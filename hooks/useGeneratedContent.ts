@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { images, videos, thumbnails, texts, sketches, ApiImage, ApiVideo, ApiThumbnail, ApiText, ApiSketch } from '../lib/apiClient';
+import { images, videos, thumbnails, texts, sketches, chats, ApiImage, ApiVideo, ApiThumbnail, ApiText, ApiSketch } from '../lib/apiClient';
 
 type ContentType = 'image' | 'video' | 'thumbnail' | 'text' | 'sketch';
 
@@ -119,15 +119,29 @@ export const useGeneratedContent = () => {
         } finally { setLoading(false); }
     };
 
-    // Chat sessions — not yet in labs-api, stub out gracefully
-    const saveChat = async (_data: SaveChatData) => {
-        console.warn('[useGeneratedContent] saveChat: chat sessions not yet migrated to labs-api');
-        return { success: true };
+    // Chat sessions
+    const saveChat = async (data: SaveChatData) => {
+        setLoading(true); setError(null);
+        try {
+            await chats.save({
+                title: data.title,
+                bot_id: data.bot_id,
+                messages: data.messages,
+            });
+            return { success: true };
+        } catch (err: any) {
+            setError(err.message);
+            return { success: false, error: err.message };
+        } finally { setLoading(false); }
     };
 
     const loadChatSessions = async (_limit = 50) => {
-        console.warn('[useGeneratedContent] loadChatSessions: not yet migrated to labs-api');
-        return { success: true, data: [] };
+        try {
+            const data = await chats.list();
+            return { success: true, data };
+        } catch (err: any) {
+            return { success: false, error: err.message, data: [] };
+        }
     };
 
     const loadHistory = async (type: ContentType, _limit = 50) => {

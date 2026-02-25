@@ -383,3 +383,20 @@ export const inventar = {
         list: () => request<InventarProfile[]>('/api/inventar/profiles'),
     },
 };
+
+// ── Chat Sessions ──────────────────────────────────────────────────
+export interface ApiChatSession {
+    id: string;
+    title: string;
+    bot_id: string;
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+    created_at: string;
+    updated_at: string;
+}
+
+export const chats = {
+    list: () => request<ApiChatSession[]>('/api/chats'),
+    save: (data: { id?: string; title: string; bot_id: string; messages: ApiChatSession['messages'] }) =>
+        request<ApiChatSession>('/api/chats', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/api/chats/${id}`, { method: 'DELETE' }),
+};
