@@ -102,7 +102,7 @@ function getR2Key(supabaseUrl) {
 // ── Migrate a table ──────────────────────────────────────────────────
 async function migrateTable(table, urlColumn) {
   console.log(`\n📋 Migrating ${table}.${urlColumn}...`);
-  const { rows } = await db.query(`SELECT id, ${urlColumn} FROM ${table} WHERE ${urlColumn} LIKE '%:8000%' OR ${urlColumn} LIKE '%supabase%'`);
+  const { rows } = await db.query(`SELECT id, ${urlColumn} FROM ${table} WHERE ${urlColumn} IS NOT NULL AND ${urlColumn} != '' AND ${urlColumn} NOT LIKE '%r2.dev%'`);
   console.log(`   Found ${rows.length} rows to migrate`);
 
   let success = 0, failed = 0;
@@ -169,7 +169,7 @@ async function migrateStoryboards() {
   }
   console.log(`   Using column: ${jsonCol}`);
   
-  const { rows } = await db.query(`SELECT id, ${jsonCol} FROM storyboard_sessions WHERE ${jsonCol}::text LIKE '%:8000%' OR ${jsonCol}::text LIKE '%supabase%'`);
+  const { rows } = await db.query(`SELECT id, ${jsonCol} FROM storyboard_sessions WHERE ${jsonCol}::text NOT LIKE '%r2.dev%' AND ${jsonCol}::text LIKE '%/storage/%'`);
   console.log(`   Found ${rows.length} sessions to migrate`);
 
   for (const row of rows) {
@@ -180,7 +180,7 @@ async function migrateStoryboards() {
       // Walk through shots/scenes and migrate image URLs
       const items = json.shots || json.scenes || [];
       for (const shot of items) {
-        if (shot.image_url && (shot.image_url.includes(':8000') || shot.image_url.includes('supabase'))) {
+        if (shot.image_url && !shot.image_url.includes('r2.dev')) {
           const r2Key = getR2Key(shot.image_url);
           const { buffer, contentType } = downloadFile(shot.image_url);
           shot.image_url = uploadToR2(r2Key, buffer, contentType);
