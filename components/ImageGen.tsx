@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { supabase, normalizeStorageUrl, downloadAsset } from '../lib/supabaseClient';
+import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { GeneratedImage } from '../lib/database.types';
 
@@ -111,22 +111,20 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
             parts.push({ text: prompt });
 
             // Using gemini-2.5-flash-image for standard generations
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-2.5-flash-image',
-                    contents: [{ role: 'user', parts: parts }],
-                    config: {
-                        imageConfig: {
-                            aspectRatio: aspectRatio,
-                        }
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-2.5-flash-image',
+                contents: [{ role: 'user', parts: parts }],
+                config: {
+                    imageConfig: {
+                        aspectRatio: aspectRatio,
                     }
                 }
-            });
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(error?.message || JSON.stringify(response?.error));
+            if (response?.error) {
+                console.error("Gemini API Error:", response.error);
+                throw new Error(JSON.stringify(response.error));
             }
 
             // Parse response to find image part
@@ -137,19 +135,12 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         const mimeType = part.inlineData.mimeType || 'image/png';
                         const ext = mimeType.split('/')[1] || 'png';
 
-                        // Convert base64 → Blob → upload to Supabase Storage
+                        // Convert base64 → Blob → upload to Cloudflare R2
                         const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
                         const imageBlob = await (await fetch(dataUri)).blob();
                         const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.${ext}`;
-                        const { error: uploadError } = await supabase.storage
-                            .from('generated_assets')
-                            .upload(`images/${fileName}`, imageBlob, { contentType: mimeType });
-                        if (uploadError) throw uploadError;
-
-                        const { data: { publicUrl: rawUrl } } = supabase.storage
-                            .from('generated_assets')
-                            .getPublicUrl(`images/${fileName}`);
-                        const publicUrl = normalizeStorageUrl(rawUrl);
+                        const imageFile = new File([imageBlob], fileName, { type: mimeType });
+                        const publicUrl = await uploadFile(imageFile, 'images');
 
                         setCurrentImage(publicUrl);
                         await saveImage({

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { geminiProxy } from '../lib/apiClient';
 import { StoryAsset, StoryShot } from '../lib/database.types';
 
 interface StoryParams {
@@ -36,17 +36,14 @@ export const useStoryAI = () => {
             Zielgruppe: ${params.targetAudience}
             `;
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-2.0-flash',
-                    contents: [{ role: 'user', parts: [{ text: prompt }] }]
-                }
-            });
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-2.0-flash',
+                contents: [{ role: 'user', parts: [{ text: prompt }] }]
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(response?.error || error?.message);
+            if (response?.error) {
+                throw new Error(response.error);
             }
 
             const generatedStory = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -97,17 +94,14 @@ export const useStoryAI = () => {
             ]
             `;
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-2.0-flash',
-                    contents: [{ role: 'user', parts: [{ text: prompt }] }]
-                }
-            });
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-2.0-flash',
+                contents: [{ role: 'user', parts: [{ text: prompt }] }]
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(response?.error || error?.message);
+            if (response?.error) {
+                throw new Error(response.error);
             }
 
             const responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -169,18 +163,15 @@ export const useStoryAI = () => {
                 Das Bild sollte einen neutralen Hintergrund haben und isoliert dargestellt sein.
             `;
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-2.5-flash-image',
-                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                    config: { imageConfig: { aspectRatio: '1:1' } }
-                }
-            });
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-2.5-flash-image',
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                config: { imageConfig: { aspectRatio: '1:1' } }
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(response?.error || error?.message);
+            if (response?.error) {
+                throw new Error(response.error);
             }
 
             // Parse response to find image part
@@ -191,7 +182,7 @@ export const useStoryAI = () => {
                         const base64Data = part.inlineData.data;
                         const mimeType = part.inlineData.mimeType || 'image/png';
 
-                        // Convert base64 to blob and upload to Supabase
+                        // Convert base64 to blob and upload to R2 via labs-api
                         const byteCharacters = atob(base64Data);
                         const byteNumbers = new Array(byteCharacters.length);
                         for (let i = 0; i < byteCharacters.length; i++) {

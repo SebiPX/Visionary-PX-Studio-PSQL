@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
-import type { InventarLoan } from '../types'
+import { inventar, InventarLoan } from '../../../lib/apiClient'
 
 export function useLoans(itemId?: string) {
   const [loans, setLoans] = useState<InventarLoan[]>([])
@@ -8,16 +7,13 @@ export function useLoans(itemId?: string) {
 
   const fetchLoans = useCallback(async () => {
     setLoading(true)
-    let query = supabase
-      .from('inventar_loans')
-      .select('*, profile:profiles(id, full_name, email, avatar_url, role), item:inventar_items(id, geraet, modell, px_nummer, bild_url)')
-      .order('created_at', { ascending: false })
-
-    if (itemId) query = query.eq('item_id', itemId)
-
-    const { data, error } = await query
-    if (!error) setLoans(data || [])
-    setLoading(false)
+    try {
+      setLoans(await inventar.loans.list(itemId))
+    } catch (err: any) {
+      console.error('[useLoans]', err)
+    } finally {
+      setLoading(false)
+    }
   }, [itemId])
 
   useEffect(() => { fetchLoans() }, [fetchLoans])
@@ -33,39 +29,24 @@ export function useLoans(itemId?: string) {
     notes?: string
     created_by?: string | null
   }) {
-    const { data, error } = await supabase
-      .from('inventar_loans')
-      .insert(loan)
-      .select('*, profile:profiles(id, full_name, email, avatar_url, role)')
-      .single()
-    if (error) throw new Error(error.message)
+    const data = await inventar.loans.create(loan as any)
     setLoans(prev => [data, ...prev])
     return data
   }
 
   async function returnLoan(id: string) {
-    const { data, error } = await supabase
-      .from('inventar_loans')
-      .update({ zurueck_am: new Date().toISOString().split('T')[0] })
-      .eq('id', id)
-      .select('*, profile:profiles(id, full_name, email, avatar_url, role)')
-      .single()
-    if (error) throw new Error(error.message)
+    const data = await inventar.loans.return_(id)
     setLoans(prev => prev.map(l => l.id === id ? data : l))
     return data
   }
 
   async function deleteLoan(id: string) {
-    const { error } = await supabase
-      .from('inventar_loans')
-      .delete()
-      .eq('id', id)
-    if (error) throw new Error(error.message)
+    await inventar.loans.delete(id)
     setLoans(prev => prev.filter(l => l.id !== id))
   }
 
   const activeLoans = loans.filter(l => !l.zurueck_am)
-  const pastLoans = loans.filter(l => !!l.zurueck_am)
+  const pastLoans   = loans.filter(l => !!l.zurueck_am)
 
   return { loans, activeLoans, pastLoans, loading, fetchLoans, createLoan, returnLoan, deleteLoan }
 }

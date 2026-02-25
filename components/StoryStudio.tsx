@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useStoryboard } from '../hooks/useStoryboard';
 import { StoryboardSession, StoryAsset, StoryShot } from '../lib/database.types';
-import { supabase, normalizeStorageUrl } from '../lib/supabaseClient';
+import { uploadFile, normalizeStorageUrl, geminiProxy } from '../lib/apiClient';
 import { useAuth } from '../contexts/AuthContext';
 import { ShotEditor } from './ShotEditor';
 import { SetupPhase, StoryPhase, StoryboardPhase, ReviewPhase } from './StoryStudio/phases';
@@ -50,7 +50,7 @@ export const StoryStudio: React.FC = () => {
     const loadHistory = async () => {
         const { data, error } = await loadStoryboards();
         if (!error && data) {
-            setHistory(data);
+            setHistory(data as any);
         }
     };
 
@@ -115,26 +115,14 @@ export const StoryStudio: React.FC = () => {
         setShots(session.shots);
     };
 
-    // Upload image to Supabase Storage
+    // Upload image to Cloudflare R2
     const uploadAssetImage = async (file: File, assetId: string): Promise<string | null> => {
         if (!user) return null;
 
         setUploadingAssetId(assetId);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${user.id}/${sessionId || 'temp'}/${assetId}.${fileExt}`;
-
-            const { data, error } = await supabase.storage
-                .from('storyboard-assets')
-                .upload(fileName, file, { upsert: true });
-
-            if (error) throw error;
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('storyboard-assets')
-                .getPublicUrl(fileName);
-
-            return `${normalizeStorageUrl(publicUrl)}?t=${Date.now()}`;
+            const publicUrl = await uploadFile(file, 'storyboard-assets');
+            return `${publicUrl}?t=${Date.now()}`;
         } catch (err) {
             console.error('Upload error:', err);
             setError('Fehler beim Hochladen des Bildes');
@@ -185,19 +173,15 @@ Cinematic, detailed, professional production design.`;
             }
             parts.push({ text: imagePrompt });
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-2.5-flash-image',
-                    contents: [{ role: 'user', parts }],
-                    config: { imageConfig: { aspectRatio: '1:1' } }
-                }
-            });
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-2.5-flash-image',
+                contents: [{ role: 'user', parts }],
+                config: { imageConfig: { aspectRatio: '1:1' } }
+            }) as any;
 
-
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(error?.message || JSON.stringify(response?.error));
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
             }
 
             const respParts = response.candidates?.[0]?.content?.parts;
@@ -283,17 +267,14 @@ ${assetContext ? `\nAssets:\n${assetContext}` : ''}
 
 Write a concise story narrative (3-5 paragraphs) with a clear beginning, middle and end, suitable for visual storytelling. Incorporate the defined assets naturally.`;
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-3-flash-preview',
-                    contents: [{ role: 'user', parts: [{ text: storyPrompt }] }]
-                }
-            });
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-3-flash-preview',
+                contents: [{ role: 'user', parts: [{ text: storyPrompt }] }]
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(error?.message || JSON.stringify(response?.error));
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
             }
 
             const generatedStory = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -350,18 +331,14 @@ Each shot must follow this exact structure:
   }
 ]`;
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-3-flash-preview',
-                    contents: [{ role: 'user', parts: [{ text: shotsPrompt }] }]
-                }
-            });
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-3-flash-preview',
+                contents: [{ role: 'user', parts: [{ text: shotsPrompt }] }]
+            }) as any;
 
-
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(error?.message || JSON.stringify(response?.error));
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
             }
 
             const responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -499,22 +476,19 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
 
             parts.push({ text: prompt });
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-2.5-flash-image',
-                    contents: [{ role: 'user', parts: parts }],
-                    config: {
-                        imageConfig: {
-                            aspectRatio: '16:9',
-                        }
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-2.5-flash-image',
+                contents: [{ role: 'user', parts: parts }],
+                config: {
+                    imageConfig: {
+                        aspectRatio: '16:9',
                     }
                 }
-            });
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(error?.message || JSON.stringify(response?.error));
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
             }
 
             // Parse response
@@ -535,21 +509,10 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
                         const blob = new Blob([byteArray], { type: mimeType });
                         const file = new File([blob], `shot-${shot.id}.png`, { type: mimeType });
 
-                        // Upload to Supabase Storage
-                        const fileExt = 'png';
-                        const fileName = `${user.id}/${sessionId || 'temp'}/shots/${shot.id}.${fileExt}`;
-
-                        const { error: uploadError } = await supabase.storage
-                            .from('storyboard-assets')
-                            .upload(fileName, file, { upsert: true });
-
-                        if (uploadError) throw uploadError;
-
-                        const { data: { publicUrl } } = supabase.storage
-                            .from('storyboard-assets')
-                            .getPublicUrl(fileName);
-
-                        const cacheBustedUrl = `${normalizeStorageUrl(publicUrl)}?t=${Date.now()}`;
+                        // Upload to Cloudflare R2
+                        const shotFile = new File([blob], `shot-${shot.id}.png`, { type: mimeType });
+                        const publicUrl = await uploadFile(shotFile, 'storyboard-shots');
+                        const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
 
                         return cacheBustedUrl;
                     }

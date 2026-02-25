@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { supabase, normalizeStorageUrl, downloadAsset } from '../lib/supabaseClient';
+import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { GeneratedThumbnail } from '../lib/database.types';
 import { BackgroundTool } from './ThumbnailEngine/components/BackgroundTool';
@@ -133,17 +133,14 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
 
         setIsGeneratingIdea(true);
         try {
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-3-flash-preview',
-                    contents: [{ role: 'user', parts: [{ text: `Write a very short, catchy, 2-3 word thumbnail text overlay for a video about: "${videoTopic}". RETURN ONLY THE TEXT. No quotes.` }] }]
-                }
-            });
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-3-flash-preview',
+                contents: [{ role: 'user', parts: [{ text: `Write a very short, catchy, 2-3 word thumbnail text overlay for a video about: "${videoTopic}". RETURN ONLY THE TEXT. No quotes.` }] }]
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(error?.message || JSON.stringify(response?.error));
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
             }
 
             const textResult = response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -169,17 +166,14 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                 ? `Describe a visually striking background for a youtube thumbnail about: "${videoTopic}". Keep it concise, visual, and descriptive (no text description).`
                 : `Describe a main subject/character/element for a youtube thumbnail about: "${videoTopic}". Keep it concise (no text description).`;
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-3-flash-preview',
-                    contents: [{ role: 'user', parts: [{ text: promptText }] }]
-                }
-            });
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-3-flash-preview',
+                contents: [{ role: 'user', parts: [{ text: promptText }] }]
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(error?.message || JSON.stringify(response?.error));
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
             }
             const visualResult = response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
             if (visualResult) {
@@ -242,20 +236,17 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
             // Add text prompt last
             parts.push({ text: finalPrompt });
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model: 'gemini-2.5-flash-image',
-                    contents: [{ role: 'user', parts: parts }],
-                    config: {
-                        imageConfig: { aspectRatio: aspectRatio }
-                    }
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model: 'gemini-2.5-flash-image',
+                contents: [{ role: 'user', parts: parts }],
+                config: {
+                    imageConfig: { aspectRatio: aspectRatio }
                 }
-            });
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(error?.message || JSON.stringify(response?.error));
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
             }
 
             const respParts = response.candidates?.[0]?.content?.parts;
@@ -265,19 +256,12 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                         const mimeType = part.inlineData.mimeType || 'image/png';
                         const ext = mimeType.split('/')[1] || 'png';
 
-                        // Convert base64 → Blob → upload to Supabase Storage
+                        // Convert base64 → Blob → upload to Cloudflare R2
                         const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
                         const imageBlob = await (await fetch(dataUri)).blob();
                         const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.${ext}`;
-                        const { error: uploadError } = await supabase.storage
-                            .from('generated_assets')
-                            .upload(`thumbnails/${fileName}`, imageBlob, { contentType: mimeType });
-                        if (uploadError) throw uploadError;
-
-                        const { data: { publicUrl: rawUrl } } = supabase.storage
-                            .from('generated_assets')
-                            .getPublicUrl(`thumbnails/${fileName}`);
-                        const publicUrl = normalizeStorageUrl(rawUrl);
+                        const imageFile = new File([imageBlob], fileName, { type: mimeType });
+                        const publicUrl = await uploadFile(imageFile, 'thumbnails');
 
                         setGeneratedImage(publicUrl);
                         addToHistory(publicUrl);

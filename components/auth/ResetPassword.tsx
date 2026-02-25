@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabaseClient';
 
 interface ResetPasswordProps {
     onComplete: () => void;
@@ -8,6 +7,7 @@ interface ResetPasswordProps {
 
 export const ResetPassword: React.FC<ResetPasswordProps> = ({ onComplete }) => {
     const { updatePassword } = useAuth();
+    const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -18,20 +18,21 @@ export const ResetPassword: React.FC<ResetPasswordProps> = ({ onComplete }) => {
         e.preventDefault();
         setError(null);
 
-        // Validation
-        if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters long');
+        if (!currentPassword) {
+            setError('Please enter your current password');
             return;
         }
-
+        if (newPassword.length < 6) {
+            setError('New password must be at least 6 characters long');
+            return;
+        }
         if (newPassword !== confirmPassword) {
             setError('Passwords do not match');
             return;
         }
 
         setLoading(true);
-
-        const { error: updateError } = await updatePassword(newPassword);
+        const { error: updateError } = await updatePassword(currentPassword, newPassword);
 
         if (updateError) {
             setError(updateError.message);
@@ -39,10 +40,7 @@ export const ResetPassword: React.FC<ResetPasswordProps> = ({ onComplete }) => {
         } else {
             setSuccess(true);
             setLoading(false);
-            // Redirect to app after 2 seconds
-            setTimeout(() => {
-                onComplete();
-            }, 2000);
+            setTimeout(() => { onComplete(); }, 2000);
         }
     };
 
@@ -54,10 +52,10 @@ export const ResetPassword: React.FC<ResetPasswordProps> = ({ onComplete }) => {
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-[#135bec] to-[#4a90ff] bg-clip-text text-transparent mb-2">
                         Visionary PX Studio
                     </h1>
-                    <p className="text-slate-400">Reset Your Password</p>
+                    <p className="text-slate-400">Change Your Password</p>
                 </div>
 
-                {/* Reset Password Card */}
+                {/* Card */}
                 <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl shadow-[#135bec]/10">
                     {success ? (
                         <div className="text-center">
@@ -70,9 +68,25 @@ export const ResetPassword: React.FC<ResetPasswordProps> = ({ onComplete }) => {
                     ) : (
                         <>
                             <h2 className="text-2xl font-semibold text-slate-100 mb-6">Set New Password</h2>
-
                             <form onSubmit={handleSubmit} className="space-y-5">
-                                {/* New Password Input */}
+
+                                {/* Current Password */}
+                                <div>
+                                    <label htmlFor="current-password" className="block text-sm font-medium text-slate-300 mb-2">
+                                        Current Password
+                                    </label>
+                                    <input
+                                        id="current-password"
+                                        type="password"
+                                        value={currentPassword}
+                                        onChange={(e) => setCurrentPassword(e.target.value)}
+                                        required
+                                        className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#135bec] focus:border-transparent transition-all"
+                                        placeholder="Enter your current password"
+                                    />
+                                </div>
+
+                                {/* New Password */}
                                 <div>
                                     <label htmlFor="new-password" className="block text-sm font-medium text-slate-300 mb-2">
                                         New Password
@@ -84,14 +98,14 @@ export const ResetPassword: React.FC<ResetPasswordProps> = ({ onComplete }) => {
                                         onChange={(e) => setNewPassword(e.target.value)}
                                         required
                                         className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#135bec] focus:border-transparent transition-all"
-                                        placeholder="Enter new password (min 6 characters)"
+                                        placeholder="New password (min 6 characters)"
                                     />
                                 </div>
 
-                                {/* Confirm Password Input */}
+                                {/* Confirm Password */}
                                 <div>
                                     <label htmlFor="confirm-password" className="block text-sm font-medium text-slate-300 mb-2">
-                                        Confirm Password
+                                        Confirm New Password
                                     </label>
                                     <input
                                         id="confirm-password"
@@ -104,14 +118,14 @@ export const ResetPassword: React.FC<ResetPasswordProps> = ({ onComplete }) => {
                                     />
                                 </div>
 
-                                {/* Error Message */}
+                                {/* Error */}
                                 {error && (
                                     <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 text-red-400 text-sm">
                                         {error}
                                     </div>
                                 )}
 
-                                {/* Submit Button */}
+                                {/* Submit */}
                                 <button
                                     type="submit"
                                     disabled={loading}

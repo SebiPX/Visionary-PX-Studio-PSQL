@@ -3,23 +3,20 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { ChatSession } from '../lib/database.types';
-import { supabase } from '../lib/supabaseClient';
+import { geminiProxy, getToken } from '../lib/apiClient';
 
 // ── Onboarding RAG helpers ─────────────────────────────────────────────────
 const EMBED_MODEL = 'gemini-embedding-001';
 
 async function embedText(text: string): Promise<number[]> {
-  const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-    body: {
-      action: 'embedContent',
-      model: EMBED_MODEL,
-      contents: text
-    }
-  });
+  const response = await geminiProxy({
+    action: 'embedContent',
+    model: EMBED_MODEL,
+    contents: text
+  }) as any;
 
-  if (error || response?.error) {
-    const errMsg = error?.message || JSON.stringify(response?.error);
-    throw new Error(`Embed API error: ${errMsg}`);
+  if (response?.error) {
+    throw new Error(`Embed API error: ${JSON.stringify(response.error)}`);
   }
 
   return response.embedding.values as number[];
@@ -28,14 +25,21 @@ async function embedText(text: string): Promise<number[]> {
 async function retrieveOnboardingContext(question: string): Promise<string> {
   try {
     const embedding = await embedText(question);
-    const { data, error } = await supabase.rpc('match_onboarding_docs', {
-      query_embedding: embedding,
-      match_count: 5,
+    // Call labs-api RAG endpoint
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+    const token = getToken();
+    const res = await fetch(`${apiUrl}/api/rag`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ embedding, match_count: 5 }),
     });
-    if (error || !data?.length) return '';
-    return (data as { heading: string; content: string }[])
-      .map(r => `### ${r.heading}\n${r.content}`)
-      .join('\n\n');
+    if (!res.ok) return '';
+    const data = await res.json() as { heading: string; content: string }[];
+    if (!data?.length) return '';
+    return data.map(r => `### ${r.heading}\n${r.content}`).join('\n\n');
   } catch (err) {
     console.warn('[OnboardingRAG] retrieval failed:', err);
     return '';
@@ -196,18 +200,15 @@ export const ChatBot: React.FC = () => {
       }));
       contents.push({ role: 'user', parts: [{ text: messageToSend }] });
 
-      const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-        body: {
-          action: 'generateContent',
-          model: 'gemini-3-flash-preview',
-          contents: contents,
-          systemInstruction: activePersona.instruction,
-        }
-      });
+      const response = await geminiProxy({
+        action: 'generateContent',
+        model: 'gemini-3-flash-preview',
+        contents: contents,
+        systemInstruction: activePersona.instruction,
+      }) as any;
 
-      if (error || response?.error) {
-        console.error("Gemini API Error:", error || response?.error);
-        throw new Error(response?.error || error?.message);
+      if (response?.error) {
+        throw new Error(JSON.stringify(response.error));
       }
 
       const modelMsgId = (Date.now() + 1).toString();

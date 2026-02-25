@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabaseClient';
+import { uploadFile, auth as apiAuth } from '../lib/apiClient';
 
 interface SettingsProps {
   userProfile: UserProfile;
@@ -46,15 +46,10 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
     setIsUploading(true);
 
     try {
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          full_name: name,
-          avatar_url: selectedAvatar,
-        })
-        .eq('id', user.id);
-
-      if (updateError) throw updateError;
+      await apiAuth.updateProfile({
+        full_name: name,
+        avatar_url: selectedAvatar,
+      });
 
       // Refresh profile in context
       await refreshProfile();
@@ -76,26 +71,9 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
     setError(null);
 
     try {
-      // Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('generated_assets')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data } = supabase.storage
-        .from('generated_assets')
-        .getPublicUrl(filePath);
-
-      setSelectedAvatar(data.publicUrl);
+      // Upload to Cloudflare R2
+      const avatarUrl = await uploadFile(file, 'avatars');
+      setSelectedAvatar(avatarUrl);
     } catch (err: any) {
       setError(err.message || 'Failed to upload avatar');
     } finally {

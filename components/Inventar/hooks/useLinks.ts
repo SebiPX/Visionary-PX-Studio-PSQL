@@ -1,52 +1,37 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
-import type { InternalLink } from '../types'
+import { inventar, InventarLink } from '../../../lib/apiClient'
 
 export function useLinks() {
-  const [links, setLinks] = useState<InternalLink[]>([])
+  const [links, setLinks] = useState<InventarLink[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchLinks = useCallback(async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('inventar_links')
-      .select('*')
-      .order('kategorie', { ascending: true })
-      .order('sort_order', { ascending: true })
-      .order('titel', { ascending: true })
-    if (error) console.error('[useLinks]', error)
-    else setLinks(data as InternalLink[])
-    setLoading(false)
+    try {
+      setLinks(await inventar.links.list())
+    } catch (err: any) {
+      console.error('[useLinks]', err)
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => { fetchLinks() }, [fetchLinks])
 
-  async function createLink(entry: Omit<InternalLink, 'id' | 'created_at' | 'updated_at'>) {
-    const { data, error } = await supabase
-      .from('inventar_links')
-      .insert(entry)
-      .select()
-      .single()
-    if (error) throw new Error(error.message)
-    setLinks(prev => [...prev, data as InternalLink].sort((a, b) => (a.sort_order - b.sort_order) || (a.titel.localeCompare(b.titel, 'de'))))
-    return data as InternalLink
+  async function createLink(entry: Omit<InventarLink, 'id' | 'created_at' | 'updated_at'>) {
+    const data = await inventar.links.create(entry)
+    setLinks(prev => [...prev, data].sort((a, b) => (a.sort_order - b.sort_order) || (a.titel.localeCompare(b.titel, 'de'))))
+    return data
   }
 
-  async function updateLink(id: string, updates: Partial<InternalLink>) {
-    const { data, error } = await supabase
-      .from('inventar_links')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single()
-    if (error) throw new Error(error.message)
-    setLinks(prev => prev.map(l => l.id === id ? data as InternalLink : l))
-    return data as InternalLink
+  async function updateLink(id: string, updates: Partial<InventarLink>) {
+    const data = await inventar.links.update(id, updates)
+    setLinks(prev => prev.map(l => l.id === id ? data : l))
+    return data
   }
 
   async function deleteLink(id: string) {
-    const { error } = await supabase.from('inventar_links').delete().eq('id', id)
-    if (error) throw new Error(error.message)
+    await inventar.links.delete(id)
     setLinks(prev => prev.filter(l => l.id !== id))
   }
 

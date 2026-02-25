@@ -6,7 +6,7 @@ import { AppState, ContextOption, StyleOption } from './types';
 import { generateImageFromSketch, editGeneratedImage } from '../../services/sketchService';
 import { useGeneratedContent } from '../../hooks/useGeneratedContent';
 import { GeneratedSketch } from '../../lib/database.types';
-import { supabase, normalizeStorageUrl } from '../../lib/supabaseClient';
+import { uploadFile as apiUploadFile } from '../../lib/apiClient';
 
 export const SketchStudio: React.FC = () => {
     // ========================================================================
@@ -33,7 +33,7 @@ export const SketchStudio: React.FC = () => {
     useEffect(() => {
         const loadHistory = async () => {
             const sketches = await loadSketchHistory(20);
-            setHistory(sketches);
+            setHistory(sketches as any);
         };
         loadHistory();
     }, []);
@@ -65,17 +65,15 @@ export const SketchStudio: React.FC = () => {
                 (await fetch(snapshot)).blob(),
             ]);
 
-            const uploadFile = async (blob: Blob, path: string) => {
-                const { error } = await supabase.storage
-                    .from('generated_assets')
-                    .upload(path, blob, { contentType: 'image/png', upsert: false });
-                if (error) { console.error('[SketchStudio] Upload failed:', path, error.message); return ''; }
-                return normalizeStorageUrl(supabase.storage.from('generated_assets').getPublicUrl(path).data.publicUrl);
+            const uploadToR2 = async (blob: Blob, folder: string): Promise<string> => {
+                const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.png`;
+                const fileObj = new File([blob], fileName, { type: 'image/png' });
+                return await apiUploadFile(fileObj, folder);
             };
 
             const [imageUrl, sketchUrl] = await Promise.all([
-                uploadFile(generatedBlob, `sketches/${ts}_${rand()}.png`),
-                uploadFile(sketchBlob, `sketches/originals/${ts}_${rand()}.png`),
+                uploadToR2(generatedBlob, 'sketches'),
+                uploadToR2(sketchBlob, 'sketches/originals'),
             ]);
 
             console.log('[SketchStudio] Generated:', imageUrl);
@@ -95,7 +93,7 @@ export const SketchStudio: React.FC = () => {
 
             // Reload history
             const sketches = await loadSketchHistory(20);
-            setHistory(sketches);
+            setHistory(sketches as any);
 
         } catch (err: any) {
             console.error(err);

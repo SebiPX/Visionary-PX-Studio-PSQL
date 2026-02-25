@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { GeneratedText } from '../lib/database.types';
 
@@ -81,19 +81,16 @@ export const TextEngine: React.FC = () => {
             // Experimental alternatives (gemini-1.5-pro, gemini-2.0-flash-exp) returned 404.
             const model = 'gemini-3-flash-preview';
 
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateContent',
-                    model,
-                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                    systemInstruction,
-                    ...(tools ? { tools } : {})
-                }
-            });
+            const response = await geminiProxy({
+                action: 'generateContent',
+                model,
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                systemInstruction,
+                ...(tools ? { tools } : {})
+            }) as any;
 
-            if (error || response?.error) {
-                console.error("Gemini API Error:", error || response?.error);
-                throw new Error(response?.error || error?.message);
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
             }
 
             const generatedText = response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -142,19 +139,16 @@ export const TextEngine: React.FC = () => {
                     }];
                 }
 
-                const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                    body: {
-                        action: 'generateContent',
-                        model: 'gemini-3-flash-preview',
-                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                        systemInstruction: sysInstruction,
-                        ...(Object.keys(config).length > 0 ? { config } : {})
-                    }
-                });
+                const response = await geminiProxy({
+                    action: 'generateContent',
+                    model: 'gemini-3-flash-preview',
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    systemInstruction: sysInstruction,
+                    ...(Object.keys(config).length > 0 ? { config } : {})
+                }) as any;
 
-                if (error || response?.error) {
-                    console.error("Gemini API Error:", error || response?.error);
-                    throw new Error(response?.error || error?.message);
+                if (response?.error) {
+                    throw new Error(JSON.stringify(response.error));
                 }
 
                 const generatedText = response?.candidates?.[0]?.content?.parts?.[0]?.text || '';

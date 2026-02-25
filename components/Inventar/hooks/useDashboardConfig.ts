@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
+import { inventar } from '../../../lib/apiClient'
 
 // ─── Config shape ────────────────────────────────────────────────────────────
 export interface DashboardConfig {
@@ -25,26 +25,17 @@ export const DEFAULT_CONFIG: DashboardConfig = {
 export function useDashboardConfig() {
   const [config, setConfig] = useState<DashboardConfig>(DEFAULT_CONFIG)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving]   = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { setLoading(false); return }
-
-      const { data, error } = await supabase
-        .from('inventar_dashboard_config')
-        .select('config')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (error) { console.error('[useDashboardConfig] load:', error); return }
-
-      if (data?.config) {
-        // Merge with defaults so new keys always have a value
-        setConfig({ ...DEFAULT_CONFIG, ...(data.config as Partial<DashboardConfig>) })
+      const data = await inventar.dashboardConfig.get()
+      if (data) {
+        setConfig({ ...DEFAULT_CONFIG, ...(data as Partial<DashboardConfig>) })
       }
+    } catch (err: any) {
+      console.error('[useDashboardConfig] load:', err)
     } finally {
       setLoading(false)
     }
@@ -53,16 +44,10 @@ export function useDashboardConfig() {
   const save = useCallback(async (next: DashboardConfig) => {
     setSaving(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { error } = await supabase
-        .from('inventar_dashboard_config')
-        .upsert({ user_id: user.id, config: next, updated_at: new Date().toISOString() },
-          { onConflict: 'user_id' })
-
-      if (error) { console.error('[useDashboardConfig] save:', error); return }
+      await inventar.dashboardConfig.save(next as unknown as Record<string, unknown>)
       setConfig(next)
+    } catch (err: any) {
+      console.error('[useDashboardConfig] save:', err)
     } finally {
       setSaving(false)
     }

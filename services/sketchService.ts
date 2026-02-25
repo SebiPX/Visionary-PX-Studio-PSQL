@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient';
+import { geminiProxy } from '../lib/apiClient';
 import { ContextOption, StyleOption } from "../components/SketchStudio/types";
 
 const GEMINI_MODEL = 'gemini-2.5-flash-image';
@@ -11,18 +11,11 @@ const cleanBase64 = (base64Data: string) => {
 };
 
 const invokeProxy = async (payload: any) => {
-    const { data, error } = await supabase.functions.invoke('gemini-proxy', {
-        body: payload
-    });
-    
-    if (error) {
-        console.error("Supabase Function Error:", error);
-        throw new Error(`Proxy Error: ${error.message}`);
-    }
+    const data = await geminiProxy(payload) as any;
     
     if (data?.error) {
         console.error("Gemini API Error via Proxy:", data.error);
-        throw new Error(`API Error: ${data.error}`);
+        throw new Error(`API Error: ${JSON.stringify(data.error)}`);
     }
     
     return data;

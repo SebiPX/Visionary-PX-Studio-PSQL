@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ContextOption, StyleOption } from './types';
-import { downloadAsset } from '../../lib/supabaseClient';
+import { downloadAsset } from '../../lib/apiClient';
 
 interface ResultViewProps {
   originalSketch: string;

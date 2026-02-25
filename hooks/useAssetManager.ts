@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { uploadFile } from '../lib/apiClient';
 import { StoryAsset } from '../lib/database.types';
 
 interface UseAssetManagerProps {
@@ -14,29 +14,12 @@ export const useAssetManager = ({ userId, sessionId }: UseAssetManagerProps) => 
 
     const uploadAssetImage = async (file: File, assetId: string): Promise<string | null> => {
         if (!userId) return null;
-
         setUploadingAssetId(assetId);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${userId}/${sessionId || 'temp'}/${assetId}.${fileExt}`;
-
-            console.log('Uploading file:', fileName);
-
-            const { data, error } = await supabase.storage
-                .from('storyboard-assets')
-                .upload(fileName, file, { upsert: true });
-
-            if (error) {
-                console.error('Supabase upload error:', error);
-                throw error;
-            }
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('storyboard-assets')
-                .getPublicUrl(fileName);
-
-            console.log('Upload successful! Public URL:', publicUrl);
-            return publicUrl;
+            console.log('Uploading file to R2, assetId:', assetId);
+            const url = await uploadFile(file, 'storyboard-assets');
+            console.log('Upload successful! URL:', url);
+            return url;
         } catch (err) {
             console.error('Upload error:', err);
             setError(`Fehler beim Hochladen: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`);
@@ -53,8 +36,6 @@ export const useAssetManager = ({ userId, sessionId }: UseAssetManagerProps) => 
     ) => {
         console.log('handleAssetUpload called for asset:', assetId);
         const imageUrl = await uploadAssetImage(file, assetId);
-        console.log('Received image URL:', imageUrl);
-
         if (imageUrl) {
             updateCallback(assetId, { image_url: imageUrl, source: 'upload' });
         }
@@ -68,7 +49,6 @@ export const useAssetManager = ({ userId, sessionId }: UseAssetManagerProps) => 
         setGeneratingAssetId(asset.id);
         const imageUrl = await generateCallback(asset, uploadAssetImage);
         setGeneratingAssetId(null);
-
         if (imageUrl) {
             updateCallback(asset.id, { image_url: imageUrl, source: 'ai-generated' });
         }

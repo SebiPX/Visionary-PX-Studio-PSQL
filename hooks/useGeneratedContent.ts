@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { GeneratedImage, GeneratedVideo, GeneratedThumbnail, ChatSession, GeneratedText, GeneratedSketch } from '../lib/database.types';
+import { useState } from 'react';
+import { images, videos, thumbnails, texts, sketches, ApiImage, ApiVideo, ApiThumbnail, ApiText, ApiSketch } from '../lib/apiClient';
 
 type ContentType = 'image' | 'video' | 'thumbnail' | 'text' | 'sketch';
 
@@ -26,12 +25,6 @@ interface SaveThumbnailData {
     config?: Record<string, any>;
 }
 
-interface SaveChatData {
-    title: string;
-    bot_id: string;
-    messages: Array<{ role: 'user' | 'assistant'; content: string }>;
-}
-
 interface SaveTextData {
     content: string;
     topic?: string;
@@ -49,301 +42,132 @@ interface SaveSketchData {
     edit_history?: any[];
 }
 
+// Chat session types (stub — labs-api /api/chats not yet implemented)
+interface SaveChatData {
+    title: string;
+    bot_id: string;
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+}
+
 export const useGeneratedContent = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Save generated image
     const saveImage = async (data: SaveImageData) => {
-        setLoading(true);
-        setError(null);
-
+        setLoading(true); setError(null);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('User not authenticated');
-
-            const { error: insertError } = await supabase
-                .from('generated_images')
-                .insert({
-                    user_id: user.id,
-                    prompt: data.prompt,
-                    style: data.style || null,
-                    image_url: data.image_url,
-                    config: data.config || {},
-                });
-
-            if (insertError) throw insertError;
+            await images.create({ prompt: data.prompt, style: data.style, image_url: data.image_url, config: data.config });
             return { success: true };
         } catch (err: any) {
             setError(err.message);
             return { success: false, error: err.message };
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
-    // Save generated video
     const saveVideo = async (data: SaveVideoData) => {
-        setLoading(true);
-        setError(null);
-
+        setLoading(true); setError(null);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('User not authenticated');
-
-            const { error: insertError } = await supabase
-                .from('generated_videos')
-                .insert({
-                    user_id: user.id,
-                    prompt: data.prompt,
-                    model: data.model || null,
-                    video_url: data.video_url,
-                    thumbnail_url: data.thumbnail_url || null,
-                    config: data.config || {},
-                });
-
-            if (insertError) throw insertError;
+            await videos.create({ prompt: data.prompt, model: data.model, video_url: data.video_url, thumbnail_url: data.thumbnail_url, config: data.config });
             return { success: true };
         } catch (err: any) {
             setError(err.message);
             return { success: false, error: err.message };
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
-    // Save generated thumbnail
     const saveThumbnail = async (data: SaveThumbnailData) => {
-        setLoading(true);
-        setError(null);
-
+        setLoading(true); setError(null);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('User not authenticated');
-
-            const { error: insertError } = await supabase
-                .from('generated_thumbnails')
-                .insert({
-                    user_id: user.id,
-                    prompt: data.prompt,
-                    platform: data.platform || null,
-                    image_url: data.image_url,
-                    config: data.config || {},
-                });
-
-            if (insertError) throw insertError;
+            await thumbnails.create({ prompt: data.prompt, platform: data.platform, image_url: data.image_url, config: data.config });
             return { success: true };
         } catch (err: any) {
             setError(err.message);
             return { success: false, error: err.message };
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
-    // Save chat session
-    const saveChat = async (data: SaveChatData) => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('User not authenticated');
-
-            const { error: insertError } = await supabase
-                .from('chat_sessions')
-                .insert({
-                    user_id: user.id,
-                    title: data.title,
-                    bot_id: data.bot_id,
-                    messages: data.messages,
-                });
-
-            if (insertError) throw insertError;
-            return { success: true };
-        } catch (err: any) {
-            setError(err.message);
-            return { success: false, error: err.message };
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Save generated text
     const saveText = async (data: SaveTextData) => {
-        setLoading(true);
-        setError(null);
-
+        setLoading(true); setError(null);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('User not authenticated');
-
-            const { error: insertError } = await supabase
-                .from('generated_texts')
-                .insert({
-                    user_id: user.id,
-                    content: data.content,
-                    topic: data.topic || null,
-                    platform: data.platform || null,
-                    audience: data.audience || null,
-                    tone: data.tone || null,
-                    config: data.config || {},
-                });
-
-            if (insertError) throw insertError;
+            await texts.create({
+                content: data.content,
+                prompt: data.topic,
+                type: data.platform,
+                config: { audience: data.audience, tone: data.tone, ...data.config },
+            });
             return { success: true };
         } catch (err: any) {
             setError(err.message);
             return { success: false, error: err.message };
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
-    // Load chat sessions
-    const loadChatSessions = async (limit = 50) => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('User not authenticated');
-
-            const { data, error: fetchError } = await supabase
-                .from('chat_sessions')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
-                .limit(limit);
-
-            if (fetchError) throw fetchError;
-
-            return { success: true, data };
-        } catch (err: any) {
-            setError(err.message);
-            return { success: false, error: err.message, data: [] };
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Load history for a specific content type
-    const loadHistory = async (type: ContentType, limit = 50) => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('User not authenticated');
-
-            const tableName = type === 'image'
-                ? 'generated_images'
-                : type === 'video'
-                    ? 'generated_videos'
-                    : type === 'thumbnail'
-                        ? 'generated_thumbnails'
-                        : type === 'sketch'
-                            ? 'generated_sketches'
-                            : 'generated_texts';
-
-            const { data, error: fetchError } = await supabase
-                .from(tableName)
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
-                .limit(limit);
-
-            if (fetchError) throw fetchError;
-
-            return { success: true, data };
-        } catch (err: any) {
-            setError(err.message);
-            return { success: false, error: err.message, data: [] };
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Delete content by ID
-    const deleteContent = async (id: string, type: ContentType) => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const tableName = type === 'image'
-                ? 'generated_images'
-                : type === 'video'
-                    ? 'generated_videos'
-                    : type === 'thumbnail'
-                        ? 'generated_thumbnails'
-                        : type === 'sketch'
-                            ? 'generated_sketches'
-                            : 'generated_texts';
-
-            const { error: deleteError } = await supabase
-                .from(tableName)
-                .delete()
-                .eq('id', id);
-
-            if (deleteError) throw deleteError;
-            return { success: true };
-        } catch (err: any) {
-            setError(err.message);
-            return { success: false, error: err.message };
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Save generated sketch
     const saveSketch = async (data: SaveSketchData) => {
-        setLoading(true);
-        setError(null);
-
+        setLoading(true); setError(null);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('User not authenticated');
-
-            const { error: insertError } = await supabase
-                .from('generated_sketches')
-                .insert({
-                    user_id: user.id,
-                    sketch_data: data.sketch_data,
-                    generated_image_url: data.generated_image_url,
-                    context: data.context,
-                    style: data.style,
-                    edit_history: data.edit_history || [],
-                });
-
-            if (insertError) throw insertError;
+            await sketches.create({
+                sketch_data: data.sketch_data,
+                generated_image_url: data.generated_image_url,
+                context: data.context,
+                style: data.style,
+                edit_history: data.edit_history || [],
+            });
             return { success: true };
         } catch (err: any) {
             setError(err.message);
             return { success: false, error: err.message };
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
-    // Load sketch history
-    const loadSketchHistory = async (limit: number = 20): Promise<GeneratedSketch[]> => {
+    // Chat sessions — not yet in labs-api, stub out gracefully
+    const saveChat = async (_data: SaveChatData) => {
+        console.warn('[useGeneratedContent] saveChat: chat sessions not yet migrated to labs-api');
+        return { success: true };
+    };
+
+    const loadChatSessions = async (_limit = 50) => {
+        console.warn('[useGeneratedContent] loadChatSessions: not yet migrated to labs-api');
+        return { success: true, data: [] };
+    };
+
+    const loadHistory = async (type: ContentType, _limit = 50) => {
+        setLoading(true); setError(null);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('User not authenticated');
+            let data: any[];
+            if (type === 'image') data = await images.list();
+            else if (type === 'video') data = await videos.list();
+            else if (type === 'thumbnail') data = await thumbnails.list();
+            else if (type === 'sketch') data = await sketches.list();
+            else data = await texts.list();
+            return { success: true, data };
+        } catch (err: any) {
+            setError(err.message);
+            return { success: false, error: err.message, data: [] };
+        } finally { setLoading(false); }
+    };
 
-            const { data, error } = await supabase
-                .from('generated_sketches')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
-                .limit(limit);
-
-            if (error) throw error;
-            return data || [];
+    const loadSketchHistory = async (_limit = 20): Promise<ApiSketch[]> => {
+        try {
+            return await sketches.list();
         } catch (err: any) {
             console.error('Error loading sketch history:', err);
             return [];
         }
+    };
+
+    const deleteContent = async (id: string, type: ContentType) => {
+        setLoading(true); setError(null);
+        try {
+            if (type === 'image') await images.delete(id);
+            else if (type === 'video') await videos.delete(id);
+            else if (type === 'thumbnail') await thumbnails.delete(id);
+            else if (type === 'sketch') await sketches.delete(id);
+            else await texts.delete(id);
+            return { success: true };
+        } catch (err: any) {
+            setError(err.message);
+            return { success: false, error: err.message };
+        } finally { setLoading(false); }
     };
 
     return {

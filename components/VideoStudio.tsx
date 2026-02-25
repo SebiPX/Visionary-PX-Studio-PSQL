@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { supabase, normalizeStorageUrl, downloadAsset } from '../lib/supabaseClient';
+import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { GeneratedVideo } from '../lib/database.types';
 
@@ -92,21 +92,10 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
             if (!response.ok) throw new Error('Failed to fetch video from Gemini');
             const blob = await response.blob();
 
-            // 2. Upload blob to Supabase Storage
+            // 2. Upload blob to Cloudflare R2 via labs-api
             const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.mp4`;
-            const filePath = `videos/${fileName}`;
-            const { supabase: supabaseClient } = await import('../lib/supabaseClient');
-            const { error: uploadError } = await supabaseClient.storage
-                .from('generated_assets')
-                .upload(filePath, blob, { contentType: 'video/mp4', upsert: false });
-
-            if (uploadError) throw uploadError;
-
-            // 3. Get the public URL
-            const { data: urlData } = supabaseClient.storage
-                .from('generated_assets')
-                .getPublicUrl(filePath);
-            const permanentUrl = normalizeStorageUrl(urlData.publicUrl);
+            const videoFile = new File([blob], fileName, { type: 'video/mp4' });
+            const permanentUrl = await uploadFile(videoFile, 'videos');
 
             // 4. Save permanent URL to DB
             await saveVideo({
@@ -164,24 +153,22 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
         setIsPlaying(false);
 
         try {
-            const { data: response, error } = await supabase.functions.invoke('gemini-proxy', {
-                body: {
-                    action: 'generateVideos',
-                    model: 'veo-3.1-fast-generate-preview',
-                    prompt: `${prompt} (Camera Motion: ${cameraMotion})`,
-                    image: (activeMode === 'IMAGE' && uploadedImage) ? {
-                        imageBytes: uploadedImage.split(',')[1],
-                        mimeType: 'image/png'
-                    } : undefined,
-                    config: {
-                        resolution: (activeMode === 'IMAGE' && uploadedImage) ? '720p' : '1080p',
-                        aspectRatio: aspectRatio
-                    }
+            const response = await geminiProxy({
+                action: 'generateVideos',
+                model: 'veo-3.1-fast-generate-preview',
+                prompt: `${prompt} (Camera Motion: ${cameraMotion})`,
+                image: (activeMode === 'IMAGE' && uploadedImage) ? {
+                    imageBytes: uploadedImage.split(',')[1],
+                    mimeType: 'image/png'
+                } : undefined,
+                config: {
+                    resolution: (activeMode === 'IMAGE' && uploadedImage) ? '720p' : '1080p',
+                    aspectRatio: aspectRatio
                 }
-            });
+            }) as any;
 
-            if (error || response?.error) {
-                throw new Error(error?.message || JSON.stringify(response?.error));
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
             }
 
             let operation = response;
@@ -189,15 +176,13 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
             while (!operation.done) {
                 await new Promise(resolve => setTimeout(resolve, 5000));
 
-                const { data: opResponse, error: opError } = await supabase.functions.invoke('gemini-proxy', {
-                    body: {
-                        action: 'getVideosOperation',
-                        operation: operation
-                    }
-                });
+                const opResponse = await geminiProxy({
+                    action: 'getVideosOperation',
+                    operation: operation
+                }) as any;
 
-                if (opError || opResponse?.error) {
-                    throw new Error(opError?.message || JSON.stringify(opResponse?.error));
+                if (opResponse?.error) {
+                    throw new Error(JSON.stringify(opResponse.error));
                 }
 
                 operation = opResponse;
@@ -219,18 +204,10 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
 
             const videoBlob = await (await fetch(googleDownloadUrl)).blob();
 
-            // 2. Upload to Supabase Storage for a permanent URL
+            // 2. Upload to Cloudflare R2 for a permanent URL
             const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.mp4`;
-            const { error: uploadError } = await supabase.storage
-                .from('generated_assets')
-                .upload(`videos/${fileName}`, videoBlob, { contentType: 'video/mp4' });
-
-            if (uploadError) throw uploadError;
-
-            const { data: { publicUrl: rawVideoUrl } } = supabase.storage
-                .from('generated_assets')
-                .getPublicUrl(`videos/${fileName}`);
-            const publicUrl = normalizeStorageUrl(rawVideoUrl);
+            const videoFile = new File([videoBlob], fileName, { type: 'video/mp4' });
+            const publicUrl = await uploadFile(videoFile, 'videos');
             // 3. Save to DB & update UI
             setVideoUri(publicUrl);
             setIsPlaying(true);

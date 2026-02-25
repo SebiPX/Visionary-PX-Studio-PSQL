@@ -1,16 +1,14 @@
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabaseClient';
-import { StoryboardSession } from '../lib/database.types';
+import { storyboards } from '../lib/apiClient';
 
 export const useStoryboard = () => {
     const { user } = useAuth();
 
-    const saveStoryboard = async (session: Partial<StoryboardSession>) => {
+    const saveStoryboard = async (session: any) => {
         if (!user) return { error: new Error('User not authenticated') };
 
         try {
             const sessionData = {
-                user_id: user.id,
                 title: session.title || 'Untitled Storyboard',
                 concept: session.concept || null,
                 target_duration: session.target_duration || null,
@@ -18,45 +16,25 @@ export const useStoryboard = () => {
                 config: session.config || {},
                 assets: session.assets || [],
                 shots: session.shots || [],
-                updated_at: new Date().toISOString(),
             };
 
             if (session.id) {
-                // Update existing
-                const { data, error } = await supabase
-                    .from('storyboard_sessions')
-                    .update(sessionData)
-                    .eq('id', session.id)
-                    .select()
-                    .single();
-
-                return { data, error };
+                const data = await storyboards.update(session.id, sessionData);
+                return { data, error: null };
             } else {
-                // Create new
-                const { data, error } = await supabase
-                    .from('storyboard_sessions')
-                    .insert([sessionData])
-                    .select()
-                    .single();
-
-                return { data, error };
+                const data = await storyboards.create(sessionData);
+                return { data, error: null };
             }
         } catch (error: any) {
-            return { error };
+            return { data: null, error };
         }
     };
 
     const loadStoryboards = async () => {
         if (!user) return { data: [], error: new Error('User not authenticated') };
-
         try {
-            const { data, error } = await supabase
-                .from('storyboard_sessions')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('updated_at', { ascending: false });
-
-            return { data: data as StoryboardSession[], error };
+            const data = await storyboards.list();
+            return { data, error: null };
         } catch (error: any) {
             return { data: [], error };
         }
@@ -64,23 +42,13 @@ export const useStoryboard = () => {
 
     const deleteStoryboard = async (id: string) => {
         if (!user) return { error: new Error('User not authenticated') };
-
         try {
-            const { error } = await supabase
-                .from('storyboard_sessions')
-                .delete()
-                .eq('id', id)
-                .eq('user_id', user.id);
-
-            return { error };
+            await storyboards.delete(id);
+            return { error: null };
         } catch (error: any) {
             return { error };
         }
     };
 
-    return {
-        saveStoryboard,
-        loadStoryboards,
-        deleteStoryboard,
-    };
+    return { saveStoryboard, loadStoryboards, deleteStoryboard };
 };
