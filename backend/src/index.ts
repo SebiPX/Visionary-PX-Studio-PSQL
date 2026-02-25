@@ -24,6 +24,7 @@ import inventarDashboardRoutes   from './routes/inventar/dashboard-config';
 import inventarProfileRoutes     from './routes/inventar/profiles';
 import geminiRoutes from './routes/gemini';
 import ragRoutes from './routes/rag';
+import chatRoutes from './routes/chats';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -62,6 +63,7 @@ app.use('/api/storyboards', storyboardRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/gemini', geminiRoutes);
 app.use('/api/rag', ragRoutes);
+app.use('/api/chats', chatRoutes);
 // Inventar
 app.use('/api/inventar/items',            inventarItemRoutes);
 app.use('/api/inventar/loans',            inventarLoanRoutes);
