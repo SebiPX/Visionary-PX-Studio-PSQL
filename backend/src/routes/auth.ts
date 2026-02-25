@@ -96,4 +96,39 @@ router.patch('/profile', requireAuth, async (req: AuthRequest, res: Response) =>
   }
 });
 
+// PATCH /auth/password — change password for logged-in user
+router.patch('/password', requireAuth, async (req: AuthRequest, res: Response) => {
+  const { current_password, new_password } = req.body;
+  if (!current_password || !new_password) {
+    res.status(400).json({ error: 'current_password and new_password required' });
+    return;
+  }
+  if (new_password.length < 6) {
+    res.status(400).json({ error: 'new_password must be at least 6 characters' });
+    return;
+  }
+  try {
+    const result = await pool.query(
+      'SELECT password_hash FROM profiles WHERE id = $1', [req.userId]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    const valid = await bcrypt.compare(current_password, result.rows[0].password_hash);
+    if (!valid) {
+      res.status(401).json({ error: 'Current password is incorrect' });
+      return;
+    }
+    const new_hash = await bcrypt.hash(new_password, 12);
+    await pool.query(
+      'UPDATE profiles SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+      [new_hash, req.userId]
+    );
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

@@ -12,7 +12,18 @@ import sketchRoutes from './routes/sketches';
 import textRoutes from './routes/texts';
 import storyboardRoutes from './routes/storyboards';
 import uploadRoutes from './routes/upload';
+import inventarItemRoutes       from './routes/inventar/items';
+import inventarLoanRoutes        from './routes/inventar/loans';
+import inventarVerleihRoutes     from './routes/inventar/verleihscheine';
+import inventarLinkRoutes        from './routes/inventar/links';
+import inventarLoginRoutes       from './routes/inventar/logins';
+import inventarKreditRoutes      from './routes/inventar/kreditkarten';
+import inventarHandyRoutes       from './routes/inventar/handyvertraege';
+import inventarFirmaRoutes       from './routes/inventar/firmendaten';
+import inventarDashboardRoutes   from './routes/inventar/dashboard-config';
+import inventarProfileRoutes     from './routes/inventar/profiles';
 import geminiRoutes from './routes/gemini';
+import ragRoutes from './routes/rag';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -50,6 +61,18 @@ app.use('/api/texts', textRoutes);
 app.use('/api/storyboards', storyboardRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/gemini', geminiRoutes);
+app.use('/api/rag', ragRoutes);
+// Inventar
+app.use('/api/inventar/items',            inventarItemRoutes);
+app.use('/api/inventar/loans',            inventarLoanRoutes);
+app.use('/api/inventar/verleihscheine',   inventarVerleihRoutes);
+app.use('/api/inventar/links',            inventarLinkRoutes);
+app.use('/api/inventar/logins',           inventarLoginRoutes);
+app.use('/api/inventar/kreditkarten',     inventarKreditRoutes);
+app.use('/api/inventar/handyvertraege',   inventarHandyRoutes);
+app.use('/api/inventar/firmendaten',      inventarFirmaRoutes);
+app.use('/api/inventar/dashboard-config', inventarDashboardRoutes);
+app.use('/api/inventar/profiles',         inventarProfileRoutes);
 
 // ── 404 Handler ──────────────────────────────────────────────
 app.use((_req, res) => {
