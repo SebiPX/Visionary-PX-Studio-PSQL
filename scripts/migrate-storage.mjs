@@ -46,10 +46,10 @@ const db = new Pool({
 });
 
 
-const BUCKET = process.env.R2_BUCKET_NAME;
-const R2_BASE = process.env.R2_PUBLIC_BASE_URL.replace(/\/$/, '');
+const BUCKET = process.env.R2_BUCKET_NAME.trim();
+const R2_BASE = process.env.R2_PUBLIC_BASE_URL.trim().replace(/\/$/, '');
 // e.g. https://42e817feef1a0fe73189800cbbe001d7.r2.cloudflarestorage.com
-const R2_S3_ENDPOINT = process.env.R2_ENDPOINT.replace(/\/$/, '');
+const R2_S3_ENDPOINT = process.env.R2_ENDPOINT.trim().replace(/\/$/, '');
 
 
 // ── Helper: Download a file using curl (bypasses TLS compat issues) ──
