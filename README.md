@@ -14,43 +14,54 @@ Visionary PX Studio vereint Google's leistungsstärkste KI-Modelle (Gemini & Veo
 
 ### Voraussetzungen
 
-- Node.js 18+
-- Supabase Account (kostenlos)
+- Node.js 20+
+- PostgreSQL 16 (`labs_db` auf VPS oder lokal)
 - Google Gemini API Key
+- Cloudflare R2 Bucket (für File Storage)
 
 ### Installation
 
 1. **Repository klonen:**
 
    ```bash
-   git clone https://github.com/SebiPX/Visionary-PX-Studio-V4.git
-   cd Visionary-PX-Studio-V4
+   git clone https://github.com/SebiPX/Visionary-PX-Studio-PSQL.git
+   cd Visionary-PX-Studio-PSQL
    ```
 
-2. **Dependencies installieren:**
+2. **Frontend Dependencies installieren:**
 
    ```bash
    npm install
    ```
 
-3. **Umgebungsvariablen konfigurieren:**
+3. **Backend starten (Docker auf VPS):**
 
-   Erstellen Sie `.env.local` im Hauptverzeichnis:
-
-   ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   GEMINI_API_KEY=your_gemini_api_key
+   ```bash
+   cd backend
+   cp .env.example .env
+   # .env befüllen (DB, JWT, R2, Gemini)
+   docker compose up -d --build
    ```
 
-4. **Entwicklungsserver starten:**
+4. **Datenbank anlegen:**
+
+   `backend/schema.sql` in DBeaver auf `labs_db` ausführen.
+
+5. **Frontend konfigurieren:**
+
+   ```env
+   # .env.local
+   VITE_API_URL=https://api.labs-schickeria.com
+   ```
+
+6. **Entwicklungsserver starten:**
 
    ```bash
    npm run dev
    ```
 
-5. **App öffnen:**
-   Navigieren Sie zu `http://localhost:3000`
+7. **App öffnen:**
+   Navigieren Sie zu `http://localhost:5173`
 
 ---
 
@@ -60,7 +71,7 @@ Visionary PX Studio vereint Google's leistungsstärkste KI-Modelle (Gemini & Veo
 
 - Masonry-Grid mit allen Generierungen
 - Klickbare Karten für direkte Navigation
-- Echtzeit-Updates aus Supabase
+- Echtzeit-Updates aus labs_db (PostgreSQL)
 - **Tools & Apps** Bereich mit direktem Inventar-Zugang
 
 ### 🎨 **Image Gen**
@@ -115,7 +126,7 @@ Visionary PX Studio vereint Google's leistungsstärkste KI-Modelle (Gemini & Veo
 ### ⚙️ **Settings**
 
 - Profilverwaltung
-- Avatar-Upload (Supabase Storage)
+- Avatar-Upload (Cloudflare R2)
 - Passwort-Reset
 
 ---
@@ -146,15 +157,15 @@ Vollständiges internes Teamportal, zugänglich direkt über das Dashboard → "
 
 ## 🔐 Authentifizierung
 
-Vollständiges Auth-System powered by Supabase:
+Eigenständiges JWT Auth-System (kein Supabase):
 
 - ✅ Email/Password Login & Signup
-- ✅ Passwort-Reset mit E-Mail-Verifizierung
+- ✅ JWT Token (7 Tage gültig, localStorage)
 - ✅ Session-Persistenz
-- ✅ Row Level Security (RLS)
 - ✅ Rollen-System (user / admin)
+- ✅ bcrypt Passwort-Hashing
 
-Siehe [SUPABASE_INTEGRATION.md](./SUPABASE_INTEGRATION.md) für Details.
+Backend API: `api.labs-schickeria.com/auth/*`
 
 ---
 
@@ -190,7 +201,10 @@ Siehe [SUPABASE_INTEGRATION.md](./SUPABASE_INTEGRATION.md) für Details.
 
 - **Frontend:** React 19, TypeScript, Vite
 - **Styling:** Tailwind CSS
-- **Backend:** Supabase (Auth, Database, Storage)
+- **Backend:** Express.js + Node.js (`backend/`) — ersetzt Supabase komplett
+- **Datenbank:** PostgreSQL 16 + pgvector (`labs_db`)
+- **Storage:** Cloudflare R2 (S3-kompatibel)
+- **Auth:** JWT + bcrypt (eigenständig, kein externer Auth-Dienst)
 - **AI:** Google Gemini 2.0–2.5, Veo 3.1, Gemini Embedding (`gemini-embedding-001`)
 - **Routing:** React Router DOM (MemoryRouter für Inventar-Isolation)
 - **Icons:** Material Icons Rounded, Lucide React
@@ -203,7 +217,8 @@ Siehe [SUPABASE_INTEGRATION.md](./SUPABASE_INTEGRATION.md) für Details.
 ## 📚 Dokumentation
 
 - [APP_INFO.md](./APP_INFO.md) — Ausführliche Feature-Beschreibung
-- [SUPABASE_INTEGRATION.md](./SUPABASE_INTEGRATION.md) — Datenbank Setup Guide
+- [backend/README.md](./backend/README.md) — Express API Setup & Deployment Guide
+- [backend/schema.sql](./backend/schema.sql) — PostgreSQL Schema (labs_db)
 
 ---
 
