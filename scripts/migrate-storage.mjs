@@ -21,10 +21,12 @@
  */
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import pg from 'pg';
 import dotenv from 'dotenv';
 import { basename, extname } from 'path';
 import { execFileSync } from 'child_process';
+import https from 'https';
 
 dotenv.config();
 
@@ -45,6 +47,12 @@ const db = new Pool({
 });
 
 
+// ── Custom HTTPS agent to fix TLS compat with Cloudflare R2 ──────────
+const httpsAgent = new https.Agent({
+  ciphers: 'DEFAULT:@SECLEVEL=0',
+  rejectUnauthorized: false,
+});
+
 const r2 = new S3Client({
   region: 'auto',
   endpoint: process.env.R2_ENDPOINT,
@@ -52,6 +60,7 @@ const r2 = new S3Client({
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
+  requestHandler: new NodeHttpHandler({ httpsAgent }),
 });
 
 const BUCKET = process.env.R2_BUCKET_NAME;
