@@ -27,8 +27,22 @@ import { basename } from 'path';
 
 dotenv.config();
 
+// ── Validate required env vars ────────────────────────────────────────
+const required = ['DATABASE_URL', 'R2_ENDPOINT', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY', 'R2_BUCKET_NAME', 'R2_PUBLIC_BASE_URL'];
+const missing = required.filter(k => !process.env[k]);
+if (missing.length > 0) {
+  console.error('❌ Missing environment variables:', missing.join(', '));
+  console.error('   Add them to the .env file in this directory or export them before running.');
+  process.exit(1);
+}
+
 const { Pool } = pg;
-const db = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  // ssl: false — PostgreSQL runs locally without SSL
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+});
+
 
 const r2 = new S3Client({
   region: 'auto',
