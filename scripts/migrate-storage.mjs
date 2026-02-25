@@ -75,13 +75,13 @@ function uploadToR2(key, buffer, contentType) {
   writeFileSync(tmpFile, buffer);
   try {
     const url = `${R2_S3_ENDPOINT}/${BUCKET}/${key}`;
+    // Note: do NOT add x-amz-content-sha256 manually — --aws-sigv4 handles it
     execFileSync('curl', [
       '--aws-sigv4', 'aws:amz:auto:s3',
-      '--user', `${process.env.R2_ACCESS_KEY_ID}:${process.env.R2_SECRET_ACCESS_KEY}`,
+      '--user', `${process.env.R2_ACCESS_KEY_ID.trim()}:${process.env.R2_SECRET_ACCESS_KEY.trim()}`,
       '-X', 'PUT',
       '-T', tmpFile,
       '-H', `Content-Type: ${contentType}`,
-      '-H', 'x-amz-content-sha256: UNSIGNED-PAYLOAD',
       '-s', '-f', '-k',
       url,
     ], { maxBuffer: 10 * 1024 }); // response body is small
