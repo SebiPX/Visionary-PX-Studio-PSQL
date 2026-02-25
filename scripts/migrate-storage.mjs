@@ -24,6 +24,10 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import pg from 'pg';
 import dotenv from 'dotenv';
 import { basename } from 'path';
+import https from 'https';
+
+// ── Bypass SSL for self-hosted Supabase (self-signed cert) ────────────
+const sslAgent = new https.Agent({ rejectUnauthorized: false });
 
 dotenv.config();
 
@@ -58,7 +62,7 @@ const R2_BASE = process.env.R2_PUBLIC_BASE_URL;
 
 // ── Helper: Download a file from any URL ─────────────────────────────
 async function downloadFile(url) {
-  const res = await fetch(url);
+  const res = await fetch(url, { agent: url.startsWith('https') ? sslAgent : undefined });
   if (!res.ok) throw new Error(`Download failed: ${url} → HTTP ${res.status}`);
   return { buffer: Buffer.from(await res.arrayBuffer()), contentType: res.headers.get('content-type') || 'application/octet-stream' };
 }
@@ -135,28 +139,44 @@ async function main() {
 // ── Storyboard sessions (JSON with nested image URLs) ────────────────
 async function migrateStoryboards() {
   console.log('\n📋 Migrating storyboard_sessions (JSON)...');
-  const { rows } = await db.query('SELECT id, data FROM storyboard_sessions WHERE data::text LIKE \'%:8000%\'');
+  
+  // Find the correct JSON column name
+  const { rows: cols } = await db.query(`
+    SELECT column_name FROM information_schema.columns 
+    WHERE table_name = 'storyboard_sessions'
+  `);
+  const colNames = cols.map(r => r.column_name);
+  console.log('   Columns:', colNames.join(', '));
+  
+  // Find which column holds the JSON data (shots/scenes/content/data)
+  const jsonCol = ['scenes', 'shots', 'content', 'data', 'session_data'].find(c => colNames.includes(c));
+  if (!jsonCol) {
+    console.log('   ⚠️  No JSON column found in storyboard_sessions — skipping');
+    return;
+  }
+  console.log(`   Using column: ${jsonCol}`);
+  
+  const { rows } = await db.query(`SELECT id, ${jsonCol} FROM storyboard_sessions WHERE ${jsonCol}::text LIKE '%:8000%' OR ${jsonCol}::text LIKE '%supabase%'`);
   console.log(`   Found ${rows.length} sessions to migrate`);
 
   for (const row of rows) {
     try {
-      const json = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
+      const json = typeof row[jsonCol] === 'string' ? JSON.parse(row[jsonCol]) : row[jsonCol];
       let modified = false;
 
-      // Walk through shots and migrate image URLs
-      if (json.shots) {
-        for (const shot of json.shots) {
-          if (shot.image_url && (shot.image_url.includes(':8000') || shot.image_url.includes('supabase'))) {
-            const r2Key = getR2Key(shot.image_url);
-            const { buffer, contentType } = await downloadFile(shot.image_url);
-            shot.image_url = await uploadToR2(r2Key, buffer, contentType);
-            modified = true;
-          }
+      // Walk through shots/scenes and migrate image URLs
+      const items = json.shots || json.scenes || [];
+      for (const shot of items) {
+        if (shot.image_url && (shot.image_url.includes(':8000') || shot.image_url.includes('supabase'))) {
+          const r2Key = getR2Key(shot.image_url);
+          const { buffer, contentType } = await downloadFile(shot.image_url);
+          shot.image_url = await uploadToR2(r2Key, buffer, contentType);
+          modified = true;
         }
       }
 
       if (modified) {
-        await db.query('UPDATE storyboard_sessions SET data = $1 WHERE id = $2', [JSON.stringify(json), row.id]);
+        await db.query(`UPDATE storyboard_sessions SET ${jsonCol} = $1 WHERE id = $2`, [JSON.stringify(json), row.id]);
         console.log(`   ✅ Session ${row.id}`);
       }
     } catch (err) {
