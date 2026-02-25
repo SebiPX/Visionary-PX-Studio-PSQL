@@ -23,11 +23,8 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import pg from 'pg';
 import dotenv from 'dotenv';
-import { basename } from 'path';
-import https from 'https';
-
-// ── Bypass SSL for self-hosted Supabase (self-signed cert) ────────────
-const sslAgent = new https.Agent({ rejectUnauthorized: false });
+import { basename, extname } from 'path';
+import { execFileSync } from 'child_process';
 
 dotenv.config();
 
@@ -60,11 +57,19 @@ const r2 = new S3Client({
 const BUCKET = process.env.R2_BUCKET_NAME;
 const R2_BASE = process.env.R2_PUBLIC_BASE_URL;
 
-// ── Helper: Download a file from any URL ─────────────────────────────
-async function downloadFile(url) {
-  const res = await fetch(url, { agent: url.startsWith('https') ? sslAgent : undefined });
-  if (!res.ok) throw new Error(`Download failed: ${url} → HTTP ${res.status}`);
-  return { buffer: Buffer.from(await res.arrayBuffer()), contentType: res.headers.get('content-type') || 'application/octet-stream' };
+// ── Helper: Download a file using curl (bypasses TLS compat issues) ──
+function downloadFile(url) {
+  const ext = extname(url).toLowerCase();
+  const contentTypeMap = {
+    '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp', '.gif': 'image/gif',
+    '.mp4': 'video/mp4', '.webm': 'video/webm',
+  };
+  const contentType = contentTypeMap[ext] || 'application/octet-stream';
+  // curl -s -L -k: silent, follow redirects, ignore SSL errors
+  const buffer = execFileSync('curl', ['-s', '-L', '-k', url]);
+  if (!buffer || buffer.length === 0) throw new Error(`Empty response from: ${url}`);
+  return { buffer, contentType };
 }
 
 // ── Helper: Upload buffer to R2 ──────────────────────────────────────
@@ -99,7 +104,7 @@ async function migrateTable(table, urlColumn) {
     try {
       const r2Key = getR2Key(oldUrl);
       console.log(`   ↓ ${basename(r2Key)}`);
-      const { buffer, contentType } = await downloadFile(oldUrl);
+      const { buffer, contentType } = downloadFile(oldUrl);
       const newUrl = await uploadToR2(r2Key, buffer, contentType);
       await db.query(`UPDATE ${table} SET ${urlColumn} = $1 WHERE id = $2`, [newUrl, row.id]);
       console.log(`   ✅ → ${newUrl}`);
@@ -169,7 +174,7 @@ async function migrateStoryboards() {
       for (const shot of items) {
         if (shot.image_url && (shot.image_url.includes(':8000') || shot.image_url.includes('supabase'))) {
           const r2Key = getR2Key(shot.image_url);
-          const { buffer, contentType } = await downloadFile(shot.image_url);
+          const { buffer, contentType } = downloadFile(shot.image_url);
           shot.image_url = await uploadToR2(r2Key, buffer, contentType);
           modified = true;
         }
