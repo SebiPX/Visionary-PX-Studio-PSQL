@@ -67,7 +67,8 @@ function downloadFile(url) {
   };
   const contentType = contentTypeMap[ext] || 'application/octet-stream';
   // curl -s -L -k: silent, follow redirects, ignore SSL errors
-  const buffer = execFileSync('curl', ['-s', '-L', '-k', url]);
+  // maxBuffer: 500MB to handle large video files
+  const buffer = execFileSync('curl', ['-s', '-L', '-k', url], { maxBuffer: 500 * 1024 * 1024 });
   if (!buffer || buffer.length === 0) throw new Error(`Empty response from: ${url}`);
   return { buffer, contentType };
 }
