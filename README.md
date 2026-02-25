@@ -10,215 +10,295 @@ Visionary PX Studio vereint Google's leistungsstärkste KI-Modelle (Gemini & Veo
 
 ---
 
-## 🚀 Schnellstart
+## 🏗️ Architektur-Übersicht
+
+```
+Browser (React / Vite)
+        │  HTTPS
+        ▼
+labs-api (Express.js auf Hostinger VPS)
+        │  PostgreSQL
+        ▼
+  labs_db (PostgreSQL 16 + pgvector)
+        │  S3
+        ▼
+Cloudflare R2 (File Storage)
+```
+
+- **Kein Supabase** — vollständig selbst gehostet
+- **Zwei Docker-Container** auf dem VPS: `px-studio-psql` (Frontend) und `labs-api` (Backend)
+- **JWT Auth** — kein externer Auth-Dienst
+
+---
+
+## 🚀 Schnellstart (Lokal)
 
 ### Voraussetzungen
 
 - Node.js 20+
-- PostgreSQL 16 (`labs_db` auf VPS oder lokal)
+- PostgreSQL 16 (`labs_db` lokal oder auf VPS)
 - Google Gemini API Key
 - Cloudflare R2 Bucket (für File Storage)
 
-### Installation
+### 1. Repository klonen
 
-1. **Repository klonen:**
+```bash
+git clone https://github.com/SebiPX/Visionary-PX-Studio-PSQL.git
+cd Visionary-PX-Studio-PSQL
+```
 
-   ```bash
-   git clone https://github.com/SebiPX/Visionary-PX-Studio-PSQL.git
-   cd Visionary-PX-Studio-PSQL
-   ```
+### 2. Backend starten
 
-2. **Frontend Dependencies installieren:**
+```bash
+cd backend
+cp .env.example .env
+# .env befüllen (siehe unten)
+npm install
+npm run dev        # Startet auf Port 4000
+```
 
-   ```bash
-   npm install
-   ```
+**`backend/.env` Felder:**
 
-3. **Backend starten (Docker auf VPS):**
+```env
+DATABASE_URL=postgresql://user:pass@host:5432/labs_db
+DB_SSL=true
+JWT_SECRET=min-32-zeichen-langer-geheimer-schluessel
+ALLOWED_ORIGINS=http://localhost:5173
+R2_ENDPOINT=https://xxx.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=xxx
+R2_SECRET_ACCESS_KEY=xxx
+R2_BUCKET_NAME=xxx
+R2_PUBLIC_BASE_URL=https://pub-xxx.r2.dev
+GEMINI_API_KEY=AIzaXXX
+```
 
-   ```bash
-   cd backend
-   cp .env.example .env
-   # .env befüllen (DB, JWT, R2, Gemini)
-   docker compose up -d --build
-   ```
+### 3. Datenbank anlegen
 
-4. **Datenbank anlegen:**
+```bash
+# Basis-Schema:
+psql $DATABASE_URL -f backend/schema.sql
 
-   `backend/schema.sql` in DBeaver auf `labs_db` ausführen.
+# PX INTERN Tabellen (Inventar):
+psql $DATABASE_URL -f backend/inventar_migration.sql
+```
 
-5. **Frontend konfigurieren:**
+### 4. Frontend konfigurieren
 
-   ```env
-   # .env.local
-   VITE_API_URL=https://api.labs-schickeria.com
-   ```
+```env
+# .env.local (im Root)
+VITE_API_URL=http://localhost:4000
+```
 
-6. **Entwicklungsserver starten:**
+### 5. Frontend starten
 
-   ```bash
-   npm run dev
-   ```
+```bash
+npm install
+npm run dev
+# → http://localhost:5173
+```
 
-7. **App öffnen:**
-   Navigieren Sie zu `http://localhost:5173`
+---
+
+## 🖥️ Deployment auf dem Server (Hostinger VPS)
+
+Der Server läuft unter `/opt/docker/`. **Zwei getrennte Dienste:**
+
+### Frontend deployen
+
+```bash
+cd /opt/docker/px-studio-psql
+git pull
+docker-compose up --build -d
+```
+
+**`/opt/docker/px-studio-psql/.env`:**
+
+```env
+VITE_API_URL=https://api.labs-schickeria.com
+GEMINI_API_KEY=AIzaXXX
+APP_PORT=3010        # freier Port (nicht 80 oder 8000!)
+```
+
+### Backend deployen (labs-api)
+
+Das Backend liegt als Unterordner `backend/` im Mono-Repo. Nach einem `git pull` im px-studio-psql Verzeichnis:
+
+```bash
+# Backend-Dateien in labs-api Ordner kopieren:
+cp -r /opt/docker/px-studio-psql/backend/* /opt/docker/labs-api/
+
+cd /opt/docker/labs-api
+docker-compose up --build -d
+```
+
+**`/opt/docker/labs-api/.env`:**
+
+```env
+DATABASE_URL=postgresql://user:pass@host:5432/labs_db
+DB_SSL=true
+JWT_SECRET=dein-geheimer-schluessel
+ALLOWED_ORIGINS=https://studio.labs-schickeria.com
+R2_ENDPOINT=https://xxx.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=xxx
+R2_SECRET_ACCESS_KEY=xxx
+R2_BUCKET_NAME=xxx
+R2_PUBLIC_BASE_URL=https://pub-xxx.r2.dev
+GEMINI_API_KEY=AIzaXXX
+PORT=4000
+```
+
+### Inventar-Tabellen auf Produktions-DB anlegen
+
+```bash
+# Einmalig – nur wenn Inventar-Tabellen noch nicht existieren:
+psql "$DATABASE_URL" -f /opt/docker/labs-api/inventar_migration.sql
+```
+
+> ✅ Die Migration ist sicher — sie nutzt `CREATE TABLE IF NOT EXISTS` und kann mehrfach ausgeführt werden.
 
 ---
 
 ## ✨ Features
 
-### 🏠 **Dashboard**
+### 🏠 Dashboard
 
 - Masonry-Grid mit allen Generierungen
 - Klickbare Karten für direkte Navigation
-- Echtzeit-Updates aus labs_db (PostgreSQL)
+- Echtzeit-Updates aus labs_db
 - **Tools & Apps** Bereich mit direktem Inventar-Zugang
 
-### 🎨 **Image Gen**
+### 🎨 Image Gen
 
 - Text-to-Image, Image-to-Image, Inpainting
-- Gemini 2.0 Flash Exp
-- Mehrere Seitenverhältnisse
-- Preview & Download
+- Gemini 2.0 Flash Exp · Mehrere Seitenverhältnisse
 
-### 🎥 **Video Studio**
+### 🎥 Video Studio
 
 - Veo 3.1 Fast & High Quality
 - Text-to-Video & Image-to-Video
 - Kamerabewegungen, Dauer-Kontrolle
-- Video-Player mit Preview
 
-### 📝 **Text Engine**
+### 📝 Text Engine
 
 - Multi-Platform (YouTube, Instagram, TikTok, Twitter)
-- Google Trends Integration
-- Batch-Generierung
-- Copy-to-Clipboard
+- Google Trends Integration · Batch-Generierung
 
-### 🖼️ **Thumbnail Engine**
+### 🖼️ Thumbnail Engine
 
 - 3-Schritt Workflow (Background, Elements, Text)
-- KI-Ideen-Generator
-- Layer-Komposition
-- Preview & Download
+- KI-Ideen-Generator · Layer-Komposition
 
-### 📖 **Story Studio**
+### 📖 Story Studio
 
-- 4-Phasen Workflow (Setup, Story, Storyboard, Review)
-- KI-Story-Generierung
-- Shot-by-Shot Bilder
-- Regenerierungs-Optionen
+- 4-Phasen Workflow: Setup → Story → Storyboard → Review
+- Shot-by-Shot Bilder mit Regenerierung
 
-### ✏️ **Sketch Studio**
+### ✏️ Sketch Studio
 
-- Sketch-to-Image Transformation
-- Interaktives Drawing Canvas
-- Context & Style Auswahl
-- History mit Wiederherstellung
+- Sketch-to-Image mit `gemini-2.5-flash-image`
+- Interaktives Drawing Canvas, Undo/Redo, Aspect Ratio
 
-### 💬 **Chat Bot**
+### 💬 Chat Bot
 
-- 6 Personas: Creative, Tech, Marketing, SEO, General, **Onboarding Support**
-- **Onboarding Support Bot** mit RAG (Retrieval-Augmented Generation) — durchsucht automatisch die interne Firmenwissensdatenbank
-- Streaming-Antworten mit **Markdown-Rendering** (Überschriften, Listen, Bold, Code)
-- Chat-History mit Wiederherstellung
+- 6 Personas: Creative, Tech, Marketing, SEO, General, Onboarding
+- **Onboarding Bot** mit RAG (pgvector Cosine-Similarity über `onboarding_embeddings`)
+- Markdown-Rendering, Chat-History
 
-### ⚙️ **Settings**
+### ⚙️ Settings
 
-- Profilverwaltung
-- Avatar-Upload (Cloudflare R2)
-- Passwort-Reset
+- Profil & Avatar-Upload (Cloudflare R2)
+- Passwort ändern (aktuelles Passwort erforderlich)
 
 ---
 
-## 📦 PX INTERN (Integriertes Modul)
+## 📦 PX INTERN (Internes Teamportal)
 
-Vollständiges internes Teamportal, zugänglich direkt über das Dashboard → "PX INTERN".
+Zugänglich über **Dashboard → „PX INTERN"**. Eigenständige React-App mit `MemoryRouter`.
 
-### Module
-
-- **🏠 Dashboard** — Konfigurierbar pro User: Interne Links, Kalender-Widget, Ausleihen-Widget, Inventar-Stats, angeheftete Logins
-- **📋 Inventar** — Geräteverwaltung mit Status, Fotos, Filtern & CSV-Export
-- **🔄 Verleih** — Ausleihe-Tracking mit Rückgabe & Archiv
-- **📄 Verleih-Formular** — Neues Verleihschein erstellen mit PDF-Export
-- **📅 Kalender** — Monatsansicht aller aktiven Ausleihen
-- **🔑 Logins** — Zugangsdaten-Verwaltung; Logins können im Dashboard angeheftet werden
-- **📱 Handyverträge** — Mobilfunkvertrag-Übersicht
-- **💳 Kreditkarten** — Kreditkarten-Verwaltung
-- **🏢 Firmendaten** — Bankverbindung & Handelsregisterdaten
-- **🔗 Interne Links** — Teamlinks mit Kategorien, Google Favicon CDN & Buchstaben-Avatar Fallback
-
-### Rollen
-
-- **User** — Lesen & eigene Daten verwalten; eigene Dashboard-Konfiguration
-- **Admin** — Voller Zugriff auf alle Module inkl. Bearbeiten & Löschen
+| Modul                | Beschreibung                                                          |
+| -------------------- | --------------------------------------------------------------------- |
+| **Dashboard**        | Konfigurierbar: Links, Kalender, Ausleihen, Stats, angeheftete Logins |
+| **Inventar**         | Geräteverwaltung mit Status, Fotos, Filtern, CSV-Export               |
+| **Verleih**          | Ausleihe-Tracking mit Rückgabe & Archiv                               |
+| **Verleih-Formular** | Neuen Verleihschein erstellen, Kostenberechnung, PDF                  |
+| **Kalender**         | Monatsansicht aller aktiven Ausleihen                                 |
+| **Logins**           | Zugangsdaten-Verwaltung; anpinnen im Dashboard möglich                |
+| **Handyverträge**    | Mobilfunkvertrag-Übersicht                                            |
+| **Kreditkarten**     | Kreditkarten-Verwaltung                                               |
+| **Firmendaten**      | Bankverbindung & Handelsregisterdaten                                 |
+| **Interne Links**    | Team-Links mit Kategorien & Google Favicon CDN                        |
 
 ---
 
 ## 🔐 Authentifizierung
 
-Eigenständiges JWT Auth-System (kein Supabase):
+Eigenständiges JWT Auth-System — kein Supabase, kein Firebase:
 
 - ✅ Email/Password Login & Signup
-- ✅ JWT Token (7 Tage gültig, localStorage)
-- ✅ Session-Persistenz
-- ✅ Rollen-System (user / admin)
-- ✅ bcrypt Passwort-Hashing
-
-Backend API: `api.labs-schickeria.com/auth/*`
+- ✅ JWT Token (7 Tage, localStorage)
+- ✅ Session-Persistenz (auto-login beim Reload)
+- ✅ Rollen: `user` / `admin`
+- ✅ bcrypt Passwort-Hashing (cost 12)
+- ✅ Passwort-Änderung (erfordert aktuelles Passwort)
 
 ---
 
-## 📊 Datenbank
+## 📊 Datenbank (labs_db)
 
 ### KI-Studio Tabellen
 
-- `profiles` — Benutzerprofile mit Rollen
-- `generated_images` — Bildgenerierungen
-- `generated_videos` — Videogenerierungen
-- `generated_thumbnails` — Thumbnails
-- `generated_texts` — Texte
-- `generated_videos` — Videogenerierungen (Veo → Upload zu `generated_assets` Storage → permanente URL)
-- `generated_sketches` — Sketch-to-Image (Upload zu `generated_assets/sketches/` → URL in DB)
-- `onboarding_embeddings` — Vektordatenbank für RAG-Chatbot (pgvector, 768-dim)
-- `stories` — Story Studio Projekte
+| Tabelle                 | Inhalt                                   |
+| ----------------------- | ---------------------------------------- |
+| `profiles`              | Benutzer: Email, Name, Avatar-URL, Rolle |
+| `generated_images`      | Bildgenerierungen                        |
+| `generated_videos`      | Videogenerierungen                       |
+| `generated_thumbnails`  | Thumbnails                               |
+| `generated_texts`       | Textgenerierungen                        |
+| `generated_sketches`    | Sketch-to-Image (R2-URL in DB)           |
+| `storyboard_sessions`   | Story Studio Projekte                    |
+| `chat_sessions`         | ChatBot-Verläufe                         |
+| `onboarding_embeddings` | RAG-Vektordaten (pgvector, 768-dim)      |
 
 ### PX INTERN Tabellen
 
-- `inventar_items` — Geräte & Assets
-- `inventar_loans` — Ausleihen
-- `inventar_verleihscheine` — Verleihscheine & Positionen
-- `inventar_logins` — Zugangsdaten
-- `inventar_handyvertraege` — Mobilfunkverträge
-- `inventar_kreditkarten` — Kreditkarten
-- `inventar_firmendaten` — Firmendaten
-- `inventar_links` — Interne Teamlinks
-- `inventar_dashboard_config` — Per-User Dashboard-Konfiguration (JSONB, RLS: user-scoped)
+| Tabelle                        | Inhalt                            |
+| ------------------------------ | --------------------------------- |
+| `inventar_items`               | Geräte & Assets                   |
+| `inventar_loans`               | Ausleihen                         |
+| `inventar_verleihscheine`      | Verleihschein-Header              |
+| `inventar_verleihschein_items` | Verleihschein-Positionen          |
+| `inventar_logins`              | Zugangsdaten                      |
+| `inventar_handyvertraege`      | Mobilfunkverträge                 |
+| `inventar_kreditkarten`        | Kreditkarten                      |
+| `inventar_firmendaten`         | Firmendaten                       |
+| `inventar_links`               | Interne Team-Links                |
+| `inventar_dashboard_config`    | Per-User Dashboard-Config (JSONB) |
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React 19, TypeScript, Vite
-- **Styling:** Tailwind CSS
-- **Backend:** Express.js + Node.js (`backend/`) — ersetzt Supabase komplett
-- **Datenbank:** PostgreSQL 16 + pgvector (`labs_db`)
-- **Storage:** Cloudflare R2 (S3-kompatibel)
-- **Auth:** JWT + bcrypt (eigenständig, kein externer Auth-Dienst)
-- **AI:** Google Gemini 2.0–2.5, Veo 3.1, Gemini Embedding (`gemini-embedding-001`)
-- **Routing:** React Router DOM (MemoryRouter für Inventar-Isolation)
-- **Icons:** Material Icons Rounded, Lucide React
-- **PDF:** jsPDF, QRCode React
-- **Markdown:** React Markdown
-- **Toasts:** React Hot Toast
+| Bereich    | Technologie                                          |
+| ---------- | ---------------------------------------------------- |
+| Frontend   | React 19, TypeScript, Vite                           |
+| Styling    | Tailwind CSS                                         |
+| Backend    | Express.js + Node.js (`backend/`)                    |
+| Datenbank  | PostgreSQL 16 + pgvector                             |
+| Storage    | Cloudflare R2 (S3-kompatibel)                        |
+| Auth       | JWT + bcrypt (eigenständig)                          |
+| AI         | Gemini 2.0–2.5, Veo 3.1, gemini-embedding-001        |
+| Deployment | Docker, Hostinger VPS, Nginx Proxy Manager           |
+| Icons      | Material Icons Rounded, Lucide React                 |
+| Extras     | jsPDF, QRCode React, React Markdown, React Hot Toast |
 
 ---
 
 ## 📚 Dokumentation
 
-- [APP_INFO.md](./APP_INFO.md) — Ausführliche Feature-Beschreibung
-- [backend/README.md](./backend/README.md) — Express API Setup & Deployment Guide
-- [backend/schema.sql](./backend/schema.sql) — PostgreSQL Schema (labs_db)
+- [APP_INFO.md](./APP_INFO.md) — Detaillierte Feature-Beschreibung
+- [backend/README.md](./backend/README.md) — Express API Setup & Endpunkte
+- [backend/schema.sql](./backend/schema.sql) — Basis-Datenbankschema
+- [backend/inventar_migration.sql](./backend/inventar_migration.sql) — PX INTERN Tabellen
 
 ---
 
@@ -226,17 +306,8 @@ Backend API: `api.labs-schickeria.com/auth/*`
 
 Cyberpunk / Futuristic Glassmorphism:
 
-- Dunkle Hintergründe (#101622)
-- Neon-Blau Primary (#135bec)
-- Backdrop-Blur Effekte
-- Smooth Animations
-- Vollständig Responsive
-
----
-
-## 📝 Lizenz
-
-Dieses Projekt ist für internen Gebrauch bei PX Agentur erstellt.
+- Dunkle Hintergründe (`#101622`) · Neon-Blau Primary (`#135bec`)
+- Backdrop-Blur Effekte · Smooth Animations · Vollständig Responsive
 
 ---
 
