@@ -20,13 +20,12 @@
  *   R2_PUBLIC_BASE_URL    ← https://pub-xxx.r2.dev
  */
 
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { NodeHttpHandler } from '@smithy/node-http-handler';
 import pg from 'pg';
 import dotenv from 'dotenv';
 import { basename, extname } from 'path';
 import { execFileSync } from 'child_process';
-import https from 'https';
+import { writeFileSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
 
 dotenv.config();
 
@@ -47,24 +46,11 @@ const db = new Pool({
 });
 
 
-// ── Custom HTTPS agent to fix TLS compat with Cloudflare R2 ──────────
-const httpsAgent = new https.Agent({
-  ciphers: 'DEFAULT:@SECLEVEL=0',
-  rejectUnauthorized: false,
-});
-
-const r2 = new S3Client({
-  region: 'auto',
-  endpoint: process.env.R2_ENDPOINT,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  },
-  requestHandler: new NodeHttpHandler({ httpsAgent }),
-});
-
 const BUCKET = process.env.R2_BUCKET_NAME;
-const R2_BASE = process.env.R2_PUBLIC_BASE_URL;
+const R2_BASE = process.env.R2_PUBLIC_BASE_URL.replace(/\/$/, '');
+// e.g. https://42e817feef1a0fe73189800cbbe001d7.r2.cloudflarestorage.com
+const R2_S3_ENDPOINT = process.env.R2_ENDPOINT.replace(/\/$/, '');
+
 
 // ── Helper: Download a file using curl (bypasses TLS compat issues) ──
 function downloadFile(url) {
@@ -82,15 +68,27 @@ function downloadFile(url) {
   return { buffer, contentType };
 }
 
-// ── Helper: Upload buffer to R2 ──────────────────────────────────────
-async function uploadToR2(key, buffer, contentType) {
-  await r2.send(new PutObjectCommand({
-    Bucket: BUCKET,
-    Key: key,
-    Body: buffer,
-    ContentType: contentType,
-  }));
-  return `${R2_BASE}/${key}`;
+// ── Helper: Upload buffer to R2 via curl --aws-sigv4 ─────────────────
+// Uses system OpenSSL (curl) instead of Node.js TLS to avoid handshake issues
+function uploadToR2(key, buffer, contentType) {
+  const tmpFile = `${tmpdir()}/r2_upload_${Date.now()}`;
+  writeFileSync(tmpFile, buffer);
+  try {
+    const url = `${R2_S3_ENDPOINT}/${BUCKET}/${key}`;
+    execFileSync('curl', [
+      '--aws-sigv4', 'aws:amz:auto:s3',
+      '--user', `${process.env.R2_ACCESS_KEY_ID}:${process.env.R2_SECRET_ACCESS_KEY}`,
+      '-X', 'PUT',
+      '-T', tmpFile,
+      '-H', `Content-Type: ${contentType}`,
+      '-H', 'x-amz-content-sha256: UNSIGNED-PAYLOAD',
+      '-s', '-f', '-k',
+      url,
+    ], { maxBuffer: 10 * 1024 }); // response body is small
+    return `${R2_BASE}/${key}`;
+  } finally {
+    try { unlinkSync(tmpFile); } catch {}
+  }
 }
 
 // ── Helper: Determine R2 key from Supabase URL ───────────────────────
@@ -115,7 +113,7 @@ async function migrateTable(table, urlColumn) {
       const r2Key = getR2Key(oldUrl);
       console.log(`   ↓ ${basename(r2Key)}`);
       const { buffer, contentType } = downloadFile(oldUrl);
-      const newUrl = await uploadToR2(r2Key, buffer, contentType);
+      const newUrl = uploadToR2(r2Key, buffer, contentType);
       await db.query(`UPDATE ${table} SET ${urlColumn} = $1 WHERE id = $2`, [newUrl, row.id]);
       console.log(`   ✅ → ${newUrl}`);
       success++;
@@ -185,7 +183,7 @@ async function migrateStoryboards() {
         if (shot.image_url && (shot.image_url.includes(':8000') || shot.image_url.includes('supabase'))) {
           const r2Key = getR2Key(shot.image_url);
           const { buffer, contentType } = downloadFile(shot.image_url);
-          shot.image_url = await uploadToR2(r2Key, buffer, contentType);
+          shot.image_url = uploadToR2(r2Key, buffer, contentType);
           modified = true;
         }
       }
