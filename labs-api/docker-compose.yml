@@ -7,7 +7,7 @@ services:
       - "4001:4000" # Host:Container — 4001 weil 4000 schon belegt
     environment:
       PORT: 4000
-      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@host.docker.internal:${DB_PORT:-5434}/labs_db
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@host.docker.internal:${DB_PORT:-5433}/labs_db
       JWT_SECRET: ${JWT_SECRET}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
