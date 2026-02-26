@@ -239,7 +239,8 @@ export const ChatBot: React.FC = () => {
       const modelMsgId = (Date.now() + 1).toString();
       const responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-      const newMessages = [...messages, { id: (Date.now() + 1).toString(), role: 'model' as const, text: responseText }];
+      // Include userMsg explicitly — messages state may not yet include it (async React update)
+      const newMessages = [...messages, userMsg, { id: modelMsgId, role: 'model' as const, text: responseText }];
       setMessages(newMessages);
       setTimeout(() => saveCurrentSession(newMessages), 500);
     } catch (error) {
