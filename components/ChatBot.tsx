@@ -65,45 +65,57 @@ const PERSONAS: Persona[] = [
     id: 'analysis',
     name: 'Medien-Analyst',
     icon: 'palette',
-    desc: 'Helps with brainstorming and art direction.',
-    instruction: 'You are a highly creative art director and brainstorming partner. Your goal is to inspire, generate vivid ideas, and help refine artistic concepts for videos, images, and designs. Keep responses enthusiastic and visual.'
+    desc: 'Kreative Ideenfindung und Art Direction.',
+    instruction: 'Du bist ein kreativer Art Director und Brainstorming-Partner. Dein Ziel ist es zu inspirieren, lebhafte Ideen zu entwickeln und künstlerische Konzepte für Videos, Bilder und Designs zu verfeinern.'
   },
   {
     id: 'coding',
     name: 'DevX Assistant',
     icon: 'terminal',
-    desc: 'Assistance with coding and technical details.',
-    instruction: 'You are a senior software engineer and technical expert. Provide concise, accurate, and efficient solutions. Use code blocks where necessary.'
+    desc: 'Unterstützung bei Code und technischen Fragen.',
+    instruction: 'Du bist ein erfahrener Software-Ingenieur und technischer Experte. Gib präzise, effiziente Lösungen. Nutze Code-Blöcke wo nötig.'
   },
   {
     id: 'content',
     name: 'Content Stratege',
     icon: 'trending_up',
-    desc: 'Strategy for social media and growth.',
-    instruction: 'You are a digital marketing strategist. Focus on engagement, hooks, social media trends, and audience growth strategies. Keep advice actionable and data-driven.'
+    desc: 'Social Media Strategie und Wachstum.',
+    instruction: 'Du bist ein digitaler Marketing-Stratege. Fokussiere dich auf Engagement, Hooks, Social-Media-Trends und Reichweiten-Strategien. Halte Ratschläge umsetzbar und datenbasiert.'
   },
   {
     id: 'marketing',
     name: 'Marketing & SEO Pro',
     icon: 'campaign',
-    desc: 'Marketing specialist and SEO expert.',
-    instruction: 'You are a marketing specialist and SEO professional. Provide expert advice on digital marketing strategies, SEO optimization, keyword research, content marketing, conversion optimization, and analytics. Focus on practical, results-driven recommendations with current best practices.'
+    desc: 'Marketing-Spezialist und SEO-Experte.',
+    instruction: 'Du bist ein Marketing-Spezialist und SEO-Profi. Gib Expertenrat zu digitalen Marketing-Strategien, SEO-Optimierung, Keyword-Recherche, Content-Marketing und Conversion-Optimierung.'
   },
   {
     id: 'normal',
     name: 'Gemini General',
     icon: 'auto_awesome',
-    desc: 'General purpose assistant.',
-    instruction: 'You are Visionary AI, a helpful, futuristic assistant integrated into a creative studio suite. You are polite, professional, and knowledgeable about all topics.'
+    desc: 'Allgemeiner Assistent für alle Themen.',
+    instruction: 'Du bist Visionary AI, ein hilfreicher, zukunftsorientierter Assistent in einer kreativen Studio-Suite. Du bist höflich, professionell und kenntnisreich zu allen Themen.'
   },
   {
     id: 'onboarding',
     name: 'Onboarding Support',
     icon: 'support_agent',
-    desc: 'Helps with onboarding and getting started.',
-    instruction: 'You are a friendly onboarding assistant. Help users get started with the platform, answer questions about features, and guide them through their first steps.'
+    desc: 'Hilfe beim Einstieg und zu Features.',
+    instruction: 'Du bist ein freundlicher Onboarding-Assistent. Du hilfst Nutzern beim Start mit der Plattform, beantwortest Fragen zu Features und führst sie durch ihre ersten Schritte.'
   }
 ];
+
+// Builds a system instruction with current date/time + German language rule
+const buildSystemInstruction = (baseInstruction: string): string => {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  return `${baseInstruction}
+
+AKTUELLES DATUM & UHRZEIT: ${dateStr}, ${timeStr} Uhr. Nutze dieses Wissen wenn der Nutzer nach Datum, Uhrzeit oder aktuellen Ereignissen fragt.
+
+SPRACHE: Antworte IMMER auf Deutsch, außer der Nutzer schreibt ausdrücklich in einer anderen Sprache — dann antworte in dieser Sprache.`;
+};
 
 export const ChatBot: React.FC = () => {
   const { saveChat, loadChatSessions } = useGeneratedContent();
@@ -155,9 +167,9 @@ export const ChatBot: React.FC = () => {
     setMessages([{
       id: Date.now().toString(),
       role: 'model',
-      text: activePersona.id === PERSONAS[0].id && messages.length === 0
-        ? `Hello! I'm your ${activePersona.name}. How can I assist with your creative process today?`
-        : `System: Switched to ${activePersona.name} mode.\n${activePersona.desc}`
+      text: messages.length === 0
+        ? `Hallo! Ich bin dein ${activePersona.name}. Wie kann ich dir heute helfen?`
+        : `System: Gewechselt zu — ${activePersona.name}.\n${activePersona.desc}`
     }]);
 
   }, [activePersona.id]);
@@ -204,7 +216,7 @@ export const ChatBot: React.FC = () => {
         action: 'generateContent',
         model: 'gemini-3-flash-preview',
         contents: contents,
-        systemInstruction: activePersona.instruction,
+        systemInstruction: buildSystemInstruction(activePersona.instruction),
       }) as any;
 
       if (response?.error) {
@@ -245,7 +257,7 @@ export const ChatBot: React.FC = () => {
     setMessages([{
       id: Date.now().toString(),
       role: 'model',
-      text: `Hello! I'm your ${activePersona.name}. How can I assist with your creative process today?`
+      text: `Hallo! Ich bin dein ${activePersona.name}. Wie kann ich dir heute helfen?`
     }]);
     setCurrentSessionId(null);
   };
