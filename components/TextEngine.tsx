@@ -144,7 +144,7 @@ export const TextEngine: React.FC = () => {
                     model: 'gemini-3-flash-preview',
                     contents: [{ role: 'user', parts: [{ text: prompt }] }],
                     systemInstruction: sysInstruction,
-                    ...(Object.keys(config).length > 0 ? { config } : {})
+                    ...(useTrends ? { tools: [{ googleSearch: {} }] } : {})
                 }) as any;
 
                 if (response?.error) {
