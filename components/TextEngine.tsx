@@ -334,18 +334,18 @@ export const TextEngine: React.FC = () => {
                                         key={item.id}
                                         onClick={() => {
                                             setContent(item.content);
-                                            setTopic(item.topic || '');
-                                            setActivePlatform(item.platform || 'Blog Post');
-                                            setAudience(item.audience || '');
-                                            setTone(item.tone || 'Professional');
+                                            setTopic((item as any).prompt || '');
+                                            setActivePlatform((item as any).type || 'Blog Post');
+                                            setAudience((item as any).config?.audience || '');
+                                            setTone((item as any).config?.tone || 'Professional');
                                         }}
                                         className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg p-3 group transition-all"
                                     >
                                         <div className="flex justify-between items-start mb-1">
-                                            <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase font-bold">{item.platform || 'Text'}</span>
+                                            <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase font-bold">{(item as any).type || 'Text'}</span>
                                             <span className="text-[9px] text-slate-500">{new Date(item.created_at).toLocaleTimeString()}</span>
                                         </div>
-                                        <p className="text-xs text-slate-300 font-medium truncate">{item.topic || 'Untitled'}</p>
+                                        <p className="text-xs text-slate-300 font-medium truncate">{(item as any).prompt || 'Untitled'}</p>
                                         <p className="text-[10px] text-slate-500 mt-1 line-clamp-2">{item.content}</p>
                                     </button>
                                 ))}
