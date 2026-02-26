@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
-import { GeneratedImage } from '../lib/database.types';
+import { GeneratedImage } from '../types';
 
 // ============================================================================
 // TYPES

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import ReactMarkdown from 'react-markdown';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
-import { ChatSession } from '../lib/database.types';
+import { ChatSession } from '../types';
 import { geminiProxy, getToken } from '../lib/apiClient';
 
 // ── Onboarding RAG helpers ─────────────────────────────────────────────────

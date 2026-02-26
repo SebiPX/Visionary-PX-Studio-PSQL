@@ -1,4 +1,159 @@
 
+// ── Domain types (formerly database.types.ts) ─────────────────────────
+
+export interface Profile {
+  id: string;
+  created_at: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  role: string | null;
+  billable_hourly_rate: number | null;
+  internal_cost_per_hour: number | null;
+  weekly_hours: number | null;
+  client_id: string | null;
+}
+
+export interface ChatSession {
+  id: string;
+  user_id: string;
+  title: string | null;
+  bot_id: string | null;
+  messages: Message[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface StoryAsset {
+  id: string;
+  type: 'actor' | 'environment' | 'product';
+  name: string;
+  description: string;
+  image_url: string;
+  source: 'upload' | 'ai-generated';
+  created_at: string;
+}
+
+export interface StoryShot {
+  id: string;
+  order: number;
+  scene_number: string;
+  title: string;
+  description: string;
+  location: string;
+  framing: string;
+  camera_angle: string;
+  camera_movement: string;
+  focal_length: string;
+  lighting: string;
+  equipment: string;
+  audio_notes: string;
+  estimated_duration: number;
+  movement_notes: string;
+  vfx_notes: string;
+  actors: string[];
+  environment: string;
+  products: string[];
+  notes: string;
+  image_url?: string;
+  duration: number;
+  created_at: string;
+}
+
+export interface StoryboardSession {
+  id: string;
+  user_id: string;
+  title: string | null;
+  concept: string | null;
+  target_duration: number | null;
+  num_shots: number | null;
+  config: {
+    story_text?: string;
+    genre?: string;
+    mood?: string;
+    target_audience?: string;
+    [key: string]: any;
+  };
+  assets: StoryAsset[];
+  shots: StoryShot[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GeneratedImage {
+  id: string;
+  user_id: string;
+  prompt: string | null;
+  style: string | null;
+  image_url: string;
+  config: {
+    aspectRatio?: string;
+    mode?: string;
+    referenceImage?: string;
+    [key: string]: any;
+  };
+  created_at: string;
+}
+
+export interface GeneratedVideo {
+  id: string;
+  user_id: string;
+  prompt: string | null;
+  model: string | null;
+  video_url: string;
+  thumbnail_url: string | null;
+  config: {
+    duration?: number;
+    aspectRatio?: string;
+    cameraMovement?: string;
+    [key: string]: any;
+  };
+  created_at: string;
+}
+
+export interface GeneratedThumbnail {
+  id: string;
+  user_id: string;
+  prompt: string | null;
+  platform: string | null;
+  image_url: string;
+  config: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GeneratedText {
+  id: string;
+  user_id: string;
+  content: string;
+  topic: string | null;
+  platform: string | null;
+  audience: string | null;
+  tone: string | null;
+  config: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GeneratedSketch {
+  id: string;
+  user_id: string;
+  sketch_data: string;
+  generated_image_url: string | null;
+  context: string;
+  style: string;
+  edit_history: any[];
+  created_at: string;
+  updated_at: string;
+}
+
+// ── App enums & view types ─────────────────────────────────────────────
 
 export enum AppView {
   DASHBOARD = 'DASHBOARD',

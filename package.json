@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.95.3",
     "date-fns": "^4.1.0",
     "jspdf": "^4.2.0",
     "lucide-react": "^0.575.0",

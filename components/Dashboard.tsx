@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
-import { GeneratedImage, GeneratedVideo, GeneratedThumbnail, GeneratedSketch } from '../lib/database.types';
+import { GeneratedImage, GeneratedVideo, GeneratedThumbnail, GeneratedSketch } from '../types';
 import { AppView } from '../types';
 
 type ContentItem = {

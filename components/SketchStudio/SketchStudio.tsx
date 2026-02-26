@@ -5,7 +5,7 @@ import ResultView from './ResultView';
 import { AppState, ContextOption, StyleOption } from './types';
 import { generateImageFromSketch, editGeneratedImage } from '../../services/sketchService';
 import { useGeneratedContent } from '../../hooks/useGeneratedContent';
-import { GeneratedSketch } from '../../lib/database.types';
+import { GeneratedSketch } from '../../types';
 import { uploadFile as apiUploadFile } from '../../lib/apiClient';
 
 export const SketchStudio: React.FC = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
-import { GeneratedVideo } from '../lib/database.types';
+import { GeneratedVideo } from '../types';
 
 interface HistoryItem {
     id: string;

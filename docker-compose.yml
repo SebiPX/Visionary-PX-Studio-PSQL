@@ -1,19 +1,17 @@
-version: "3.8"
-
 networks:
   proxy-netz:
     external: true
 
 services:
   app:
-    container_name: px-aissistent-app
+    container_name: visionary-px-studio-app
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
-        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+        VITE_API_URL: ${VITE_API_URL}
         GEMINI_API_KEY: ${GEMINI_API_KEY}
+
     restart: always
     ports:
       - "${APP_PORT:-3000}:80"

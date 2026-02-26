@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { uploadFile } from '../lib/apiClient';
-import { StoryAsset } from '../lib/database.types';
+import { StoryAsset } from '../types';
 
 interface UseAssetManagerProps {
     userId: string | undefined;

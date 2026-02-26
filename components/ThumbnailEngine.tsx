@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
-import { GeneratedThumbnail } from '../lib/database.types';
+import { GeneratedThumbnail } from '../types';
 import { BackgroundTool } from './ThumbnailEngine/components/BackgroundTool';
 import { ElementsTool } from './ThumbnailEngine/components/ElementsTool';
 import { TextTool } from './ThumbnailEngine/components/TextTool';

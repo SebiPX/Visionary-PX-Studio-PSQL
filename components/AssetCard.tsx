@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { StoryAsset } from '../lib/database.types';
+import { StoryAsset } from '../types';
 
 interface AssetCardProps {
     asset: StoryAsset;

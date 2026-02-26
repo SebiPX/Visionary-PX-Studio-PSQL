@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { geminiProxy } from '../lib/apiClient';
-import { StoryAsset, StoryShot } from '../lib/database.types';
+import { StoryAsset, StoryShot } from '../types';
 
 interface StoryParams {
     actors: StoryAsset[];

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
-import { GeneratedText } from '../lib/database.types';
+import { GeneratedText } from '../types';
 
 interface HistoryItem {
     id: string;

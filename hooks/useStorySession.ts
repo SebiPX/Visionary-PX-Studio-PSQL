@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useStoryboard } from './useStoryboard';
-import { StoryboardSession, StoryAsset, StoryShot } from '../lib/database.types';
+import { StoryboardSession, StoryAsset, StoryShot } from '../types';
 
 export const useStorySession = () => {
     const { saveStoryboard, loadStoryboards } = useStoryboard();

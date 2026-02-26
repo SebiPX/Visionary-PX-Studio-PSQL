@@ -1,5 +1,5 @@
 import React from 'react';
-import { StoryShot, StoryAsset } from '../../../lib/database.types';
+import { StoryShot, StoryAsset } from '../../../types';
 
 interface StoryboardPhaseProps {
     shots: StoryShot[];

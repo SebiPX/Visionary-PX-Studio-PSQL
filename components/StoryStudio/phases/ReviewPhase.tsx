@@ -1,5 +1,5 @@
 import React from 'react';
-import { StoryShot } from '../../../lib/database.types';
+import { StoryShot } from '../../../types';
 
 interface ReviewPhaseProps {
     sessionTitle: string;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { useStoryboard } from '../hooks/useStoryboard';
-import { StoryboardSession, StoryAsset, StoryShot } from '../lib/database.types';
+import { StoryboardSession, StoryAsset, StoryShot } from '../types';
 import { uploadFile, normalizeStorageUrl, geminiProxy } from '../lib/apiClient';
 import { useAuth } from '../contexts/AuthContext';
 import { ShotEditor } from './ShotEditor';

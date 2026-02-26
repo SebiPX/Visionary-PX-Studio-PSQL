@@ -1,5 +1,5 @@
 import React from 'react';
-import { StoryAsset } from '../../../lib/database.types';
+import { StoryAsset } from '../../../types';
 import { AssetCard } from '../../AssetCard';
 
 interface SetupPhaseProps {
