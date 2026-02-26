@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { ChatSession } from '../types';
-import { geminiProxy, getToken } from '../lib/apiClient';
+import { geminiProxy, getToken, chats } from '../lib/apiClient';
 
 // ── Onboarding RAG helpers ─────────────────────────────────────────────────
 const EMBED_MODEL = 'gemini-embedding-001';
@@ -118,13 +118,15 @@ SPRACHE: Antworte IMMER auf Deutsch, außer der Nutzer schreibt ausdrücklich in
 };
 
 export const ChatBot: React.FC = () => {
-  const { saveChat, loadChatSessions } = useGeneratedContent();
+  const { loadChatSessions } = useGeneratedContent();
   const [activePersona, setActivePersona] = useState<Persona>(PERSONAS[0]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  // Ref to always have the latest sessionId without stale closures
+  const sessionIdRef = useRef<string | null>(null);
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -142,28 +144,40 @@ export const ChatBot: React.FC = () => {
     loadSessions();
   }, [loadSessions]);
 
-  // Save current chat session
-  const saveCurrentSession = async () => {
-    if (messages.length < 2) return; // Need at least one exchange
-
-    const title = messages.find(m => m.role === 'user')?.text.slice(0, 50) || 'Untitled Chat';
-
-    await saveChat({
+  // Save/update current chat session — creates once, updates on every subsequent exchange
+  const saveCurrentSession = async (currentMessages: Message[]) => {
+    if (currentMessages.length < 2) return;
+    const title = currentMessages.find(m => m.role === 'user')?.text.slice(0, 50) || 'Chat';
+    const payload = {
       title,
       bot_id: activePersona.id,
-      messages: messages.map(m => ({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.text,
-      })),
-    });
-
-    loadSessions(); // Reload to show new session
+      messages: currentMessages
+        .filter(m => !m.text.startsWith('System:') && !m.text.startsWith('Hallo! Ich bin'))
+        .map(m => ({ role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant', content: m.text })),
+    };
+    try {
+      if (sessionIdRef.current) {
+        // Update existing session
+        await chats.save({ id: sessionIdRef.current, ...payload });
+      } else {
+        // Create new session, store its id
+        const session = await chats.save(payload);
+        sessionIdRef.current = session.id;
+        setCurrentSessionId(session.id);
+      }
+      loadSessions();
+    } catch (err) {
+      console.error('[saveCurrentSession]', err);
+    }
   };
 
   // Initialize Chat Session
   useEffect(() => {
 
     // Set initial greeting or switch message
+    // Reset session when persona changes
+    sessionIdRef.current = null;
+    setCurrentSessionId(null);
     setMessages([{
       id: Date.now().toString(),
       role: 'model',
@@ -171,7 +185,6 @@ export const ChatBot: React.FC = () => {
         ? `Hallo! Ich bin dein ${activePersona.name}. Wie kann ich dir heute helfen?`
         : `System: Gewechselt zu — ${activePersona.name}.\n${activePersona.desc}`
     }]);
-
   }, [activePersona.id]);
 
   // Auto-scroll to bottom
@@ -226,9 +239,9 @@ export const ChatBot: React.FC = () => {
       const modelMsgId = (Date.now() + 1).toString();
       const responseText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-      setMessages(prev => [...prev, { id: modelMsgId, role: 'model', text: responseText }]);
-
-      setTimeout(() => saveCurrentSession(), 500);
+      const newMessages = [...messages, { id: (Date.now() + 1).toString(), role: 'model' as const, text: responseText }];
+      setMessages(newMessages);
+      setTimeout(() => saveCurrentSession(newMessages), 500);
     } catch (error) {
       console.error("Chat error:", error);
       setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: "I'm having trouble connecting right now. Please check your internet or API key." }]);
@@ -254,12 +267,13 @@ export const ChatBot: React.FC = () => {
   };
 
   const startNewChat = () => {
+    sessionIdRef.current = null;
+    setCurrentSessionId(null);
     setMessages([{
       id: Date.now().toString(),
       role: 'model',
       text: `Hallo! Ich bin dein ${activePersona.name}. Wie kann ich dir heute helfen?`
     }]);
-    setCurrentSessionId(null);
   };
 
   return (
