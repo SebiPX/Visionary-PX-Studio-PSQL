@@ -23,3 +23,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Monorepo — labs-api backend
+labs-api/node_modules
+labs-api/.env
+labs-api/dist
+
+# Ignore any accidental nested clone of this repo
+PX AIssistent V4/
+
