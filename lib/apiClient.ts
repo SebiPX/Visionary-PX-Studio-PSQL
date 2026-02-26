@@ -144,7 +144,22 @@ export const geminiProxy = (body: Record<string, unknown>) =>
 // ── Download helper (unchanged from supabaseClient) ───────────────
 export const downloadAsset = async (url: string, filename: string): Promise<void> => {
     try {
-        // Route through labs-api proxy to avoid CORS restrictions on R2
+        // data: URLs are already local — fetch them directly in the browser (no proxy needed)
+        if (url.startsWith('data:')) {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = objectUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(objectUrl);
+            return;
+        }
+
+        // Remote URLs (R2 etc.) — route through labs-api proxy to avoid CORS
         const proxyUrl = `${API_URL}/api/proxy/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
         const response = await fetch(proxyUrl, {
             headers: getToken() ? { Authorization: `Bearer ${getToken()}` } : {},
@@ -160,7 +175,7 @@ export const downloadAsset = async (url: string, filename: string): Promise<void
         document.body.removeChild(link);
         URL.revokeObjectURL(objectUrl);
     } catch (err) {
-        console.error('[downloadAsset] Proxy failed, opening in new tab instead:', err);
+        console.error('[downloadAsset] Failed, opening in new tab instead:', err);
         window.open(url, '_blank');
     }
 };
