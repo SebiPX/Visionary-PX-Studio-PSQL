@@ -22,7 +22,18 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
       const url = `${GEMINI_BASE}/models/${model}:generateContent?key=${apiKey}`;
       const geminiBody: Record<string, unknown> = { contents };
       if (systemInstruction) geminiBody.systemInstruction = { parts: [{ text: systemInstruction }] };
-      if (config) geminiBody.generationConfig = config;
+
+      // For image-generation models, responseModalities MUST include "IMAGE".
+      // Without it, the API defaults to text-only and returns no image data.
+      const isImageModel = typeof model === 'string' && (
+        model.includes('-image') || model.includes('imagen')
+      );
+      const generationConfig = config ? { ...config } : {};
+      if (isImageModel && !(generationConfig as any).responseModalities) {
+        (generationConfig as any).responseModalities = ['TEXT', 'IMAGE'];
+      }
+      geminiBody.generationConfig = generationConfig;
+
       if (tools) geminiBody.tools = tools;
 
       const geminiRes = await fetch(url, {
