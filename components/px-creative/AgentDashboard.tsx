@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useCreativeAgentStore } from '../../store/useCreativeAgentStore';
-import { useAuth } from '../../contexts/AuthContext';
+import { getToken } from '../../lib/apiClient';
 
 export const AgentDashboard: React.FC = () => {
-  const { session } = useAuth();
   const { projects, loading, createProject, fetchProject, deleteProject } = useCreativeAgentStore();
   const [isCreating, setIsCreating] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -11,9 +10,10 @@ export const AgentDashboard: React.FC = () => {
   const [newGuestCount, setNewGuestCount] = useState('');
 
   const handleStartProject = async () => {
-    if (!session?.access_token || !newTitle || !newOccasion || !newGuestCount) return;
+    const token = getToken();
+    if (!token || !newTitle || !newOccasion || !newGuestCount) return;
     try {
-      await createProject(session.access_token, {
+      await createProject(token, {
         title: newTitle,
         occasion: newOccasion,
         guest_count: parseInt(newGuestCount) || 0,
@@ -29,15 +29,17 @@ export const AgentDashboard: React.FC = () => {
   };
 
   const handleOpenProject = async (id: string) => {
-    if (!session?.access_token) return;
-    await fetchProject(session.access_token, id);
+    const token = getToken();
+    if (!token) return;
+    await fetchProject(token, id);
   };
 
   const handleDeleteProject = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!session?.access_token) return;
+    const token = getToken();
+    if (!token) return;
     if (confirm('Are you sure you want to delete this event project?')) {
-      await deleteProject(session.access_token, id);
+      await deleteProject(token, id);
     }
   };
 

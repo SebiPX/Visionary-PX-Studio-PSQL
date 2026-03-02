@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useCreativeAgentStore } from '../../../store/useCreativeAgentStore';
-import { useAuth } from '../../../contexts/AuthContext';
+import { getToken } from '../../../lib/apiClient';
 
 export const MatrixStep: React.FC = () => {
-  const { session } = useAuth();
   const { currentProject, generateConcepts, loading } = useCreativeAgentStore();
 
   const [activeConceptIndex, setActiveConceptIndex] = useState(0);
@@ -24,10 +23,11 @@ export const MatrixStep: React.FC = () => {
   };
 
   const handleGenerateScamper = async () => {
-    if (!session?.access_token || !currentProject) return;
+    const token = getToken();
+    if (!token || !currentProject) return;
     setIsGenerating(true);
     try {
-      await generateConcepts(session.access_token, currentProject.id, concepts);
+      await generateConcepts(token, currentProject.id, concepts);
     } catch (err) {
       console.error(err);
       alert('Failed to generate SCAMPER concepts.');

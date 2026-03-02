@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useCreativeAgentStore } from '../../../store/useCreativeAgentStore';
-import { useAuth } from '../../../contexts/AuthContext';
+import { getToken } from '../../../lib/apiClient';
 
 export const BriefingStep: React.FC = () => {
-  const { session } = useAuth();
   const { currentProject, updateProject, generateMatrix, loading } = useCreativeAgentStore();
 
   const [occasion, setOccasion] = useState(currentProject?.occasion || '');
@@ -20,23 +19,24 @@ export const BriefingStep: React.FC = () => {
   if (!currentProject) return null;
 
   const handleSaveAndContinue = async () => {
-    if (!session?.access_token) return;
+    const token = getToken();
+    if (!token) return;
     setIsSaving(true);
     try {
       // 1. Save all fields
-      await updateProject(session.access_token, currentProject.id, {
+      await updateProject(token, currentProject.id, {
         occasion,
         guest_count: parseInt(guestCount) || 0,
-        budget,
-        season,
-        industry,
-        emotional_goals: emotionalGoals,
-        target_audience: targetAudience,
-        location_preference: locationPreference
+        budget: budget === '' ? null : budget,
+        season: season === '' ? null : season,
+        industry: industry === '' ? null : industry,
+        emotional_goals: emotionalGoals === '' ? null : emotionalGoals,
+        target_audience: targetAudience === '' ? null : targetAudience,
+        location_preference: locationPreference === '' ? null : locationPreference
       });
 
       // 2. Generate matrix
-      await generateMatrix(session.access_token, currentProject.id);
+      await generateMatrix(token, currentProject.id);
 
     } catch (err) {
       console.error(err);
