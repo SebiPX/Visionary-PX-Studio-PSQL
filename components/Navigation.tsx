@@ -19,6 +19,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
     { view: AppView.THUMBNAIL_ENGINE, icon: 'dashboard_customize', label: 'Thumb' },
     { view: AppView.STORY_STUDIO, icon: 'movie_creation', label: 'Story' },
     { view: AppView.SKETCH_STUDIO, icon: 'brush', label: 'Sketch' },
+    { view: AppView.PX_CREATIVE, icon: 'tips_and_updates', label: 'Agent' },
     { view: AppView.CHAT_BOT, icon: 'chat_bubble', label: 'Chat' },
   ];
 

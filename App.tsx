@@ -13,6 +13,7 @@ import { SketchStudio } from './components/SketchStudio/SketchStudio';
 import { ChatBot } from './components/ChatBot';
 import { Settings } from './components/Settings';
 import { InventarApp } from './components/InventarApp';
+import { PxCreativeApp } from './components/px-creative/PxCreativeApp';
 
 const AppContent: React.FC = () => {
   const { user, profile, loading } = useAuth();
@@ -87,6 +88,10 @@ const AppContent: React.FC = () => {
 
         <div className={`w-full h-full ${currentView === AppView.SKETCH_STUDIO ? 'block' : 'hidden'}`}>
           <SketchStudio />
+        </div>
+
+        <div className={`w-full h-full ${currentView === AppView.PX_CREATIVE ? 'block' : 'hidden'}`}>
+          <PxCreativeApp />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.CHAT_BOT ? 'block' : 'hidden'}`}>
