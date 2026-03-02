@@ -142,15 +142,28 @@ export const StoryStudio: React.FC = () => {
             const hasRefImage = !!asset.image_url;
 
             const imagePrompt = hasRefImage
-                ? `Refine and reimagine this ${typeLabel} image in ${storyboardStyle} style for a storyboard.
-Keep the same subject/identity but enhance for cinematic quality.
-Name: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}.
-${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}
-Cinematic, detailed, professional production design.`
-                : `Generate a high-quality ${storyboardStyle} style image of a ${typeLabel} for a storyboard.
-Name: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}.
-${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}
-Cinematic, detailed, professional production design.`;
+                ? `Refine and reimagine this ${typeLabel} image in ${storyboardStyle} style for a storyboard.\r\nKeep the same subject/identity but enhance for cinematic quality.\r\nName: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}.\r\n${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}\r\nCinematic, detailed, professional production design.`
+                : `Generate a high-quality ${storyboardStyle} style image of a ${typeLabel} for a storyboard.\r\nName: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}.\r\n${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}\r\nCinematic, detailed, professional production design.`;
+
+            // Helper: attempt a single generation call and return base64 data if found
+            const attemptGenerate = async (parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>): Promise<{ data: string; mimeType: string } | null> => {
+                const response = await geminiProxy({
+                    action: 'generateContent',
+                    model: 'gemini-2.5-flash-image',
+                    contents: [{ role: 'user', parts }],
+                    config: { imageConfig: { aspectRatio: '1:1' } }
+                }) as any;
+
+                if (response?.error) throw new Error(JSON.stringify(response.error));
+
+                const respParts = response.candidates?.[0]?.content?.parts;
+                if (respParts) {
+                    for (const part of respParts) {
+                        if (part.inlineData) return { data: part.inlineData.data, mimeType: part.inlineData.mimeType || 'image/png' };
+                    }
+                }
+                return null;
+            };
 
             // Build parts array — include uploaded image as reference input if available (i2i)
             const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
@@ -173,43 +186,39 @@ Cinematic, detailed, professional production design.`;
             }
             parts.push({ text: imagePrompt });
 
-            const response = await geminiProxy({
-                action: 'generateContent',
-                model: 'gemini-2.5-flash-image',
-                contents: [{ role: 'user', parts }],
-                config: { imageConfig: { aspectRatio: '1:1' } }
-            }) as any;
+            // --- First attempt ---
+            let result = await attemptGenerate(parts);
 
-            if (response?.error) {
-                throw new Error(JSON.stringify(response.error));
+            // --- Auto-retry with simplified neutral prompt (safety filter bypass) ---
+            if (!result) {
+                console.warn('[StoryStudio] No image on first attempt — retrying with simplified prompt...');
+                const fallbackPrompt = `A professional ${storyboardStyle} style portrait of a ${typeLabel} for a storyboard. ${asset.description ? `Visual style: ${asset.description.slice(0, 80)}.` : ''} Cinematic quality, clean background.`;
+                result = await attemptGenerate([{ text: fallbackPrompt }]);
             }
 
-            const respParts = response.candidates?.[0]?.content?.parts;
-            if (respParts) {
-                for (const part of respParts) {
-                    if (part.inlineData) {
-                        const base64Data = part.inlineData.data;
-                        const mimeType = part.inlineData.mimeType || 'image/png';
-
-                        const byteCharacters = atob(base64Data);
-                        const byteNumbers = new Array(byteCharacters.length);
-                        for (let i = 0; i < byteCharacters.length; i++) {
-                            byteNumbers[i] = byteCharacters.charCodeAt(i);
-                        }
-                        const byteArray = new Uint8Array(byteNumbers);
-                        const blob = new Blob([byteArray], { type: mimeType });
-                        const file = new File([blob], `${asset.id}-generated.png`, { type: mimeType });
-
-                        const imageUrl = await uploadAssetImage(file, asset.id);
-                        return imageUrl;
-                    }
+            if (result) {
+                const byteCharacters = atob(result.data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
                 }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: result.mimeType });
+                const file = new File([blob], `${asset.id}-generated.png`, { type: result.mimeType });
+                const imageUrl = await uploadAssetImage(file, asset.id);
+                return imageUrl;
             }
 
-            throw new Error('Keine Bilddaten in der Antwort');
+            // Both attempts failed — likely a safety filter issue with the description
+            throw new Error('SAFETY_FILTER');
         } catch (err) {
             console.error('Generation error:', err);
-            setError(`Fehler bei der KI-Bildgenerierung: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`);
+            const isSafetyError = err instanceof Error && (err.message === 'SAFETY_FILTER' || err.message === 'Keine Bilddaten in der Antwort');
+            setError(
+                isSafetyError
+                    ? `⚠️ Die KI konnte für diese Beschreibung kein Bild erstellen — der Inhalt wurde möglicherweise vom Sicherheitsfilter blockiert. Bitte versuche es mit einer anderen oder kürzeren Beschreibung.`
+                    : `Fehler bei der KI-Bildgenerierung: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`
+            );
             return null;
         } finally {
             setGeneratingAssetId(null);
