@@ -66,6 +66,12 @@ export const auth = {
             method: 'PATCH',
             body: JSON.stringify({ current_password, new_password }),
         }),
+
+    adminResetPassword: (user_id: string, new_password: string) =>
+        request<{ success: boolean; user: { id: string; email: string; full_name: string } }>('/auth/admin/reset-password', {
+            method: 'PATCH',
+            body: JSON.stringify({ user_id, new_password }),
+        }),
 };
 
 // ── Images ───────────────────────────────────────────────────────

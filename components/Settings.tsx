@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import { uploadFile, auth as apiAuth } from '../lib/apiClient';
+import { uploadFile, auth as apiAuth, inventar } from '../lib/apiClient';
 
 interface SettingsProps {
   userProfile: UserProfile;
@@ -31,6 +31,15 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Admin reset state
+  const [adminUsers, setAdminUsers] = useState<{ id: string; email: string; full_name: string }[]>([]);
+  const [adminTargetId, setAdminTargetId] = useState('');
+  const [adminNewPw, setAdminNewPw] = useState('');
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminSuccess, setAdminSuccess] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [adminCopied, setAdminCopied] = useState(false);
+
   // Sync with profile changes
   useEffect(() => {
     if (profile) {
@@ -38,6 +47,42 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
       setSelectedAvatar(profile.avatar_url || PRESET_AVATARS[0]);
     }
   }, [profile]);
+
+  // Load user list for admins
+  useEffect(() => {
+    if (profile?.role === 'admin') {
+      inventar.profiles.list().then(list => {
+        setAdminUsers(list.filter(u => u.id !== profile.id));
+      }).catch(() => {});
+    }
+  }, [profile]);
+
+  function generatePassword() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
+    return Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  }
+
+  async function handleAdminReset(e: React.FormEvent) {
+    e.preventDefault();
+    if (!adminTargetId || !adminNewPw) return;
+    setAdminLoading(true);
+    setAdminError(null);
+    try {
+      await apiAuth.adminResetPassword(adminTargetId, adminNewPw);
+      setAdminSuccess(true);
+      setTimeout(() => { setAdminSuccess(false); setAdminTargetId(''); setAdminNewPw(''); }, 4000);
+    } catch (err: any) {
+      setAdminError(err.message || 'Reset failed');
+    } finally {
+      setAdminLoading(false);
+    }
+  }
+
+  function copyAdminPw() {
+    navigator.clipboard.writeText(adminNewPw);
+    setAdminCopied(true);
+    setTimeout(() => setAdminCopied(false), 2000);
+  }
 
   const handleSave = async () => {
     if (!user) return;
@@ -248,6 +293,75 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
               </button>
             </form>
           </div>
+
+          {/* Admin: Reset User Password */}
+          {profile?.role === 'admin' && (
+            <>
+              <div className="w-full h-px bg-white/5" />
+              <div className="space-y-4">
+                <label className="text-xs font-bold uppercase tracking-widest text-amber-400 flex items-center gap-2">
+                  <span className="material-icons-round text-sm">admin_panel_settings</span>
+                  Admin: User-Passwort zurücksetzen
+                </label>
+                <form onSubmit={handleAdminReset} className="space-y-3">
+                  <select
+                    value={adminTargetId}
+                    onChange={e => setAdminTargetId(e.target.value)}
+                    className="w-full bg-[#1a1f2e] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-amber-400 outline-none transition-all"
+                  >
+                    <option value="">— User auswählen —</option>
+                    {adminUsers.map(u => (
+                      <option key={u.id} value={u.id}>{u.full_name || u.email} ({u.email})</option>
+                    ))}
+                  </select>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={adminNewPw}
+                      onChange={e => setAdminNewPw(e.target.value)}
+                      placeholder="Neues Passwort (min. 6 Zeichen)"
+                      className="flex-1 bg-[#1a1f2e] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-amber-400 outline-none transition-all font-mono text-sm placeholder:text-slate-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setAdminNewPw(generatePassword())}
+                      title="Passwort generieren"
+                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 transition-all"
+                    >
+                      <span className="material-icons-round text-sm">casino</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={copyAdminPw}
+                      disabled={!adminNewPw}
+                      title="Passwort kopieren"
+                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 transition-all disabled:opacity-30"
+                    >
+                      <span className="material-icons-round text-sm">{adminCopied ? 'check' : 'content_copy'}</span>
+                    </button>
+                  </div>
+
+                  {adminError && <div className="text-red-400 text-sm">{adminError}</div>}
+                  {adminSuccess && (
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-green-400 text-sm flex items-center gap-2">
+                      <span className="material-icons-round text-sm">check_circle</span>
+                      Passwort erfolgreich gesetzt! User muss informiert werden.
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={adminLoading || !adminTargetId || adminNewPw.length < 6}
+                    className="w-full py-3 rounded-xl font-bold text-sm bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <span className="material-icons-round text-sm">lock_reset</span>
+                    {adminLoading ? 'Wird gesetzt...' : 'Passwort zurücksetzen'}
+                  </button>
+                </form>
+              </div>
+            </>
+          )}
 
           {/* Error Message */}
           {error && (

@@ -6,32 +6,11 @@ import { AuthRequest, requireAuth } from '../middleware/requireAuth';
 
 const router = Router();
 
-// POST /auth/register
-router.post('/register', async (req, res: Response) => {
-  const { email, password, full_name } = req.body;
-  if (!email || !password) {
-    res.status(400).json({ error: 'email and password required' });
-    return;
-  }
-  try {
-    const existing = await pool.query('SELECT id FROM profiles WHERE email = $1', [email]);
-    if (existing.rows.length > 0) {
-      res.status(409).json({ error: 'Email already registered' });
-      return;
-    }
-    const password_hash = await bcrypt.hash(password, 12);
-    const result = await pool.query(
-      `INSERT INTO profiles (email, password_hash, full_name) VALUES ($1, $2, $3) RETURNING id, email, full_name, avatar_url, role, created_at`,
-      [email, password_hash, full_name || '']
-    );
-    const user = result.rows[0];
-    const token = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET!, { expiresIn: '7d' });
-    res.status(201).json({ token, user });
-  } catch (err: any) {
-    console.error('[auth/register]', err);
-    res.status(500).json({ error: err.message });
-  }
+// POST /auth/register — DISABLED: accounts are created by admin only
+router.post('/register', async (_req, res: Response) => {
+  res.status(403).json({ error: 'Self-registration is disabled. Please contact your administrator.' });
 });
+
 
 // POST /auth/login
 router.post('/login', async (req, res: Response) => {
@@ -126,6 +105,39 @@ router.patch('/password', requireAuth, async (req: AuthRequest, res: Response) =
       [new_hash, req.userId]
     );
     res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /auth/admin/reset-password — admin sets a new password for any user
+router.patch('/admin/reset-password', requireAuth, async (req: AuthRequest, res: Response) => {
+  // Only admins
+  const adminCheck = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
+  if (!adminCheck.rows[0] || adminCheck.rows[0].role !== 'admin') {
+    res.status(403).json({ error: 'Admin access required' });
+    return;
+  }
+  const { user_id, new_password } = req.body;
+  if (!user_id || !new_password) {
+    res.status(400).json({ error: 'user_id and new_password required' });
+    return;
+  }
+  if (new_password.length < 6) {
+    res.status(400).json({ error: 'new_password must be at least 6 characters' });
+    return;
+  }
+  try {
+    const new_hash = await bcrypt.hash(new_password, 12);
+    const result = await pool.query(
+      'UPDATE profiles SET password_hash = $1, updated_at = NOW() WHERE id = $2 RETURNING id, email, full_name',
+      [new_hash, user_id]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    res.json({ success: true, user: result.rows[0] });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
