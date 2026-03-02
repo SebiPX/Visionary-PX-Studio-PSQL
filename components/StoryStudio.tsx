@@ -41,6 +41,9 @@ export const StoryStudio: React.FC = () => {
     const [uploadingAssetId, setUploadingAssetId] = useState<string | null>(null);
     const [history, setHistory] = useState<StoryboardSession[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+    const [lastSaved, setLastSaved] = useState<Date | null>(null);
+    const [savedFeedback, setSavedFeedback] = useState(false);
 
     // Load history on mount
     useEffect(() => {
@@ -93,6 +96,9 @@ export const StoryStudio: React.FC = () => {
         const { data, error } = await saveStoryboard(sessionData);
         if (!error && data) {
             setSessionId(data.id);
+            setLastSaved(new Date());
+            setSavedFeedback(true);
+            setTimeout(() => setSavedFeedback(false), 3000);
             await loadHistory();
         }
     };
@@ -115,7 +121,7 @@ export const StoryStudio: React.FC = () => {
         setShots(session.shots);
     };
 
-    // Upload image to Cloudflare R2
+    // Upload raw image to Cloudflare R2 (returns URL, no state update here)
     const uploadAssetImage = async (file: File, assetId: string): Promise<string | null> => {
         if (!user) return null;
 
@@ -132,13 +138,15 @@ export const StoryStudio: React.FC = () => {
         }
     };
 
-    // Generate image with AI (supports i2i when asset already has an uploaded image)
+    // Generate image with AI
+    // i2i source is always ref_image_url (never the generated image_url)
     const generateAssetImage = async (asset: StoryAsset): Promise<string | null> => {
         if (!user) return null;
 
         setGeneratingAssetId(asset.id);
         try {
-            const hasRefImage = !!asset.image_url;
+            // i2i source is the uploaded reference, never the generated result
+            const hasRefImage = !!asset.ref_image_url;
             const isActor = asset.type === 'actor';
 
             // --- Prompt system ---
@@ -151,7 +159,24 @@ export const StoryStudio: React.FC = () => {
                     ? `Person description: ${asset.description}.`
                     : '';
 
-                if (hasRefImage) {
+                if (asset.is_character_sheet && hasRefImage) {
+                    // Wardrobe-change mode: ref IS already a character sheet, only change clothing
+                    imagePrompt = `Use the uploaded photographic identity sheet as reference.
+
+Maintain the EXACT same person: face, body, age, proportions, posture, and expression across all views.
+
+Change ONLY the clothing/styling to the following:
+${asset.description ? asset.description : '(no specific outfit described)'}
+
+Constraints:
+- Clothing must behave like real fabric on a real body.
+- No change to lighting, camera angle, or body posture.
+- No change to the layout — preserve the same contact sheet format.
+- The person must still feel like the same individual photographed on the same day, just wearing different clothes.
+- No stylization, no CGI look, no character redesign.
+- NOT a 3D render. NOT CGI. NOT stylized.
+${genre ? `Genre context: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
+                } else if (hasRefImage) {
                     imagePrompt = `Create a photorealistic multi-angle photographic identity sheet based strictly on the uploaded reference image.
 
 CHARACTER IDENTITY (from reference image):
@@ -278,11 +303,11 @@ NOT a 3D render. NOT CGI. NOT a digital set.${genre ? ` Genre: ${genre}.` : ''}$
                 return null;
             };
 
-            // Build parts array — include uploaded image as reference input if available (i2i)
+            // Build parts array — use ref_image_url as i2i source (not the generated image_url)
             const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
             if (hasRefImage) {
                 try {
-                    const fetchUrl = asset.image_url.split('?')[0]; // strip cache-bust timestamp
+                    const fetchUrl = asset.ref_image_url!.split('?')[0]; // strip cache-bust timestamp
                     const imgResponse = await fetch(fetchUrl);
                     const blob = await imgResponse.blob();
                     const base64 = await new Promise<string>((resolve, reject) => {
@@ -341,9 +366,11 @@ NOT a 3D render. NOT CGI. NOT a digital set.${genre ? ` Genre: ${genre}.` : ''}$
     };
 
     const handleAssetUpload = async (file: File, assetId: string) => {
+        // Upload always writes to ref_image_url (the reference source for i2i)
+        // This way uploading a new reference never destroys the generated image_url
         const imageUrl = await uploadAssetImage(file, assetId);
         if (imageUrl) {
-            updateAsset(assetId, { image_url: imageUrl, source: 'upload' });
+            updateAsset(assetId, { ref_image_url: imageUrl, source: 'upload' });
         }
     };
 
@@ -708,6 +735,7 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
                         onAssetGenerate={handleAssetGenerate}
                         uploadingAssetId={uploadingAssetId}
                         generatingAssetId={generatingAssetId}
+                        onAssetPreview={setPreviewImageUrl}
                         onNext={() => setCurrentPhase('story')}
                     />
                 );
@@ -811,13 +839,32 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
             <main className="flex-1 overflow-y-auto p-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <input
-                        type="text"
-                        value={sessionTitle}
-                        onChange={(e) => setSessionTitle(e.target.value)}
-                        className="text-3xl font-bold text-white bg-transparent border-none outline-none mb-4"
-                        placeholder="Untitled Storyboard"
-                    />
+                    <div className="flex items-center gap-3 mb-4">
+                        <input
+                            type="text"
+                            value={sessionTitle}
+                            onChange={(e) => setSessionTitle(e.target.value)}
+                            className="flex-1 text-3xl font-bold text-white bg-transparent border-none outline-none"
+                            placeholder="Untitled Storyboard"
+                        />
+                        {/* Persistent Save Button */}
+                        <button
+                            onClick={handleSave}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                                savedFeedback
+                                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                    : 'bg-slate-700 hover:bg-slate-600 text-white'
+                            }`}
+                        >
+                            <span className="material-icons-round text-sm">
+                                {savedFeedback ? 'check_circle' : 'save'}
+                            </span>
+                            {savedFeedback
+                                ? `Gespeichert ${lastSaved?.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+                                : 'Speichern'
+                            }
+                        </button>
+                    </div>
 
                     {/* Phase Tabs */}
                     <div className="flex gap-2">
@@ -869,6 +916,29 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
                     }}
                     onClose={() => setEditingShot(null)}
                 />
+            )}
+
+            {/* Lightbox Modal — fullscreen image preview */}
+            {previewImageUrl && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 cursor-zoom-out"
+                    onClick={() => setPreviewImageUrl(null)}
+                    onKeyDown={(e) => e.key === 'Escape' && setPreviewImageUrl(null)}
+                    tabIndex={0}
+                >
+                    <button
+                        onClick={() => setPreviewImageUrl(null)}
+                        className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all z-10"
+                    >
+                        <span className="material-icons-round">close</span>
+                    </button>
+                    <img
+                        src={previewImageUrl}
+                        alt="Preview"
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl cursor-default"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
             )}
         </div>
     );

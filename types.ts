@@ -35,7 +35,9 @@ export interface StoryAsset {
   type: 'actor' | 'environment' | 'product';
   name: string;
   description: string;
-  image_url: string;
+  image_url: string;           // Generated / final result image
+  ref_image_url?: string;      // User-uploaded reference photo (i2i source)
+  is_character_sheet?: boolean; // If true: ref is already a sheet → wardrobe-change mode
   source: 'upload' | 'ai-generated';
   created_at: string;
 }

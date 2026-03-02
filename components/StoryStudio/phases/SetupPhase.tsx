@@ -9,8 +9,9 @@ interface SetupPhaseProps {
     onUpdateActor: (index: number, actor: StoryAsset) => void;
     onUpdateEnvironment: (env: StoryAsset) => void;
     onUpdateProduct: (prod: StoryAsset) => void;
-    onAssetUpload: (file: File, assetId: string) => void;
-    onAssetGenerate: (asset: StoryAsset) => void;
+    onAssetUpload: (file: File, assetId: string) => Promise<void>;
+    onAssetGenerate: (asset: StoryAsset) => Promise<void>;
+    onAssetPreview?: (url: string) => void;
     uploadingAssetId: string | null;
     generatingAssetId: string | null;
     onNext: () => void;
@@ -25,6 +26,7 @@ export const SetupPhase: React.FC<SetupPhaseProps> = ({
     onUpdateProduct,
     onAssetUpload,
     onAssetGenerate,
+    onAssetPreview,
     uploadingAssetId,
     generatingAssetId,
     onNext,
@@ -41,6 +43,7 @@ export const SetupPhase: React.FC<SetupPhaseProps> = ({
                             onUpdate={(updatedActor) => onUpdateActor(index, updatedActor)}
                             onUpload={onAssetUpload}
                             onGenerate={onAssetGenerate}
+                            onPreview={onAssetPreview}
                             isUploading={uploadingAssetId === actor.id}
                             isGenerating={generatingAssetId === actor.id}
                         />
@@ -57,6 +60,7 @@ export const SetupPhase: React.FC<SetupPhaseProps> = ({
                             onUpdate={onUpdateEnvironment}
                             onUpload={onAssetUpload}
                             onGenerate={onAssetGenerate}
+                            onPreview={onAssetPreview}
                             isUploading={uploadingAssetId === environment.id}
                             isGenerating={generatingAssetId === environment.id}
                         />
@@ -73,6 +77,7 @@ export const SetupPhase: React.FC<SetupPhaseProps> = ({
                             onUpdate={onUpdateProduct}
                             onUpload={onAssetUpload}
                             onGenerate={onAssetGenerate}
+                            onPreview={onAssetPreview}
                             isUploading={uploadingAssetId === product.id}
                             isGenerating={generatingAssetId === product.id}
                         />
