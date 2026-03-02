@@ -63,6 +63,12 @@ function formatDT(dt: string) {
   return new Date(dt).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' })
 }
 
+/** DB returns NUMERIC as string — safely coerce to number */
+function toNum(v: unknown): number {
+  const n = Number(v)
+  return isNaN(n) ? 0 : n
+}
+
 export function VerleihFormularPage({
   items, profiles, scheine, archivierte,
   onSaveVerleihschein, onMarkErledigt, onFetchArchive, currentUserId,
@@ -113,8 +119,8 @@ export function VerleihFormularPage({
   const itemCosts = useMemo(() =>
     selectedItems.map(item => ({
       item,
-      tagespreis: item.anschaffungspreis ? item.anschaffungspreis * (percent / 100) : 0,
-      gesamtpreis: item.anschaffungspreis && dauer ? item.anschaffungspreis * (percent / 100) * dauer : 0,
+      tagespreis: toNum(item.anschaffungspreis) > 0 ? toNum(item.anschaffungspreis) * (percent / 100) : 0,
+      gesamtpreis: toNum(item.anschaffungspreis) > 0 && dauer ? toNum(item.anschaffungspreis) * (percent / 100) * dauer : 0,
     })), [selectedItems, percent, dauer])
 
   const gesamtkosten = itemCosts.reduce((s, r) => s + r.gesamtpreis, 0)
@@ -240,7 +246,7 @@ export function VerleihFormularPage({
       doc.setTextColor(15, 23, 42); doc.setFontSize(9)
       doc.text(`${r.item.geraet}${r.item.modell ? ' – ' + r.item.modell : ''}`.slice(0, 35), margin + 2, y)
       doc.text(r.item.px_nummer || '–', margin + 75, y)
-      doc.text(r.item.anschaffungspreis ? `€ ${r.item.anschaffungspreis.toFixed(2)}` : '–', margin + 103, y)
+      doc.text(toNum(r.item.anschaffungspreis) > 0 ? `€ ${toNum(r.item.anschaffungspreis).toFixed(2)}` : '–', margin + 103, y)
       doc.text(r.tagespreis > 0 ? `€ ${r.tagespreis.toFixed(2)}` : '–', margin + 127, y)
       doc.text(r.gesamtpreis > 0 ? `€ ${r.gesamtpreis.toFixed(2)}` : '–', margin + 158, y); y += 7
     })
@@ -342,7 +348,7 @@ export function VerleihFormularPage({
                         </p>
                         <p className="text-xs text-slate-400">
                           {item.px_nummer && <span className="font-mono mr-2">{item.px_nummer}</span>}
-                          {item.anschaffungspreis && <span>Kaufpreis: € {item.anschaffungspreis.toFixed(2)}</span>}
+                          {toNum(item.anschaffungspreis) > 0 && <span>Kaufpreis: € {toNum(item.anschaffungspreis).toFixed(2)}</span>}
                           {blocked && conflictName && (
                             <span className="ml-2 text-red-400">· Belegt von: {conflictName}</span>
                           )}
@@ -404,7 +410,7 @@ export function VerleihFormularPage({
                     {itemCosts.map(({ item, tagespreis, gesamtpreis }) => (
                       <tr key={item.id}>
                         <td className="py-2.5 px-4 text-white">{item.geraet}{item.modell ? ` – ${item.modell}` : ''}{item.px_nummer && <span className="text-slate-500 font-mono text-xs ml-2">{item.px_nummer}</span>}</td>
-                        <td className="py-2.5 px-4 text-slate-300 text-right">{item.anschaffungspreis ? `€ ${item.anschaffungspreis.toFixed(2)}` : '–'}</td>
+                        <td className="py-2.5 px-4 text-slate-300 text-right">{toNum(item.anschaffungspreis) > 0 ? `€ ${toNum(item.anschaffungspreis).toFixed(2)}` : '–'}</td>
                         <td className="py-2.5 px-4 text-slate-300 text-right">{tagespreis > 0 ? `€ ${tagespreis.toFixed(2)}` : '–'}</td>
                         <td className="py-2.5 px-4 text-right font-semibold text-white">{gesamtpreis > 0 ? `€ ${gesamtpreis.toFixed(2)}` : '–'}</td>
                       </tr>

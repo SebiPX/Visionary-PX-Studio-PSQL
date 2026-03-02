@@ -161,7 +161,7 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
           <DetailRow icon={Info} label="IP Tiger" value={item.ip_tiger} />
           <DetailRow icon={Info} label="Handynummer" value={item.handy_nr} />
           <DetailRow icon={Clock} label="Angeschafft" value={item.anschaffungsdatum ? new Date(item.anschaffungsdatum).toLocaleDateString('de-DE') : undefined} />
-          <DetailRow icon={Info} label="Preis" value={item.anschaffungspreis ? `€ ${item.anschaffungspreis.toFixed(2)}` : undefined} />
+          <DetailRow icon={Info} label="Preis" value={Number(item.anschaffungspreis) > 0 ? `€ ${Number(item.anschaffungspreis).toFixed(2)}` : undefined} />
           {item.notes && (
             <div className="mt-4 p-3 bg-slate-900 rounded-xl">
               <p className="text-xs text-slate-500 mb-1">Notizen</p>
