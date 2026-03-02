@@ -314,7 +314,7 @@ NOT a 3D render. NOT CGI. NOT a digital set.${genre ? ` Genre: ${genre}.` : ''}$
             const attemptGenerate = async (parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>): Promise<{ data: string; mimeType: string } | null> => {
                 const response = await geminiProxy({
                     action: 'generateContent',
-                    model: 'gemini-2.5-flash-image',
+                    model: 'gemini-3.1-flash-image-preview',
                     contents: [{ role: 'user', parts }],
                     // Aspect ratio matched to layout: actors/products 4:3 (landscape contact sheet), environments 16:9 (cinematic wide)
                     config: { imageConfig: { aspectRatio: asset.type === 'environment' ? '16:9' : '4:3' } }
@@ -657,7 +657,7 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
 
             const response = await geminiProxy({
                 action: 'generateContent',
-                model: 'gemini-2.5-flash-image',
+                model: 'gemini-3.1-flash-image-preview',
                 contents: [{ role: 'user', parts: parts }],
                 config: {
                     imageConfig: {
