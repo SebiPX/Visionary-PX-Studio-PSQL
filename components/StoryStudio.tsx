@@ -154,19 +154,25 @@ export const StoryStudio: React.FC = () => {
                 if (hasRefImage) {
                     imagePrompt = `Create a photorealistic multi-angle photographic identity sheet based strictly on the uploaded reference image.
 
-Match the exact real-world appearance of the person: facial structure, proportions, skin texture, age, asymmetry, and natural imperfections. The result must look like real photography of a real human, not a digital character or 3D asset.
+CHARACTER IDENTITY (from reference image):
+- Match the exact real-world appearance of the person: facial structure, proportions, skin texture, age, asymmetry, and natural imperfections.
+- The reference image defines WHO this person is. Preserve their face, body type, and physical characteristics precisely.
+- The result must look like real photography of a real human, not a digital character or 3D asset.
+
+CHARACTER CONTEXT (apply to all views):
+- Name: ${asset.name}.${asset.description ? `\n- Appearance/Styling: ${asset.description}.` : ''}${genre ? `\n- Genre context: ${genre}.` : ''}${mood ? `\n- Mood: ${mood}.` : ''}
 
 Layout — two horizontal rows as a clean photo contact sheet:
-- Top row: four full-body photographs of the same person: (1) facing camera, (2) left-facing profile, (3) right-facing profile, (4) facing away.
+- Top row: four full-body photographs of the same person in the described costume/styling: (1) facing camera, (2) left-facing profile, (3) right-facing profile, (4) facing away.
 - Bottom row: three close-up photographic portraits: (1) facing camera, (2) left-facing profile, (3) right-facing profile.
 
 Pose: natural and casual stance, relaxed posture, shoulders relaxed, arms resting naturally at sides. No exaggerated or rigid pose.
 
 Lighting: soft, neutral real-world lighting (window light or soft studio light). No dramatic or cinematic lighting. Natural shadows with gentle falloff.
 
-Consistency: maintain strong identity consistency across all views. Same person photographed multiple times, not a replicated model.
+Consistency: same person, same costume/styling across all views. Strong identity consistency — this is photographed multiple times, not replicated.
 
-NOT a 3D render. NOT CGI. NOT stylized. NOT a model turnaround.${genre ? ` Genre context: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
+NOT a 3D render. NOT CGI. NOT stylized. NOT a model turnaround.`;
                 } else {
                     imagePrompt = `Create a photorealistic photographic identity sheet of the following person:
 
