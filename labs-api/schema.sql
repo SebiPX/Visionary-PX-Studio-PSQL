@@ -124,13 +124,13 @@ CREATE TABLE IF NOT EXISTS public.onboarding_embeddings (
     heading     TEXT,
     content     TEXT,
     tokens      INT,
-    embedding   vector(768),    -- gemini-embedding-001
+    embedding   vector(3072),   -- gemini-embedding-001 (3072-dim)
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Similarity search function
 CREATE OR REPLACE FUNCTION match_onboarding_docs(
-    query_embedding vector(768),
+    query_embedding vector(3072),
     match_count int DEFAULT 5
 )
 RETURNS TABLE (id uuid, heading text, content text, similarity float)
