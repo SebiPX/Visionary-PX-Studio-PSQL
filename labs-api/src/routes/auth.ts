@@ -75,7 +75,7 @@ router.get('/me', requireAuth, async (req: AuthRequest, res: Response) => {
       res.status(404).json({ error: 'User not found' });
       return;
     }
-    res.json({ user: result.rows[0] });
+    res.json(result.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -90,7 +90,7 @@ router.patch('/profile', requireAuth, async (req: AuthRequest, res: Response) =>
        WHERE id = $3 RETURNING id, email, full_name, avatar_url, role`,
       [full_name, avatar_url, req.userId]
     );
-    res.json({ user: result.rows[0] });
+    res.json(result.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
