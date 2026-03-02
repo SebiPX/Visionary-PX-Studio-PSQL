@@ -439,13 +439,14 @@ NOT a 3D render. NOT CGI. NOT a digital set.${genre ? ` Genre: ${genre}.` : ''}$
 
             const storyPrompt = `Du bist ein kreativer Storyboard-Autor. Generiere eine fesselnde Story-Narration für ein Storyboard.
 WICHTIG: Schreibe ALLES auf Deutsch!
+WICHTIG: Gib NUR die Story-Absätze zurück. Keine Einleitung wie "Hier ist..." und keinen Markdown-Titel davor!
 Projekt: ${sessionTitle}
 Genre: ${genre || 'nicht angegeben'}
 Stimmung: ${mood || 'nicht angegeben'}
 Zielgruppe: ${targetAudience || 'allgemeines Publikum'}
 ${assetContext ? `\nAssets:\n${assetContext}` : ''}
 
-Schreibe eine prägnante Story (3-5 Absätze) mit klarem Anfang, Mitte und Ende, geeignet für visuelles Storytelling. Baue die definierten Assets natürlich ein. Alles auf Deutsch.`;
+Schreibe eine prägnante Story (3-5 Absätze) mit klarem Anfang, Mitte und Ende, geeignet für visuelles Storytelling. Baue die definierten Assets natürlich ein. Beginne sofort mit dem ersten Absatz der Story.`;
 
             const response = await geminiProxy({
                 action: 'generateContent',
@@ -457,8 +458,13 @@ Schreibe eine prägnante Story (3-5 Absätze) mit klarem Anfang, Mitte und Ende,
                 throw new Error(JSON.stringify(response.error));
             }
 
+            // Strip any AI preamble like "Hier ist..." or markdown headings
             const generatedStory = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            setStoryText(generatedStory);
+            const cleaned = generatedStory
+                .replace(/^\*\*[^*]+\*\*\n?/m, '') // remove **Titel: ...** lines
+                .replace(/^Hier ist[^\n]*\n?/im, '') // remove "Hier ist..." line
+                .trim();
+            setStoryText(cleaned);
 
         } catch (err) {
             console.error('Story generation error:', err);
