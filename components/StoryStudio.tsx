@@ -601,10 +601,17 @@ Jeder Shot muss exakt dieser Struktur folgen:
             ? [product].filter(p => p && shot.products.includes(p!.id)) as StoryAsset[]
             : (product ? [product] : []);
 
-        // ── Collect reference images (check both image_url and ref_image_url) ─
+        // ── Collect reference images — routed via labs-api proxy to bypass CORS ─
         const fetchAsBase64 = async (url: string): Promise<{ data: string; mimeType: string } | null> => {
             try {
-                const res = await fetch(url);
+                const token = localStorage.getItem('labs_token');
+                const apiUrl = (import.meta.env.VITE_API_URL as string) || 'http://localhost:4000';
+                // Route through server-side proxy to avoid CORS on CDN resources
+                const proxyUrl = `${apiUrl}/api/proxy/download?url=${encodeURIComponent(url)}&filename=ref.png`;
+                const res = await fetch(proxyUrl, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                });
+                if (!res.ok) return null;
                 const blob = await res.blob();
                 const base64 = await new Promise<string>((resolve) => {
                     const reader = new FileReader();
