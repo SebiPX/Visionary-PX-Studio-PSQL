@@ -138,12 +138,60 @@ export const StoryStudio: React.FC = () => {
 
         setGeneratingAssetId(asset.id);
         try {
-            const typeLabel = asset.type === 'actor' ? 'character/actor' : asset.type === 'environment' ? 'environment/location' : 'product/object';
             const hasRefImage = !!asset.image_url;
+            const isActor = asset.type === 'actor';
 
-            const imagePrompt = hasRefImage
-                ? `Refine and reimagine this ${typeLabel} image in ${storyboardStyle} style for a storyboard.\r\nKeep the same subject/identity but enhance for cinematic quality.\r\nName: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}.\r\n${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}\r\nCinematic, detailed, professional production design.`
-                : `Generate a high-quality ${storyboardStyle} style image of a ${typeLabel} for a storyboard.\r\nName: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}.\r\n${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}\r\nCinematic, detailed, professional production design.`;
+            // --- Prompt system ---
+            // Actors: professional multi-angle photographic identity sheet
+            // Environments/Products: simpler cinematic prompt
+            let imagePrompt: string;
+
+            if (isActor) {
+                const descriptionLine = asset.description
+                    ? `Person description: ${asset.description}.`
+                    : '';
+
+                if (hasRefImage) {
+                    imagePrompt = `Create a photorealistic multi-angle photographic identity sheet based strictly on the uploaded reference image.
+
+Match the exact real-world appearance of the person: facial structure, proportions, skin texture, age, asymmetry, and natural imperfections. The result must look like real photography of a real human, not a digital character or 3D asset.
+
+Layout — two horizontal rows as a clean photo contact sheet:
+- Top row: four full-body photographs of the same person: (1) facing camera, (2) left-facing profile, (3) right-facing profile, (4) facing away.
+- Bottom row: three close-up photographic portraits: (1) facing camera, (2) left-facing profile, (3) right-facing profile.
+
+Pose: natural and casual stance, relaxed posture, shoulders relaxed, arms resting naturally at sides. No exaggerated or rigid pose.
+
+Lighting: soft, neutral real-world lighting (window light or soft studio light). No dramatic or cinematic lighting. Natural shadows with gentle falloff.
+
+Consistency: maintain strong identity consistency across all views. Same person photographed multiple times, not a replicated model.
+
+NOT a 3D render. NOT CGI. NOT stylized. NOT a model turnaround.${genre ? ` Genre context: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
+                } else {
+                    imagePrompt = `Create a photorealistic photographic identity sheet of the following person:
+
+${descriptionLine}
+Name: ${asset.name}.
+
+The subject must look like a real human photographed in the real world. Avoid any stylized, animated, or synthetic appearance. Simple neutral background, similar to an ID or documentary shoot.
+
+Layout — two horizontal rows as a photo contact sheet:
+- Top row: four full-body photographs: (1) facing camera, (2) left-facing profile, (3) right-facing profile, (4) facing away.
+- Bottom row: three close-up portraits: (1) facing camera, (2) left-facing profile, (3) right-facing profile.
+
+Pose: natural stance, relaxed posture. No posing for presentation. Subtle variation in head angle and body balance, like multiple photos taken moments apart.
+
+Lighting: soft, neutral, realistic. No stylization, no dramatic contrast. The final result should resemble real reference photography, not a character asset.
+
+NOT a 3D render. NOT CGI. NOT stylized. NOT a model turnaround.${genre ? ` Genre context: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
+                }
+            } else {
+                // Environment / Product: keep existing concise cinematic prompt
+                const typeLabel = asset.type === 'environment' ? 'environment/location' : 'product/object';
+                imagePrompt = hasRefImage
+                    ? `Refine and reimagine this ${typeLabel} image in ${storyboardStyle} style for a storyboard. Keep the same subject/identity but enhance for cinematic quality. Name: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}. ${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''} Cinematic, detailed, professional production design.`
+                    : `Generate a high-quality ${storyboardStyle} style image of a ${typeLabel} for a storyboard. Name: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}. ${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''} Cinematic, detailed, professional production design.`;
+            }
 
             // Helper: attempt a single generation call and return base64 data if found
             const attemptGenerate = async (parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>): Promise<{ data: string; mimeType: string } | null> => {
@@ -151,7 +199,8 @@ export const StoryStudio: React.FC = () => {
                     action: 'generateContent',
                     model: 'gemini-2.5-flash-image',
                     contents: [{ role: 'user', parts }],
-                    config: { imageConfig: { aspectRatio: '1:1' } }
+                    // Actors: 4:3 landscape fits the 2-row contact sheet layout; others: square
+                    config: { imageConfig: { aspectRatio: isActor ? '4:3' : '1:1' } }
                 }) as any;
 
                 if (response?.error) throw new Error(JSON.stringify(response.error));
@@ -192,7 +241,9 @@ export const StoryStudio: React.FC = () => {
             // --- Auto-retry with simplified neutral prompt (safety filter bypass) ---
             if (!result) {
                 console.warn('[StoryStudio] No image on first attempt — retrying with simplified prompt...');
-                const fallbackPrompt = `A professional ${storyboardStyle} style portrait of a ${typeLabel} for a storyboard. ${asset.description ? `Visual style: ${asset.description.slice(0, 80)}.` : ''} Cinematic quality, clean background.`;
+                const fallbackPrompt = isActor
+                    ? `A photorealistic photo contact sheet of a person. ${asset.description ? asset.description.slice(0, 80) + '.' : ''} Multiple angles: front, side profile, and back. Natural studio lighting, neutral background. Real photography style.`
+                    : `A professional ${storyboardStyle} style image of a ${asset.type}. ${asset.description ? asset.description.slice(0, 80) + '.' : ''} Cinematic quality, clean background.`;
                 result = await attemptGenerate([{ text: fallbackPrompt }]);
             }
 
