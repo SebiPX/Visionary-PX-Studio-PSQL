@@ -437,14 +437,15 @@ NOT a 3D render. NOT CGI. NOT a digital set.${genre ? ` Genre: ${genre}.` : ''}$
                 product ? `Product/Object "${product.name}": ${product.description}` : null,
             ].filter(Boolean).join('\n');
 
-            const storyPrompt = `You are a creative storyboard writer. Generate a compelling story narrative for a storyboard.
-Project: ${sessionTitle}
-Genre: ${genre || 'not specified'}
-Mood: ${mood || 'not specified'}
-Target Audience: ${targetAudience || 'general audience'}
+            const storyPrompt = `Du bist ein kreativer Storyboard-Autor. Generiere eine fesselnde Story-Narration für ein Storyboard.
+WICHTIG: Schreibe ALLES auf Deutsch!
+Projekt: ${sessionTitle}
+Genre: ${genre || 'nicht angegeben'}
+Stimmung: ${mood || 'nicht angegeben'}
+Zielgruppe: ${targetAudience || 'allgemeines Publikum'}
 ${assetContext ? `\nAssets:\n${assetContext}` : ''}
 
-Write a concise story narrative (3-5 paragraphs) with a clear beginning, middle and end, suitable for visual storytelling. Incorporate the defined assets naturally.`;
+Schreibe eine prägnante Story (3-5 Absätze) mit klarem Anfang, Mitte und Ende, geeignet für visuelles Storytelling. Baue die definierten Assets natürlich ein. Alles auf Deutsch.`;
 
             const response = await geminiProxy({
                 action: 'generateContent',
@@ -482,30 +483,33 @@ Write a concise story narrative (3-5 paragraphs) with a clear beginning, middle 
                 product ? `- Product/Object: "${product.name}" (${product.description})` : null,
             ].filter(Boolean).join('\n');
 
-            const shotsPrompt = `You are a professional storyboard artist and film director.
-Project: "${sessionTitle}"
-Genre: ${genre || 'not specified'} | Mood: ${mood || 'not specified'} | Target Audience: ${targetAudience || 'general audience'}
+            const shotsPrompt = `Du bist ein professioneller Storyboard-Artist und Filmregisseur.
+WICHTIG: Schreibe ALLE Texte (title, description, location, audio_notes, movement_notes, dialog) auf Deutsch!
+Projekt: "${sessionTitle}"
+Genre: ${genre || 'nicht angegeben'} | Stimmung: ${mood || 'nicht angegeben'} | Zielgruppe: ${targetAudience || 'allgemeines Publikum'}
 
 Story:
-${storyText || 'A story about the defined assets below.'}
+${storyText || 'Eine Geschichte über die definierten Assets.'}
 
 Assets:
-${assetList || '(No specific assets defined)'}
+${assetList || '(Keine spezifischen Assets definiert)'}
 
-Create a storyboard shot list of 6-10 shots. Return ONLY a valid JSON array with NO additional text, markdown, or explanation.
-Each shot must follow this exact structure:
+Erstelle eine Storyboard Shot-Liste mit 6-10 Shots. Gib NUR ein valides JSON-Array zurück, OHNE zusätzlichen Text, Markdown oder Erklärungen.
+Für das Feld "dialog": Schreibe den gesprochenen Dialog im Format "ACTORNAME: Text\nACTORNAME2: Antwort". Leerer String wenn kein Dialog.
+Jeder Shot muss exakt dieser Struktur folgen:
 [
   {
     "scene_number": "1",
-    "title": "Short shot title",
-    "description": "What happens in this shot",
-    "location": "Where the shot takes place",
+    "title": "Kurzer Shot-Titel",
+    "description": "Was in diesem Shot passiert",
+    "location": "Wo der Shot stattfindet",
     "framing": "close-up|medium-shot|wide-shot|extreme-wide|over-the-shoulder",
     "camera_angle": "eye-level|high-angle|low-angle|dutch-angle|birds-eye",
     "camera_movement": "static|pan|tilt|dolly|handheld|tracking",
     "lighting": "natural|studio|dramatic|soft|harsh",
-    "audio_notes": "Sound design notes",
-    "movement_notes": "Actor/subject movement description",
+    "audio_notes": "Sound Design Notizen",
+    "movement_notes": "Beschreibung der Schauspieler/Subjekt-Bewegung",
+    "dialog": "ACTOR1: Hallo!\nACTOR2: Hey!",
     "duration": 5
   }
 ]`;
@@ -546,6 +550,7 @@ Each shot must follow this exact structure:
                 actors: actors.map(a => a.id),
                 environment: environment?.id || '',
                 products: product ? [product.id] : [],
+                dialog: shot.dialog || '',
                 notes: '',
                 duration: shot.duration || 5,
                 created_at: new Date().toISOString(),
@@ -737,6 +742,7 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
             actors: [],
             environment: environment?.id || '',
             products: [],
+            dialog: '',
             notes: '',
             duration: 5,
             created_at: new Date().toISOString(),
