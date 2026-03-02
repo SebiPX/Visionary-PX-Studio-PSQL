@@ -501,7 +501,7 @@ export function VerleihFormularPage({
                       {isOverdue && <span className="text-red-400 ml-2 font-semibold">Überfällig!</span>}
                     </p>
                     {schein.zweck && <p className="text-xs text-slate-500">Zweck: {schein.zweck}</p>}
-                    {schein.gesamtkosten != null && schein.gesamtkosten > 0 && <p className="text-xs text-brand-300 font-semibold">€ {schein.gesamtkosten.toFixed(2)}</p>}
+                    {schein.gesamtkosten != null && toNum(schein.gesamtkosten) > 0 && <p className="text-xs text-brand-300 font-semibold">€ {toNum(schein.gesamtkosten).toFixed(2)}</p>}
                   </div>
                   <button onClick={() => handleErledigt(schein)}
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition-colors shrink-0">
@@ -513,7 +513,7 @@ export function VerleihFormularPage({
                     {schein.items.map(li => (
                       <div key={li.id} className="flex items-center justify-between px-5 py-2.5">
                         <p className="text-sm text-slate-300">{li.item?.geraet}{li.item?.modell ? ` – ${li.item.modell}` : ''}{li.item?.px_nummer && <span className="font-mono text-xs text-slate-500 ml-2">{li.item.px_nummer}</span>}</p>
-                        {li.gesamtpreis != null && li.gesamtpreis > 0 && <p className="text-xs text-slate-400">€ {li.gesamtpreis.toFixed(2)}</p>}
+                        {li.gesamtpreis != null && toNum(li.gesamtpreis) > 0 && <p className="text-xs text-slate-400">€ {toNum(li.gesamtpreis).toFixed(2)}</p>}
                       </div>
                     ))}
                   </div>
@@ -556,8 +556,8 @@ export function VerleihFormularPage({
                     <p className="text-xs text-slate-700">
                       Erledigt am: {schein.erledigt_am ? formatDT(schein.erledigt_am) : '–'}
                     </p>
-                    {schein.gesamtkosten != null && schein.gesamtkosten > 0 && (
-                      <p className="text-xs text-slate-500 font-semibold">€ {schein.gesamtkosten.toFixed(2)}</p>
+                    {schein.gesamtkosten != null && toNum(schein.gesamtkosten) > 0 && (
+                      <p className="text-xs text-slate-500 font-semibold">€ {toNum(schein.gesamtkosten).toFixed(2)}</p>
                     )}
                   </div>
                   <span className="text-xs px-2.5 py-1 rounded-full bg-slate-700/60 text-slate-400 border border-slate-600/40 shrink-0 mt-1">
@@ -574,8 +574,8 @@ export function VerleihFormularPage({
                             <span className="font-mono text-xs text-slate-600 ml-2">{li.item.px_nummer}</span>
                           )}
                         </p>
-                        {li.gesamtpreis != null && li.gesamtpreis > 0 && (
-                          <p className="text-xs text-slate-600">€ {li.gesamtpreis.toFixed(2)}</p>
+                        {li.gesamtpreis != null && toNum(li.gesamtpreis) > 0 && (
+                          <p className="text-xs text-slate-600">€ {toNum(li.gesamtpreis).toFixed(2)}</p>
                         )}
                       </div>
                     ))}
