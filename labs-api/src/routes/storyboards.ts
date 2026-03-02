@@ -17,42 +17,47 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// POST /api/storyboards — create or update (upsert by id)
+// POST /api/storyboards — create new
 router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { id, title, concept, target_duration, num_shots, config, assets, shots } = req.body;
+  const { title, concept, target_duration, num_shots, config, assets, shots } = req.body;
   try {
-    // Ensure JSONB fields are properly serialized strings for the ::jsonb cast
     const configJson = JSON.stringify(config || {});
     const assetsJson = JSON.stringify(assets || []);
     const shotsJson  = JSON.stringify(shots  || []);
 
-    let result;
-    if (id) {
-      result = await pool.query(
-        `UPDATE storyboard_sessions
-         SET title = $1, concept = $2, target_duration = $3, num_shots = $4,
-             config = $5::jsonb, assets = $6::jsonb, shots = $7::jsonb, updated_at = NOW()
-         WHERE id = $8 AND user_id = $9
-         RETURNING *`,
-        [title, concept, target_duration, num_shots, configJson, assetsJson, shotsJson, id, req.userId]
-      );
-    } else {
-      result = await pool.query(
-        `INSERT INTO storyboard_sessions (user_id, title, concept, target_duration, num_shots, config, assets, shots)
-         VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb) RETURNING *`,
-        [req.userId, title, concept, target_duration, num_shots, configJson, assetsJson, shotsJson]
-      );
-    }
-    res.status(id ? 200 : 201).json(result.rows[0]);
+    const result = await pool.query(
+      `INSERT INTO storyboard_sessions (user_id, title, concept, target_duration, num_shots, config, assets, shots)
+       VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb) RETURNING *`,
+      [req.userId, title, concept, target_duration, num_shots, configJson, assetsJson, shotsJson]
+    );
+    res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    console.error('[storyboards] Save error:', {
-      message: err.message,
-      code:    err.code,
-      detail:  err.detail,
-      hint:    err.hint,
-      body:    JSON.stringify(req.body).slice(0, 500),
-    });
-    res.status(500).json({ error: err.message, detail: err.detail, hint: err.hint });
+    console.error('[storyboards POST] Error:', { message: err.message, code: err.code, detail: err.detail, body: JSON.stringify(req.body).slice(0, 300) });
+    res.status(500).json({ error: err.message, detail: err.detail });
+  }
+});
+
+// PATCH /api/storyboards/:id — update existing
+router.patch('/:id', requireAuth, async (req: AuthRequest, res: Response) => {
+  const { title, concept, target_duration, num_shots, config, assets, shots } = req.body;
+  try {
+    const configJson = JSON.stringify(config || {});
+    const assetsJson = JSON.stringify(assets || []);
+    const shotsJson  = JSON.stringify(shots  || []);
+
+    const result = await pool.query(
+      `UPDATE storyboard_sessions
+       SET title = $1, concept = $2, target_duration = $3, num_shots = $4,
+           config = $5::jsonb, assets = $6::jsonb, shots = $7::jsonb, updated_at = NOW()
+       WHERE id = $8 AND user_id = $9
+       RETURNING *`,
+      [title, concept, target_duration, num_shots, configJson, assetsJson, shotsJson, req.params.id, req.userId]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
+    res.json(result.rows[0]);
+  } catch (err: any) {
+    console.error('[storyboards PATCH] Error:', { message: err.message, code: err.code, detail: err.detail });
+    res.status(500).json({ error: err.message, detail: err.detail });
   }
 });
 
