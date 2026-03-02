@@ -65,12 +65,22 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 - **4 Phasen:** Setup → Story → Storyboard → Review
 - KI generiert Story → Shot-Liste → Shot-by-Shot Bilder
 - Vollständige Persistenz in `storyboard_sessions` (JSONB)
+- **Asset Reference Images:** Separate Upload-Felder für Referenzbild vs. generiertes Ergebnis (`ref_image_url` + `is_character_sheet` Flag)
+- **AssetCard:** Referenzbild-Thumbnail, Wardrobe Toggle, Download-Button, Vorschau-Icon
+- **Lightbox Preview:** Großes Bild-Vorschau Modal für generierte Assets
 
 ### 7. ✏️ Sketch Studio
 
 - **Modell:** `gemini-2.5-flash-image`
 - Interaktives Drawing Canvas mit Undo/Redo, Aspect Ratio, Stil-Auswahl
 - Generiertes Bild → Upload zu R2 → URL in `generated_sketches` (kein base64 in DB)
+
+### 7a. 🖼️ Image Source Picker (Cross-Feature)
+
+- Wiederverwendbares Modal für alle Bild-Upload-Bereiche (Image Gen, Video Studio, Thumbnails, Storyboard)
+- **3 Quellen:** Upload (Datei), Webcam (Live-Kamera → Foto), Eigene Assets (Grid aus gespeicherten Images & Thumbnails)
+- Webcam: `getUserMedia` → Video-Stream → Canvas-Screenshot → base64 DataURL
+- Eigene Assets: Lädt aus `generated_images` + `generated_thumbnails` → Klick gibt CDN-URL zurück
 
 ### 8. 💬 Chat Bot
 
@@ -87,8 +97,10 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 
 - Profil bearbeiten (Name)
 - Avatar-Upload → Cloudflare R2 → URL in `profiles`
-- **Passwort ändern:** Erfordert aktuelles Passwort (sicher, kein E-Mail-Reset nötig)
-- Backend: `PATCH /auth/profile` und `PATCH /auth/password`
+- **Passwort ändern (User):** Erfordert aktuelles Passwort (sicher, kein E-Mail-Reset nötig)
+- **Admin — Passwort zurücksetzen:** Admin kann beliebige User-Passwörter aus den Settings zurücksetzen (ohne aktuelles PW). Neues Passwort wird in der UI angezeigt zum Weitergeben.
+- **Registrierung deaktiviert:** Der öffentliche `POST /auth/register` Endpunkt ist gesperrt — nur Admins können neue Accounts anlegen (via Admin-UI)
+- Backend: `PATCH /auth/profile`, `PATCH /auth/password`, `POST /auth/admin/reset-password`
 
 ---
 
@@ -137,15 +149,18 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 
 **Self-hosted JWT Auth — kein externer Dienst:**
 
-| Feature         | Umsetzung                                              |
-| --------------- | ------------------------------------------------------ |
-| Login/Signup    | `POST /auth/login`, `POST /auth/register`              |
-| Profil lesen    | `GET /auth/me` (JWT erforderlich)                      |
-| Profil updaten  | `PATCH /auth/profile`                                  |
-| Passwort ändern | `PATCH /auth/password` (aktuelles PW erforderlich)     |
-| Token           | JWT, 7 Tage gültig, im `localStorage`                  |
-| Hashing         | bcrypt, cost 12                                        |
-| Middleware      | `requireAuth` prüft JWT bei jedem geschützten Endpunkt |
+| Feature                     | Umsetzung                                               |
+| --------------------------- | ------------------------------------------------------- |
+| Login                       | `POST /auth/login`                                      |
+| Registrierung               | ❌ Öffentlich deaktiviert — nur via Admin-UI            |
+| Profil lesen                | `GET /auth/me` (JWT erforderlich)                       |
+| Profil updaten              | `PATCH /auth/profile`                                   |
+| Passwort ändern (User)      | `PATCH /auth/password` (aktuelles PW erforderlich)      |
+| Passwort reset (Admin only) | `POST /auth/admin/reset-password` — kein altes PW nötig |
+| Token                       | JWT, 7 Tage gültig, im `localStorage`                   |
+| Hashing                     | bcrypt, cost 12                                         |
+| Middleware                  | `requireAuth` prüft JWT bei jedem geschützten Endpunkt  |
+| Admin-Middleware            | `requireAdmin` — schützt Admin-spezifische Routen       |
 
 ---
 
@@ -205,12 +220,13 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 │   │   ├── hooks/                 # 10 Custom Hooks (useInventar, useLoans, …)
 │   │   ├── components/            # UI (Sidebar, Tables, Forms, Modal…)
 │   │   └── pages/                 # 10 Seiten
+│   ├── ImageSourcePicker.tsx      # Webcam + Eigene Assets + Upload Modal
 │   ├── auth/
 │   │   ├── Login.tsx
 │   │   ├── Signup.tsx
 │   │   └── ResetPassword.tsx      # Passwort ändern (braucht aktuelles PW)
 │   ├── ChatBot.tsx                # inkl. RAG für Onboarding-Persona
-│   ├── Settings.tsx
+│   ├── Settings.tsx               # Profil + PW ändern + Admin Password Reset
 │   └── …
 └── backend/                       # Express.js Backend (labs-api)
     ├── src/

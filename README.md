@@ -192,6 +192,13 @@ psql "$DATABASE_URL" -f /opt/docker/labs-api/inventar_migration.sql
 
 - 4-Phasen Workflow: Setup → Story → Storyboard → Review
 - Shot-by-Shot Bilder mit Regenerierung
+- **Asset Reference Images:** Separates Referenzbild vs. generiertes Ergebnis (`ref_image_url`)
+- **AssetCard:** Referenzbild-Thumbnail, Wardrobe Toggle, Download, Lightbox-Vorschau
+
+### 🎞️ Image Source Picker
+
+- Wiederverwendbares Modal in Image Gen, Video Studio, Thumbnails & Storyboard
+- **3 Quellen:** Datei-Upload · Webcam (Live → Foto) · Eigene Assets (DB-Grid)
 
 ### ✏️ Sketch Studio
 
@@ -208,6 +215,7 @@ psql "$DATABASE_URL" -f /opt/docker/labs-api/inventar_migration.sql
 
 - Profil & Avatar-Upload (Cloudflare R2)
 - Passwort ändern (aktuelles Passwort erforderlich)
+- **Admin:** Beliebige User-Passwörter zurücksetzen — neues Passwort wird in der UI angezeigt
 
 ---
 
@@ -234,12 +242,14 @@ Zugänglich über **Dashboard → „PX INTERN"**. Eigenständige React-App mit 
 
 Eigenständiges JWT Auth-System — kein Supabase, kein Firebase:
 
-- ✅ Email/Password Login & Signup
+- ✅ Email/Password Login
+- ❌ Öffentliche Registrierung **deaktiviert** — nur Admins können neue Accounts anlegen
 - ✅ JWT Token (7 Tage, localStorage)
 - ✅ Session-Persistenz (auto-login beim Reload)
 - ✅ Rollen: `user` / `admin`
 - ✅ bcrypt Passwort-Hashing (cost 12)
-- ✅ Passwort-Änderung (erfordert aktuelles Passwort)
+- ✅ Passwort ändern (User: erfordert aktuelles Passwort)
+- ✅ **Admin Password Reset** — Admin setzt Passwort eines Users direkt zurück (kein altes PW nötig)
 
 ---
 

@@ -4,10 +4,10 @@
 
 Zwei Services laufen parallel auf dem VPS:
 
-| Service | Pfad | Container | Extern erreichbar |
-|---------|------|-----------|-------------------|
-| Frontend (React/Nginx) | `/opt/docker/px-studio-psql` | `visionary-px-studio-app` | https://px-studio.labs-schickeria.com |
-| Backend (Express API) | `/opt/docker/labs-api` | `labs-api` | https://api.labs-schickeria.com (intern Port 4001) |
+| Service                | Pfad                         | Container                 | Extern erreichbar                                  |
+| ---------------------- | ---------------------------- | ------------------------- | -------------------------------------------------- |
+| Frontend (React/Nginx) | `/opt/docker/px-studio-psql` | `visionary-px-studio-app` | https://px-studio.labs-schickeria.com              |
+| Backend (Express API)  | `/opt/docker/labs-api`       | `labs-api`                | https://api.labs-schickeria.com (intern Port 4001) |
 
 Beide hängen im Docker-Netz `proxy-netz` hinter dem **Nginx Proxy Manager**.
 
@@ -75,6 +75,7 @@ ALLOWED_ORIGINS=http://localhost:5173,https://px-studio.labs-schickeria.com
 ```
 
 **Nach manuellem Config-Ändern** ([docker-compose.yml](file:///d:/PX%20AgenturApp/PROJECT/CODE/2026/260226/Visionary-PX-Studio-PSQL/docker-compose.yml) oder [.env](file:///d:/PX%20AgenturApp/PROJECT/CODE/2026/260226/Visionary-PX-Studio-PSQL/labs-api/.env)):
+
 ```bash
 cd /opt/docker/labs-api   # oder px-studio-psql
 docker compose down && docker compose up -d
@@ -88,10 +89,12 @@ docker logs labs-api --since 2m
 ## Häufige Fehler & Fixes
 
 ### ❌ `ERR_CONNECTION_REFUSED` auf `localhost:4000`
+
 **Ursache:** Backend (labs-api) läuft nicht.  
 **Fix:** `cd labs-api && npm run dev` (lokal) oder `docker compose up -d` (VPS).
 
 ### ❌ `no pg_hba.conf entry for host "172.x.x.x", user "postgres"`
+
 **Ursache:** Der Docker-Container verbindet sich als `postgres`-User, welcher in `pg_hba.conf` nicht für das Docker-Netz erlaubt ist.  
 **Fix (dauerhaft):** `DB_USER=schickeria_user` in `/opt/docker/labs-api/.env` setzen — `schickeria_user` ist in `/etc/postgresql/16/main/pg_hba.conf` für `172.0.0.0/8` erlaubt.
 
@@ -101,9 +104,17 @@ host labs_db schickeria_user 172.0.0.0/8 scram-sha-256
 ```
 
 ### ❌ `500 Internal Server Error` nach Config-Änderung
+
 **Ursache:** Container läuft noch mit alten Variablen.  
 **Fix:** `docker compose down && docker compose up -d` (nicht nur `docker restart`).
 
-### ⚠️ Tailwind CDN Warning in Production
-**Ursache:** [index.html](file:///d:/PX%20AgenturApp/PROJECT/CODE/2026/260226/Visionary-PX-Studio-PSQL/index.html) lädt Tailwind via CDN-Script-Tag — nur für Entwicklung gedacht.  
-**Fix (später):** Tailwind als PostCSS-Plugin einbauen.
+### ✅ Auth API Endpunkte
+
+| Aktion                      | Endpoint                              | Hinweis                            |
+| --------------------------- | ------------------------------------- | ---------------------------------- |
+| Login                       | `POST /auth/login`                    | gibt JWT zurück                    |
+| Profil lesen                | `GET /auth/me`                        | JWT erforderlich                   |
+| Profil updaten              | `PATCH /auth/profile`                 | Name, Avatar                       |
+| Passwort ändern (User)      | `PATCH /auth/password`                | aktuelles PW erforderlich          |
+| Passwort reset (Admin only) | `POST /auth/admin/reset-password`     | kein altes PW nötig, nur Admins    |
+| Registrierung               | `POST /auth/register` ❌ **gesperrt** | Neue User nur via Admin-UI anlegen |
