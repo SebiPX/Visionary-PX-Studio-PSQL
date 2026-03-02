@@ -103,6 +103,12 @@ export const StoryStudio: React.FC = () => {
         }
     };
 
+    // Auto-save on every phase transition — fire-and-forget, UI switches immediately
+    const navigateTo = (phase: Phase) => {
+        handleSave().catch(err => console.warn('[auto-save] Phase transition save failed:', err));
+        setCurrentPhase(phase);
+    };
+
     const loadSession = (session: StoryboardSession) => {
         setSessionId(session.id);
         setSessionTitle(session.title || 'Untitled Storyboard');
@@ -776,7 +782,7 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
                         uploadingAssetId={uploadingAssetId}
                         generatingAssetId={generatingAssetId}
                         onAssetPreview={setPreviewImageUrl}
-                        onNext={() => setCurrentPhase('story')}
+                        onNext={() => navigateTo('story')}
                     />
                 );
             case 'story':
@@ -794,8 +800,8 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
                         onStoryboardStyleChange={setStoryboardStyle}
                         onGenerateStory={generateStory}
                         isGenerating={isGenerating}
-                        onBack={() => setCurrentPhase('setup')}
-                        onNext={() => setCurrentPhase('storyboard')}
+                        onBack={() => navigateTo('setup')}
+                        onNext={() => navigateTo('storyboard')}
                     />
                 );
             case 'storyboard':
@@ -808,8 +814,8 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
                         onAddShot={handleAddShot}
                         onEditShot={setEditingShot}
                         onDeleteShot={(shotId) => setShots(shots.filter(s => s.id !== shotId))}
-                        onBack={() => setCurrentPhase('story')}
-                        onNext={() => setCurrentPhase('review')}
+                        onBack={() => navigateTo('story')}
+                        onNext={() => navigateTo('review')}
                     />
                 );
             case 'review':
@@ -821,7 +827,7 @@ ${parts.length > 0 ? 'Use the reference image(s) for character/environment consi
                         isGenerating={isGenerating}
                         onEditShot={setEditingShot}
                         onGenerateShotImage={handleGenerateShotImage}
-                        onBack={() => setCurrentPhase('storyboard')}
+                        onBack={() => navigateTo('storyboard')}
                         onSave={handleSave}
                     />
                 );
