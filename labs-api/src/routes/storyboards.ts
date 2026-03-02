@@ -21,28 +21,38 @@ router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
 router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
   const { id, title, concept, target_duration, num_shots, config, assets, shots } = req.body;
   try {
+    // Ensure JSONB fields are properly serialized strings for the ::jsonb cast
+    const configJson = JSON.stringify(config || {});
+    const assetsJson = JSON.stringify(assets || []);
+    const shotsJson  = JSON.stringify(shots  || []);
+
     let result;
     if (id) {
-      // Update existing
       result = await pool.query(
         `UPDATE storyboard_sessions
          SET title = $1, concept = $2, target_duration = $3, num_shots = $4,
-             config = $5, assets = $6, shots = $7, updated_at = NOW()
+             config = $5::jsonb, assets = $6::jsonb, shots = $7::jsonb, updated_at = NOW()
          WHERE id = $8 AND user_id = $9
          RETURNING *`,
-        [title, concept, target_duration, num_shots, config || {}, assets || [], shots || [], id, req.userId]
+        [title, concept, target_duration, num_shots, configJson, assetsJson, shotsJson, id, req.userId]
       );
     } else {
-      // Create new
       result = await pool.query(
         `INSERT INTO storyboard_sessions (user_id, title, concept, target_duration, num_shots, config, assets, shots)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-        [req.userId, title, concept, target_duration, num_shots, config || {}, assets || [], shots || []]
+         VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8::jsonb) RETURNING *`,
+        [req.userId, title, concept, target_duration, num_shots, configJson, assetsJson, shotsJson]
       );
     }
     res.status(id ? 200 : 201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    console.error('[storyboards] Save error:', {
+      message: err.message,
+      code:    err.code,
+      detail:  err.detail,
+      hint:    err.hint,
+      body:    JSON.stringify(req.body).slice(0, 500),
+    });
+    res.status(500).json({ error: err.message, detail: err.detail, hint: err.hint });
   }
 });
 
