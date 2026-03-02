@@ -585,57 +585,77 @@ Jeder Shot muss exakt dieser Struktur folgen:
         setIsGenerating(true);
         try {
             // Prepare parts for i2i generation
-            const parts: any[] = [];
+        const parts: any[] = [];
 
-            // Add reference images from setup assets
-            // Priority: actors > environment > product
-            const referenceImages: string[] = [];
+        // ── Resolve assets referenced in this specific shot ──────────────────
+        // shot.actors contains actor IDs — find the matching StoryAsset objects
+        const shotActors = actors.filter(a => shot.actors.includes(a.id));
+        // If no specific actors listed, fall back to all actors
+        const relevantActors = shotActors.length > 0 ? shotActors : actors;
 
-            // Add actor images if available
-            actors.forEach(actor => {
-                if (actor.image_url && !actor.image_url.startsWith('data:')) {
-                    referenceImages.push(actor.image_url);
-                }
-            });
+        const shotEnvironment = shot.environment
+            ? (environment?.id === shot.environment ? environment : null) ?? environment
+            : environment;
 
-            // Add environment image
-            if (environment?.image_url && !environment.image_url.startsWith('data:')) {
-                referenceImages.push(environment.image_url);
+        const shotProducts = shot.products.length > 0
+            ? [product].filter(p => p && shot.products.includes(p!.id)) as StoryAsset[]
+            : (product ? [product] : []);
+
+        // ── Collect reference images (check both image_url and ref_image_url) ─
+        const fetchAsBase64 = async (url: string): Promise<{ data: string; mimeType: string } | null> => {
+            try {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                const base64 = await new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+                    reader.readAsDataURL(blob);
+                });
+                return { data: base64, mimeType: blob.type || 'image/png' };
+            } catch {
+                return null;
             }
+        };
 
-            // Add product image
-            if (product?.image_url && !product.image_url.startsWith('data:')) {
-                referenceImages.push(product.image_url);
+        // Add actor reference images
+        for (const actor of relevantActors) {
+            // Prefer ref_image_url (uploaded reference), fall back to image_url (generated result)
+            const imgUrl = (actor as any).ref_image_url || actor.image_url;
+            if (imgUrl && !imgUrl.startsWith('data:')) {
+                const img = await fetchAsBase64(imgUrl);
+                if (img) parts.push({ inlineData: img });
             }
-
-            // If we have reference images, fetch and convert to base64
-            if (referenceImages.length > 0) {
-                // Use the first available image as primary reference
-                const primaryImageUrl = referenceImages[0];
-
-                try {
-                    const response = await fetch(primaryImageUrl);
-                    const blob = await response.blob();
-                    const base64Data = await new Promise<string>((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            const result = reader.result as string;
-                            const base64 = result.split(',')[1];
-                            resolve(base64);
-                        };
-                        reader.readAsDataURL(blob);
-                    });
-
-                    parts.push({
-                        inlineData: {
-                            mimeType: 'image/png',
-                            data: base64Data
-                        }
-                    });
-                } catch (err) {
-                    console.warn('Could not load reference image, using text-only generation:', err);
-                }
+        }
+        // Add environment reference image
+        if (shotEnvironment) {
+            const imgUrl = (shotEnvironment as any).ref_image_url || shotEnvironment.image_url;
+            if (imgUrl && !imgUrl.startsWith('data:')) {
+                const img = await fetchAsBase64(imgUrl);
+                if (img) parts.push({ inlineData: img });
             }
+        }
+        // Add product reference image
+        for (const prod of shotProducts) {
+            const imgUrl = (prod as any).ref_image_url || prod.image_url;
+            if (imgUrl && !imgUrl.startsWith('data:')) {
+                const img = await fetchAsBase64(imgUrl);
+                if (img) parts.push({ inlineData: img });
+            }
+        }
+
+        const hasRefs = parts.length > 0;
+
+        // ── Build asset context strings for the prompt ────────────────────────
+        const actorContext = relevantActors.map(a =>
+            `- ${a.name}${a.description ? ': ' + a.description : ''}`
+        ).join('\n');
+        const envContext = shotEnvironment
+            ? `${shotEnvironment.name}${shotEnvironment.description ? ': ' + shotEnvironment.description : ''}`
+            : 'Not specified';
+        const prodContext = shotProducts.length > 0
+            ? shotProducts.map(p => `${p.name}${p.description ? ': ' + p.description : ''}`).join(', ')
+            : 'None';
+
 
             // Build comprehensive prompt for storyboard frame
             const styleDescriptions: Record<string, string> = {
@@ -650,25 +670,35 @@ Jeder Shot muss exakt dieser Struktur folgen:
 
             const styleDescription = styleDescriptions[storyboardStyle] || styleDescriptions['realistic'];
 
-            const prompt = `Create a professional storyboard frame based on this shot description:
+            const prompt = `Create a professional storyboard frame for the following shot.
 
+SHOT DETAILS:
 Title: ${shot.title}
 Description: ${shot.description}
 Location: ${shot.location || 'Not specified'}
-
-Camera Setup:
+${shot.dialog ? `\nDialog in this shot:\n${shot.dialog}\n` : ''}
+CAMERA SETUP:
 - Framing: ${shot.framing}
 - Angle: ${shot.camera_angle}
 - Movement: ${shot.camera_movement}
-- Focal Length: ${shot.focal_length}
-
-Lighting: ${shot.lighting}
-${shot.movement_notes ? `\nMovement: ${shot.movement_notes}` : ''}
+- Focal Length: ${shot.focal_length || '50mm'}
+- Lighting: ${shot.lighting}
+${shot.movement_notes ? `\nMovement notes: ${shot.movement_notes}` : ''}
 ${shot.vfx_notes ? `\nVFX: ${shot.vfx_notes}` : ''}
 
-Visual Style: ${styleDescription}
+CHARACTERS IN THIS SHOT:
+${actorContext || 'No specific actors'}
 
-${parts.length > 0 ? 'Use the reference image(s) for character/environment consistency. Maintain the same visual style across all shots.' : 'Create based on description only.'}`;
+LOCATION/ENVIRONMENT:
+${envContext}
+
+${prodContext !== 'None' ? `PRODUCT/PROP:\n${prodContext}\n` : ''}
+VISUAL STYLE: ${styleDescription}
+
+${hasRefs
+    ? 'IMPORTANT: Reference images are attached. Use them to accurately depict the characters and environment shown. Maintain exact character appearance, costume, and environment style from the references.'
+    : 'No reference images available — create based on descriptions only.'
+}`;
 
             parts.push({ text: prompt });
 
