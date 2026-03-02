@@ -179,42 +179,70 @@ ${genre ? `Genre context: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
                 } else if (hasRefImage) {
                     imagePrompt = `Create a photorealistic multi-angle photographic identity sheet based strictly on the uploaded reference image.
 
-CHARACTER IDENTITY (from reference image):
-- Match the exact real-world appearance of the person: facial structure, proportions, skin texture, age, asymmetry, and natural imperfections.
-- The reference image defines WHO this person is. Preserve their face, body type, and physical characteristics precisely.
-- The result must look like real photography of a real human, not a digital character or 3D asset.
+CRITICAL IDENTITY LOCK — ALL 8 PANELS MUST SHOW THE EXACT SAME PERSON:
+- This is ONE real person photographed 8 times from different angles. Not 8 different people.
+- Preserve with 100% accuracy: face shape, bone structure, eye color, skin tone, age, hair, any asymmetry or imperfection.
+- The face in panel 1 (full-body front) must be recognizably identical to the face in panel 5 (close-up front). If they look like different people, the result is wrong.
+- The reference image defines this person's identity. Do not idealize, smooth over, or alter any facial feature.
 
-CHARACTER CONTEXT (apply to all views):
+CHARACTER CONTEXT (apply to all 8 panels):
 - Name: ${asset.name}.${asset.description ? `\n- Appearance/Styling: ${asset.description}.` : ''}${genre ? `\n- Genre context: ${genre}.` : ''}${mood ? `\n- Mood: ${mood}.` : ''}
 
-Layout — two horizontal rows as a clean photo contact sheet:
-- Top row: four full-body photographs of the same person in the described costume/styling: (1) facing camera, (2) left-facing profile, (3) right-facing profile, (4) facing away.
-- Bottom row: three close-up photographic portraits: (1) facing camera, (2) left-facing profile, (3) right-facing profile.
+LAYOUT — 2 rows × 4 columns (8 panels total, like a professional character turnaround sheet):
 
-Pose: natural and casual stance, relaxed posture, shoulders relaxed, arms resting naturally at sides. No exaggerated or rigid pose.
+Top row — 4 full-body photographs (head to feet), evenly spaced rotational angles:
+  Panel 1: Facing directly at camera (0° — front view)
+  Panel 2: Turned 45° to the left (¾ view)
+  Panel 3: Turned 90° to the left (full left-side profile)
+  Panel 4: Turned 180° — back fully facing camera (rear view)
 
-Lighting: soft, neutral real-world lighting (window light or soft studio light). No dramatic or cinematic lighting. Natural shadows with gentle falloff.
+Bottom row — 4 close-up head/shoulder portraits, matching the exact same rotational angles as the top row:
+  Panel 5: Facing directly at camera (0° — front close-up)
+  Panel 6: Turned 45° to the left (¾ close-up)
+  Panel 7: Turned 90° to the left (full left-side profile close-up)
+  Panel 8: Turned 180° — back of head (rear close-up)
 
-Consistency: same person, same costume/styling across all views. Strong identity consistency — this is photographed multiple times, not replicated.
+Division: clean white or light grey border lines between all panels. Consistent neutral studio background behind subject.
 
-NOT a 3D render. NOT CGI. NOT stylized. NOT a model turnaround.`;
+Pose: relaxed, natural stance in all full-body panels. Arms resting at sides. No exaggerated or dramatic pose.
+
+Lighting: consistent soft studio lighting (softbox or window light) across all 8 panels. Same light direction, same exposure. No dramatic shadows.
+
+NOT a 3D render. NOT CGI. NOT stylized. NOT illustrated. Real photographic studio imagery.`;
                 } else {
-                    imagePrompt = `Create a photorealistic photographic identity sheet of the following person:
+                    imagePrompt = `Create a photorealistic photographic character identity sheet of the following person:
 
+Subject:
 ${descriptionLine}
 Name: ${asset.name}.
 
-The subject must look like a real human photographed in the real world. Avoid any stylized, animated, or synthetic appearance. Simple neutral background, similar to an ID or documentary shoot.
+CRITICAL IDENTITY LOCK — ALL 8 PANELS MUST SHOW THE EXACT SAME PERSON:
+- This is ONE real person photographed 8 times from different angles. Not 8 different people.
+- Maintain 100% consistent face shape, bone structure, eye color, skin tone, age, and hair across all panels.
+- The face seen from the front (panels 1 and 5) must be clearly the same individual as the profiles and rear view.
+- Do not idealize or smooth the character — preserve natural asymmetry and real human features.
 
-Layout — two horizontal rows as a photo contact sheet:
-- Top row: four full-body photographs: (1) facing camera, (2) left-facing profile, (3) right-facing profile, (4) facing away.
-- Bottom row: three close-up portraits: (1) facing camera, (2) left-facing profile, (3) right-facing profile.
+LAYOUT — 2 rows × 4 columns (8 panels total):
 
-Pose: natural stance, relaxed posture. No posing for presentation. Subtle variation in head angle and body balance, like multiple photos taken moments apart.
+Top row — 4 full-body photographs (head to feet):
+  Panel 1: Facing directly at camera (0° — front view)
+  Panel 2: Turned 45° to the left (¾ view)
+  Panel 3: Turned 90° to the left (full left-side profile)
+  Panel 4: Turned 180° — back fully facing camera
 
-Lighting: soft, neutral, realistic. No stylization, no dramatic contrast. The final result should resemble real reference photography, not a character asset.
+Bottom row — 4 close-up head/shoulder portraits at the same angles:
+  Panel 5: Facing directly at camera (0°)
+  Panel 6: Turned 45° to the left (¾ close-up)
+  Panel 7: Turned 90° to the left (full left-side profile)
+  Panel 8: Turned 180° — back of head
 
-NOT a 3D render. NOT CGI. NOT stylized. NOT a model turnaround.${genre ? ` Genre context: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
+Division: clean separator lines between all panels. Neutral studio background behind subject.
+
+Pose: relaxed natural stance. Arms at sides. No posed or dramatic stance.
+
+Lighting: soft consistent studio lighting across all 8 panels.
+
+NOT a 3D render. NOT CGI. NOT stylized. NOT illustrated. Real photographic studio imagery.${genre ? ` Genre context: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
                 }
             } else if (asset.type === 'product') {
                 // Product: multi-angle turnaround reference sheet
