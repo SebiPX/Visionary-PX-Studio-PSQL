@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, RefreshCw, LogOut, FileText, Calendar, KeyRound, Smartphone, CreditCard, Building2, Link2 } from 'lucide-react'
+import { LayoutDashboard, Package, LogOut, FileText, Calendar, KeyRound, Smartphone, CreditCard, Building2, Link2 } from 'lucide-react'
 import type { Profile } from '../../types'
 
 interface SidebarProps {
@@ -11,8 +11,7 @@ interface SidebarProps {
 const navItems = [
   { to: '/',                 label: 'Dashboard',        icon: LayoutDashboard, end: true,  adminOnly: false },
   { to: '/inventar',         label: 'Inventar',          icon: Package,         end: false, adminOnly: false },
-  { to: '/verleih',          label: 'Verleih',           icon: RefreshCw,       end: false, adminOnly: false },
-  { to: '/verleih-formular', label: 'Verleih-Formular',  icon: FileText,        end: false, adminOnly: false },
+  { to: '/verleih-formular', label: 'Verleih',           icon: FileText,        end: false, adminOnly: false },
   { to: '/kalender',         label: 'Kalender',          icon: Calendar,        end: false, adminOnly: false },
   { to: '/logins',           label: 'Logins',            icon: KeyRound,        end: false, adminOnly: false },
   { to: '/handyvertraege',   label: 'Handyverträge',     icon: Smartphone,      end: false, adminOnly: true  },
