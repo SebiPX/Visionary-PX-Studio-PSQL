@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { GeneratedVideo } from '../types';
+import { ImageSourcePicker } from './ImageSourcePicker';
 
 interface HistoryItem {
     id: string;
@@ -40,6 +41,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
 
     // Preview modal state
     const [showPreview, setShowPreview] = useState(false);
+    const [showPicker, setShowPicker] = useState(false);
 
     // Load video history from database
     const loadVideoHistory = useCallback(async () => {
@@ -450,28 +452,28 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                         <div className="max-w-3xl mx-auto">
                             {activeMode === 'IMAGE' && (
                                 <div className="mb-4">
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={handleFileUpload}
-                                    />
                                     {!uploadedImage ? (
                                         <div
-                                            onClick={() => fileInputRef.current?.click()}
+                                            onClick={() => setShowPicker(true)}
                                             className="border-2 border-dashed border-white/10 rounded-xl p-4 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
                                         >
                                             <span className="material-icons-round text-3xl text-slate-500 group-hover:text-primary mb-2 transition-colors">add_photo_alternate</span>
-                                            <p className="text-xs text-slate-400 font-medium">Upload source image</p>
+                                            <p className="text-xs text-slate-400 font-medium">Quellbild wählen</p>
+                                            <p className="text-xs text-slate-600 mt-1">Upload · Webcam · Eigene Assets</p>
                                         </div>
                                     ) : (
                                         <div className="relative border border-white/10 rounded-xl overflow-hidden bg-black/20">
                                             <img src={uploadedImage} alt="Video Source" className="w-full h-32 object-cover opacity-60" />
-                                            <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="absolute inset-0 flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => setShowPicker(true)}
+                                                    className="px-3 py-1.5 bg-primary/80 hover:bg-primary text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-1"
+                                                >
+                                                    <span className="material-icons-round text-xs">swap_horiz</span> Ändern
+                                                </button>
                                                 <button
                                                     onClick={() => setUploadedImage(null)}
-                                                    className="px-4 py-2 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-2"
+                                                    className="px-3 py-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-2"
                                                 >
                                                     <span className="material-icons-round text-sm">delete</span> Remove
                                                 </button>
@@ -551,6 +553,15 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                         onClick={(e) => e.stopPropagation()}
                     />
                 </div>
+            )}
+
+            {/* Image Source Picker */}
+            {showPicker && (
+                <ImageSourcePicker
+                    label="Quellbild auswählen"
+                    onSelect={(dataUrl) => { setUploadedImage(dataUrl); setShowPicker(false); }}
+                    onClose={() => setShowPicker(false)}
+                />
             )}
         </div >
     );

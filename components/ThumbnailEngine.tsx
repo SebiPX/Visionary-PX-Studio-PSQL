@@ -5,6 +5,7 @@ import { GeneratedThumbnail } from '../types';
 import { BackgroundTool } from './ThumbnailEngine/components/BackgroundTool';
 import { ElementsTool } from './ThumbnailEngine/components/ElementsTool';
 import { TextTool } from './ThumbnailEngine/components/TextTool';
+import { ImageSourcePicker } from './ImageSourcePicker';
 
 interface HistoryItem {
     id: string;
@@ -44,6 +45,8 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
     // Specific loading states for idea generation buttons
     const [isGeneratingIdea, setIsGeneratingIdea] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
+    const [showBgPicker, setShowBgPicker] = useState(false);
+    const [showElPicker, setShowElPicker] = useState(false);
 
     // Refs for file inputs
     const bgFileInputRef = useRef<HTMLInputElement>(null);
@@ -367,27 +370,23 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
 
                             {/* Background Upload */}
                             <div>
-                                <input
-                                    type="file"
-                                    ref={bgFileInputRef}
-                                    onChange={(e) => handleFileUpload(e, 'BACKGROUND')}
-                                    className="hidden"
-                                    accept="image/*"
-                                />
                                 {!bgImage ? (
                                     <div
-                                        onClick={() => bgFileInputRef.current?.click()}
+                                        onClick={() => setShowBgPicker(true)}
                                         className="p-4 rounded-xl border border-dashed border-white/10 bg-white/5 flex flex-col items-center text-center cursor-pointer hover:bg-white/10 transition-colors"
                                     >
                                         <span className="material-icons-round text-slate-500 mb-2">upload_file</span>
-                                        <p className="text-xs text-slate-300 font-bold">Upload Reference</p>
-                                        <p className="text-[10px] text-slate-500 mt-1">Use an image as inspiration</p>
+                                        <p className="text-xs text-slate-300 font-bold">Referenz auswählen</p>
+                                        <p className="text-[10px] text-slate-500 mt-1">Upload · Webcam · Eigene Assets</p>
                                     </div>
                                 ) : (
                                     <div className="relative rounded-xl overflow-hidden border border-white/10 group">
                                         <img src={bgImage} alt="Bg Ref" className="w-full h-32 object-cover opacity-60" />
                                         <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-                                            <span className="text-xs font-bold text-white">Reference Loaded</span>
+                                            <button onClick={() => setShowBgPicker(true)} className="px-2 py-1 bg-primary/80 hover:bg-primary text-white rounded text-[10px] font-bold">
+                                                Ändern
+                                            </button>
+                                            <span className="text-xs font-bold text-white">BG geladen</span>
                                         </div>
                                         <button
                                             onClick={() => setBgImage(null)}
@@ -424,27 +423,23 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
 
                             {/* Element Upload */}
                             <div>
-                                <input
-                                    type="file"
-                                    ref={elementFileInputRef}
-                                    onChange={(e) => handleFileUpload(e, 'ELEMENT')}
-                                    className="hidden"
-                                    accept="image/*"
-                                />
                                 {!elementImage ? (
                                     <div
-                                        onClick={() => elementFileInputRef.current?.click()}
+                                        onClick={() => setShowElPicker(true)}
                                         className="p-4 rounded-xl border border-dashed border-white/10 bg-white/5 flex flex-col items-center text-center cursor-pointer hover:bg-white/10 transition-colors"
                                     >
                                         <span className="material-icons-round text-slate-500 mb-2">person_add</span>
-                                        <p className="text-xs text-slate-300 font-bold">Upload Subject</p>
-                                        <p className="text-[10px] text-slate-500 mt-1">Or drag a photo here</p>
+                                        <p className="text-xs text-slate-300 font-bold">Subject wählen</p>
+                                        <p className="text-[10px] text-slate-500 mt-1">Upload · Webcam · Eigene Assets</p>
                                     </div>
                                 ) : (
                                     <div className="relative rounded-xl overflow-hidden border border-white/10 group">
                                         <img src={elementImage} alt="El Ref" className="w-full h-32 object-cover opacity-60" />
                                         <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-                                            <span className="text-xs font-bold text-white">Subject Loaded</span>
+                                            <button onClick={() => setShowElPicker(true)} className="px-2 py-1 bg-primary/80 hover:bg-primary text-white rounded text-[10px] font-bold">
+                                                Ändern
+                                            </button>
+                                            <span className="text-xs font-bold text-white">Subject geladen</span>
                                         </div>
                                         <button
                                             onClick={() => setElementImage(null)}
@@ -683,6 +678,24 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                         onClick={(e) => e.stopPropagation()}
                     />
                 </div>
+            )}
+
+            {/* Background Image Picker */}
+            {showBgPicker && (
+                <ImageSourcePicker
+                    label="Hintergrundbild auswählen"
+                    onSelect={(dataUrl) => { setBgImage(dataUrl); setShowBgPicker(false); }}
+                    onClose={() => setShowBgPicker(false)}
+                />
+            )}
+
+            {/* Element Image Picker */}
+            {showElPicker && (
+                <ImageSourcePicker
+                    label="Subject / Element auswählen"
+                    onSelect={(dataUrl) => { setElementImage(dataUrl); setShowElPicker(false); }}
+                    onClose={() => setShowElPicker(false)}
+                />
             )}
         </div>
     );

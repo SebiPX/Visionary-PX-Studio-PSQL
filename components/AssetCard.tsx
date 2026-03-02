@@ -1,5 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import { StoryAsset } from '../types';
+import { ImageSourcePicker } from './ImageSourcePicker';
 
 interface AssetCardProps {
     asset: StoryAsset;
@@ -20,15 +21,16 @@ export const AssetCard: React.FC<AssetCardProps> = ({
     isUploading = false,
     isGenerating = false,
 }) => {
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showPicker, setShowPicker] = useState(false);
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            await onUpload(file, asset.id);
-            // Reset input so the same file can be re-uploaded
-            e.target.value = '';
-        }
+    const handlePickerSelect = async (dataUrl: string) => {
+        setShowPicker(false);
+        // Convert DataURL → File so onUpload prop stays compatible
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const ext = blob.type.split('/')[1] || 'png';
+        const file = new File([blob], `asset-${Date.now()}.${ext}`, { type: blob.type });
+        await onUpload(file, asset.id);
     };
 
     const handleDownload = async (url: string, name: string) => {
@@ -122,7 +124,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                     </div>
                     {/* Replace ref button */}
                     <button
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => setShowPicker(true)}
                         disabled={isUploading || isGenerating}
                         className="p-1.5 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 transition-all disabled:opacity-40"
                         title="Referenzfoto ersetzen"
@@ -161,7 +163,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                 {/* Upload / Replace button — only show if no ref yet */}
                 {!hasRef && (
                     <button
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => setShowPicker(true)}
                         disabled={isUploading || isGenerating}
                         className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:text-slate-600 text-white text-xs font-medium rounded transition-all flex items-center justify-center gap-1"
                     >
@@ -172,8 +174,8 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                             </>
                         ) : (
                             <>
-                                <span className="material-icons-round text-xs">upload</span>
-                                Referenz hochladen
+                                <span className="material-icons-round text-xs">add_photo_alternate</span>
+                                Referenz wählen
                             </>
                         )}
                     </button>
@@ -200,15 +202,6 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                 </button>
             </div>
 
-            {/* Hidden File Input */}
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-            />
-
             {/* Source Badge */}
             {hasGenerated && (
                 <div className="text-xs text-slate-500 flex items-center gap-1">
@@ -220,6 +213,15 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                         <span className="ml-2 text-primary/70">· Garderoben-Modus</span>
                     )}
                 </div>
+            )}
+
+            {/* Image Source Picker Modal */}
+            {showPicker && (
+                <ImageSourcePicker
+                    label={`Referenzbild für ${asset.name || asset.type} wählen`}
+                    onSelect={handlePickerSelect}
+                    onClose={() => setShowPicker(false)}
+                />
             )}
         </div>
     );

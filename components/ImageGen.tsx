@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { GeneratedImage } from '../types';
+import { ImageSourcePicker } from './ImageSourcePicker';
 
 // ============================================================================
 // TYPES
@@ -42,6 +43,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
 
     // UI state
     const [showPreview, setShowPreview] = useState(false);
+    const [showPicker, setShowPicker] = useState(false);
 
     // ========================================================================
     // HANDLERS
@@ -367,16 +369,9 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                             {/* Source Image Upload Area - Visible only in Img2Img or Edit mode */}
                             {activeMode !== 'TEXT' && (
                                 <div className="mb-4">
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        className="hidden"
-                                        accept="image/*"
-                                        onChange={handleFileUpload}
-                                    />
                                     {!uploadedImage ? (
                                         <div
-                                            onClick={() => fileInputRef.current?.click()}
+                                            onClick={() => setShowPicker(true)}
                                             className="border-2 border-dashed border-white/10 rounded-xl p-6 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
                                         >
                                             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -385,17 +380,23 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                                 </span>
                                             </div>
                                             <p className="text-sm text-slate-300 font-medium">
-                                                {activeMode === 'EDIT' ? 'Upload image to edit' : 'Upload reference image'}
+                                                {activeMode === 'EDIT' ? 'Bild zum Bearbeiten wählen' : 'Referenzbild wählen'}
                                             </p>
-                                            <p className="text-xs text-slate-500 mt-1">Drag & drop or click to browse</p>
+                                            <p className="text-xs text-slate-500 mt-1">Upload · Webcam · Eigene Assets</p>
                                         </div>
                                     ) : (
                                         <div className="relative border border-white/10 rounded-xl overflow-hidden bg-black/20">
                                             <img src={uploadedImage} alt="Reference" className="w-full h-32 object-cover opacity-60" />
-                                            <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="absolute inset-0 flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => setShowPicker(true)}
+                                                    className="px-3 py-1.5 bg-primary/80 hover:bg-primary text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-1"
+                                                >
+                                                    <span className="material-icons-round text-xs">swap_horiz</span> Ändern
+                                                </button>
                                                 <button
                                                     onClick={() => setUploadedImage(null)}
-                                                    className="px-4 py-2 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-2"
+                                                    className="px-3 py-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-2"
                                                 >
                                                     <span className="material-icons-round text-sm">delete</span> Remove
                                                 </button>
@@ -482,6 +483,15 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         onClick={(e) => e.stopPropagation()}
                     />
                 </div>
+            )}
+
+            {/* Image Source Picker */}
+            {showPicker && (
+                <ImageSourcePicker
+                    label="Bild auswählen"
+                    onSelect={(dataUrl) => { setUploadedImage(dataUrl); setShowPicker(false); }}
+                    onClose={() => setShowPicker(false)}
+                />
             )}
         </div>
     );
