@@ -49,7 +49,18 @@ router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) =>
         (user_id, title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, current_step)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'briefing') 
        RETURNING *`,
-      [req.userId, title, occasion, guest_count, budget || null, season, industry, emotional_goals, target_audience, location_preference]
+      [
+        req.userId, 
+        title ?? null, 
+        occasion ?? null, 
+        guest_count ?? null, 
+        budget ?? null, 
+        season ?? null, 
+        industry ?? null, 
+        emotional_goals ?? null, 
+        target_audience ?? null, 
+        location_preference ?? null
+      ]
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
@@ -77,7 +88,20 @@ router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Respons
            updated_at = NOW()
        WHERE id = $11 AND user_id = $12
        RETURNING *`,
-      [title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, current_step, req.params.id, req.userId]
+      [
+        title ?? null,
+        occasion ?? null,
+        guest_count ?? null,
+        budget ?? null,
+        season ?? null,
+        industry ?? null,
+        emotional_goals ?? null,
+        target_audience ?? null,
+        location_preference ?? null,
+        current_step ?? null,
+        req.params.id,
+        req.userId
+      ]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Project not found' });
     res.json(result.rows[0]);
