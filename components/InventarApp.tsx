@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { MemoryRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
-import { ArrowLeft } from 'lucide-react'
 
 import { useInventar } from './Inventar/hooks/useInventar'
 import { useLoans } from './Inventar/hooks/useLoans'
@@ -107,14 +106,6 @@ function InventarShell({ onBack }: InventarAppProps) {
 
   return (
     <div className="flex h-full bg-slate-950 relative">
-      {/* Back to Studio button */}
-      <button
-        onClick={onBack}
-        className="absolute top-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 text-white text-sm rounded-full transition-all"
-      >
-        <ArrowLeft size={14} />
-        Zurück zum Studio
-      </button>
 
       <Sidebar profile={profile} isAdmin={isAdmin} onSignOut={onBack} />
 
