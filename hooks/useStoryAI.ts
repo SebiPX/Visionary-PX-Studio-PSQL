@@ -25,8 +25,9 @@ export const useStoryAI = () => {
 
         try {
             const prompt = `
-            Erstelle eine detaillierte, fesselnde kreative Story basierend auf den folgenden Parametern. 
+            Erstelle eine detaillierte, fesselnde kreative Story basierend auf den folgenden Parametern.
             Die Story sollte ca. 50-100 Wörter umfassen und eine klare Handlung haben.
+            WICHTIG: Schreibe ALLES auf Deutsch.
             
             Darsteller: ${params.actors.map(a => a.name).join(', ')}
             Location/Umgebung: ${params.environment?.name || 'Nicht spezifiziert'}
@@ -65,6 +66,8 @@ export const useStoryAI = () => {
         try {
             const prompt = `
             Erstelle eine Shot-Liste basierend auf der folgenden Story.
+            WICHTIG: Schreibe ALLE Texte (title, description, location, audio_notes, movement_notes, dialog) auf Deutsch.
+            
             Storyboard Parameter:
             Darsteller: ${params.actors.map(a => a.name).join(', ')}
             Location/Umgebung: ${params.environment?.name || 'Nicht spezifiziert'}
@@ -76,6 +79,10 @@ export const useStoryAI = () => {
             ${params.storyText}
             
             Gib die Antwort **ausschließlich** als valides JSON-Array zurück, das eine Liste von Shots enthält.
+            Für das Feld "dialog": Schreibe den gesprochenen Dialog in folgendem Format (eine Zeile pro Sprechakt):
+            "ACTORNAME: Gesprochener Text\nACTORNAME2: Antwort"
+            Falls kein Dialog vorhanden ist, gib einen leeren String zurück.
+            
             Benutze exakt dieses Format für jeden Shot in der Liste:
             [
               {
@@ -89,7 +96,8 @@ export const useStoryAI = () => {
                 "lighting": "natural",
                 "audio_notes": "Audio Notizen",
                 "duration": 5,
-                "movement_notes": "Bewegungsnotizen"
+                "movement_notes": "Bewegungsnotizen",
+                "dialog": "ACTOR1: Hallo! Wie geht's?\nACTOR2: Danke, gut!"
               }
             ]
             `;
@@ -135,6 +143,7 @@ export const useStoryAI = () => {
                 actors: params.actors.map(a => a.id),
                 environment: params.environment?.id || '',
                 products: params.product ? [params.product.id] : [],
+                dialog: shot.dialog || '',
                 notes: '',
                 duration: shot.duration || 5,
                 created_at: new Date().toISOString(),

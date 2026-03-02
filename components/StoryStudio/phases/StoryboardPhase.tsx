@@ -83,6 +83,22 @@ export const StoryboardPhase: React.FC<StoryboardPhaseProps> = ({
                         <h4 className="text-white font-medium mb-2">{shot.title || 'Untitled Shot'}</h4>
                         <p className="text-slate-400 text-xs mb-3 line-clamp-2">{shot.description || 'No description'}</p>
 
+                        {/* Dialog */}
+                        {shot.dialog && (
+                            <div className="mb-3 bg-slate-900/60 border border-white/5 rounded-lg px-3 py-2">
+                                <div className="flex items-center gap-1 mb-1">
+                                    <span className="material-icons-round text-xs text-primary">record_voice_over</span>
+                                    <span className="text-xs text-slate-500">Dialog</span>
+                                </div>
+                                {shot.dialog.split('\n').slice(0, 3).map((line, i) => (
+                                    <p key={i} className="text-xs text-slate-300 font-mono line-clamp-1">{line}</p>
+                                ))}
+                                {shot.dialog.split('\n').length > 3 && (
+                                    <p className="text-xs text-slate-500 italic">+{shot.dialog.split('\n').length - 3} weitere Zeilen...</p>
+                                )}
+                            </div>
+                        )}
+
                         <div className="flex flex-wrap gap-1 mb-2">
                             <span className="px-2 py-0.5 bg-primary/20 text-primary text-xs rounded">{shot.framing}</span>
                             <span className="px-2 py-0.5 bg-slate-700 text-slate-300 text-xs rounded">{shot.camera_movement}</span>

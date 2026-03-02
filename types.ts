@@ -62,6 +62,7 @@ export interface StoryShot {
   actors: string[];
   environment: string;
   products: string[];
+  dialog: string;
   notes: string;
   image_url?: string;
   duration: number;

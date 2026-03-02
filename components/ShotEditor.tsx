@@ -95,6 +95,27 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
                         </div>
                     </section>
 
+                    {/* Dialog */}
+                    <section>
+                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <span className="material-icons-round text-primary">record_voice_over</span>
+                            Dialog / Gesprochener Text
+                        </h3>
+                        <div>
+                            <label className="block text-sm text-slate-400 mb-2">
+                                Format: <span className="text-white font-mono text-xs">ACTORNAME: Text</span>
+                            </label>
+                            <textarea
+                                value={editedShot.dialog || ''}
+                                onChange={(e) => updateField('dialog', e.target.value)}
+                                className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white resize-none font-mono text-sm"
+                                rows={4}
+                                placeholder={"ACTOR1: Hallo, mein Freund! Wie geht's?\nACTOR2: Was geht dich das an?"}
+                            />
+                            <p className="text-xs text-slate-500 mt-1">Eine Zeile pro Sprechakt. Leer lassen wenn kein Dialog.</p>
+                        </div>
+                    </section>
+
                     {/* Visuelle Gestaltung */}
                     <section>
                         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
