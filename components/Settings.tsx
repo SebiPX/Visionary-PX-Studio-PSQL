@@ -25,6 +25,7 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Password change state
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -130,30 +131,31 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
     e.preventDefault();
     setPasswordError(null);
 
-    // Validation
+    if (!currentPassword) {
+      setPasswordError('Bitte aktuelles Passwort eingeben');
+      return;
+    }
     if (newPassword.length < 6) {
       setPasswordError('Password must be at least 6 characters long');
       return;
     }
-
     if (newPassword !== confirmPassword) {
       setPasswordError('Passwords do not match');
       return;
     }
 
     setPasswordLoading(true);
-
-    const { error } = await updatePassword(newPassword);
-
-    if (error) {
-      setPasswordError(error.message);
-      setPasswordLoading(false);
-    } else {
+    try {
+      await apiAuth.updatePassword(currentPassword, newPassword);
       setPasswordSuccess(true);
-      setPasswordLoading(false);
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setTimeout(() => setPasswordSuccess(false), 3000);
+    } catch (err: any) {
+      setPasswordError(err.message || 'Failed to update password');
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -244,6 +246,19 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
           <div className="space-y-4">
             <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Change Password</label>
             <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div>
+                <label htmlFor="current-password" className="block text-xs text-slate-400 mb-2">Aktuelles Passwort</label>
+                <input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  disabled={passwordLoading}
+                  className="w-full bg-[#1a1f2e] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-600 disabled:opacity-50"
+                  placeholder="Aktuelles Passwort eingeben"
+                />
+              </div>
+
               <div>
                 <label htmlFor="new-password" className="block text-xs text-slate-400 mb-2">New Password</label>
                 <input
