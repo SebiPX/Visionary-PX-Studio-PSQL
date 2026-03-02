@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StoryAsset } from '../types';
 import { ImageSourcePicker } from './ImageSourcePicker';
+import { downloadAsset } from '../lib/apiClient';
 
 interface AssetCardProps {
     asset: StoryAsset;
@@ -31,23 +32,6 @@ export const AssetCard: React.FC<AssetCardProps> = ({
         const ext = blob.type.split('/')[1] || 'png';
         const file = new File([blob], `asset-${Date.now()}.${ext}`, { type: blob.type });
         await onUpload(file, asset.id);
-    };
-
-    const handleDownload = async (url: string, name: string) => {
-        try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const objectUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = objectUrl;
-            a.download = `${name.replace(/\s+/g, '-').toLowerCase()}-asset.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(objectUrl);
-        } catch {
-            window.open(url, '_blank');
-        }
     };
 
     const isActor = asset.type === 'actor';
@@ -82,7 +66,10 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                         )}
                         {/* Download */}
                         <button
-                            onClick={() => handleDownload(asset.image_url, asset.name || placeholderLabel)}
+                            onClick={() => downloadAsset(
+                                asset.image_url,
+                                `${(asset.name || placeholderLabel).replace(/\s+/g, '-').toLowerCase()}-asset.png`
+                            )}
                             className="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-all"
                             title="Herunterladen"
                         >
