@@ -185,12 +185,70 @@ Lighting: soft, neutral, realistic. No stylization, no dramatic contrast. The fi
 
 NOT a 3D render. NOT CGI. NOT stylized. NOT a model turnaround.${genre ? ` Genre context: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
                 }
+            } else if (asset.type === 'product') {
+                // Product: multi-angle turnaround reference sheet
+                const descLine = asset.description ? `Product description: ${asset.description}.` : '';
+                if (hasRefImage) {
+                    imagePrompt = `Create a photorealistic multi-angle product reference sheet based strictly on the uploaded reference image.
+
+Match the exact real-world appearance of the object: shape, material, texture, color, and proportions. The result must look like real studio photography of a real physical product.
+
+Layout — two horizontal rows as a clean product reference sheet:
+- Top row: four views of the same product: (1) front view, (2) left side view, (3) right side view, (4) back view.
+- Bottom row: three close-up detail shots highlighting key features, surface texture, and materials.
+
+Lighting: neutral studio lighting (softbox or diffused light). Consistent lighting direction across all views. Clean, simple background (white, light grey, or gradient). No dramatic shadows.
+
+Consistency: same product, same color, same material across all views. Perfectly matched scale and proportions.
+
+NOT a 3D render. NOT CGI. NOT stylized. Pure product photography.${genre ? ` Production context: ${genre}.` : ''}`;
+                } else {
+                    imagePrompt = `Create a photorealistic product reference sheet for the following product:
+
+Name: ${asset.name}.
+${descLine}
+
+Layout — two horizontal rows as a product reference sheet:
+- Top row: four views: (1) front view, (2) left side view, (3) right side view, (4) back view.
+- Bottom row: three close-up detail shots of materials, texture, and key features.
+
+The product must look like a real, physical, manufactured object photographed in a studio. Clean neutral background, professional product photography lighting from a softbox. No stylization or CGI look.
+
+NOT a 3D render. NOT CGI. NOT an illustration.${genre ? ` Production context: ${genre}.` : ''}`;
+                }
             } else {
-                // Environment / Product: keep existing concise cinematic prompt
-                const typeLabel = asset.type === 'environment' ? 'environment/location' : 'product/object';
-                imagePrompt = hasRefImage
-                    ? `Refine and reimagine this ${typeLabel} image in ${storyboardStyle} style for a storyboard. Keep the same subject/identity but enhance for cinematic quality. Name: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}. ${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''} Cinematic, detailed, professional production design.`
-                    : `Generate a high-quality ${storyboardStyle} style image of a ${typeLabel} for a storyboard. Name: ${asset.name}. Description: ${asset.description || `A ${asset.type} asset`}. ${genre ? `Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''} Cinematic, detailed, professional production design.`;
+                // Environment: location scout reference board
+                const descLine = asset.description ? `Location description: ${asset.description}.` : '';
+                if (hasRefImage) {
+                    imagePrompt = `Create a photorealistic location scout reference board based on the uploaded reference image.
+
+Layout — a 2x2 grid of real-world photographs of the same location:
+- (1) Wide establishing shot showing the full scope of the space.
+- (2) Mid-range shot focusing on key architectural or environmental features.
+- (3) Detail/texture shot of a characteristic surface or element.
+- (4) Atmospheric shot showing the overall light, mood, and feeling of the location.
+
+Lighting: realistic and consistent with the location's natural or ambient light source. Preserve the mood and atmosphere of the reference.
+
+Consistency: same location, same time of day, same weather and lighting conditions across all views.
+
+NOT a 3D render. NOT CGI. NOT stylized. Real location photography.${genre ? ` Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
+                } else {
+                    imagePrompt = `Create a photorealistic location scout reference board for the following place:
+
+Name: ${asset.name}.
+${descLine}
+
+Layout — a 2x2 grid of photographs of the same location:
+- (1) Wide establishing shot.
+- (2) Mid-range shot of key architectural or environmental features.
+- (3) Close-up detail of a characteristic surface or texture.
+- (4) Atmospheric mood shot capturing the light and ambiance.
+
+The location must look like real-world photography, not a digital set or CGI environment. Realistic lighting consistent with the described setting.
+
+NOT a 3D render. NOT CGI. NOT a digital set.${genre ? ` Genre: ${genre}.` : ''}${mood ? ` Mood: ${mood}.` : ''}`;
+                }
             }
 
             // Helper: attempt a single generation call and return base64 data if found
@@ -199,8 +257,8 @@ NOT a 3D render. NOT CGI. NOT stylized. NOT a model turnaround.${genre ? ` Genre
                     action: 'generateContent',
                     model: 'gemini-2.5-flash-image',
                     contents: [{ role: 'user', parts }],
-                    // Actors: 4:3 landscape fits the 2-row contact sheet layout; others: square
-                    config: { imageConfig: { aspectRatio: isActor ? '4:3' : '1:1' } }
+                    // Aspect ratio matched to layout: actors/products 4:3 (landscape contact sheet), environments 16:9 (cinematic wide)
+                    config: { imageConfig: { aspectRatio: asset.type === 'environment' ? '16:9' : '4:3' } }
                 }) as any;
 
                 if (response?.error) throw new Error(JSON.stringify(response.error));
