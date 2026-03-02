@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StoryShot } from '../../../types';
 
 interface ReviewPhaseProps {
@@ -23,9 +23,90 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
     onSave,
 }) => {
     const totalDuration = shots.reduce((sum, s) => sum + s.duration, 0);
+    const [previewShot, setPreviewShot] = useState<StoryShot | null>(null);
+
+    const handleDownload = async (shot: StoryShot) => {
+        if (!shot.image_url) return;
+        try {
+            const res = await fetch(shot.image_url);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `shot-${shot.scene_number || shot.order + 1}-${shot.title.replace(/\s+/g, '-')}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            // Fallback: open in new tab
+            window.open(shot.image_url, '_blank');
+        }
+    };
 
     return (
         <div className="space-y-6">
+            {/* ── Preview Modal ─────────────────────────────────────────────── */}
+            {previewShot && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                    onClick={() => setPreviewShot(null)}
+                >
+                    <div
+                        className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+                            <div>
+                                <p className="text-xs text-slate-500">Shot {previewShot.scene_number}</p>
+                                <h3 className="text-white font-bold text-lg">{previewShot.title}</h3>
+                            </div>
+                            <button
+                                onClick={() => setPreviewShot(null)}
+                                className="text-slate-400 hover:text-white transition-colors"
+                            >
+                                <span className="material-icons-round">close</span>
+                            </button>
+                        </div>
+
+                        {/* Image */}
+                        <div className="flex-1 overflow-hidden flex items-center justify-center bg-black/40 min-h-0">
+                            <img
+                                src={previewShot.image_url!}
+                                alt={previewShot.title}
+                                className="max-w-full max-h-[60vh] object-contain"
+                            />
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 py-4 border-t border-white/10 flex items-center justify-between gap-3">
+                            <p className="text-slate-400 text-sm line-clamp-1">{previewShot.description}</p>
+                            <div className="flex gap-3 shrink-0">
+                                {/* Neu generieren */}
+                                <button
+                                    onClick={() => {
+                                        onGenerateShotImage(previewShot);
+                                        setPreviewShot(null);
+                                    }}
+                                    disabled={isGenerating}
+                                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-all flex items-center gap-2"
+                                >
+                                    <span className="material-icons-round text-sm">refresh</span>
+                                    Neu generieren
+                                </button>
+                                {/* Download */}
+                                <button
+                                    onClick={() => handleDownload(previewShot)}
+                                    className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg transition-all flex items-center gap-2"
+                                >
+                                    <span className="material-icons-round text-sm">download</span>
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Summary Header */}
             <div className="bg-slate-800/40 border border-white/10 rounded-xl p-6">
                 <h3 className="text-lg font-bold text-white mb-4">Storyboard Übersicht</h3>
@@ -67,25 +148,29 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
                                     <div className="aspect-video bg-slate-900/50 rounded-lg border border-white/10 flex items-center justify-center overflow-hidden relative group">
                                         {shot.image_url ? (
                                             <>
-                                                <img src={shot.image_url} alt={shot.title} className="w-full h-full object-cover" />
-                                                {/* Regenerate Overlay - appears on hover */}
-                                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                {/* Click → open preview modal */}
+                                                <img
+                                                    src={shot.image_url}
+                                                    alt={shot.title}
+                                                    className="w-full h-full object-cover cursor-pointer"
+                                                    onClick={() => setPreviewShot(shot)}
+                                                />
+                                                {/* Hover Overlay */}
+                                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                    <button
+                                                        onClick={() => setPreviewShot(shot)}
+                                                        className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded-lg backdrop-blur-sm transition-all flex items-center gap-1"
+                                                    >
+                                                        <span className="material-icons-round text-xs">fullscreen</span>
+                                                        Vorschau
+                                                    </button>
                                                     <button
                                                         onClick={() => onGenerateShotImage(shot)}
                                                         disabled={isGenerating}
-                                                        className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-all flex items-center gap-2"
+                                                        className="px-3 py-1.5 bg-primary hover:bg-primary-hover disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1"
                                                     >
-                                                        {isGenerating ? (
-                                                            <>
-                                                                <span className="material-icons-round text-sm animate-spin">refresh</span>
-                                                                Generiere...
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <span className="material-icons-round text-sm">refresh</span>
-                                                                Neu generieren
-                                                            </>
-                                                        )}
+                                                        <span className={`material-icons-round text-xs ${isGenerating ? 'animate-spin' : ''}`}>refresh</span>
+                                                        {isGenerating ? 'Generiere...' : 'Neu'}
                                                     </button>
                                                 </div>
                                             </>
@@ -125,6 +210,19 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
                                         <h4 className="text-lg font-bold text-white mb-2">{shot.title}</h4>
                                         <p className="text-slate-300 text-sm">{shot.description}</p>
                                     </div>
+
+                                    {/* Dialog */}
+                                    {shot.dialog && (
+                                        <div className="bg-slate-900/60 border border-white/5 rounded-lg px-4 py-3">
+                                            <div className="flex items-center gap-1 mb-2">
+                                                <span className="material-icons-round text-xs text-primary">record_voice_over</span>
+                                                <span className="text-xs text-slate-500 font-medium">Dialog</span>
+                                            </div>
+                                            {shot.dialog.split('\n').map((line, i) => (
+                                                <p key={i} className="text-sm text-slate-200 font-mono">{line}</p>
+                                            ))}
+                                        </div>
+                                    )}
 
                                     {/* Technical Details Grid */}
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
@@ -216,6 +314,15 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
                                                 </>
                                             )}
                                         </button>
+                                        {shot.image_url && (
+                                            <button
+                                                onClick={() => handleDownload(shot)}
+                                                className="px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white text-xs rounded transition-all flex items-center gap-1"
+                                            >
+                                                <span className="material-icons-round text-xs">download</span>
+                                                Download
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
