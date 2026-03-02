@@ -26,10 +26,10 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
     const [prompt, setPrompt] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [activeMode, setActiveMode] = useState<'TEXT' | 'IMAGE'>('TEXT');
-    const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('9:16');
+    const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9');
     const [duration, setDuration] = useState<'2s' | '4s' | '8s'>('4s');
     const [cameraMotion, setCameraMotion] = useState('Pan');
-    const [videoUri, setVideoUri] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuARKp7un_J6viDTzhW62zcaIX54n_gduphy8RFH1nb5LrOpPsFRtd3uFEWCD1AnQrvArVRpdsoDPdspjUMk2IMXcBWI-3mu8TpCO2o_4B71YZJVTZcOLHNPt8cyFXUNfAO4W6aTM9PgtX9BOOe9lQXTqdRyd-SmNOjI4Knd2Rtqpn4QXicuxXkfYFzplomomOUFkfiP6j-PSRevX9SzXraWGKTBqUVOfCuy_CYr9xbxbRY_wmpJ2vLGJMMK3mdJ5yDD4PiaKKN_ueJ6NZ');
+    const [videoUri, setVideoUri] = useState('');
     const [history, setHistory] = useState<GeneratedVideo[]>([]);
 
     // Upload State
@@ -389,11 +389,16 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                                     controls={false}
                                 />
                             ) : (
-                                <img
-                                    src={videoUri.includes('mp4') ? "https://lh3.googleusercontent.com/aida-public/AB6AXuARKp7un_J6viDTzhW62zcaIX54n_gduphy8RFH1nb5LrOpPsFRtd3uFEWCD1AnQrvArVRpdsoDPdspjUMk2IMXcBWI-3mu8TpCO2o_4B71YZJVTZcOLHNPt8cyFXUNfAO4W6aTM9PgtX9BOOe9lQXTqdRyd-SmNOjI4Knd2Rtqpn4QXicuxXkfYFzplomOUFkfiP6j-PSRevX9SzXraWGKTBqUVOfCuy_CYr9xbxbRY_wmpJ2vLGJMMK3mdJ5yDD4PiaKKN_ueJ6NZ" : videoUri}
-                                    className={`w-full h-full object-cover transition-all duration-700 ${isGenerating ? 'scale-110 blur-md opacity-50' : 'scale-100 opacity-80'}`}
-                                    alt="Preview"
-                                />
+                                // Empty / placeholder state
+                                <div className="w-full h-full flex flex-col items-center justify-center text-center gap-4">
+                                    <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                                        <span className="material-icons-round text-4xl text-slate-600">movie_creation</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-slate-400 font-semibold text-sm">Kein Video generiert</p>
+                                        <p className="text-slate-600 text-xs mt-1">Beschreibe ein Video und klicke GENERATE</p>
+                                    </div>
+                                </div>
                             )}
 
                             {/* Generation Loader */}
