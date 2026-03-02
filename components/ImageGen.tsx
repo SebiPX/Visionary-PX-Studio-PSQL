@@ -69,6 +69,10 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     const restoreFromHistory = (item: GeneratedImage) => {
         setCurrentImage(item.image_url);
         setPrompt(item.prompt || '');
+        // Restore the aspect ratio that was used when this image was generated
+        if (item.config?.aspectRatio) {
+            setAspectRatio(item.config.aspectRatio as '1:1' | '16:9' | '9:16');
+        }
     };
 
     // ========================================================================
@@ -261,7 +265,10 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                     <button
                                         key={item.id}
                                         onClick={() => restoreFromHistory(item)}
-                                        className="relative aspect-square rounded-lg overflow-hidden border border-white/10 group hover:border-primary/50 transition-all"
+                                        className={`relative overflow-hidden rounded-lg border border-white/10 group hover:border-primary/50 transition-all ${
+                                            item.config?.aspectRatio === '9:16' ? 'aspect-[9/16]' :
+                                            item.config?.aspectRatio === '1:1' ? 'aspect-square' : 'aspect-video'
+                                        }`}
                                         title={item.prompt || 'Generated image'}
                                     >
                                         <img src={item.image_url} alt="History" className="w-full h-full object-cover" />

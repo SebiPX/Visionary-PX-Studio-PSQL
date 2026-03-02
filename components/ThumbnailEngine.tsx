@@ -102,6 +102,10 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
         setElementPrompt(item.config?.mainElement || '');
         setTextContent(item.config?.textOverlay || '');
         setTextStyle(item.config?.textStyle || 'Bold & Modern');
+        // Restore the aspect ratio that was used when this thumbnail was generated
+        if (item.config?.aspectRatio) {
+            setAspectRatio(item.config.aspectRatio as '16:9' | '9:16' | '1:1');
+        }
     };
 
     // Auto-restore selected item from Dashboard
@@ -505,7 +509,10 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 <button
                                     key={item.id}
                                     onClick={() => restoreFromHistory(item)}
-                                    className="relative aspect-video rounded-lg overflow-hidden border border-white/10 group hover:border-primary/50 transition-all"
+                                    className={`relative overflow-hidden rounded-lg border border-white/10 group hover:border-primary/50 transition-all ${
+                                        item.config?.aspectRatio === '9:16' ? 'aspect-[9/16]' :
+                                        item.config?.aspectRatio === '1:1' ? 'aspect-square' : 'aspect-video'
+                                    }`}
                                 >
                                     <img src={item.image_url} alt="History" className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

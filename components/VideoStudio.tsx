@@ -129,6 +129,10 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
             if (selectedItem) {
                 setVideoUri(selectedItem.video_url);
                 setPrompt(selectedItem.prompt || '');
+                // Restore aspect ratio from saved config
+                if (selectedItem.config?.aspectRatio) {
+                    setAspectRatio(selectedItem.config.aspectRatio as '16:9' | '9:16');
+                }
                 onItemLoaded?.();
             }
         }
