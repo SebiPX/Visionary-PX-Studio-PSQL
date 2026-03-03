@@ -115,7 +115,7 @@ export const MatrixStep: React.FC = () => {
       <div className="bg-[#161f30] rounded-2xl border border-white/10 p-2 shadow-xl overflow-hidden">
         <div className="overflow-x-auto p-6 hide-scrollbar">
           
-          <table className="w-full min-w-max border-collapse">
+          <table className="w-full border-collapse">
             <tbody>
               {categories.map((cat: any, i: number) => {
                 const activeSelection = concepts[activeConceptIndex][cat.name];
