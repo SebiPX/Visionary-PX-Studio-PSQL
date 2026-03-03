@@ -266,7 +266,7 @@ Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ googleSearch: {} }],
-        generationConfig: { responseMimeType: "application/json", temperature: 0.8 }
+        generationConfig: { temperature: 0.8 }
       })
     });
     
@@ -276,8 +276,11 @@ Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
     }
 
     const data = await geminiRes.json() as any;
-    const textResp = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    let textResp = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!textResp) throw new Error("Keine valide Antwort von der KI erhalten");
+
+    // Clean up potential markdown formatting (```json ... ```)
+    textResp = textResp.replace(/```json\n?/g, '').replace(/```/g, '').trim();
 
     const parsedData = JSON.parse(textResp);
     const concepts = parsedData.concepts || [];
