@@ -22,10 +22,7 @@ export const PxCreativeApp: React.FC = () => {
       {/* Top Header */}
       <div className="flex bg-[#161f30] border-b border-white/5 px-6 py-4 items-center justify-between z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center neon-glow-orange">
-            <span className="material-icons-round text-white text-lg">tips_and_updates</span>
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">PX Event <span className="text-orange-500">Agent</span></h1>
+          {/* Title removed since side navigation shows current context */}
         </div>
         
         {currentProject && (
