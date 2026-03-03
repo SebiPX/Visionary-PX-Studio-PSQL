@@ -40,8 +40,19 @@ export interface CreativeConcept {
   scamper_refinements?: { 
     idea: string;
     real_world_validation?: {
-      location?: { name: string; description: string; };
-      vendor?: { name: string; description: string; };
+      location?: { 
+        name: string; 
+        description: string; 
+        address?: string;
+        contact?: string;
+        website?: string;
+      };
+      nearby_vendors?: Array<{
+        name: string;
+        type: string;
+        description: string;
+        contact: string;
+      }>;
     };
   };
   how_now_wow_score?: 'how' | 'now' | 'wow';

@@ -138,15 +138,17 @@ export const MatrixStep: React.FC = () => {
                               key={opt.name}
                               onClick={() => handleSelectOption(cat.name, opt.name)}
                               title={opt.reason}
-                              className={`px-4 py-2 rounded-lg text-sm transition-all border
+                              className={`px-4 py-2 rounded-lg text-sm transition-all border block whitespace-normal text-left
                                 ${isSelected 
                                   ? `${colorObj.bg} ${colorObj.border} ${colorObj.text} font-bold ${colorObj.glow} scale-105` 
                                   : 'bg-[#0f1522] border-white/5 text-slate-400 hover:border-white/20'
                                 }
                               `}
                             >
-                              {opt.name}
-                              {isSelected && <span className="material-icons-round text-[12px] ml-2">check</span>}
+                              <div className="flex items-center justify-between gap-2">
+                                <span>{opt.name}</span>
+                                {isSelected && <span className="material-icons-round text-[12px] flex-shrink-0">check</span>}
+                              </div>
                             </button>
                           );
                         })}

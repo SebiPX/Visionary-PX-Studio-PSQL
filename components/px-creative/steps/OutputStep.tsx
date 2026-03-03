@@ -114,15 +114,25 @@ export const OutputStep: React.FC = () => {
                         <div>
                           <span className="block text-xs uppercase text-slate-500 mb-1">Real Location</span>
                           <strong className="text-green-400 text-base block">{finalConcept.scamper_refinements.real_world_validation.location.name}</strong>
-                          <p className="text-sm text-slate-400 mt-1">{finalConcept.scamper_refinements.real_world_validation.location.description}</p>
+                          <p className="text-sm text-slate-400 mt-1 mb-2">{finalConcept.scamper_refinements.real_world_validation.location.description}</p>
+                          {finalConcept.scamper_refinements.real_world_validation.location.address && <p className="text-xs text-slate-300 mt-1"><span className="opacity-50">📍</span> {finalConcept.scamper_refinements.real_world_validation.location.address}</p>}
+                          {finalConcept.scamper_refinements.real_world_validation.location.contact && <p className="text-xs text-slate-300"><span className="opacity-50">📞</span> {finalConcept.scamper_refinements.real_world_validation.location.contact}</p>}
+                          {finalConcept.scamper_refinements.real_world_validation.location.website && <p className="text-xs text-blue-400 truncate"><a href={finalConcept.scamper_refinements.real_world_validation.location.website} target="_blank" rel="noreferrer"><span className="opacity-70">🌐</span> {finalConcept.scamper_refinements.real_world_validation.location.website}</a></p>}
                         </div>
                       )}
                       
-                      {finalConcept.scamper_refinements.real_world_validation.vendor && (
-                        <div>
-                          <span className="block text-xs uppercase text-slate-500 mb-1">Real Vendor / Caterer</span>
-                          <strong className="text-blue-400 text-base block">{finalConcept.scamper_refinements.real_world_validation.vendor.name}</strong>
-                          <p className="text-sm text-slate-400 mt-1">{finalConcept.scamper_refinements.real_world_validation.vendor.description}</p>
+                      {finalConcept.scamper_refinements.real_world_validation.nearby_vendors && finalConcept.scamper_refinements.real_world_validation.nearby_vendors.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-slate-700/50">
+                          <span className="block text-xs uppercase text-slate-500 mb-3">Nearby Vendors</span>
+                          <div className="space-y-4">
+                            {finalConcept.scamper_refinements.real_world_validation.nearby_vendors.map((v: any, vi: number) => (
+                              <div key={vi} className="bg-white/5 p-3 rounded-lg border border-white/5">
+                                <strong className="text-blue-400 text-sm block">{v.name} <span className="text-xs text-slate-500 font-normal">({v.type})</span></strong>
+                                <p className="text-xs text-slate-400 mt-1">{v.description}</p>
+                                <p className="text-xs text-slate-300 mt-2"><span className="opacity-50">📞</span> {v.contact}</p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>

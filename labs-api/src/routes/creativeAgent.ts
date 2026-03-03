@@ -236,7 +236,8 @@ DEINE AUFGABE:
    - "now": Bekannt, erprobt, einfach machbar.
    - "wow": Extrem kreativ, neuartig, aber absolut umsetzbar.
 4. Schätze für jedes Konzept eine Budget-Kategorie (z.B. "$", "$$", "$$$").
-5. WICHTIG (REAL-WORLD VALIDATION): Nutze dein Google Search Tool, um für JEDES Konzept eine GANZ REALE Location und falls passend einen konkreten echten Dienstleister/Caterer in der Zielregion (bzw. für das Konzept passend) zu finden. Erfinde KEINE Namen.
+5. WICHTIG (REAL-WORLD VALIDATION): Nutze dein Google Search Tool, um für JEDES Konzept eine GANZ REALE Location und passende Dienstleister/Caterer in der Zielregion zu finden. Erfinde KEINE Namen.
+Recherchiere außerdem konkrete Kontaktinformationen sowie eine kleine Liste an Dienstleistern (z.B. Technik, Catering) in der Nähe der Location.
 
 Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
 {
@@ -247,8 +248,21 @@ Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
       "scamper_refinements": {
         "idea": "Der Wow-Faktor durch SCAMPER beschrieben...",
         "real_world_validation": {
-          "location": { "name": "Echter Location Name via Google", "description": "Kurze Beschreibung" },
-          "vendor": { "name": "Echter Dienstleister/Caterer", "description": "Kurze Beschreibung" }
+          "location": { 
+            "name": "Echter Location Name via Google", 
+            "description": "Kurze Beschreibung",
+            "address": "Genaue Adresse",
+            "contact": "Ansprechpartner / Telefon / Email",
+            "website": "URL zur Website"
+          },
+          "nearby_vendors": [
+            {
+              "name": "Echter Dienstleister",
+              "type": "Catering / Technik / Deko etc.",
+              "description": "Kurzinfo",
+              "contact": "Webseite oder Telefon"
+            }
+          ]
         }
       },
       "how_now_wow": "wow",
