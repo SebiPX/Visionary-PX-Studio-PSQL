@@ -93,7 +93,14 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 - **Chat-History:** Gespeichert in `chat_sessions`, wiederherstellbar
 - **Markdown-Rendering:** Alle Bot-Antworten als formatiertes Markdown
 
-### 9. ⚙️ Benutzereinstellungen
+### 9. 🎤 PX Event Agent
+
+- **Mehrstufiger Ideation-Workflow:** Briefing → Morphological Box → SCAMPER Refinement → Pitch Export
+- **Google Search Integration:** Agent liest Location-Präferenzen, sucht reale Veranstaltungsorte & Vendors via Google (Website, Adresse, Telefonnummer)
+- **Osbourne Checklist:** Erweitertes SCAMPER-Prompting mit Adjektiven zur Ideen-Herausforderung (visuell als Tags dargestellt)
+- **HTML Pitch Export:** Dynamisch generiertes, eigenständiges HTML-Pitchbook mit Tailwind CSS
+
+### 10. ⚙️ Benutzereinstellungen
 
 - Profil bearbeiten (Name)
 - Avatar-Upload → Cloudflare R2 → URL in `profiles`

@@ -211,6 +211,12 @@ psql "$DATABASE_URL" -f /opt/docker/labs-api/inventar_migration.sql
 - **Onboarding Bot** mit RAG (pgvector Cosine-Similarity über `onboarding_embeddings`)
 - Markdown-Rendering, Chat-History
 
+### 🎤 PX Event Agent
+
+- Mehrstufiger KI-Workflow: Morphological Box → SCAMPER → Pitch
+- Google Search API: Ortsspezifische Vorschläge (Locations, Vendoren)
+- Selbstgenerierendes, portables HTML-Pitchbook
+
 ### ⚙️ Settings
 
 - Profil & Avatar-Upload (Cloudflare R2)
