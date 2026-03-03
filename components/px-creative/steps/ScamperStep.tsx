@@ -7,6 +7,7 @@ export const ScamperStep: React.FC = () => {
   const [selectingId, setSelectingId] = useState<string | null>(null);
 
   const concepts = currentProject?.concepts || [];
+  const hasFinalConcept = concepts.some(c => c.is_final_choice);
 
   const handleSelectConcept = async (conceptId: string) => {
     const token = getToken();
@@ -141,7 +142,7 @@ export const ScamperStep: React.FC = () => {
         })}
       </div>
 
-      <div className="mt-8 flex">
+      <div className="mt-8 flex justify-between items-center">
         <button 
           onClick={async () => {
             const token = getToken();
@@ -152,6 +153,19 @@ export const ScamperStep: React.FC = () => {
         >
           <span className="material-icons-round text-sm">arrow_back</span> Back to Matrix
         </button>
+
+        {hasFinalConcept && (
+          <button 
+            onClick={async () => {
+              const token = getToken();
+              if (token && currentProject) await updateProject(token, currentProject.id, { current_step: 'finished' });
+            }}
+            disabled={loading || selectingId !== null}
+            className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 text-lg"
+          >
+            Skip to Output <span className="material-icons-round text-sm">arrow_forward</span>
+          </button>
+        )}
       </div>
     </div>
   );

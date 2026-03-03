@@ -9,6 +9,16 @@ export const MatrixStep: React.FC = () => {
   const [concepts, setConcepts] = useState<Array<Record<string, string>>>([{}, {}]); // Pre-fill with 2 empty concepts
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Load previously selected user concepts if available
+  useEffect(() => {
+    if (currentProject?.concepts && currentProject.concepts.length > 0) {
+      const userConcepts = currentProject.concepts.filter(c => c.concept_type === 'user');
+      if (userConcepts.length === 2) {
+        setConcepts([userConcepts[0].selected_parameters, userConcepts[1].selected_parameters]);
+      }
+    }
+  }, [currentProject?.concepts]);
+
   // Parse Matrix Data securely
   const matrixData = currentProject?.matrices?.[0]?.matrix_data;
   const categories = matrixData?.categories || [];
@@ -20,6 +30,22 @@ export const MatrixStep: React.FC = () => {
       [categoryName]: optionName
     };
     setConcepts(updatedConcepts);
+  };
+
+  const hasConcepts = currentProject?.concepts && currentProject.concepts.length > 0;
+
+  const handleContinue = async () => {
+    const token = getToken();
+    if (!token || !currentProject) return;
+    setIsGenerating(true);
+    try {
+      await updateProject(token, currentProject.id, { current_step: 'scamper' });
+    } catch (err) {
+      console.error(err);
+      alert('Failed to continue.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleGenerateScamper = async () => {
@@ -147,22 +173,34 @@ export const MatrixStep: React.FC = () => {
           <span className="material-icons-round text-sm">arrow_back</span> Back to Briefing
         </button>
 
-        <button 
-          onClick={handleGenerateScamper}
-          disabled={!bothComplete || isGenerating || loading}
-          className="px-8 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)] flex items-center gap-2 text-lg"
-        >
-          {isGenerating || loading ? (
-            <span className="flex items-center gap-2">
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              Running SCAMPER Engine...
-            </span>
-          ) : (
-            <>
-              Next: Generate SCAMPER Concepts <span className="material-icons-round">bolt</span>
-            </>
+        <div className="flex gap-4 items-center">
+          {hasConcepts && (
+            <button 
+              onClick={handleContinue}
+              disabled={isGenerating || loading}
+              className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+            >
+              Skip to SCAMPER <span className="material-icons-round text-sm">arrow_forward</span>
+            </button>
           )}
-        </button>
+
+          <button 
+            onClick={handleGenerateScamper}
+            disabled={!bothComplete || isGenerating || loading}
+            className="px-8 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)] flex items-center gap-2 text-lg"
+          >
+            {isGenerating || loading ? (
+              <span className="flex items-center gap-2">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Running SCAMPER Engine...
+              </span>
+            ) : (
+              <>
+                {hasConcepts ? 'Re-generate Concepts' : 'Next: Generate SCAMPER Concepts'} <span className="material-icons-round">bolt</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
     </div>

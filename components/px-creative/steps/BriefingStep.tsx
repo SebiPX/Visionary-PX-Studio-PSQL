@@ -18,6 +18,22 @@ export const BriefingStep: React.FC = () => {
 
   if (!currentProject) return null;
 
+  const hasMatrix = currentProject.matrices && currentProject.matrices.length > 0;
+
+  const handleContinue = async () => {
+    const token = getToken();
+    if (!token) return;
+    setIsSaving(true);
+    try {
+      await updateProject(token, currentProject.id, { current_step: 'matrix' });
+    } catch (err) {
+      console.error(err);
+      alert('Failed to continue.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleSaveAndContinue = async () => {
     const token = getToken();
     if (!token) return;
@@ -155,7 +171,17 @@ export const BriefingStep: React.FC = () => {
 
       </div>
 
-      <div className="mt-8 flex justify-end">
+      <div className="mt-8 flex justify-end gap-4">
+        {hasMatrix && (
+          <button 
+            onClick={handleContinue}
+            disabled={isSaving || loading}
+            className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+          >
+            Skip to Matrix <span className="material-icons-round text-sm">arrow_forward</span>
+          </button>
+        )}
+
         <button 
           onClick={handleSaveAndContinue}
           disabled={isSaving || loading || !occasion || !guestCount}
@@ -168,7 +194,7 @@ export const BriefingStep: React.FC = () => {
             </span>
           ) : (
             <>
-              Next: Generate Matrix <span className="material-icons-round">auto_awesome</span>
+              {hasMatrix ? 'Re-generate Matrix' : 'Next: Generate Matrix'} <span className="material-icons-round">auto_awesome</span>
             </>
           )}
         </button>
