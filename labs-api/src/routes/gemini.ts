@@ -30,7 +30,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
       );
       const generationConfig = config ? { ...config } : {};
       if (isImageModel && !(generationConfig as any).responseModalities) {
-        (generationConfig as any).responseModalities = ['TEXT', 'IMAGE'];
+        (generationConfig as any).responseModalities = ['IMAGE'];
       }
       geminiBody.generationConfig = generationConfig;
 
