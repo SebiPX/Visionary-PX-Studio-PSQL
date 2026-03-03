@@ -38,7 +38,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
             <span className="material-icons-round text-white text-lg">auto_awesome</span>
           </div>
           <h1 className="text-lg font-bold tracking-tight text-white hidden md:block">
-            Visionary <span className="text-primary">PX Studio</span>
+            PX <span className="text-primary">Studio</span>
           </h1>
         </div>
 

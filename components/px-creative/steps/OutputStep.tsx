@@ -1,9 +1,49 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useCreativeAgentStore } from '../../../store/useCreativeAgentStore';
 import { getToken } from '../../../lib/apiClient';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 export const OutputStep: React.FC = () => {
   const { currentProject, setCurrentProject, updateProject } = useCreativeAgentStore();
+  const printRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPDF = async () => {
+    if (!printRef.current) return;
+    setIsExporting(true);
+    
+    try {
+      const element = printRef.current;
+      
+      const canvas = await html2canvas(element, { 
+        scale: 2, 
+        useCORS: true, 
+        backgroundColor: '#0f172a' // matching bg
+      });
+      
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      
+      const safeTitle = currentProject?.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'export';
+      pdf.save(`PX_Creative_Concept_${safeTitle}.pdf`);
+    } catch (err) {
+      console.error("PDF Export failed:", err);
+      alert("Failed to generate PDF.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const finalConcept = currentProject?.concepts?.find(c => c.is_final_choice);
 
@@ -20,7 +60,7 @@ export const OutputStep: React.FC = () => {
       </div>
 
       {finalConcept && (
-        <div className="bg-[#161f30] rounded-2xl border border-white/10 p-8 shadow-xl mb-8 relative overflow-hidden">
+        <div ref={printRef} className="bg-[#161f30] rounded-2xl border border-white/10 p-8 shadow-xl mb-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
           
           <h3 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4 relative z-10">
@@ -110,10 +150,20 @@ export const OutputStep: React.FC = () => {
           <span className="material-icons-round text-sm">arrow_back</span> Back to SCAMPER
         </button>
         <button 
-          className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2"
-          onClick={() => alert("PDF Export will be implemented in the next iteration.")}
+          className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 disabled:opacity-50"
+          onClick={handleExportPDF}
+          disabled={isExporting}
         >
-          <span className="material-icons-round text-sm">picture_as_pdf</span> Export PDF Pitch
+          {isExporting ? (
+             <span className="flex items-center gap-2">
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              Exporting...
+            </span>
+          ) : (
+             <>
+               <span className="material-icons-round text-sm">picture_as_pdf</span> Export PDF Pitch
+             </>
+          )}
         </button>
       </div>
 
