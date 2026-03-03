@@ -98,6 +98,15 @@ export const OutputStep: React.FC = () => {
                 <h4 className="flex items-center gap-2 text-xs font-bold text-orange-400 uppercase tracking-wider mb-2">
                   <span className="material-icons-round text-sm">auto_awesome</span> The Wow-Factor (SCAMPER)
                 </h4>
+                {finalConcept.scamper_refinements?.applied_adjectives && finalConcept.scamper_refinements.applied_adjectives.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4 mt-2">
+                    {finalConcept.scamper_refinements.applied_adjectives.map((adj, i) => (
+                      <span key={i} className="px-3 py-1 bg-orange-500/20 text-orange-400 text-xs uppercase font-bold rounded border border-orange-500/30">
+                        {adj}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="bg-orange-500/10 p-5 rounded-xl border border-orange-500/20 mb-6">
                   <p className="text-slate-200 leading-relaxed italic text-lg">
                     "{finalConcept.scamper_refinements?.idea}"

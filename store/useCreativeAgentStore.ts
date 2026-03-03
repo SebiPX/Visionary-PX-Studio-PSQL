@@ -39,6 +39,7 @@ export interface CreativeConcept {
   selected_parameters: Record<string, string>;
   scamper_refinements?: { 
     idea: string;
+    applied_adjectives?: string[];
     real_world_validation?: {
       location?: { 
         name: string; 

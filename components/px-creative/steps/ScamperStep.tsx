@@ -74,6 +74,15 @@ export const ScamperStep: React.FC = () => {
                     <span className="material-icons-round text-sm">auto_awesome</span> 
                     SCAMPER Refinement
                   </h4>
+                  {concept.scamper_refinements?.applied_adjectives && concept.scamper_refinements.applied_adjectives.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {concept.scamper_refinements.applied_adjectives.map((adj, i) => (
+                        <span key={i} className="px-2 py-0.5 bg-orange-500/20 text-orange-400 text-[10px] uppercase font-bold rounded border border-orange-500/30">
+                          {adj}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-sm text-slate-300 leading-relaxed italic bg-orange-500/5 p-3 rounded-lg border border-orange-500/10 mb-4">
                     "{concept.scamper_refinements?.idea}"
                   </p>

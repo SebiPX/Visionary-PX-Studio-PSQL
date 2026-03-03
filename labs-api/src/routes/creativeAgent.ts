@@ -231,7 +231,9 @@ ${JSON.stringify(userConcepts, null, 2)}
 
 DEINE AUFGABE:
 1. Erstelle 2 weitere, eigene KI-Konzepte (Wähle dazu Parameter aus der Matrix, die extrem "Out-of-the-Box" und innovativ sind).
-2. Wende nun auf ALLE 4 Konzepte (die 2 vom User + deine 2) die SCAMPER-Methode an (Substitute, Combine, Adapt, Modify, Put to other use, Eliminate, Reverse), um jedem Konzept einen einzigartigen "Wow-Faktor" zu verleihen.
+2. Wende nun auf ALLE 4 Konzepte (die 2 vom User + deine 2) die SCAMPER-Methode in Kombination mit der Osbourne Checkliste an. Nutze zur Verfeinerung und als Challenge für den Wow-Faktor aktiv eine Auswahl aus diesen Adjektiven:
+   [anders, anpassen, attraktiver, automatisch, beweglich, billiger, breiter, digital, direkter, effektiver, einfacher, eliminieren, elastisch, energetisch, ergonomisch, ersetzen, flexibel, funktionaler, gefahrlos, größer, handlicher, höher, intelligenter, interaktiv, kleiner, kombinieren, kreativer, kürzer, leichter, leiser, länger, moderner, modifizieren, modular, multifunktional, nachhaltiger, natürlicher, neuartig, neu anordnen, niedriger, präziser, praktischer, preiswerter, robuster, schneller, schöner, schlanker, sicherer, smarter, sozialer, stabiler, stärker, stylischer, transparenter, umkehren, umweltfreundlicher, universeller, variabler, vereinfachen, vergrößern, verkleinern, verbessern, vernetzt, vielseitiger, wärmer, wartungsärmer, wirtschaftlicher, wirksamer, zugänglicher, zuverlässiger, zukunftsorientierter, anders verwenden].
+   Beschreibe detailliert, wie das Konzept dadurch einen einzigartigen "Wow-Faktor" erhält.
 3. Bewerte jedes der 4 Konzepte auf der How-Now-Wow-Skala:
    - "how": Sehr innovativ, aber schwer machbar / teuer.
    - "now": Bekannt, erprobt, einfach machbar.
@@ -247,7 +249,8 @@ Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
       "source": "user", // oder "ai"
       "parameters": { "Location": "...", "Catering": "..." }, // Die gewählten Matrix-Punkte
       "scamper_refinements": {
-        "idea": "Der Wow-Faktor durch SCAMPER beschrieben...",
+        "idea": "Der Wow-Faktor durch SCAMPER und die Osbourne Checkliste beschrieben...",
+        "applied_adjectives": ["innovativ", "digital", "vernetzt"], // 3-5 Adjektive aus der Liste, die hier angewendet wurden
         "real_world_validation": {
           "location": { 
             "name": "Echter Location Name via Google", 
