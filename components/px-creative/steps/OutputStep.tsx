@@ -19,7 +19,8 @@ export const OutputStep: React.FC = () => {
       const canvas = await html2canvas(element, { 
         scale: 2, 
         useCORS: true, 
-        backgroundColor: '#0f172a' // matching bg
+        backgroundColor: '#0f172a', // matching bg
+        ignoreElements: (node) => node.tagName?.toLowerCase() === 'video'
       });
       
       const imgData = canvas.toDataURL('image/jpeg', 1.0);
