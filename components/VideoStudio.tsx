@@ -202,7 +202,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
             }
 
             // 1. Download the video from Google Files API (needs the API key)
-            const apiKey = (process.env.GEMINI_API_KEY || process.env.API_KEY || '');
+            const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || '');
             const googleDownloadUrl = googleUri.includes('?')
                 ? `${googleUri}&key=${apiKey}`
                 : `${googleUri}?key=${apiKey}`;
