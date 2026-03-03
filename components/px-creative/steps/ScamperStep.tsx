@@ -3,7 +3,7 @@ import { useCreativeAgentStore } from '../../../store/useCreativeAgentStore';
 import { getToken } from '../../../lib/apiClient';
 
 export const ScamperStep: React.FC = () => {
-  const { currentProject, selectFinalConcept, loading } = useCreativeAgentStore();
+  const { currentProject, selectFinalConcept, loading, updateProject } = useCreativeAgentStore();
   const [selectingId, setSelectingId] = useState<string | null>(null);
 
   const concepts = currentProject?.concepts || [];
@@ -139,6 +139,19 @@ export const ScamperStep: React.FC = () => {
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-8 flex">
+        <button 
+          onClick={async () => {
+            const token = getToken();
+            if (token && currentProject) await updateProject(token, currentProject.id, { current_step: 'matrix' });
+          }}
+          disabled={loading || selectingId !== null}
+          className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+        >
+          <span className="material-icons-round text-sm">arrow_back</span> Back to Matrix
+        </button>
       </div>
     </div>
   );

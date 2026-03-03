@@ -1,8 +1,9 @@
 import React from 'react';
 import { useCreativeAgentStore } from '../../../store/useCreativeAgentStore';
+import { getToken } from '../../../lib/apiClient';
 
 export const OutputStep: React.FC = () => {
-  const { currentProject, setCurrentProject } = useCreativeAgentStore();
+  const { currentProject, setCurrentProject, updateProject } = useCreativeAgentStore();
 
   const finalConcept = currentProject?.concepts?.find(c => c.is_final_choice);
 
@@ -97,7 +98,16 @@ export const OutputStep: React.FC = () => {
           onClick={() => setCurrentProject(null)}
           className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
         >
-          <span className="material-icons-round text-sm">arrow_back</span> Return to Dashboard
+          <span className="material-icons-round text-sm">home</span> Dashboard
+        </button>
+        <button 
+          onClick={async () => {
+             const token = getToken();
+             if (token && currentProject) await updateProject(token, currentProject.id, { current_step: 'scamper' });
+          }}
+          className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+        >
+          <span className="material-icons-round text-sm">arrow_back</span> Back to SCAMPER
         </button>
         <button 
           className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2"

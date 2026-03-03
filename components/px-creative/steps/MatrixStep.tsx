@@ -3,7 +3,7 @@ import { useCreativeAgentStore } from '../../../store/useCreativeAgentStore';
 import { getToken } from '../../../lib/apiClient';
 
 export const MatrixStep: React.FC = () => {
-  const { currentProject, generateConcepts, loading } = useCreativeAgentStore();
+  const { currentProject, generateConcepts, loading, updateProject } = useCreativeAgentStore();
 
   const [activeConceptIndex, setActiveConceptIndex] = useState(0);
   const [concepts, setConcepts] = useState<Array<Record<string, string>>>([{}, {}]); // Pre-fill with 2 empty concepts
@@ -135,7 +135,18 @@ export const MatrixStep: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-8 flex justify-end">
+      <div className="mt-8 flex justify-between items-center">
+        <button 
+          onClick={async () => {
+            const token = getToken();
+            if (token && currentProject) await updateProject(token, currentProject.id, { current_step: 'briefing' });
+          }}
+          disabled={isGenerating || loading}
+          className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+        >
+          <span className="material-icons-round text-sm">arrow_back</span> Back to Briefing
+        </button>
+
         <button 
           onClick={handleGenerateScamper}
           disabled={!bothComplete || isGenerating || loading}
