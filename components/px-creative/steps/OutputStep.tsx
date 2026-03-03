@@ -2,6 +2,20 @@ import React, { useRef, useState } from 'react';
 import { useCreativeAgentStore } from '../../../store/useCreativeAgentStore';
 import { getToken } from '../../../lib/apiClient';
 
+const renderWithLinks = (text?: string) => {
+  if (!text) return text;
+  // Regex matches http://, https://, or www.
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+  const parts = text.split(urlRegex);
+  return parts.map((part, i) => {
+    if (part.match(urlRegex)) {
+      const href = part.startsWith('http') ? part : `https://${part}`;
+      return <a key={i} href={href} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 underline">{part}</a>;
+    }
+    return part;
+  });
+};
+
 export const OutputStep: React.FC = () => {
   const { currentProject, setCurrentProject, updateProject } = useCreativeAgentStore();
   const printRef = useRef<HTMLDivElement>(null);
@@ -135,7 +149,7 @@ export const OutputStep: React.FC = () => {
                           <p className="text-sm text-slate-400 mt-1 mb-2">{finalConcept.scamper_refinements.real_world_validation.location.description}</p>
                           {finalConcept.scamper_refinements.real_world_validation.location.address && <p className="text-xs text-slate-300 mt-1"><span className="opacity-50">📍</span> {finalConcept.scamper_refinements.real_world_validation.location.address}</p>}
                           {finalConcept.scamper_refinements.real_world_validation.location.contact && <p className="text-xs text-slate-300"><span className="opacity-50">📞</span> {finalConcept.scamper_refinements.real_world_validation.location.contact}</p>}
-                          {finalConcept.scamper_refinements.real_world_validation.location.website && <p className="text-xs text-blue-400 truncate"><a href={finalConcept.scamper_refinements.real_world_validation.location.website} target="_blank" rel="noreferrer"><span className="opacity-70">🌐</span> {finalConcept.scamper_refinements.real_world_validation.location.website}</a></p>}
+                          {finalConcept.scamper_refinements.real_world_validation.location.website && <p className="text-xs text-blue-400 truncate"><a href={finalConcept.scamper_refinements.real_world_validation.location.website.startsWith('http') ? finalConcept.scamper_refinements.real_world_validation.location.website : `https://${finalConcept.scamper_refinements.real_world_validation.location.website}`} target="_blank" rel="noreferrer" className="hover:underline"><span className="opacity-70">🌐</span> {finalConcept.scamper_refinements.real_world_validation.location.website}</a></p>}
                         </div>
                       )}
                       
@@ -147,7 +161,7 @@ export const OutputStep: React.FC = () => {
                               <div key={vi} className="bg-white/5 p-3 rounded-lg border border-white/5">
                                 <strong className="text-blue-400 text-sm block">{v.name} <span className="text-xs text-slate-500 font-normal">({v.type})</span></strong>
                                 <p className="text-xs text-slate-400 mt-1">{v.description}</p>
-                                <p className="text-xs text-slate-300 mt-2"><span className="opacity-50">📞</span> {v.contact}</p>
+                                <p className="text-xs text-slate-300 mt-2"><span className="opacity-50">📞</span> {renderWithLinks(v.contact)}</p>
                               </div>
                             ))}
                           </div>
