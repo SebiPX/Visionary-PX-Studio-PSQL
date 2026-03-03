@@ -37,7 +37,13 @@ export interface CreativeConcept {
   project_id: string;
   concept_type: 'user' | 'ai';
   selected_parameters: Record<string, string>;
-  scamper_refinements?: { idea: string };
+  scamper_refinements?: { 
+    idea: string;
+    real_world_validation?: {
+      location?: { name: string; description: string; };
+      vendor?: { name: string; description: string; };
+    };
+  };
   how_now_wow_score?: 'how' | 'now' | 'wow';
   budget_estimation?: string;
   is_final_choice?: boolean;

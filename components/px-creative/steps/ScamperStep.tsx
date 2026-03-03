@@ -73,9 +73,35 @@ export const ScamperStep: React.FC = () => {
                     <span className="material-icons-round text-sm">auto_awesome</span> 
                     SCAMPER Refinement
                   </h4>
-                  <p className="text-sm text-slate-300 leading-relaxed italic bg-orange-500/5 p-3 rounded-lg border border-orange-500/10">
+                  <p className="text-sm text-slate-300 leading-relaxed italic bg-orange-500/5 p-3 rounded-lg border border-orange-500/10 mb-4">
                     "{concept.scamper_refinements?.idea}"
                   </p>
+                  
+                  {/* Real-World Validation */}
+                  {concept.scamper_refinements?.real_world_validation && (
+                    <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50 space-y-3">
+                      <h4 className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-700/50 pb-2 mb-2">
+                        <span className="material-icons-round text-xs">travel_explore</span> 
+                        Real-World Validation
+                      </h4>
+                      
+                      {concept.scamper_refinements.real_world_validation.location && (
+                        <div>
+                          <span className="block text-[10px] uppercase text-slate-500 mb-1">Real Location</span>
+                          <strong className="text-green-400 text-sm block">{concept.scamper_refinements.real_world_validation.location.name}</strong>
+                          <p className="text-xs text-slate-400 mt-1">{concept.scamper_refinements.real_world_validation.location.description}</p>
+                        </div>
+                      )}
+
+                      {concept.scamper_refinements.real_world_validation.vendor && (
+                        <div>
+                          <span className="block text-[10px] uppercase text-slate-500 mb-1">Real Vendor / Caterer</span>
+                          <strong className="text-blue-400 text-sm block">{concept.scamper_refinements.real_world_validation.vendor.name}</strong>
+                          <p className="text-xs text-slate-400 mt-1">{concept.scamper_refinements.real_world_validation.vendor.description}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Evaluation */}

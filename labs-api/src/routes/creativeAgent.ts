@@ -236,6 +236,7 @@ DEINE AUFGABE:
    - "now": Bekannt, erprobt, einfach machbar.
    - "wow": Extrem kreativ, neuartig, aber absolut umsetzbar.
 4. Schätze für jedes Konzept eine Budget-Kategorie (z.B. "$", "$$", "$$$").
+5. WICHTIG (REAL-WORLD VALIDATION): Nutze dein Google Search Tool, um für JEDES Konzept eine GANZ REALE Location und falls passend einen konkreten echten Dienstleister/Caterer in der Zielregion (bzw. für das Konzept passend) zu finden. Erfinde KEINE Namen.
 
 Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
 {
@@ -244,7 +245,11 @@ Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
       "source": "user", // oder "ai"
       "parameters": { "Location": "...", "Catering": "..." }, // Die gewählten Matrix-Punkte
       "scamper_refinements": {
-        "idea": "Der Wow-Faktor durch SCAMPER beschrieben..."
+        "idea": "Der Wow-Faktor durch SCAMPER beschrieben...",
+        "real_world_validation": {
+          "location": { "name": "Echter Location Name via Google", "description": "Kurze Beschreibung" },
+          "vendor": { "name": "Echter Dienstleister/Caterer", "description": "Kurze Beschreibung" }
+        }
       },
       "how_now_wow": "wow",
       "budget_estimation": "$$"
@@ -260,6 +265,7 @@ Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ googleSearch: {} }],
         generationConfig: { responseMimeType: "application/json", temperature: 0.8 }
       })
     });

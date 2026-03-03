@@ -56,11 +56,36 @@ export const OutputStep: React.FC = () => {
                 <h4 className="flex items-center gap-2 text-xs font-bold text-orange-400 uppercase tracking-wider mb-2">
                   <span className="material-icons-round text-sm">auto_awesome</span> The Wow-Factor (SCAMPER)
                 </h4>
-                <div className="bg-orange-500/10 p-5 rounded-xl border border-orange-500/20">
+                <div className="bg-orange-500/10 p-5 rounded-xl border border-orange-500/20 mb-6">
                   <p className="text-slate-200 leading-relaxed italic text-lg">
                     "{finalConcept.scamper_refinements?.idea}"
                   </p>
                 </div>
+
+                {finalConcept.scamper_refinements?.real_world_validation && (
+                  <div>
+                    <h4 className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                      <span className="material-icons-round text-sm">travel_explore</span> Real-World Validation
+                    </h4>
+                    <div className="bg-slate-800/50 p-5 rounded-xl border border-slate-700/50 space-y-4">
+                      {finalConcept.scamper_refinements.real_world_validation.location && (
+                        <div>
+                          <span className="block text-xs uppercase text-slate-500 mb-1">Real Location</span>
+                          <strong className="text-green-400 text-base block">{finalConcept.scamper_refinements.real_world_validation.location.name}</strong>
+                          <p className="text-sm text-slate-400 mt-1">{finalConcept.scamper_refinements.real_world_validation.location.description}</p>
+                        </div>
+                      )}
+                      
+                      {finalConcept.scamper_refinements.real_world_validation.vendor && (
+                        <div>
+                          <span className="block text-xs uppercase text-slate-500 mb-1">Real Vendor / Caterer</span>
+                          <strong className="text-blue-400 text-base block">{finalConcept.scamper_refinements.real_world_validation.vendor.name}</strong>
+                          <p className="text-sm text-slate-400 mt-1">{finalConcept.scamper_refinements.real_world_validation.vendor.description}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
