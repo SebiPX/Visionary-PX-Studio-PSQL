@@ -219,6 +219,7 @@ router.post('/projects/:id/concepts', requireAuth, async (req: AuthRequest, res:
     const prompt = `
 Du bist ein renommierter Event-Kreativdirektor.
 Hier ist das Briefing:
+Der User hat folgende Präferenz für den Veranstaltungsort (Location Preference): ${project.location_preference || 'Keine spezifische Angabe, wähle eine zu den restlichen Parametern passende Stadt'}
 Anlass: ${project.occasion}, Teilnehmer: ${project.guest_count}, Budget: ${project.budget || 'Offen'}
 
 Hier ist der Morphologische Kasten (Matrix), der dafür generiert wurde:
@@ -236,7 +237,7 @@ DEINE AUFGABE:
    - "now": Bekannt, erprobt, einfach machbar.
    - "wow": Extrem kreativ, neuartig, aber absolut umsetzbar.
 4. Schätze für jedes Konzept eine Budget-Kategorie (z.B. "$", "$$", "$$$").
-5. WICHTIG (REAL-WORLD VALIDATION): Nutze dein Google Search Tool, um für JEDES Konzept eine GANZ REALE Location und passende Dienstleister/Caterer in der Zielregion zu finden. Erfinde KEINE Namen.
+5. WICHTIG (REAL-WORLD VALIDATION): Nutze dein Google Search Tool, um für JEDES Konzept eine GANZ REALE Location und passende Dienstleister/Caterer EXAKT in der oben genannten "Location Preference" (Veranstaltungsort) Region des Users zu finden. Erfinde KEINE Namen. Die Location und die Dienstleister MÜSSEN zwingend in oder in direkter Umgebung der Location Preference liegen.
 Recherchiere außerdem konkrete Kontaktinformationen sowie eine kleine Liste an Dienstleistern (z.B. Technik, Catering) in der Nähe der Location.
 
 Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
