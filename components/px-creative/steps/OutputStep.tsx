@@ -1,46 +1,55 @@
 import React, { useRef, useState } from 'react';
 import { useCreativeAgentStore } from '../../../store/useCreativeAgentStore';
 import { getToken } from '../../../lib/apiClient';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 
 export const OutputStep: React.FC = () => {
   const { currentProject, setCurrentProject, updateProject } = useCreativeAgentStore();
   const printRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
-  const handleExportPDF = async () => {
+  const handleExportHTML = () => {
     if (!printRef.current) return;
     setIsExporting(true);
     
     try {
-      const element = printRef.current;
+      const content = printRef.current.innerHTML;
       
-      const canvas = await html2canvas(element, { 
-        scale: 2, 
-        useCORS: true, 
-        backgroundColor: '#0f172a', // matching bg
-        ignoreElements: (node) => node.tagName?.toLowerCase() === 'video'
-      });
-      
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      
+      const htmlTemplate = `<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PX Creative Concept: ${currentProject?.title}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+      body {
+        background-color: #0f1522;
+        color: white;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+    </style>
+</head>
+<body class="min-h-screen py-10 px-4 md:px-10 flex flex-col items-center">
+    <div class="max-w-4xl w-full bg-[#161f30] rounded-2xl border border-white/10 p-8 shadow-xl relative overflow-hidden">
+        ${content}
+    </div>
+</body>
+</html>`;
+
+      const blob = new Blob([htmlTemplate], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
       const safeTitle = currentProject?.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'export';
-      pdf.save(`PX_Creative_Concept_${safeTitle}.pdf`);
+      link.setAttribute('download', `PX_Creative_Concept_${safeTitle}.html`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("PDF Export failed:", err);
-      alert("Failed to generate PDF.");
+      console.error("HTML Export failed:", err);
+      alert("Failed to generate HTML.");
     } finally {
       setIsExporting(false);
     }
@@ -171,7 +180,7 @@ export const OutputStep: React.FC = () => {
         </button>
         <button 
           className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 disabled:opacity-50"
-          onClick={handleExportPDF}
+          onClick={handleExportHTML}
           disabled={isExporting}
         >
           {isExporting ? (
@@ -181,7 +190,7 @@ export const OutputStep: React.FC = () => {
             </span>
           ) : (
              <>
-               <span className="material-icons-round text-sm">picture_as_pdf</span> Export PDF Pitch
+               <span className="material-icons-round text-sm">html</span> Export HTML Pitch
              </>
           )}
         </button>
