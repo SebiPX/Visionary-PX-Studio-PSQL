@@ -164,8 +164,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                 model: 'veo-3.1-fast-generate-preview',
                 prompt: `${prompt} (Camera Motion: ${cameraMotion})`,
                 image: (activeMode === 'IMAGE' && uploadedImage) ? {
-                    imageBytes: uploadedImage.split(',')[1],
-                    mimeType: 'image/png'
+                    bytesBase64Encoded: uploadedImage.split(',')[1]
                 } : undefined,
                 config: {
                     resolution: (activeMode === 'IMAGE' && uploadedImage) ? '720p' : '1080p',
