@@ -109,6 +109,10 @@ const AppContent: React.FC = () => {
           <VoiceStudio />
         </div>
 
+        <div className={`w-full h-full ${currentView === AppView.MUSIC_STUDIO ? 'block' : 'hidden'}`}>
+          <MusicStudio isActive={currentView === AppView.MUSIC_STUDIO} />
+        </div>
+
         <div className={`w-full h-full ${currentView === AppView.SETTINGS ? 'block' : 'hidden'}`}>
           <Settings userProfile={userProfile} />
         </div>
