@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { fal } from '@fal-ai/client';
 import { uploadFile } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
+import { ImageSourcePicker } from './ImageSourcePicker';
 import toast from 'react-hot-toast';
 
 export const Studio3D: React.FC = () => {
@@ -16,9 +17,19 @@ export const Studio3D: React.FC = () => {
   const [decimationTarget, setDecimationTarget] = useState<number>(500000);
   const [samplingSteps, setSamplingSteps] = useState<number>(12);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
+  // We keep fileInputRef for direct uploads, although ImageSourcePicker handles it too.
+  // Actually, we don't strictly need it if we rely purely on ImageSourcePicker, 
+  // but let's keep it if we want to bypass it. However, we'll route everything through ImageSourcePicker now.
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { save3D } = useGeneratedContent();
+
+  const handleSourceSelect = (dataUrl: string) => {
+    setSourceImage(dataUrl);
+    setGeneratedModelUrl(null);
+    setShowPicker(false);
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,10 +137,17 @@ export const Studio3D: React.FC = () => {
              {/* Upload Section */}
              <div>
               <label className="text-sm font-medium text-slate-300 mb-2 block">Referenzbild (2D)</label>
-              <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
               
+              {showPicker && (
+                <ImageSourcePicker
+                  onSelect={handleSourceSelect}
+                  onClose={() => setShowPicker(false)}
+                  label="Referenzbild auswählen"
+                />
+              )}
+
               <div 
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => setShowPicker(true)}
                 className="group relative h-48 rounded-xl border-2 border-dashed border-white/10 bg-[#0a0f18] hover:border-primary/50 transition-colors cursor-pointer overflow-hidden flex items-center justify-center"
               >
                 {sourceImage ? (
