@@ -10,6 +10,13 @@ export const Studio3D: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState('');
   const [generatedModelUrl, setGeneratedModelUrl] = useState<string | null>(null);
+  
+  // Advanced Settings
+  const [textureSize, setTextureSize] = useState<1024 | 2048 | 4096>(2048);
+  const [decimationTarget, setDecimationTarget] = useState<number>(500000);
+  const [samplingSteps, setSamplingSteps] = useState<number>(12);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { save3D } = useGeneratedContent();
 
@@ -45,17 +52,17 @@ export const Studio3D: React.FC = () => {
           resolution: 1024,
           ss_guidance_strength: 7.5,
           ss_guidance_rescale: 0.7,
-          ss_sampling_steps: 12,
+          ss_sampling_steps: samplingSteps,
           ss_rescale_t: 5,
           shape_slat_guidance_strength: 7.5,
           shape_slat_guidance_rescale: 0.5,
-          shape_slat_sampling_steps: 12,
+          shape_slat_sampling_steps: samplingSteps,
           shape_slat_rescale_t: 3,
           tex_slat_guidance_strength: 1,
-          tex_slat_sampling_steps: 12,
+          tex_slat_sampling_steps: samplingSteps,
           tex_slat_rescale_t: 3,
-          decimation_target: 500000,
-          texture_size: 2048,
+          decimation_target: decimationTarget,
+          texture_size: textureSize,
           remesh: true,
           remesh_band: 1,
           image_url: imageUrl,
@@ -142,6 +149,86 @@ export const Studio3D: React.FC = () => {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Advanced Settings Toggle */}
+            <div className="pt-2">
+              <button 
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
+              >
+                <span className="material-icons-round text-lg transition-transform duration-300" style={{ transform: showAdvanced ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  expand_more
+                </span>
+                Erweiterte Parameter (Optional)
+              </button>
+              
+              {showAdvanced && (
+                <div className="mt-4 space-y-4 p-4 bg-white/5 border border-white/5 rounded-xl">
+                  {/* Texture Size */}
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-slate-300">Textur-Auflösung</label>
+                      <span className="text-xs text-slate-400">{textureSize}px</span>
+                    </div>
+                    <div className="flex gap-2">
+                      {[1024, 2048, 4096].map(val => (
+                        <button
+                          key={val}
+                          onClick={() => setTextureSize(val as any)}
+                          className={`flex-1 py-1.5 text-xs rounded-md transition-colors ${textureSize === val ? 'bg-primary text-white font-medium' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}
+                        >
+                          {val}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Polygon Count (Decimation) */}
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-slate-300">Geometrie-Detail (Polygone)</label>
+                      <span className="text-xs text-slate-400">
+                        {decimationTarget === 50000 ? 'Low Poly' : decimationTarget === 100000 ? 'Medium' : 'High Poly'}
+                      </span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="50000" 
+                      max="500000" 
+                      step="50000"
+                      value={decimationTarget}
+                      onChange={(e) => setDecimationTarget(Number(e.target.value))}
+                      className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                      <span>50k (Schneller)</span>
+                      <span>500k (Detaillierter)</span>
+                    </div>
+                  </div>
+
+                  {/* Sampling Steps */}
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs font-medium text-slate-300">KI Detail-Schritte</label>
+                      <span className="text-xs text-slate-400">{samplingSteps} Steps</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="10" 
+                      max="24" 
+                      step="2"
+                      value={samplingSteps}
+                      onChange={(e) => setSamplingSteps(Number(e.target.value))}
+                      className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                    />
+                     <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                      <span>10 (Draft)</span>
+                      <span>24 (Hi-Res)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="pt-4 border-t border-white/5">
