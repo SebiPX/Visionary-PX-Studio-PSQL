@@ -86,9 +86,14 @@ export const VoiceStudio: React.FC = () => {
       // which would otherwise forcefully overwrite all speakers to a single Voice.
       let finalPrompt = prompt;
       
-      const containsDialogue = prompt.toLowerCase().includes('speaker 1') || prompt.toLowerCase().includes('speaker 2');
+      // Use regex to detect variants like "Speaker 1", "Speaker1", "Voice 1", "Voice1", etc.
+      const hasSpeaker1 = /speaker\s*1|voice\s*1/i.test(prompt);
+      const hasSpeaker2 = /speaker\s*2|voice\s*2/i.test(prompt);
+      
+      const containsDialogue = hasSpeaker1 && hasSpeaker2;
+
       if (containsDialogue) {
-         finalPrompt = `Instructions: Speaker 1 should use the voice style "${voice1}". Speaker 2 should use the voice style "${voice2}".\n\nTranscript:\n${prompt}`;
+         finalPrompt = `Instructions: The text contains a dialogue. Assign the voice style "${voice1}" to Speaker 1. Assign the voice style "${voice2}" to Speaker 2.\n\nTranscript:\n${prompt}`;
       }
       
       const parts = [{ text: finalPrompt }];
