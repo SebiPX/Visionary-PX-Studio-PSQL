@@ -80,23 +80,40 @@ export const VoiceStudio: React.FC = () => {
       // Do NOT wrap the prompt with instructions like "You are a TTS engine, don't generate text", 
       // because that ironically causes the model to try and reply with text ("Okay, I will read it")!
       // Just send the raw prompt directly.
-      const parts = [{ text: prompt }];
+      
+      // If the user seems to be using dialogue (Speaker 1, Speaker 2), we inject an instruction mapping 
+      // those speakers to the chosen voice styles, and REMOVE the hardcoded `speechConfig` 
+      // which would otherwise forcefully overwrite all speakers to a single Voice.
+      let finalPrompt = prompt;
+      
+      const containsDialogue = prompt.toLowerCase().includes('speaker 1') || prompt.toLowerCase().includes('speaker 2');
+      if (containsDialogue) {
+         finalPrompt = `Instructions: Speaker 1 should use the voice style "${voice1}". Speaker 2 should use the voice style "${voice2}".\n\nTranscript:\n${prompt}`;
+      }
+      
+      const parts = [{ text: finalPrompt }];
 
-      const response = await geminiProxy({
+      const payload: any = {
         action: 'generateContent',
         model: aiModel,
         contents: [{ role: 'user', parts: parts }],
         config: {
           responseModalities: ['AUDIO'],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: {
-                voiceName: voice1
-              }
+        }
+      };
+
+      // Only force a single voice if it's a monologue
+      if (!containsDialogue) {
+        payload.config.speechConfig = {
+          voiceConfig: {
+            prebuiltVoiceConfig: {
+              voiceName: voice1
             }
           }
-        }
-      }) as any;
+        };
+      }
+
+      const response = await geminiProxy(payload) as any;
 
       if (response?.error) {
         throw new Error(response.error.message || JSON.stringify(response.error));
