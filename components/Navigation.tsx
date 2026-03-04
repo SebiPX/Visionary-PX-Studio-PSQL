@@ -23,6 +23,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
     { view: AppView.CHAT_BOT, icon: 'chat_bubble', label: 'Chat' },
     { view: AppView.STUDIO_3D, icon: 'view_in_ar', label: '3D' },
     { view: AppView.VOICE_STUDIO, icon: 'record_voice_over', label: 'Voice' },
+    { view: AppView.MUSIC_STUDIO, icon: 'music_note', label: 'Music' },
   ];
 
   const handleLogout = async () => {

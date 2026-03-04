@@ -15,6 +15,9 @@ const sql = fs.readFileSync(sqlFilePath, 'utf8');
 const sqlVoicesPath = path.join(__dirname, 'voices_migration.sql');
 const sqlVoices = fs.readFileSync(sqlVoicesPath, 'utf8');
 
+const sqlMusicPath = path.join(__dirname, 'music_migration.sql');
+const sqlMusic = fs.readFileSync(sqlMusicPath, 'utf8');
+
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
 });
@@ -27,6 +30,8 @@ async function runMigration() {
     await client.query(sql);
     console.log('Running migration voices_migration.sql...');
     await client.query(sqlVoices);
+    console.log('Running migration music_migration.sql...');
+    await client.query(sqlMusic);
     console.log('Migration completed successfully.');
   } catch (err) {
     console.error('Error running migration:', err);

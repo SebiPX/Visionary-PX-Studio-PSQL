@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { images, videos, thumbnails, texts, sketches, chats, models3d, voices, ApiImage, ApiVideo, ApiThumbnail, ApiText, ApiSketch } from '../lib/apiClient';
+import { images, videos, thumbnails, texts, sketches, chats, models3d, voices, music, ApiImage, ApiVideo, ApiThumbnail, ApiText, ApiSketch } from '../lib/apiClient';
 
-type ContentType = 'image' | 'video' | 'thumbnail' | 'text' | 'sketch' | '3d' | 'voice';
+type ContentType = 'image' | 'video' | 'thumbnail' | 'text' | 'sketch' | '3d' | 'voice' | 'music';
 
 interface Save3DData {
     image_url: string;
@@ -11,6 +11,12 @@ interface Save3DData {
 
 interface SaveVoiceData {
     title?: string;
+    prompt: string;
+    audio_url: string;
+    config?: Record<string, any>;
+}
+
+interface SaveMusicData {
     prompt: string;
     audio_url: string;
     config?: Record<string, any>;
@@ -62,6 +68,12 @@ interface SaveChatData {
     messages: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
+export interface GeneratedContent {
+    image_url: string;
+    model_url: string;
+    config?: Record<string, any>;
+}
+
 export const useGeneratedContent = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -92,6 +104,17 @@ export const useGeneratedContent = () => {
         setLoading(true); setError(null);
         try {
             await voices.create(data);
+            return { success: true };
+        } catch (err: any) {
+            setError(err.message);
+            return { success: false, error: err.message };
+        } finally { setLoading(false); }
+    };
+
+    const saveMusic = async (data: SaveMusicData) => {
+        setLoading(true); setError(null);
+        try {
+            await music.create(data);
             return { success: true };
         } catch (err: any) {
             setError(err.message);
@@ -183,13 +206,32 @@ export const useGeneratedContent = () => {
         setLoading(true); setError(null);
         try {
             let data: any[];
-            if (type === 'image') data = await images.list();
-            else if (type === 'video') data = await videos.list();
-            else if (type === 'thumbnail') data = await thumbnails.list();
-            else if (type === 'sketch') data = await sketches.list();
-            else if (type === '3d') data = await models3d.list();
-            else if (type === 'voice') data = await voices.list();
-            else data = await texts.list();
+            switch (type) {
+                case 'image':
+                    data = await images.list();
+                    break;
+                case 'video':
+                    data = await videos.list();
+                    break;
+                case 'thumbnail':
+                    data = await thumbnails.list();
+                    break;
+                case 'sketch':
+                    data = await sketches.list();
+                    break;
+                case '3d':
+                    data = await models3d.list();
+                    break;
+                case 'voice':
+                    data = await voices.list();
+                    break;
+                case 'music':
+                    data = await music.list();
+                    break;
+                default:
+                    data = await texts.list();
+                    break;
+            }
             return { success: true, data };
         } catch (err: any) {
             setError(err.message);
@@ -209,13 +251,33 @@ export const useGeneratedContent = () => {
     const deleteContent = async (id: string, type: ContentType) => {
         setLoading(true); setError(null);
         try {
-            if (type === 'image') await images.delete(id);
-            else if (type === 'video') await videos.delete(id);
-            else if (type === 'thumbnail') await thumbnails.delete(id);
-            else if (type === 'sketch') await sketches.delete(id);
-            else if (type === '3d') await models3d.delete(id);
-            else if (type === 'voice') await voices.delete(id);
-            else await texts.delete(id);
+            let result;
+            switch (type) {
+                case 'image':
+                    result = await images.delete(id);
+                    break;
+                case 'video':
+                    result = await videos.delete(id);
+                    break;
+                case 'thumbnail':
+                    result = await thumbnails.delete(id);
+                    break;
+                case 'sketch':
+                    result = await sketches.delete(id);
+                    break;
+                case '3d':
+                    result = await models3d.delete(id);
+                    break;
+                case 'voice':
+                    result = await voices.delete(id);
+                    break;
+                case 'music':
+                    result = await music.delete(id);
+                    break;
+                default:
+                    result = await texts.delete(id);
+                    break;
+            }
             return { success: true };
         } catch (err: any) {
             setError(err.message);
@@ -229,6 +291,7 @@ export const useGeneratedContent = () => {
         saveImage,
         save3D,
         saveVoice,
+        saveMusic,
         saveVideo,
         saveThumbnail,
         saveText,

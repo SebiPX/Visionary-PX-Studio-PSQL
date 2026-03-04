@@ -114,6 +114,14 @@ export const voices = {
     delete: (id: string) => request<void>(`/api/voices/${id}`, { method: 'DELETE' }),
 };
 
+// ── Music (Fal.ai / Yue) ─────────────────────────────────────────
+export const music = {
+    list: () => request<any[]>('/api/music'),
+    create: (data: any) =>
+        request<any>('/api/music', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/api/music/${id}`, { method: 'DELETE' }),
+};
+
 // ── Texts ────────────────────────────────────────────────────────
 export const texts = {
     list: () => request<ApiText[]>('/api/texts'),

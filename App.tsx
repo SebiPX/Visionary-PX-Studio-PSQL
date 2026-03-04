@@ -13,6 +13,7 @@ import { SketchStudio } from './components/SketchStudio/SketchStudio';
 import { ChatBot } from './components/ChatBot';
 import { Studio3D } from './components/Studio3D';
 import { VoiceStudio } from './components/VoiceStudio';
+import MusicStudio from './components/MusicStudio'; // Added MusicStudio import
 import { Settings } from './components/Settings';
 import { InventarApp } from './components/InventarApp';
 import { PxCreativeApp } from './components/px-creative/PxCreativeApp';
