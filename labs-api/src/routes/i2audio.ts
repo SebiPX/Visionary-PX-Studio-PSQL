@@ -1,17 +1,15 @@
-import { Router } from 'express';
-import { Pool } from 'pg';
+import { Router, Response } from 'express';
+import { AuthRequest, requireAuth } from '../middleware/requireAuth';
+import pool from '../db';
 
 const router = Router();
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
 
 // GET /api/i2audio - Fetch history for current user
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = req.userId!;
     const result = await pool.query(
-      'SELECT * FROM generated_i2audio WHERE user_id = $1 ORDER BY created_at DESC',
+      'SELECT * FROM generated_i2audio WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50',
       [userId]
     );
     res.json(result.rows);
@@ -22,13 +20,14 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/i2audio - Generate/Save new video metadata
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = req.userId!;
     const { prompt, video_url, config } = req.body;
 
     if (!video_url) {
-      return res.status(400).json({ error: 'Missing video_url' });
+      res.status(400).json({ error: 'Missing video_url' });
+      return;
     }
 
     const { rows } = await pool.query(
@@ -46,9 +45,9 @@ router.post('/', async (req, res) => {
 });
 
 // DELETE /api/i2audio/:id - Delete an item
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = req.userId!;
     const { id } = req.params;
 
     const result = await pool.query(
@@ -57,7 +56,8 @@ router.delete('/:id', async (req, res) => {
     );
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Item not found or unauthorized' });
+      res.status(404).json({ error: 'Item not found or unauthorized' });
+      return;
     }
 
     res.json({ success: true, deletedId: id });
