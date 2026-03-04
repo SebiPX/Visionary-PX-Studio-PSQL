@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS generated_music (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   prompt TEXT NOT NULL,
   audio_url TEXT NOT NULL,
   config JSONB DEFAULT '{}'::jsonb,

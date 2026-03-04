@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS generated_voices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   title TEXT,
   prompt TEXT NOT NULL,
   audio_url TEXT NOT NULL,
