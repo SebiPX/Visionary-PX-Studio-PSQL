@@ -98,6 +98,14 @@ export const thumbnails = {
     delete: (id: string) => request<void>(`/api/thumbnails/${id}`, { method: 'DELETE' }),
 };
 
+// ── 3D Models ────────────────────────────────────────────────────
+export const models3d = {
+    list: () => request<any[]>('/api/models3d'),
+    create: (data: any) =>
+        request<any>('/api/models3d', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/api/models3d/${id}`, { method: 'DELETE' }),
+};
+
 // ── Texts ────────────────────────────────────────────────────────
 export const texts = {
     list: () => request<ApiText[]>('/api/texts'),

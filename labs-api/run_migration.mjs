@@ -9,7 +9,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const sqlFilePath = path.join(__dirname, 'creative_agent.sql');
+const sqlFilePath = path.join(__dirname, 'models3d_migration.sql');
 const sql = fs.readFileSync(sqlFilePath, 'utf8');
 
 const pool = new pg.Pool({

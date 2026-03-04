@@ -122,6 +122,15 @@ export interface GeneratedVideo {
   created_at: string;
 }
 
+export interface Generated3D {
+  id: string;
+  user_id: string;
+  image_url: string;
+  model_url: string;
+  config: Record<string, any>;
+  created_at: string;
+}
+
 export interface GeneratedThumbnail {
   id: string;
   user_id: string;
@@ -172,6 +181,7 @@ export enum AppView {
   CHAT_BOT = 'CHAT_BOT',
   SETTINGS = 'SETTINGS',
   INVENTAR = 'INVENTAR',
+  STUDIO_3D = 'STUDIO_3D',
 }
 
 export interface UserProfile {
