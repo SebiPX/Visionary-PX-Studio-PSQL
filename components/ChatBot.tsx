@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { ChatSession } from '../types';
-import { geminiProxy, getToken, chats } from '../lib/apiClient';
+import { geminiProxy, getToken, chats, uploadFile } from '../lib/apiClient';
 
 // ── Onboarding RAG helpers ─────────────────────────────────────────────────
 const EMBED_MODEL = 'gemini-embedding-001';
@@ -171,9 +171,12 @@ export const ChatBot: React.FC = () => {
   // Ref to always have the latest sessionId without stale closures
   const sessionIdRef = useRef<string | null>(null);
 
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -247,10 +250,26 @@ export const ChatBot: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSend = async () => {
-    if (!inputText.trim() || isTyping) return;
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', text: inputText };
+  const handleSend = async () => {
+    if (!inputText.trim() && !uploadedImage || isTyping) return;
+
+    // Temporarily save attached image and clear state
+    const attachedImageBase64 = uploadedImage;
+    setUploadedImage(null);
+
+    // Initial message creation (will be updated if image is attached)
+    let userMsg: Message = { id: Date.now().toString(), role: 'user', text: inputText };
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
     setIsTyping(true);
@@ -278,7 +297,49 @@ export const ChatBot: React.FC = () => {
         role: m.role,
         parts: [{ text: m.text }]
       }));
-      contents.push({ role: 'user', parts: [{ text: messageToSend }] });
+      let finalMessageForDb = userMsg.text;
+
+      // --- Process attached image if present ---
+      if (attachedImageBase64) {
+         try {
+           // 1. Upload to Cloudflare R2
+           const mimeType = attachedImageBase64.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/)?.[1] || 'image/png';
+           const ext = mimeType.split('/')[1] || 'png';
+           const base64Data = attachedImageBase64.split(',')[1];
+           const byteCharacters = atob(base64Data);
+           const byteArray = new Uint8Array(byteCharacters.length);
+           for (let i = 0; i < byteCharacters.length; i++) {
+             byteArray[i] = byteCharacters.charCodeAt(i);
+           }
+           const imageBlob = new Blob([byteArray], { type: mimeType });
+           const imageFile = new File([imageBlob], `chat-${Date.now()}.${ext}`, { type: mimeType });
+           
+           const imageUrl = await uploadFile(imageFile, 'chat-uploads');
+           
+           // 2. Append markdown image to the DB message text
+           const markdownImage = `\n\n![Angehängtes Bild](${imageUrl})`;
+           finalMessageForDb += markdownImage;
+           
+           // Update the UI message to show the image instantly
+           userMsg = { ...userMsg, text: finalMessageForDb };
+           setMessages(prev => prev.map(m => m.id === userMsg.id ? userMsg : m));
+           
+           // 3. Attach base64 as inline data to the Gemini prompt
+           const inlineData = {
+               mimeType,
+               data: base64Data
+           };
+           
+           // The contents array structure for the final user prompt
+           contents.push({ role: 'user', parts: [ { inlineData } as any, { text: messageToSend } ] });
+
+         } catch (uploadErr) {
+           console.error("Failed to upload image to chat", uploadErr);
+           contents.push({ role: 'user', parts: [{ text: messageToSend }] });
+         }
+      } else {
+        contents.push({ role: 'user', parts: [{ text: messageToSend }] });
+      }
 
       const response = await geminiProxy({
         action: 'generateContent',
@@ -491,10 +552,32 @@ export const ChatBot: React.FC = () => {
         {/* Input Area */}
         <div className="p-4 md:p-6 bg-[#101622] border-t border-white/5 z-20">
           <div className="max-w-4xl mx-auto relative flex items-end gap-2 bg-[#0a0f18] border border-white/10 rounded-2xl p-2 shadow-xl">
-            <button className="w-10 h-10 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex-shrink-0 flex items-center justify-center">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+            />
+            <button 
+              className="w-10 h-10 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex-shrink-0 flex items-center justify-center"
+              onClick={() => fileInputRef.current?.click()}
+            >
               <span className="material-icons-round">add_circle</span>
             </button>
-            <textarea
+            <div className="flex-1 flex flex-col justify-end">
+              {uploadedImage && (
+                <div className="mb-2 relative w-20 h-20 rounded-lg overflow-hidden border border-white/20 shadow-md">
+                  <img src={uploadedImage} alt="Upload preview" className="w-full h-full object-cover" />
+                  <button 
+                    onClick={() => setUploadedImage(null)}
+                    className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-500/80 transition-colors"
+                  >
+                    <span className="material-icons-round" style={{ fontSize: '14px' }}>close</span>
+                  </button>
+                </div>
+              )}
+              <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => {
@@ -506,7 +589,8 @@ export const ChatBot: React.FC = () => {
               placeholder={`Message ${activePersona.name}...`}
               className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-200 placeholder-slate-500 py-3 resize-none max-h-32 hide-scrollbar"
               rows={1}
-            />
+              />
+            </div>
             <button
               onClick={handleSend}
               disabled={!inputText.trim() || isTyping}
