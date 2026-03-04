@@ -87,13 +87,19 @@ export const VoiceStudio: React.FC = () => {
       let finalPrompt = prompt;
       
       // Normalize variants like "Speaker1", "Voice 1" strictly to "Speaker 1" 
-      // so we can map them reliably using Google's multiSpeakerVoiceConfig array.
       finalPrompt = finalPrompt.replace(/speaker\s*1/gi, 'Speaker 1');
       finalPrompt = finalPrompt.replace(/speaker\s*2/gi, 'Speaker 2');
       finalPrompt = finalPrompt.replace(/voice\s*1/gi, 'Speaker 1');
       finalPrompt = finalPrompt.replace(/voice\s*2/gi, 'Speaker 2');
       
       const containsDialogue = finalPrompt.includes('Speaker 1') && finalPrompt.includes('Speaker 2');
+      
+      if (containsDialogue) {
+        // Since multiSpeakerVoiceConfig is not supported on the public AI Studio API,
+        // we must inject the requested voice styles as stage directions/character profiles.
+        finalPrompt = finalPrompt.replace(/Speaker 1:/g, `Speaker 1 (${voice1} voice):`);
+        finalPrompt = finalPrompt.replace(/Speaker 2:/g, `Speaker 2 (${voice2} voice):`);
+      }
       
       const parts = [{ text: finalPrompt }];
 
@@ -106,25 +112,7 @@ export const VoiceStudio: React.FC = () => {
         }
       };
 
-      if (containsDialogue) {
-         // Pass array of voices mapped to the exact string "Speaker 1" and "Speaker 2"
-         payload.config.speechConfig = {
-           voiceConfig: {
-             multiSpeakerVoiceConfig: {
-               speakerVoiceConfigs: [
-                 {
-                   speaker: "Speaker 1",
-                   voiceConfig: { prebuiltVoiceConfig: { voiceName: voice1 } }
-                 },
-                 {
-                   speaker: "Speaker 2",
-                   voiceConfig: { prebuiltVoiceConfig: { voiceName: voice2 } }
-                 }
-               ]
-             }
-           }
-         };
-      } else {
+      if (!containsDialogue) {
         // Only force a single voice if it's a monologue
         payload.config.speechConfig = {
           voiceConfig: {
