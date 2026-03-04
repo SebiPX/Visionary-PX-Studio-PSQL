@@ -38,6 +38,7 @@ export default function MusicStudio({ isActive }: MusicStudioProps) {
                     genres: genres
                 },
                 logs: true,
+                pollInterval: 5000,
                 onQueueUpdate: (update) => {
                     if (update.status === "IN_PROGRESS") {
                         const newLogs = update.logs.map((log) => log.message);

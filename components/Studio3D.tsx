@@ -78,6 +78,7 @@ export const Studio3D: React.FC = () => {
           remesh_band: 1,
           image_url: imageUrl,
         },
+        pollInterval: 5000,
         logs: true,
         onQueueUpdate: (update) => {
           if (update.status === "IN_PROGRESS") {

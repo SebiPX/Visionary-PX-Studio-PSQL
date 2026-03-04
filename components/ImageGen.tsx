@@ -123,6 +123,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         face_enhancement: true,
                         face_enhancement_strength: 0.8
                     },
+                    pollInterval: 5000,
                     logs: true,
                     onQueueUpdate: (update) => {
                         if (update.status === "IN_PROGRESS") {
@@ -159,6 +160,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                             num_images: 1,
                             output_format: "png",
                         },
+                        pollInterval: 5000,
                         logs: true,
                         onQueueUpdate: (update) => {
                             if (update.status === "IN_PROGRESS") {
