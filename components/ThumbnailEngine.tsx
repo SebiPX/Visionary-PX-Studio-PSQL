@@ -138,7 +138,6 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
 
     // Helper to generate text ideas using Gemini Text Model
     const generateTextIdea = async () => {
-        if (!process.env.API_KEY) return alert("API Key missing");
         if (!videoTopic) return alert("Please enter a Video Topic in the 'Content Context' field above first.");
 
         setIsGeneratingIdea(true);
@@ -167,7 +166,6 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
 
     // Helper to generate image description ideas
     const generateVisualIdea = async (type: 'BACKGROUND' | 'ELEMENT') => {
-        if (!process.env.API_KEY) return alert("API Key missing");
         if (!videoTopic) return alert("Please enter a Video Topic in the 'Content Context' field above first.");
 
         setIsGeneratingIdea(true);
@@ -200,7 +198,6 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
 
     // Main Generation Function
     const handleFinalGeneration = async () => {
-        if (!process.env.API_KEY) return alert("API Key missing");
         if (!bgPrompt && !elementPrompt && !bgImage && !elementImage) return alert("Please define content (text or image) for background or elements.");
 
         setIsGenerating(true);
