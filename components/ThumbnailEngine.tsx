@@ -20,9 +20,10 @@ interface HistoryItem {
 interface ThumbnailEngineProps {
     selectedItemId?: string | null;
     onItemLoaded?: () => void;
+    isActive?: boolean;
 }
 
-export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId, onItemLoaded }) => {
+export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId, onItemLoaded, isActive = true }) => {
     const { saveThumbnail, loadHistory } = useGeneratedContent();
     const [activeTool, setActiveTool] = useState<'BACKGROUND' | 'ELEMENTS' | 'TEXT'>('BACKGROUND');
     const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16' | '1:1'>('16:9');
@@ -62,8 +63,10 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
     }, []); // Empty deps - only load once on mount
 
     useEffect(() => {
-        loadThumbnailHistory();
-    }, [loadThumbnailHistory]);
+        if (isActive) {
+            loadThumbnailHistory();
+        }
+    }, [isActive, loadThumbnailHistory]);
 
     // Helper: Handle File Upload
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'BACKGROUND' | 'ELEMENT') => {

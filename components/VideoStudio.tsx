@@ -14,9 +14,10 @@ interface HistoryItem {
 interface VideoStudioProps {
     selectedItemId?: string | null;
     onItemLoaded?: () => void;
+    isActive?: boolean;
 }
 
-export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItemLoaded }) => {
+export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItemLoaded, isActive = true }) => {
     // ========================================================================
     // STATE & REFS
     // ========================================================================
@@ -53,8 +54,10 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
     }, []); // Empty deps - only load once on mount
 
     useEffect(() => {
-        loadVideoHistory();
-    }, [loadVideoHistory]);
+        if (isActive) {
+            loadVideoHistory();
+        }
+    }, [isActive, loadVideoHistory]);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

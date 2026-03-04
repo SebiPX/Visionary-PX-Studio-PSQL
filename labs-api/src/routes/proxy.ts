@@ -1,6 +1,13 @@
 import { Router, Request, Response } from 'express';
+import { createHandler } from '@fal-ai/server-proxy/express';
 
 const router = Router();
+
+/**
+ * All /api/proxy/fal
+ * Proxies Fal.ai API requests securely using the FAL_KEY from server environment.
+ */
+router.all('/fal', createHandler());
 
 /**
  * GET /api/proxy/download?url=...&filename=...

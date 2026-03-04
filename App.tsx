@@ -63,15 +63,15 @@ const AppContent: React.FC = () => {
       <div className="flex-1 relative w-full overflow-hidden">
 
         <div className={`w-full h-full ${currentView === AppView.DASHBOARD ? 'block' : 'hidden'}`}>
-          <Dashboard setView={setCurrentView} navigateToItem={navigateToItem} />
+          <Dashboard setView={setCurrentView} navigateToItem={navigateToItem} isActive={currentView === AppView.DASHBOARD} />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.IMAGE_GEN ? 'block' : 'hidden'}`}>
-          <ImageGen selectedItemId={selectedItemId} onItemLoaded={() => setSelectedItemId(null)} />
+          <ImageGen selectedItemId={selectedItemId} onItemLoaded={() => setSelectedItemId(null)} isActive={currentView === AppView.IMAGE_GEN} />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.VIDEO_STUDIO ? 'block' : 'hidden'}`}>
-          <VideoStudio selectedItemId={selectedItemId} onItemLoaded={() => setSelectedItemId(null)} />
+          <VideoStudio selectedItemId={selectedItemId} onItemLoaded={() => setSelectedItemId(null)} isActive={currentView === AppView.VIDEO_STUDIO} />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.TEXT_ENGINE ? 'block' : 'hidden'}`}>
@@ -79,15 +79,15 @@ const AppContent: React.FC = () => {
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.THUMBNAIL_ENGINE ? 'block' : 'hidden'}`}>
-          <ThumbnailEngine selectedItemId={selectedItemId} onItemLoaded={() => setSelectedItemId(null)} />
+          <ThumbnailEngine selectedItemId={selectedItemId} onItemLoaded={() => setSelectedItemId(null)} isActive={currentView === AppView.THUMBNAIL_ENGINE} />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.STORY_STUDIO ? 'block' : 'hidden'}`}>
-          <StoryStudio />
+          <StoryStudio isActive={currentView === AppView.STORY_STUDIO} />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.SKETCH_STUDIO ? 'block' : 'hidden'}`}>
-          <SketchStudio />
+          <SketchStudio isActive={currentView === AppView.SKETCH_STUDIO} />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.PX_CREATIVE ? 'block' : 'hidden'}`}>

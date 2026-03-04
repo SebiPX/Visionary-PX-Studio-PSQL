@@ -65,6 +65,8 @@ export interface StoryShot {
   dialog: string;
   notes: string;
   image_url?: string;
+  video_url?: string;
+  ai_model?: 'GEMINI' | 'FAL_QWEN';
   duration: number;
   created_at: string;
 }

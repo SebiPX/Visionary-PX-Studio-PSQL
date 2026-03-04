@@ -8,6 +8,8 @@ interface ReviewPhaseProps {
     isGenerating: boolean;
     onEditShot: (shot: StoryShot) => void;
     onGenerateShotImage: (shot: StoryShot) => void;
+    onGenerateShotVideo: (shot: StoryShot) => void;
+    onUpdateShot: (shot: StoryShot) => void;
     onBack: () => void;
     onSave: () => void;
 }
@@ -19,6 +21,8 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
     isGenerating,
     onEditShot,
     onGenerateShotImage,
+    onGenerateShotVideo,
+    onUpdateShot,
     onBack,
     onSave,
 }) => {
@@ -39,6 +43,22 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
         } catch {
             // Fallback: open in new tab
             window.open(shot.image_url, '_blank');
+        }
+    };
+
+    const handleVideoDownload = async (shot: StoryShot) => {
+        if (!shot.video_url) return;
+        try {
+            const res = await fetch(shot.video_url);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `shot-${shot.scene_number || shot.order + 1}-${shot.title.replace(/\\s+/g, '-')}.mp4`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            window.open(shot.video_url, '_blank');
         }
     };
 
@@ -143,8 +163,8 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
                     shots.map((shot, index) => (
                         <div key={shot.id} className="bg-slate-800/40 border border-white/10 rounded-xl overflow-hidden">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-                                {/* Shot Image */}
-                                <div className="md:col-span-1">
+                                {/* Shot Image & Video */}
+                                <div className="md:col-span-1 space-y-4">
                                     <div className="aspect-video bg-slate-900/50 rounded-lg border border-white/10 flex items-center justify-center overflow-hidden relative group">
                                         {shot.image_url ? (
                                             <>
@@ -198,6 +218,18 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
                                             </div>
                                         )}
                                     </div>
+
+                                    {/* Shot Video */}
+                                    {shot.video_url && (
+                                        <div className="aspect-video bg-slate-900/50 rounded-lg border border-white/10 flex items-center justify-center overflow-hidden relative">
+                                            <video 
+                                                src={shot.video_url} 
+                                                controls 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    )}
+
                                     <div className="mt-2 text-xs text-slate-500">
                                         Shot {index + 1} {shot.scene_number && `• Szene ${shot.scene_number}`}
                                     </div>
@@ -289,7 +321,16 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
                                     )}
 
                                     {/* Action Buttons */}
-                                    <div className="flex gap-2 pt-2">
+                                    <div className="flex flex-wrap gap-2 pt-2">
+                                        <select
+                                            value={shot.ai_model || 'GEMINI'}
+                                            onChange={(e) => onUpdateShot({ ...shot, ai_model: e.target.value as 'GEMINI' | 'FAL_QWEN' })}
+                                            className="px-2 py-1.5 bg-slate-800 border border-white/10 rounded text-xs text-white outline-none"
+                                            title="AI Modell für Bildgenerierung"
+                                        >
+                                            <option value="GEMINI">Google Gemini</option>
+                                            <option value="FAL_QWEN">Fal.ai (Qwen)</option>
+                                        </select>
                                         <button
                                             onClick={() => onEditShot(shot)}
                                             className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded transition-all flex items-center gap-1"
@@ -305,22 +346,52 @@ export const ReviewPhase: React.FC<ReviewPhaseProps> = ({
                                             {isGenerating ? (
                                                 <>
                                                     <span className="material-icons-round text-xs animate-spin">refresh</span>
-                                                    Generiere...
+                                                    Bild...
                                                 </>
                                             ) : (
                                                 <>
-                                                    <span className="material-icons-round text-xs">{shot.image_url ? 'refresh' : 'auto_awesome'}</span>
-                                                    {shot.image_url ? 'Neu generieren' : 'Bild generieren'}
+                                                    <span className="material-icons-round text-xs">{shot.image_url ? 'refresh' : 'image'}</span>
+                                                    {shot.image_url ? 'Bild neu' : 'Bild gen.'}
                                                 </>
                                             )}
                                         </button>
                                         {shot.image_url && (
                                             <button
+                                                onClick={() => onGenerateShotVideo(shot)}
+                                                disabled={isGenerating}
+                                                className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white text-xs rounded transition-all flex items-center gap-1"
+                                            >
+                                                {isGenerating ? (
+                                                    <>
+                                                        <span className="material-icons-round text-xs animate-spin">refresh</span>
+                                                        Video...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="material-icons-round text-xs">{shot.video_url ? 'refresh' : 'movie'}</span>
+                                                        {shot.video_url ? 'Video neu' : 'Video (i2v)'}
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                        {shot.image_url && (
+                                            <button
                                                 onClick={() => handleDownload(shot)}
-                                                className="px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white text-xs rounded transition-all flex items-center gap-1"
+                                                className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded transition-all flex items-center gap-1"
+                                                title="Bild herunterladen"
                                             >
                                                 <span className="material-icons-round text-xs">download</span>
-                                                Download
+                                                Bild
+                                            </button>
+                                        )}
+                                        {shot.video_url && (
+                                            <button
+                                                onClick={() => handleVideoDownload(shot)}
+                                                className="px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white text-xs rounded transition-all flex items-center gap-1"
+                                                title="Video herunterladen"
+                                            >
+                                                <span className="material-icons-round text-xs">download</span>
+                                                Video
                                             </button>
                                         )}
                                     </div>

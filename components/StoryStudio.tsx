@@ -6,10 +6,19 @@ import { uploadFile, normalizeStorageUrl, geminiProxy } from '../lib/apiClient';
 import { useAuth } from '../contexts/AuthContext';
 import { ShotEditor } from './ShotEditor';
 import { SetupPhase, StoryPhase, StoryboardPhase, ReviewPhase } from './StoryStudio/phases';
+import { fal } from '@fal-ai/client';
+
+fal.config({ 
+    proxyUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/proxy/fal`
+});
 
 type Phase = 'setup' | 'story' | 'storyboard' | 'review';
 
-export const StoryStudio: React.FC = () => {
+interface StoryStudioProps {
+    isActive?: boolean;
+}
+
+export const StoryStudio: React.FC<StoryStudioProps> = ({ isActive = true }) => {
     const { user } = useAuth();
     const { saveStoryboard, loadStoryboards } = useStoryboard();
 
@@ -47,8 +56,10 @@ export const StoryStudio: React.FC = () => {
 
     // Load history on mount
     useEffect(() => {
-        loadHistory();
-    }, []);
+        if (isActive) {
+            loadHistory();
+        }
+    }, [isActive]);
 
     const loadHistory = async () => {
         const { data, error } = await loadStoryboards();
@@ -480,6 +491,120 @@ Schreibe eine prägnante Story (3-5 Absätze) mit klarem Anfang, Mitte und Ende,
         }
     };
 
+    const generateShotVideo = async (shot: StoryShot) => {
+        if (!shot.image_url) return;
+
+        setIsGenerating(true);
+        try {
+            // Fetch the image locally to send to Gemini
+            const proxyUrl = import.meta.env.VITE_API_URL
+                ? `${import.meta.env.VITE_API_URL}/api/proxy/download?url=${encodeURIComponent(shot.image_url)}&filename=ref.png`
+                : shot.image_url;
+
+            const token = localStorage.getItem('labs_token');
+            const imgRes = await fetch(proxyUrl, {
+                headers: token && proxyUrl.includes('/api/proxy') ? { Authorization: `Bearer ${token}` } : {},
+            });
+            if (!imgRes.ok) throw new Error("Konnte das Bild für die Video-Generierung nicht abrufen.");
+
+            const imgBlob = await imgRes.blob();
+            const imgBase64 = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.readAsDataURL(imgBlob);
+            });
+
+            const prompt = `Erstelle ein kurzes filmisches Video für diesen Shot.
+Kamerabewegung: ${shot.camera_movement}
+Bewegungsnotizen: ${shot.movement_notes || 'Keine'}
+Dialog in dieser Szene (Lippenbewegung/Ausdruck): ${shot.dialog || 'Kein Dialog'}
+Details: ${shot.description}`;
+
+            const response = await geminiProxy({
+                action: 'generateVideos',
+                model: 'veo-3.1-fast-generate-preview',
+                prompt: prompt,
+                image: {
+                    bytesBase64Encoded: imgBase64.split(',')[1],
+                    mimeType: imgBase64.split(';')[0].split(':')[1] || 'image/png'
+                },
+                config: {
+                    resolution: '720p',
+                    aspectRatio: '16:9'
+                }
+            }) as any;
+
+            if (response?.error) {
+                throw new Error(JSON.stringify(response.error));
+            }
+
+            let operation = response;
+
+            while (!operation.done) {
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                const opResponse = await geminiProxy({
+                    action: 'getVideosOperation',
+                    operation: operation
+                }) as any;
+                if (opResponse?.error) throw new Error(JSON.stringify(opResponse.error));
+                operation = opResponse;
+            }
+
+            const googleUri = operation.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+
+            if (!googleUri) {
+                throw new Error('Video generiert, aber keine Video-URL gefunden.');
+            }
+
+            const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || '');
+            const googleDownloadUrl = googleUri.includes('?') ? `${googleUri}&key=${apiKey}` : `${googleUri}?key=${apiKey}`;
+
+            const videoBlob = await (await fetch(googleDownloadUrl)).blob();
+
+            const fileName = `shot-${shot.id}.mp4`;
+            const videoFile = new File([videoBlob], fileName, { type: 'video/mp4' });
+            const publicUrl = await uploadFile(videoFile, 'videos');
+
+            // Save video URL in shot
+            const updatedShot = { ...shot, video_url: publicUrl };
+            setShots(prev => {
+                const newShots = prev.map(s => s.id === shot.id ? updatedShot : s);
+                // Trigger auto-save inside setShots or just rely on manual save?
+                // The previous code had saveStoryboard();
+                return newShots;
+            });
+            // Auto saving will be tricky here with current state, let the user click save or manually construct session if really needed.
+            // For now, let's just construct the session inline.
+            saveStoryboard({
+                id: sessionId,
+                user_id: user.id,
+                title: sessionTitle || 'Untitled Storyboard',
+                concept: storyText,
+                target_duration: null,
+                num_shots: shots.length,
+                config: {
+                    story_text: storyText,
+                    genre,
+                    mood,
+                    target_audience: targetAudience,
+                    storyboard_style: storyboardStyle
+                },
+                assets: [
+                    ...actors,
+                    ...(environment ? [environment] : []),
+                    ...(product ? [product] : [])
+                ],
+                shots: shots.map(s => s.id === shot.id ? updatedShot : s)
+            });
+
+        } catch (err) {
+            console.error('Video generation error:', err);
+            setError(`Fehler bei der Video-Generierung: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     // Generate shots with AI
     const generateShots = async () => {
         if (!user) return;
@@ -490,9 +615,9 @@ Schreibe eine prägnante Story (3-5 Absätze) mit klarem Anfang, Mitte und Ende,
         try {
             // Build shot list prompt from full story context
             const assetList = [
-                ...actors.map(a => `- Actor: "${a.name}" (${a.description})`),
+                ...actors.map(a => `- Actor [ID: ${a.id}]: "${a.name}" (${a.description})`),
                 environment ? `- Environment: "${environment.name}" (${environment.description})` : null,
-                product ? `- Product/Object: "${product.name}" (${product.description})` : null,
+                product ? `- Product/Object [ID: ${product.id}]: "${product.name}" (${product.description})` : null,
             ].filter(Boolean).join('\n');
 
             const shotsPrompt = `Du bist ein professioneller Storyboard-Artist und Filmregisseur.
@@ -521,8 +646,10 @@ Jeder Shot muss exakt dieser Struktur folgen:
     "lighting": "natural|studio|dramatic|soft|harsh",
     "audio_notes": "Sound Design Notizen",
     "movement_notes": "Beschreibung der Schauspieler/Subjekt-Bewegung",
-    "dialog": "ACTOR1: Hallo!\nACTOR2: Hey!",
-    "duration": 5
+    "dialog": "ACTOR1: Hallo!\\nACTOR2: Hey!",
+    "duration": 5,
+    "actor_ids_in_shot": ["<ID des Actors der in diesem Shot zu sehen ist>", "...oder leeres Array falls niemand zu sehen"],
+    "product_ids_in_shot": ["<ID des Produkts>", "...oder leeres Array"]
   }
 ]`;
 
@@ -559,12 +686,14 @@ Jeder Shot muss exakt dieser Struktur folgen:
                 estimated_duration: shot.duration || 5,
                 movement_notes: shot.movement_notes || '',
                 vfx_notes: '',
-                actors: actors.map(a => a.id),
+                actors: shot.actor_ids_in_shot || [],
                 environment: environment?.id || '',
-                products: product ? [product.id] : [],
+                products: shot.product_ids_in_shot || [],
                 dialog: shot.dialog || '',
                 notes: '',
                 duration: shot.duration || 5,
+                ai_model: 'GEMINI', // Default AI model
+                video_url: '',
                 created_at: new Date().toISOString(),
             }));
 
@@ -589,17 +718,13 @@ Jeder Shot muss exakt dieser Struktur folgen:
 
         // ── Resolve assets referenced in this specific shot ──────────────────
         // shot.actors contains actor IDs — find the matching StoryAsset objects
-        const shotActors = actors.filter(a => shot.actors.includes(a.id));
-        // If no specific actors listed, fall back to all actors
-        const relevantActors = shotActors.length > 0 ? shotActors : actors;
+        const relevantActors = actors.filter(a => shot.actors.includes(a.id));
 
         const shotEnvironment = shot.environment
             ? (environment?.id === shot.environment ? environment : null) ?? environment
             : environment;
 
-        const shotProducts = shot.products.length > 0
-            ? [product].filter(p => p && shot.products.includes(p!.id)) as StoryAsset[]
-            : (product ? [product] : []);
+        const shotProducts = [product].filter(p => p && shot.products.includes(p.id)) as StoryAsset[];
 
         // ── Collect reference images — routed via labs-api proxy to bypass CORS ─
         const fetchAsBase64 = async (url: string): Promise<{ data: string; mimeType: string } | null> => {
@@ -683,7 +808,6 @@ SHOT DETAILS:
 Title: ${shot.title}
 Description: ${shot.description}
 Location: ${shot.location || 'Not specified'}
-${shot.dialog ? `\nDialog in this shot:\n${shot.dialog}\n` : ''}
 CAMERA SETUP:
 - Framing: ${shot.framing}
 - Angle: ${shot.camera_angle}
@@ -707,52 +831,91 @@ ${hasRefs
     : 'No reference images available — create based on descriptions only.'
 }`;
 
-            parts.push({ text: prompt });
+            let publicUrl = "";
 
-            const response = await geminiProxy({
-                action: 'generateContent',
-                model: 'gemini-3.1-flash-image-preview',
-                contents: [{ role: 'user', parts: parts }],
-                config: {
-                    imageConfig: {
-                        aspectRatio: '16:9',
-                    }
+            if (shot.ai_model === 'FAL_QWEN') {
+                if (!import.meta.env.VITE_FAL_KEY) {
+                    throw new Error("Fal.ai API Key fehlt (VITE_FAL_KEY in .env.local).");
                 }
-            }) as any;
 
-            if (response?.error) {
-                throw new Error(JSON.stringify(response.error));
-            }
-
-            // Parse response
-            const respParts = response.candidates?.[0]?.content?.parts;
-            if (respParts) {
-                for (const part of respParts) {
-                    if (part.inlineData) {
-                        const base64Data = part.inlineData.data;
-                        const mimeType = part.inlineData.mimeType || 'image/png';
-
-                        // Convert to blob and upload to Supabase
-                        const byteCharacters = atob(base64Data);
-                        const byteNumbers = new Array(byteCharacters.length);
-                        for (let i = 0; i < byteCharacters.length; i++) {
-                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                const result = await fal.subscribe("fal-ai/qwen-image-2/text-to-image", {
+                    input: {
+                        prompt: prompt,
+                        negative_prompt: "low resolution, error, worst quality, low quality, deformed, ugly",
+                        image_size: { width: 2048, height: 1152 },
+                        enable_prompt_expansion: true,
+                        enable_safety_checker: true,
+                        num_images: 1,
+                        output_format: "png",
+                    },
+                    logs: true,
+                    onQueueUpdate: (update) => {
+                        if (update.status === "IN_PROGRESS") {
+                            console.log('[Fal.ai]', update.logs?.map((l: any) => l.message).join(' '));
                         }
-                        const byteArray = new Uint8Array(byteNumbers);
-                        const blob = new Blob([byteArray], { type: mimeType });
-                        const file = new File([blob], `shot-${shot.id}.png`, { type: mimeType });
+                    },
+                });
 
-                        // Upload to Cloudflare R2
-                        const shotFile = new File([blob], `shot-${shot.id}.png`, { type: mimeType });
-                        const publicUrl = await uploadFile(shotFile, 'storyboard-shots');
-                        const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
+                if (!result.data || !result.data.images || result.data.images.length === 0) {
+                    throw new Error("Fal.ai hat kein Bild zurückgegeben.");
+                }
 
-                        return cacheBustedUrl;
+                const falImageUrl = result.data.images[0].url;
+                const imageBlob = await (await fetch(falImageUrl)).blob();
+                const shotFile = new File([imageBlob], `shot-${shot.id}.png`, { type: 'image/png' });
+                publicUrl = await uploadFile(shotFile, 'storyboard-shots');
+            } else {
+                parts.push({ text: prompt });
+
+                const response = await geminiProxy({
+                    action: 'generateContent',
+                    model: 'gemini-3.1-flash-image-preview',
+                    contents: [{ role: 'user', parts: parts }],
+                    config: {
+                        imageConfig: {
+                            aspectRatio: '16:9',
+                        }
                     }
+                }) as any;
+
+                if (response?.error) {
+                    throw new Error(JSON.stringify(response.error));
+                }
+
+                // Parse response
+                const respParts = response.candidates?.[0]?.content?.parts;
+                if (respParts) {
+                    let found = false;
+                    for (const part of respParts) {
+                        if (part.inlineData) {
+                            const base64Data = part.inlineData.data;
+                            const mimeType = part.inlineData.mimeType || 'image/png';
+
+                            // Convert to blob and upload to Storage
+                            const byteCharacters = atob(base64Data);
+                            const byteNumbers = new Array(byteCharacters.length);
+                            for (let i = 0; i < byteCharacters.length; i++) {
+                                byteNumbers[i] = byteCharacters.charCodeAt(i);
+                            }
+                            const byteArray = new Uint8Array(byteNumbers);
+                            const blob = new Blob([byteArray], { type: mimeType });
+                            const shotFile = new File([blob], `shot-${shot.id}.png`, { type: mimeType });
+                            publicUrl = await uploadFile(shotFile, 'storyboard-shots');
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) throw new Error("Google KI hat kein sichtbares Bild generiert.");
+                } else {
+                    throw new Error("Fehler: Die Antwort der Google KI war ungültig (fehlende Daten).");
                 }
             }
 
-            throw new Error('Keine Bilddaten in der Antwort');
+            // Update shot with image URL
+            const updatedShot = { ...shot, image_url: `${publicUrl}?t=${Date.now()}` };
+            setShots(shots.map(s => s.id === shot.id ? updatedShot : s));
+            return updatedShot.image_url;
+
         } catch (err) {
             console.error('Shot image generation error:', err);
             setError(`Fehler bei der Shot-Bildgenerierung: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`);
@@ -863,9 +1026,11 @@ ${hasRefs
                         actorsCount={actors.length}
                         isGenerating={isGenerating}
                         onEditShot={setEditingShot}
-                        onGenerateShotImage={handleGenerateShotImage}
-                        onBack={() => navigateTo('storyboard')}
-                        onSave={handleSave}
+                        onGenerateShotImage={generateShotImage}
+                        onGenerateShotVideo={generateShotVideo}
+                        onUpdateShot={(updatedShot) => setShots(shots.map(s => s.id === updatedShot.id ? updatedShot : s))}
+                        onBack={() => setCurrentPhase('storyboard')}
+                        onSave={() => handleSave()}
                     />
                 );
         }

@@ -8,7 +8,11 @@ import { useGeneratedContent } from '../../hooks/useGeneratedContent';
 import { GeneratedSketch } from '../../types';
 import { uploadFile as apiUploadFile } from '../../lib/apiClient';
 
-export const SketchStudio: React.FC = () => {
+interface SketchStudioProps {
+    isActive?: boolean;
+}
+
+export const SketchStudio: React.FC<SketchStudioProps> = ({ isActive = true }) => {
     // ========================================================================
     // STATE
     // ========================================================================
@@ -35,8 +39,10 @@ export const SketchStudio: React.FC = () => {
             const sketches = await loadSketchHistory(20);
             setHistory(sketches as any);
         };
-        loadHistory();
-    }, []);
+        if (isActive) {
+            loadHistory();
+        }
+    }, [isActive]);
 
     // ========================================================================
     // HANDLERS

@@ -15,16 +15,19 @@ type ContentItem = {
 interface DashboardProps {
     setView?: (view: AppView) => void;
     navigateToItem?: (view: AppView, itemId: string) => void;
+    isActive?: boolean;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ setView, navigateToItem }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ setView, navigateToItem, isActive = true }) => {
     const { profile } = useAuth();
     const { loadHistory, loading } = useGeneratedContent();
     const [contentItems, setContentItems] = useState<ContentItem[]>([]);
 
     useEffect(() => {
-        loadAllHistory();
-    }, []);
+        if (isActive) {
+            loadAllHistory();
+        }
+    }, [isActive]);
 
     const loadAllHistory = async () => {
         // Load all four types of content in parallel

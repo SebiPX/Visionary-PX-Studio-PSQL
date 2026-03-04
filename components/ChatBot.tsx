@@ -117,6 +117,48 @@ AKTUELLES DATUM & UHRZEIT: ${dateStr}, ${timeStr} Uhr. Nutze dieses Wissen wenn 
 SPRACHE: Antworte IMMER auf Deutsch, außer der Nutzer schreibt ausdrücklich in einer anderen Sprache — dann antworte in dieser Sprache.`;
 };
 
+type GroupedSessions = {
+  label: string;
+  sessions: ChatSession[];
+}[];
+
+const groupChatHistory = (sessions: ChatSession[]): GroupedSessions => {
+  const groups = {
+    today: [] as ChatSession[],
+    week: [] as ChatSession[],
+    month: [] as ChatSession[],
+    older: [] as ChatSession[]
+  };
+
+  const now = new Date();
+  const todayDateStr = now.toDateString();
+  const nowMs = now.getTime();
+  const msPerDay = 1000 * 60 * 60 * 24;
+
+  sessions.forEach(session => {
+    const sessionDate = new Date(session.created_at);
+    const diffDays = (nowMs - sessionDate.getTime()) / msPerDay;
+
+    if (sessionDate.toDateString() === todayDateStr) {
+      groups.today.push(session);
+    } else if (diffDays <= 7) {
+      groups.week.push(session);
+    } else if (diffDays <= 30) {
+      groups.month.push(session);
+    } else {
+      groups.older.push(session);
+    }
+  });
+
+  const result: GroupedSessions = [];
+  if (groups.today.length > 0) result.push({ label: 'Heute', sessions: groups.today });
+  if (groups.week.length > 0) result.push({ label: 'Letzte 7 Tage', sessions: groups.week });
+  if (groups.month.length > 0) result.push({ label: 'Letzte 30 Tage', sessions: groups.month });
+  if (groups.older.length > 0) result.push({ label: 'Älter', sessions: groups.older });
+
+  return result;
+};
+
 export const ChatBot: React.FC = () => {
   const { loadChatSessions } = useGeneratedContent();
   const [activePersona, setActivePersona] = useState<Persona>(PERSONAS[0]);
@@ -125,11 +167,24 @@ export const ChatBot: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [isPersonaDropdownOpen, setIsPersonaDropdownOpen] = useState(false);
   // Ref to always have the latest sessionId without stale closures
   const sessionIdRef = useRef<string | null>(null);
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsPersonaDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Load chat sessions from database
   const loadSessions = useCallback(async () => {
@@ -282,29 +337,58 @@ export const ChatBot: React.FC = () => {
 
       {/* Sidebar: Persona Selector */}
       <aside className="w-full md:w-72 bg-glass border-b md:border-b-0 md:border-r border-white/5 z-20 flex flex-col order-2 md:order-1 flex-shrink-0">
-        <div className="p-6">
+        <div className="p-6 pb-2" ref={dropdownRef}>
           <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">AI Persona</h3>
-          <div className="space-y-3">
-            {PERSONAS.map(p => (
-              <button
-                key={p.id}
-                onClick={() => setActivePersona(p)}
-                className={`w-full text-left p-3 rounded-xl border transition-all duration-300 flex items-start gap-3 ${activePersona.id === p.id ? 'bg-primary/10 border-primary/50 shadow-[0_0_15px_rgba(19,91,236,0.1)]' : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10'}`}
-              >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activePersona.id === p.id ? 'bg-primary text-white' : 'bg-white/10 text-slate-400'}`}>
-                  <span className="material-icons-round text-sm">{p.icon}</span>
+          <div className="relative">
+            {/* Active Persona Button */}
+            <button
+              onClick={() => setIsPersonaDropdownOpen(!isPersonaDropdownOpen)}
+              className="w-full text-left p-3 rounded-xl border bg-primary/10 border-primary/50 flex items-center justify-between transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary text-white">
+                  <span className="material-icons-round text-sm">{activePersona.icon}</span>
                 </div>
                 <div>
-                  <p className={`text-xs font-bold ${activePersona.id === p.id ? 'text-white' : 'text-slate-300'}`}>{p.name}</p>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-snug">{p.desc}</p>
+                  <p className="text-xs font-bold text-white">{activePersona.name}</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">{activePersona.desc}</p>
                 </div>
-              </button>
-            ))}
+              </div>
+              <span className="material-icons-round text-slate-400 text-sm">
+                {isPersonaDropdownOpen ? 'expand_less' : 'expand_more'}
+              </span>
+            </button>
+
+            {/* Dropdown Menu */}
+            {isPersonaDropdownOpen && (
+              <div className="absolute top-full left-0 w-full mt-2 bg-[#0c121e] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden">
+                <div className="max-h-64 overflow-y-auto hide-scrollbar p-2 space-y-1">
+                  {PERSONAS.map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        setActivePersona(p);
+                        setIsPersonaDropdownOpen(false);
+                      }}
+                      className={`w-full text-left p-2.5 rounded-lg transition-colors flex items-start gap-3 ${activePersona.id === p.id ? 'bg-primary/20 bg-opacity-50' : 'hover:bg-white/5'}`}
+                    >
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${activePersona.id === p.id ? 'bg-primary text-white' : 'bg-white/10 text-slate-400'}`}>
+                        <span className="material-icons-round text-xs">{p.icon}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className={`text-[11px] font-bold ${activePersona.id === p.id ? 'text-white' : 'text-slate-300'}`}>{p.name}</p>
+                        <p className="text-[9px] text-slate-500 mt-0.5 truncate">{p.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Chat History */}
-        <div className="flex-1 overflow-y-auto hide-scrollbar p-6 pt-0 border-t border-white/5">
+        <div className="flex-1 overflow-y-auto hide-scrollbar p-6 pt-4 border-t border-white/5 mt-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Chat History</h3>
             <button
@@ -316,28 +400,33 @@ export const ChatBot: React.FC = () => {
             </button>
           </div>
 
-          {chatSessions.length > 0 ? (
-            <div className="space-y-2">
-              {chatSessions.map((session) => (
-                <button
-                  key={session.id}
-                  onClick={() => loadSession(session)}
-                  className={`w-full text-left p-3 rounded-lg border transition-all ${currentSessionId === session.id ? 'bg-primary/10 border-primary/50' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
-                >
-                  <div className="flex items-start gap-2">
-                    <span className="material-icons-round text-xs text-slate-400 mt-0.5">
-                      {PERSONAS.find(p => p.id === session.bot_id)?.icon || 'chat'}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-slate-300 font-medium truncate">
-                        {session.title || 'Untitled Chat'}
-                      </p>
-                      <p className="text-[10px] text-slate-500 mt-1">
-                        {new Date(session.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </button>
+          {groupChatHistory(chatSessions).length > 0 ? (
+            <div className="space-y-6">
+              {groupChatHistory(chatSessions).map(group => (
+                <div key={group.label} className="space-y-2">
+                  <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest pl-1">{group.label}</h4>
+                  {group.sessions.map((session) => (
+                    <button
+                      key={session.id}
+                      onClick={() => loadSession(session)}
+                      className={`w-full text-left p-3 rounded-lg border transition-all ${currentSessionId === session.id ? 'bg-primary/10 border-primary/50' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="material-icons-round text-xs text-slate-400 mt-0.5">
+                          {PERSONAS.find(p => p.id === session.bot_id)?.icon || 'chat'}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-slate-300 font-medium truncate">
+                            {session.title || 'Untitled Chat'}
+                          </p>
+                          <p className="text-[10px] text-slate-500 mt-1">
+                            {new Date(session.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               ))}
             </div>
           ) : (

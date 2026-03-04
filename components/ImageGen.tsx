@@ -3,7 +3,11 @@ import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { GeneratedImage } from '../types';
 import { ImageSourcePicker } from './ImageSourcePicker';
+import { fal } from '@fal-ai/client';
 
+fal.config({ 
+    proxyUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/proxy/fal`
+});
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -11,13 +15,14 @@ import { ImageSourcePicker } from './ImageSourcePicker';
 interface ImageGenProps {
     selectedItemId?: string | null;
     onItemLoaded?: () => void;
+    isActive?: boolean;
 }
 
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
-export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded }) => {
+export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded, isActive = true }) => {
     // ========================================================================
     // STATE & REFS
     // ========================================================================
@@ -33,6 +38,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     // Mode and settings
     const [activeMode, setActiveMode] = useState<'TEXT' | 'IMG2IMG' | 'EDIT'>('TEXT');
     const [aspectRatio, setAspectRatio] = useState<'1:1' | '16:9' | '9:16'>('16:9');
+    const [aiModel, setAiModel] = useState<'GEMINI' | 'FAL_QWEN'>('GEMINI');
 
     // History
     const [history, setHistory] = useState<GeneratedImage[]>([]);
@@ -81,10 +87,12 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     // EFFECTS
     // ========================================================================
 
-    // Load history from database on mount only
+    // Load history from database when component becomes active
     useEffect(() => {
-        loadImageHistory();
-    }, [loadImageHistory]);
+        if (isActive) {
+            loadImageHistory();
+        }
+    }, [isActive, loadImageHistory]);
 
     // Auto-restore selected item from Dashboard
     useEffect(() => {
@@ -98,72 +106,158 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     }, [selectedItemId, history]);
 
     const handleGenerate = async () => {
+        setIsGenerating(true);
         try {
-            // Prepare contents
-            const parts: any[] = [];
+            let finalImageUrl = "";
 
-            // If Img2Img or Edit, add the uploaded image first
-            if (activeMode !== 'TEXT' && uploadedImage) {
-                const base64Data = uploadedImage.split(',')[1];
-                parts.push({
-                    inlineData: {
-                        mimeType: 'image/png', // Simplified assumption
-                        data: base64Data
-                    }
-                });
-            }
-
-            // Add Text Prompt
-            parts.push({ text: prompt });
-
-            // Using gemini-2.5-flash-image for standard generations
-            const response = await geminiProxy({
-                action: 'generateContent',
-                model: 'gemini-2.5-flash-image',
-                contents: [{ role: 'user', parts: parts }],
-                config: {
-                    imageConfig: {
-                        aspectRatio: aspectRatio,
-                    }
+            if (aiModel === 'FAL_QWEN') {
+                if (!import.meta.env.VITE_FAL_KEY) {
+                    throw new Error("Fal.ai API Key fehlt (VITE_FAL_KEY in .env.local).");
                 }
-            }) as any;
+                
+                let result;
+                if (activeMode === 'TEXT') {
+                    // Map aspect ratio string to dimensions
+                    let imgSize = { width: 2048, height: 1152 }; // defaults to 16:9 roughly
+                    if (aspectRatio === '1:1') imgSize = { width: 2048, height: 2048 };
+                    else if (aspectRatio === '9:16') imgSize = { width: 1152, height: 2048 };
 
-            if (response?.error) {
-                console.error("Gemini API Error:", response.error);
-                throw new Error(JSON.stringify(response.error));
-            }
-
-            // Parse response to find image part
-            const respParts = response.candidates?.[0]?.content?.parts;
-            if (respParts) {
-                for (const part of respParts) {
-                    if (part.inlineData) {
-                        const mimeType = part.inlineData.mimeType || 'image/png';
-                        const ext = mimeType.split('/')[1] || 'png';
-
-                        // Convert base64 → Blob → upload to Cloudflare R2
-                        const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
-                        const imageBlob = await (await fetch(dataUri)).blob();
-                        const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.${ext}`;
-                        const imageFile = new File([imageBlob], fileName, { type: mimeType });
-                        const publicUrl = await uploadFile(imageFile, 'images');
-
-                        setCurrentImage(publicUrl);
-                        await saveImage({
+                    result = await fal.subscribe("fal-ai/qwen-image-2/text-to-image", {
+                        input: {
                             prompt: prompt,
-                            style: activeMode,
-                            image_url: publicUrl,
-                            config: { aspectRatio, mode: activeMode }
-                        });
-                        await loadImageHistory();
-                        break;
+                            negative_prompt: "low resolution, error, worst quality, low quality, deformed, ugly",
+                            image_size: imgSize,
+                            enable_prompt_expansion: true,
+                            enable_safety_checker: true,
+                            num_images: 1,
+                            output_format: "png",
+                        },
+                        logs: true,
+                        onQueueUpdate: (update) => {
+                            if (update.status === "IN_PROGRESS") {
+                                console.log('[Fal.ai]', update.logs?.map((l: any) => l.message).join(' '));
+                            }
+                        },
+                    });
+                } else {
+                    if (!uploadedImage) throw new Error("Bitte wähle ein Startbild aus.");
+                    
+                    result = await fal.subscribe("fal-ai/qwen-image-2/edit", {
+                        input: {
+                            prompt: prompt,
+                            negative_prompt: "low resolution, error, worst quality, low quality, deformed, ugly",
+                            enable_prompt_expansion: true,
+                            enable_safety_checker: true,
+                            num_images: 1,
+                            output_format: "png",
+                            image_urls: [uploadedImage]
+                        },
+                        logs: true,
+                        onQueueUpdate: (update) => {
+                            if (update.status === "IN_PROGRESS") {
+                                console.log('[Fal.ai]', update.logs?.map((l: any) => l.message).join(' '));
+                            }
+                        },
+                    });
+                }
+
+                if (!result.data || !result.data.images || result.data.images.length === 0) {
+                    throw new Error("Fal.ai hat kein Bild zurückgegeben.");
+                }
+                
+                const falImageUrl = result.data.images[0].url;
+                const imageBlob = await (await fetch(falImageUrl)).blob();
+                const fileName = `${Date.now()}_fal_${Math.random().toString(36).substr(2, 6)}.png`;
+                const imageFile = new File([imageBlob], fileName, { type: 'image/png' });
+                finalImageUrl = await uploadFile(imageFile, 'images');
+
+            } else {
+                // GEMINI
+                const parts: any[] = [];
+                if (activeMode !== 'TEXT' && uploadedImage) {
+                    const base64Data = uploadedImage.split(',')[1];
+                    parts.push({
+                        inlineData: {
+                            mimeType: 'image/png',
+                            data: base64Data
+                        }
+                    });
+                }
+                parts.push({ text: prompt });
+
+                const response = await geminiProxy({
+                    action: 'generateContent',
+                    model: 'gemini-2.5-flash-image',
+                    contents: [{ role: 'user', parts: parts }],
+                    config: {
+                        imageConfig: {
+                            aspectRatio: aspectRatio,
+                        }
                     }
+                }) as any;
+
+                if (response?.error) {
+                    console.error("Gemini API Error:", response.error);
+                    throw new Error(JSON.stringify(response.error));
+                }
+                
+                if (response.promptFeedback?.blockReason) {
+                    throw new Error(`Generierung blockiert: Die Google KI hat diesen Prompt oder das Referenzbild aus Sicherheitsgründen abgelehnt. (${response.promptFeedback.blockReason})`);
+                }
+
+                if (!response.candidates || response.candidates.length === 0) {
+                    throw new Error("Die Bild-KI hat keine Antwort geliefert. Bitte versuche es noch einmal.");
+                }
+
+                const candidate = response.candidates[0];
+                
+                if (candidate.finishReason === 'IMAGE_OTHER' || candidate.finishReason === 'SAFETY' || candidate.finishReason === 'OTHER') {
+                    throw new Error("Generierung abgelehnt: Die Google KI weigert sich dieses Bild aufgrund ihrer strengen Sicherheitsrichtlinien zu generieren. Dies passiert oft bei fotorealistischen Anpassungen echter Personen. Bitte formuliere den Prompt um oder wähle ein anderes Bild.");
+                }
+
+                const respParts = candidate.content?.parts;
+                let foundImage = false;
+                
+                if (respParts) {
+                    for (const part of respParts) {
+                        if (part.inlineData) {
+                            const mimeType = part.inlineData.mimeType || 'image/png';
+                            const ext = mimeType.split('/')[1] || 'png';
+
+                            const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
+                            const imageBlob = await (await fetch(dataUri)).blob();
+                            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.${ext}`;
+                            const imageFile = new File([imageBlob], fileName, { type: mimeType });
+                            finalImageUrl = await uploadFile(imageFile, 'images');
+                            foundImage = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!foundImage) {
+                        const textPart = respParts.find((p: any) => p.text);
+                        if (textPart) {
+                            throw new Error(`Die KI hat mit Text statt einem Bild geantwortet: "${textPart.text}"`);
+                        }
+                        throw new Error("Es wurde kein sichtbares Bild generiert.");
+                    }
+                } else {
+                    throw new Error("Fehler: Die Antwort der Google KI war ungültig (fehlende Daten).");
                 }
             }
 
-        } catch (e) {
+            setCurrentImage(finalImageUrl);
+            await saveImage({
+                prompt: prompt,
+                style: activeMode,
+                image_url: finalImageUrl,
+                config: { aspectRatio, mode: activeMode, model: aiModel }
+            });
+            await loadImageHistory();
+
+        } catch (e: any) {
             console.error("Image generation failed", e);
-            alert("Generation failed. Please try again.");
+            alert(e.message || "Generation failed. Please try again.");
         } finally {
             setIsGenerating(false);
         }
@@ -219,7 +313,28 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         </div>
                     </div>
 
-                    <div className="w-full h-px bg-white/10"></div>
+                    <div className="w-full h-px bg-white/10 mt-6 mb-6"></div>
+
+                    {/* AI Model Switcher */}
+                    <div className="w-full space-y-2">
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">AI Engine</h3>
+                        <div className="flex bg-white/5 p-1 rounded-xl">
+                            <button
+                                onClick={() => setAiModel('GEMINI')}
+                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${aiModel === 'GEMINI' ? 'bg-primary text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                            >
+                                Google Gemini
+                            </button>
+                            <button
+                                onClick={() => setAiModel('FAL_QWEN')}
+                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${aiModel === 'FAL_QWEN' ? 'bg-primary text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                            >
+                                Fal.ai (Qwen)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="w-full h-px bg-white/10 mt-6 mb-6"></div>
 
                     {/* Settings Group */}
                     <div className="w-full space-y-6">
