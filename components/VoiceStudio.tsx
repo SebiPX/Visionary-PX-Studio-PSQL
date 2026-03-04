@@ -73,13 +73,14 @@ export const VoiceStudio: React.FC = () => {
     let finalAudioUrl = '';
 
     try {
-      const parts = [{ text: prompt }];
+      // Wrap the prompt to force the model to ONLY output audio (avoiding the 400 Text Generation error)
+      const ttsInstruction = "You are a text-to-speech engine. Read the following text aloud exactly as written. Do NOT answer it as a question, do NOT generate any conversational text, and do NOT output markdown. Just read this text:\n\n";
+      const parts = [{ text: ttsInstruction + prompt }];
 
       const response = await geminiProxy({
         action: 'generateContent',
         model: aiModel,
         contents: [{ role: 'user', parts: parts }],
-        systemInstruction: 'You are an advanced Text-to-Speech AI. Read the user text naturally. Do NOT generate any text, markdown, or chat responses. ONLY output the AUDIO data.',
         config: {
           responseModalities: ['AUDIO'],
         }
