@@ -12,6 +12,9 @@ const __dirname = path.dirname(__filename);
 const sqlFilePath = path.join(__dirname, 'models3d_migration.sql');
 const sql = fs.readFileSync(sqlFilePath, 'utf8');
 
+const sqlVoicesPath = path.join(__dirname, 'voices_migration.sql');
+const sqlVoices = fs.readFileSync(sqlVoicesPath, 'utf8');
+
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
 });
@@ -20,8 +23,10 @@ async function runMigration() {
   console.log('Connecting to database...');
   const client = await pool.connect();
   try {
-    console.log('Running migration creative_agent.sql...');
+    console.log('Running migration models3d_migration.sql...');
     await client.query(sql);
+    console.log('Running migration voices_migration.sql...');
+    await client.query(sqlVoices);
     console.log('Migration completed successfully.');
   } catch (err) {
     console.error('Error running migration:', err);

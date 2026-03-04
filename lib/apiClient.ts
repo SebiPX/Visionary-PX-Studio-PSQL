@@ -106,6 +106,14 @@ export const models3d = {
     delete: (id: string) => request<void>(`/api/models3d/${id}`, { method: 'DELETE' }),
 };
 
+// ── Voices (TTS) ─────────────────────────────────────────────────
+export const voices = {
+    list: () => request<any[]>('/api/voices'),
+    create: (data: any) =>
+        request<any>('/api/voices', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/api/voices/${id}`, { method: 'DELETE' }),
+};
+
 // ── Texts ────────────────────────────────────────────────────────
 export const texts = {
     list: () => request<ApiText[]>('/api/texts'),

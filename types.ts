@@ -167,6 +167,17 @@ export interface GeneratedSketch {
   updated_at: string;
 }
 
+export interface GeneratedVoice {
+  id: string;
+  user_id: string;
+  title: string | null;
+  prompt: string;
+  audio_url: string;
+  config: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
 // ── App enums & view types ─────────────────────────────────────────────
 
 export enum AppView {
@@ -182,6 +193,7 @@ export enum AppView {
   SETTINGS = 'SETTINGS',
   INVENTAR = 'INVENTAR',
   STUDIO_3D = 'STUDIO_3D',
+  VOICE_STUDIO = 'VOICE_STUDIO',
 }
 
 export interface UserProfile {
@@ -191,7 +203,7 @@ export interface UserProfile {
 
 export interface GenerationItem {
   id: string;
-  type: 'IMAGE' | 'VIDEO' | 'TEXT' | 'THUMBNAIL';
+  type: 'IMAGE' | 'VIDEO' | 'TEXT' | 'THUMBNAIL' | 'VOICE';
   url: string; // Image URL
   title?: string;
   timestamp: string;

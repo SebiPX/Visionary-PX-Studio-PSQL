@@ -1,11 +1,18 @@
 import { useState } from 'react';
-import { images, videos, thumbnails, texts, sketches, chats, models3d, ApiImage, ApiVideo, ApiThumbnail, ApiText, ApiSketch } from '../lib/apiClient';
+import { images, videos, thumbnails, texts, sketches, chats, models3d, voices, ApiImage, ApiVideo, ApiThumbnail, ApiText, ApiSketch } from '../lib/apiClient';
 
-type ContentType = 'image' | 'video' | 'thumbnail' | 'text' | 'sketch' | '3d';
+type ContentType = 'image' | 'video' | 'thumbnail' | 'text' | 'sketch' | '3d' | 'voice';
 
 interface Save3DData {
     image_url: string;
     model_url: string;
+    config?: Record<string, any>;
+}
+
+interface SaveVoiceData {
+    title?: string;
+    prompt: string;
+    audio_url: string;
     config?: Record<string, any>;
 }
 
@@ -74,6 +81,17 @@ export const useGeneratedContent = () => {
         setLoading(true); setError(null);
         try {
             await models3d.create(data);
+            return { success: true };
+        } catch (err: any) {
+            setError(err.message);
+            return { success: false, error: err.message };
+        } finally { setLoading(false); }
+    };
+
+    const saveVoice = async (data: SaveVoiceData) => {
+        setLoading(true); setError(null);
+        try {
+            await voices.create(data);
             return { success: true };
         } catch (err: any) {
             setError(err.message);
@@ -170,6 +188,7 @@ export const useGeneratedContent = () => {
             else if (type === 'thumbnail') data = await thumbnails.list();
             else if (type === 'sketch') data = await sketches.list();
             else if (type === '3d') data = await models3d.list();
+            else if (type === 'voice') data = await voices.list();
             else data = await texts.list();
             return { success: true, data };
         } catch (err: any) {
@@ -195,6 +214,7 @@ export const useGeneratedContent = () => {
             else if (type === 'thumbnail') await thumbnails.delete(id);
             else if (type === 'sketch') await sketches.delete(id);
             else if (type === '3d') await models3d.delete(id);
+            else if (type === 'voice') await voices.delete(id);
             else await texts.delete(id);
             return { success: true };
         } catch (err: any) {
@@ -208,6 +228,7 @@ export const useGeneratedContent = () => {
         error,
         saveImage,
         save3D,
+        saveVoice,
         saveVideo,
         saveThumbnail,
         saveText,

@@ -12,6 +12,7 @@ import { StoryStudio } from './components/StoryStudio';
 import { SketchStudio } from './components/SketchStudio/SketchStudio';
 import { ChatBot } from './components/ChatBot';
 import { Studio3D } from './components/Studio3D';
+import { VoiceStudio } from './components/VoiceStudio';
 import { Settings } from './components/Settings';
 import { InventarApp } from './components/InventarApp';
 import { PxCreativeApp } from './components/px-creative/PxCreativeApp';
@@ -101,6 +102,10 @@ const AppContent: React.FC = () => {
 
         <div className={`w-full h-full ${currentView === AppView.STUDIO_3D ? 'block' : 'hidden'}`}>
           <Studio3D />
+        </div>
+
+        <div className={`w-full h-full ${currentView === AppView.VOICE_STUDIO ? 'block' : 'hidden'}`}>
+          <VoiceStudio />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.SETTINGS ? 'block' : 'hidden'}`}>
