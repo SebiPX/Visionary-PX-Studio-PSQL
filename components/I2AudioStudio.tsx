@@ -10,8 +10,8 @@ interface I2AudioStudioProps {
 
 const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
     const [prompt, setPrompt] = useState('4K studio interview, medium close-up (shoulders-up crop). Solid light-grey seamless backdrop, uniform soft key-light—no lighting change. Presenter faces lens, steady eye-contact. Hands remain below frame, body perfectly still. Ultra-sharp.');
-    const [imageUrl, setImageUrl] = useState('https://storage.googleapis.com/falserverless/example_inputs/creatify/aurora/input_.png');
-    const [audioUrl, setAudioUrl] = useState('https://storage.googleapis.com/falserverless/example_inputs/creatify/aurora/input.wav');
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [audioUrl, setAudioUrl] = useState<string | null>(null);
     
     // UI state
     const [isGenerating, setIsGenerating] = useState(false);
@@ -25,6 +25,19 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
             loadHistory('i2audio');
         }
     }, [isActive]);
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'IMAGE' | 'AUDIO') => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                if (type === 'IMAGE') setImageUrl(base64String);
+                else setAudioUrl(base64String);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleGenerate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -147,25 +160,47 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
 
                 <form onSubmit={handleGenerate} className="flex-1 flex flex-col gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Image URL</label>
-                        <input
-                            type="text"
-                            value={imageUrl}
-                            onChange={(e) => setImageUrl(e.target.value)}
-                            placeholder="https://..."
-                            className="w-full bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-                        />
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Reference Image</label>
+                        {imageUrl ? (
+                            <div className="relative w-full h-32 rounded-xl overflow-hidden border border-[#334155] mb-2 group">
+                                <img src={imageUrl} alt="Upload preview" className="w-full h-full object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => setImageUrl(null)}
+                                    className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    <Trash2 className="w-6 h-6 text-white" />
+                                </button>
+                            </div>
+                        ) : (
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleFileUpload(e, 'IMAGE')}
+                                className="w-full bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3 text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
+                            />
+                        )}
+                        <p className="text-xs text-slate-500 mt-1">Ein Portrait-Bild (16:9, 1:1 oder 9:16)</p>
                     </div>
                     
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Audio URL</label>
-                        <input
-                            type="text"
-                            value={audioUrl}
-                            onChange={(e) => setAudioUrl(e.target.value)}
-                            placeholder="https://..."
-                            className="w-full bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
-                        />
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Voice Audio File</label>
+                        {audioUrl ? (
+                            <div className="flex items-center justify-between bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3">
+                                <span className="text-indigo-400 text-sm truncate max-w-[200px]">Audio wurde geladen</span>
+                                <button type="button" onClick={() => setAudioUrl(null)} className="text-slate-400 hover:text-red-400">
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            </div>
+                        ) : (
+                            <input
+                                type="file"
+                                accept="audio/*"
+                                onChange={(e) => handleFileUpload(e, 'AUDIO')}
+                                className="w-full bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3 text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
+                            />
+                        )}
+                        <p className="text-xs text-slate-500 mt-1">Upload an audio file (MP3, WAV)</p>
                     </div>
 
                     <div>
