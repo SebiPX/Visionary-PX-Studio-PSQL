@@ -111,9 +111,16 @@ export const VoiceStudio: React.FC = () => {
               pcmData[i] = binaryString.charCodeAt(i);
             }
 
+            // Check if the file already starts with 'RIFF'
+            const isRiff = pcmData.length > 4 && 
+                           pcmData[0] === 82 && // R
+                           pcmData[1] === 73 && // I
+                           pcmData[2] === 70 && // F
+                           pcmData[3] === 70;   // F
+
             // Gemini TTS returns raw PCM (audio/pcm). Browser needs a WAV header.
             let audioBuffer: BlobPart = pcmData as any;
-            if (mimeType.includes('audio/pcm')) {
+            if (!isRiff) {
                audioBuffer = addWavHeader(pcmData, 24000) as any; // Gemini 2.5 returns 24kHz PCM
                mimeType = 'audio/wav';
             }
