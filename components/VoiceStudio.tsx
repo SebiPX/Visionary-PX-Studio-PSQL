@@ -86,15 +86,14 @@ export const VoiceStudio: React.FC = () => {
       // which would otherwise forcefully overwrite all speakers to a single Voice.
       let finalPrompt = prompt;
       
-      // Use regex to detect variants like "Speaker 1", "Speaker1", "Voice 1", "Voice1", etc.
-      const hasSpeaker1 = /speaker\s*1|voice\s*1/i.test(prompt);
-      const hasSpeaker2 = /speaker\s*2|voice\s*2/i.test(prompt);
+      // Normalize variants like "Speaker1", "Voice 1" strictly to "Speaker 1" 
+      // so we can map them reliably using Google's multiSpeakerVoiceConfig array.
+      finalPrompt = finalPrompt.replace(/speaker\s*1/gi, 'Speaker 1');
+      finalPrompt = finalPrompt.replace(/speaker\s*2/gi, 'Speaker 2');
+      finalPrompt = finalPrompt.replace(/voice\s*1/gi, 'Speaker 1');
+      finalPrompt = finalPrompt.replace(/voice\s*2/gi, 'Speaker 2');
       
-      const containsDialogue = hasSpeaker1 && hasSpeaker2;
-
-      if (containsDialogue) {
-         finalPrompt = `Instructions: The text contains a dialogue. Assign the voice style "${voice1}" to Speaker 1. Assign the voice style "${voice2}" to Speaker 2.\n\nTranscript:\n${prompt}`;
-      }
+      const containsDialogue = finalPrompt.includes('Speaker 1') && finalPrompt.includes('Speaker 2');
       
       const parts = [{ text: finalPrompt }];
 
@@ -107,8 +106,26 @@ export const VoiceStudio: React.FC = () => {
         }
       };
 
-      // Only force a single voice if it's a monologue
-      if (!containsDialogue) {
+      if (containsDialogue) {
+         // Pass array of voices mapped to the exact string "Speaker 1" and "Speaker 2"
+         payload.config.speechConfig = {
+           voiceConfig: {
+             multiSpeakerVoiceConfig: {
+               speakerVoiceConfigs: [
+                 {
+                   speaker: "Speaker 1",
+                   voiceConfig: { prebuiltVoiceConfig: { voiceName: voice1 } }
+                 },
+                 {
+                   speaker: "Speaker 2",
+                   voiceConfig: { prebuiltVoiceConfig: { voiceName: voice2 } }
+                 }
+               ]
+             }
+           }
+         };
+      } else {
+        // Only force a single voice if it's a monologue
         payload.config.speechConfig = {
           voiceConfig: {
             prebuiltVoiceConfig: {
