@@ -834,10 +834,6 @@ ${hasRefs
             let publicUrl = "";
 
             if (shot.ai_model === 'FAL_QWEN') {
-                if (!import.meta.env.VITE_FAL_KEY) {
-                    throw new Error("Fal.ai API Key fehlt (VITE_FAL_KEY in .env.local).");
-                }
-
                 const result = await fal.subscribe("fal-ai/qwen-image-2/text-to-image", {
                     input: {
                         prompt: prompt,

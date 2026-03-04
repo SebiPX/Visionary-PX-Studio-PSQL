@@ -111,10 +111,6 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
             let finalImageUrl = "";
 
             if (aiModel === 'FAL_QWEN') {
-                if (!import.meta.env.VITE_FAL_KEY) {
-                    throw new Error("Fal.ai API Key fehlt (VITE_FAL_KEY in .env.local).");
-                }
-                
                 let result;
                 if (activeMode === 'TEXT') {
                     // Map aspect ratio string to dimensions
