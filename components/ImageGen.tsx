@@ -36,7 +36,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     const [currentImage, setCurrentImage] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuBCq-OX_ftzyJeveBb5umMg9V7eJxPvIg3MSmcvx0tb1K7k_EPMGVNzdrqsElA3mV6tPwcrS9qmja8QRML_JEbjsXFKeR7fcRzyH_4onr7EpCgV1z1FKsEav4HOPoRSU37uLJbk4AocKgiln-4odJ6qYwLaQI4NDOAdqA9Afs0pIa11mp--glasl1uvFPgCmAroVdEPW9Zrt5gPwT_ZD6XWZbX193F9278i-0UsB1leuDZz0iZhdm-rwtSL-AsDsBrHhHZj9tAFtTxC');
 
     // Mode and settings
-    const [activeMode, setActiveMode] = useState<'TEXT' | 'IMG2IMG' | 'EDIT'>('TEXT');
+    const [activeMode, setActiveMode] = useState<'TEXT' | 'IMG2IMG' | 'EDIT' | 'UPSCALE'>('TEXT');
     const [aspectRatio, setAspectRatio] = useState<'1:1' | '16:9' | '9:16'>('16:9');
     const [aiModel, setAiModel] = useState<'GEMINI' | 'FAL_QWEN'>('GEMINI');
 
@@ -110,7 +110,38 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
         try {
             let finalImageUrl = "";
 
-            if (aiModel === 'FAL_QWEN') {
+            if (activeMode === 'UPSCALE') {
+                if (!uploadedImage) throw new Error("Bitte wähle ein Startbild zum Hochskalieren aus.");
+
+                const result = await fal.subscribe("fal-ai/topaz/upscale/image", {
+                    input: {
+                        model: "Standard V2",
+                        upscale_factor: 2,
+                        image_url: uploadedImage,
+                        output_format: "jpeg",
+                        subject_detection: "All",
+                        face_enhancement: true,
+                        face_enhancement_strength: 0.8
+                    },
+                    logs: true,
+                    onQueueUpdate: (update) => {
+                        if (update.status === "IN_PROGRESS") {
+                            console.log('[Fal.ai Upscale]', update.logs?.map((l: any) => l.message).join(' '));
+                        }
+                    },
+                });
+
+                if (!result.data || !(result.data as any).image?.url) {
+                    throw new Error("Fal.ai hat kein skaliertes Bild zurückgegeben.");
+                }
+                
+                const falImageUrl = (result.data as any).image.url;
+                const imageBlob = await (await fetch(falImageUrl)).blob();
+                const fileName = `${Date.now()}_upscale_${Math.random().toString(36).substr(2, 6)}.jpeg`;
+                const imageFile = new File([imageBlob], fileName, { type: 'image/jpeg' });
+                finalImageUrl = await uploadFile(imageFile, 'images');
+
+            } else if (aiModel === 'FAL_QWEN') {
                 let result;
                 if (activeMode === 'TEXT') {
                     // Map aspect ratio string to dimensions
@@ -140,7 +171,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                     
                     result = await fal.subscribe("fal-ai/qwen-image-2/edit", {
                         input: {
-                            prompt: prompt,
+                            prompt: prompt || "Enhance image",
                             negative_prompt: "low resolution, error, worst quality, low quality, deformed, ugly",
                             enable_prompt_expansion: true,
                             enable_safety_checker: true,
@@ -244,10 +275,10 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
 
             setCurrentImage(finalImageUrl);
             await saveImage({
-                prompt: prompt,
+                prompt: activeMode === 'UPSCALE' ? 'Upscaled Image 2x' : prompt,
                 style: activeMode,
                 image_url: finalImageUrl,
-                config: { aspectRatio, mode: activeMode, model: aiModel }
+                config: { aspectRatio, mode: activeMode, model: activeMode === 'UPSCALE' ? 'FAL_TOPAZ' : aiModel }
             });
             await loadImageHistory();
 
@@ -305,6 +336,13 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                             >
                                 <span className="material-icons-round text-lg">brush</span>
                                 Image Edit / Inpaint
+                            </button>
+                            <button
+                                onClick={() => setActiveMode('UPSCALE')}
+                                className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center gap-3 transition-all ${activeMode === 'UPSCALE' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                            >
+                                <span className="material-icons-round text-lg">high_quality</span>
+                                Upscale Image (2x)
                             </button>
                         </div>
                     </div>
@@ -413,7 +451,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         <div className="px-4 py-2 glass rounded-full flex items-center gap-2 border border-white/10 shadow-lg backdrop-blur-md">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                             <span className="text-xs font-medium text-slate-200 uppercase tracking-wider">
-                                {activeMode === 'TEXT' ? 'Gemini 2.5 Flash Image' : activeMode === 'IMG2IMG' ? 'Img2Img Mode' : 'Inpainting'}
+                                {activeMode === 'TEXT' ? 'Gemini 2.5 Flash Image' : activeMode === 'IMG2IMG' ? 'Img2Img Mode' : activeMode === 'UPSCALE' ? 'AI Upscaler' : 'Inpainting'}
                             </span>
                         </div>
                         <div className="hidden md:flex px-4 py-2 glass rounded-full items-center gap-2 border border-white/10 shadow-lg backdrop-blur-md">
@@ -487,11 +525,11 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                         >
                                             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                                 <span className="material-icons-round text-2xl text-slate-400 group-hover:text-primary">
-                                                    {activeMode === 'EDIT' ? 'brush' : 'add_photo_alternate'}
+                                                    {activeMode === 'EDIT' ? 'brush' : activeMode === 'UPSCALE' ? 'high_quality' : 'add_photo_alternate'}
                                                 </span>
                                             </div>
                                             <p className="text-sm text-slate-300 font-medium">
-                                                {activeMode === 'EDIT' ? 'Bild zum Bearbeiten wählen' : 'Referenzbild wählen'}
+                                                {activeMode === 'EDIT' ? 'Bild zum Bearbeiten wählen' : activeMode === 'UPSCALE' ? 'Bild zum Skalieren wählen' : 'Referenzbild wählen'}
                                             </p>
                                             <p className="text-xs text-slate-500 mt-1">Upload · Webcam · Eigene Assets</p>
                                         </div>
@@ -536,23 +574,25 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                 <textarea
                                     value={prompt}
                                     onChange={(e) => setPrompt(e.target.value)}
+                                    disabled={activeMode === 'UPSCALE'}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && !e.shiftKey) {
                                             e.preventDefault();
                                             handleGenerate();
                                         }
                                     }}
-                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-200 placeholder-slate-500 py-3 resize-none max-h-32"
+                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-200 placeholder-slate-500 py-3 resize-none max-h-32 disabled:opacity-50"
                                     placeholder={
                                         activeMode === 'TEXT' ? "Describe a futuristic city with neon lights..." :
                                             activeMode === 'IMG2IMG' ? "Describe how to transform the reference image..." :
-                                                "Describe what to edit in the image (e.g., remove the car, add a hat)..."
+                                                activeMode === 'UPSCALE' ? "Prompt is ignored for upscale" :
+                                                    "Describe what to edit in the image (e.g., remove the car, add a hat)..."
                                     }
                                     rows={1}
                                 />
                                 <button
                                     onClick={handleGenerate}
-                                    disabled={isGenerating || (activeMode === 'TEXT' && !prompt)}
+                                    disabled={isGenerating || (activeMode === 'TEXT' && !prompt) || (activeMode === 'UPSCALE' && !uploadedImage)}
                                     className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/40 flex-shrink-0 hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                                 >
                                     <span className="material-icons-round">{isGenerating ? 'hourglass_empty' : 'send'}</span>
