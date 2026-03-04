@@ -109,17 +109,22 @@ export const models3d = {
 // ── Voices (TTS) ─────────────────────────────────────────────────
 export const voices = {
     list: () => request<any[]>('/api/voices'),
-    create: (data: any) =>
-        request<any>('/api/voices', { method: 'POST', body: JSON.stringify(data) }),
-    delete: (id: string) => request<void>(`/api/voices/${id}`, { method: 'DELETE' }),
+    create: (data: any) => request<any>('/api/voices', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/api/voices/${id}`, { method: 'DELETE' })
 };
 
 // ── Music (Fal.ai / Yue) ─────────────────────────────────────────
 export const music = {
     list: () => request<any[]>('/api/music'),
-    create: (data: any) =>
-        request<any>('/api/music', { method: 'POST', body: JSON.stringify(data) }),
-    delete: (id: string) => request<void>(`/api/music/${id}`, { method: 'DELETE' }),
+    create: (data: any) => request<any>('/api/music', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/api/music/${id}`, { method: 'DELETE' })
+};
+
+// ── I2Audio ──────────────────────────────────────────────────────
+export const i2audio = {
+    list: () => request<any[]>('/api/i2audio'),
+    create: (data: any) => request<any>('/api/i2audio', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/api/i2audio/${id}`, { method: 'DELETE' })
 };
 
 // ── Texts ────────────────────────────────────────────────────────

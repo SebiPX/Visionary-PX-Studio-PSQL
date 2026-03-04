@@ -13,7 +13,8 @@ import { SketchStudio } from './components/SketchStudio/SketchStudio';
 import { ChatBot } from './components/ChatBot';
 import { Studio3D } from './components/Studio3D';
 import { VoiceStudio } from './components/VoiceStudio';
-import MusicStudio from './components/MusicStudio'; // Added MusicStudio import
+import MusicStudio from './components/MusicStudio';
+import I2AudioStudio from './components/I2AudioStudio';
 import { Settings } from './components/Settings';
 import { InventarApp } from './components/InventarApp';
 import { PxCreativeApp } from './components/px-creative/PxCreativeApp';
@@ -111,6 +112,10 @@ const AppContent: React.FC = () => {
 
         <div className={`w-full h-full ${currentView === AppView.MUSIC_STUDIO ? 'block' : 'hidden'}`}>
           <MusicStudio isActive={currentView === AppView.MUSIC_STUDIO} />
+        </div>
+
+        <div className={`w-full h-full ${currentView === AppView.I2AUDIO_STUDIO ? 'block' : 'hidden'}`}>
+          <I2AudioStudio isActive={currentView === AppView.I2AUDIO_STUDIO} />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.SETTINGS ? 'block' : 'hidden'}`}>

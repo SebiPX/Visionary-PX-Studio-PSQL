@@ -195,6 +195,7 @@ export enum AppView {
   STUDIO_3D = 'STUDIO_3D',
   VOICE_STUDIO = 'VOICE_STUDIO',
   MUSIC_STUDIO = 'MUSIC_STUDIO',
+  I2AUDIO_STUDIO = 'I2AUDIO_STUDIO',
 }
 
 export interface UserProfile {

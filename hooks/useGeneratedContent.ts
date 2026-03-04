@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { images, videos, thumbnails, texts, sketches, chats, models3d, voices, music, ApiImage, ApiVideo, ApiThumbnail, ApiText, ApiSketch } from '../lib/apiClient';
+import { images, videos, thumbnails, texts, sketches, chats, models3d, voices, music, i2audio, ApiImage, ApiVideo, ApiThumbnail, ApiText, ApiSketch } from '../lib/apiClient';
 
-type ContentType = 'image' | 'video' | 'thumbnail' | 'text' | 'sketch' | '3d' | 'voice' | 'music';
+type ContentType = 'image' | 'video' | 'thumbnail' | 'text' | 'sketch' | '3d' | 'voice' | 'music' | 'i2audio';
 
 interface Save3DData {
     image_url: string;
@@ -19,6 +19,12 @@ interface SaveVoiceData {
 interface SaveMusicData {
     prompt: string;
     audio_url: string;
+    config?: Record<string, any>;
+}
+
+interface SaveI2AudioData {
+    prompt: string;
+    video_url: string;
     config?: Record<string, any>;
 }
 
@@ -115,6 +121,17 @@ export const useGeneratedContent = () => {
         setLoading(true); setError(null);
         try {
             await music.create(data);
+            return { success: true };
+        } catch (err: any) {
+            setError(err.message);
+            return { success: false, error: err.message };
+        } finally { setLoading(false); }
+    };
+
+    const saveI2Audio = async (data: SaveI2AudioData) => {
+        setLoading(true); setError(null);
+        try {
+            await i2audio.create(data);
             return { success: true };
         } catch (err: any) {
             setError(err.message);
@@ -228,6 +245,9 @@ export const useGeneratedContent = () => {
                 case 'music':
                     data = await music.list();
                     break;
+                case 'i2audio':
+                    data = await i2audio.list();
+                    break;
                 default:
                     data = await texts.list();
                     break;
@@ -274,6 +294,9 @@ export const useGeneratedContent = () => {
                 case 'music':
                     result = await music.delete(id);
                     break;
+                case 'i2audio':
+                    result = await i2audio.delete(id);
+                    break;
                 default:
                     result = await texts.delete(id);
                     break;
@@ -292,6 +315,7 @@ export const useGeneratedContent = () => {
         save3D,
         saveVoice,
         saveMusic,
+        saveI2Audio,
         saveVideo,
         saveThumbnail,
         saveText,

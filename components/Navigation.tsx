@@ -24,6 +24,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
     { view: AppView.STUDIO_3D, icon: 'view_in_ar', label: '3D' },
     { view: AppView.VOICE_STUDIO, icon: 'record_voice_over', label: 'Voice' },
     { view: AppView.MUSIC_STUDIO, icon: 'music_note', label: 'Music' },
+    { view: AppView.I2AUDIO_STUDIO, icon: 'graphic_eq', label: 'i2Audio' },
   ];
 
   const handleLogout = async () => {
