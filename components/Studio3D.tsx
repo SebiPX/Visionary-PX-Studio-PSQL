@@ -74,7 +74,7 @@ export const Studio3D: React.FC = () => {
       });
 
       console.log('Trellis Result:', result.data);
-      const outputModel = (result.data as any).model_file?.url;
+      const outputModel = (result.data as any).model_glb?.url || (result.data as any).model_file?.url;
       
       if (!outputModel) {
         throw new Error("No model link found in response.");
