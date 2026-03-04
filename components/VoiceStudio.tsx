@@ -13,16 +13,17 @@ export const VoiceStudio: React.FC = () => {
 
   const { saveVoice, loadHistory, deleteContent, loading } = useGeneratedContent();
 
-  const loadVoices = useCallback(async () => {
+  const loadVoices = async () => {
     const result = await loadHistory('voice', 50);
     if (result.success && result.data) {
       setHistory(result.data as GeneratedVoice[]);
     }
-  }, [loadHistory]);
+  };
 
   useEffect(() => {
     loadVoices();
-  }, [loadVoices]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
