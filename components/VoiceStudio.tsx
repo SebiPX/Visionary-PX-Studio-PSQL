@@ -44,9 +44,13 @@ function addWavHeader(pcmData: Uint8Array, sampleRate = 24000, numChannels = 1):
 export const VoiceStudio: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [aiModel, setAiModel] = useState<'gemini-2.5-flash-preview-tts' | 'gemini-2.5-pro-preview-tts'>('gemini-2.5-flash-preview-tts');
+  const [voice1, setVoice1] = useState('Puck');
+  const [voice2, setVoice2] = useState('Charon');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
   const [history, setHistory] = useState<GeneratedVoice[]>([]);
+  
+  const voiceOptions = ['Puck', 'Charon', 'Kore', 'Fenrir', 'Aoede', 'Aoede'];
 
   const { saveVoice, loadHistory, deleteContent, loading } = useGeneratedContent();
 
@@ -84,6 +88,13 @@ export const VoiceStudio: React.FC = () => {
         contents: [{ role: 'user', parts: parts }],
         config: {
           responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: {
+                voiceName: voice1
+              }
+            }
+          }
         }
       }) as any;
 
@@ -150,7 +161,7 @@ export const VoiceStudio: React.FC = () => {
       await saveVoice({
         prompt: prompt,
         audio_url: finalAudioUrl,
-        config: { model: aiModel }
+        config: { model: aiModel, voice1, voice2 }
       });
 
       await loadVoices();
@@ -170,6 +181,8 @@ export const VoiceStudio: React.FC = () => {
     if (item.config?.model) {
       setAiModel(item.config.model);
     }
+    if (item.config?.voice1) setVoice1(item.config.voice1);
+    if (item.config?.voice2) setVoice2(item.config.voice2);
   };
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
@@ -225,6 +238,32 @@ export const VoiceStudio: React.FC = () => {
                   </span>
                   <span className={`text-[10px] ${aiModel === 'gemini-2.5-pro-preview-tts' ? 'text-white/80' : 'text-slate-500'}`}>Höchste Qualität</span>
                 </button>
+              </div>
+            </div>
+
+            {/* Voice Selection */}
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 block">Voice 1</label>
+                <select
+                  value={voice1}
+                  onChange={(e) => setVoice1(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+                >
+                  {voiceOptions.map(v => <option key={v} value={v} className="bg-[#101622] text-white">{v}</option>)}
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 block opacity-50">Voice 2 (Dialog)</label>
+                <select
+                  value={voice2}
+                  onChange={(e) => setVoice2(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+                >
+                  {voiceOptions.map(v => <option key={v} value={v} className="bg-[#101622] text-white">{v}</option>)}
+                </select>
               </div>
             </div>
 
