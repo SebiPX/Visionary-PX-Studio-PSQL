@@ -4,6 +4,43 @@ import { GeneratedVoice } from '../types';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import toast from 'react-hot-toast';
 
+// Helper to wrap raw PCM data in a valid standard WAV RIFF header
+function addWavHeader(pcmData: Uint8Array, sampleRate = 24000, numChannels = 1): Uint8Array {
+  const bytesPerSample = 2; // 16-bit
+  const blockAlign = numChannels * bytesPerSample;
+  const byteRate = sampleRate * blockAlign;
+  const dataSize = pcmData.length;
+  
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  
+  const writeString = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  };
+  
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true); // File size - 8
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true); // Subchunk1Size (16 for PCM)
+  view.setUint16(20, 1, true); // AudioFormat (1 for PCM)
+  view.setUint16(22, numChannels, true); // NumChannels
+  view.setUint32(24, sampleRate, true); // SampleRate
+  view.setUint32(28, byteRate, true); // ByteRate
+  view.setUint16(32, blockAlign, true); // BlockAlign
+  view.setUint16(34, bytesPerSample * 8, true); // BitsPerSample
+  writeString(36, 'data');
+  view.setUint32(40, dataSize, true); // Subchunk2Size
+  
+  // Write PCM audio data
+  const out = new Uint8Array(buffer);
+  out.set(pcmData, 44);
+  
+  return out;
+}
+
 export const VoiceStudio: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [aiModel, setAiModel] = useState<'gemini-2.5-flash-preview-tts' | 'gemini-2.5-pro-preview-tts'>('gemini-2.5-flash-preview-tts');
@@ -62,17 +99,24 @@ export const VoiceStudio: React.FC = () => {
       if (respParts) {
         for (const part of respParts) {
           if (part.inlineData) {
-            const mimeType = part.inlineData.mimeType || 'audio/wav';
+            let mimeType = part.inlineData.mimeType || 'audio/wav';
             const base64Data = part.inlineData.data;
 
-            // Convert base64 to Blob, then upload
-            const byteCharacters = atob(base64Data);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            // Convert base64 to Uint8Array
+            const binaryString = atob(base64Data);
+            const pcmData = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              pcmData[i] = binaryString.charCodeAt(i);
             }
-            const byteArray = new Uint8Array(byteNumbers);
-            const audioBlob = new Blob([byteArray], { type: mimeType });
+
+            // Gemini TTS returns raw PCM (audio/pcm). Browser needs a WAV header.
+            let audioBuffer: BlobPart = pcmData as any;
+            if (mimeType.includes('audio/pcm')) {
+               audioBuffer = addWavHeader(pcmData, 24000) as any; // Gemini 2.5 returns 24kHz PCM
+               mimeType = 'audio/wav';
+            }
+
+            const audioBlob = new Blob([audioBuffer], { type: mimeType });
 
             const fileName = `${Date.now()}_voice_${Math.random().toString(36).substr(2, 6)}.wav`;
             const audioFile = new File([audioBlob], fileName, { type: mimeType });
