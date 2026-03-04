@@ -161,7 +161,7 @@ const ResultView: React.FC<ResultViewProps> = ({
           </button>
         </form>
         <p className="text-center text-slate-500 text-xs mt-3">
-          Powered by Gemini 2.0 Flash. Describe changes to update the image.
+          Powered by Gemini 3.1 Flash. Describe changes to update the image.
         </p>
       </div>
 

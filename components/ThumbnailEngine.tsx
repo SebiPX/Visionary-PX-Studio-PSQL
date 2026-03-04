@@ -248,7 +248,7 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
 
             const response = await geminiProxy({
                 action: 'generateContent',
-                model: 'gemini-2.5-flash-image',
+                model: 'gemini-3.1-flash-image-preview',
                 contents: [{ role: 'user', parts: parts }],
                 config: {
                     imageConfig: { aspectRatio: aspectRatio }

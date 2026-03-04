@@ -71,7 +71,7 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 
 ### 7. ✏️ Sketch Studio
 
-- **Modell:** `gemini-2.5-flash-image`
+- **Modell:** `gemini-3.1-flash-image-preview`
 - Interaktives Drawing Canvas mit Undo/Redo, Aspect Ratio, Stil-Auswahl
 - Generiertes Bild → Upload zu R2 → URL in `generated_sketches` (kein base64 in DB)
 

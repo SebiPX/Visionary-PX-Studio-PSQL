@@ -202,7 +202,7 @@ psql "$DATABASE_URL" -f /opt/docker/labs-api/inventar_migration.sql
 
 ### ✏️ Sketch Studio
 
-- Sketch-to-Image mit `gemini-2.5-flash-image`
+- Sketch-to-Image mit `gemini-3.1-flash-image-preview`
 - Interaktives Drawing Canvas, Undo/Redo, Aspect Ratio
 
 ### 💬 Chat Bot

@@ -214,7 +214,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
 
                 const response = await geminiProxy({
                     action: 'generateContent',
-                    model: 'gemini-2.5-flash-image',
+                    model: 'gemini-3.1-flash-image-preview',
                     contents: [{ role: 'user', parts: parts }],
                     config: {
                         imageConfig: {
@@ -451,7 +451,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         <div className="px-4 py-2 glass rounded-full flex items-center gap-2 border border-white/10 shadow-lg backdrop-blur-md">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                             <span className="text-xs font-medium text-slate-200 uppercase tracking-wider">
-                                {activeMode === 'TEXT' ? 'Gemini 2.5 Flash Image' : activeMode === 'IMG2IMG' ? 'Img2Img Mode' : activeMode === 'UPSCALE' ? 'AI Upscaler' : 'Inpainting'}
+                                {activeMode === 'TEXT' ? 'Gemini 3.1 Flash Image' : activeMode === 'IMG2IMG' ? 'Img2Img Mode' : activeMode === 'UPSCALE' ? 'AI Upscaler' : 'Inpainting'}
                             </span>
                         </div>
                         <div className="hidden md:flex px-4 py-2 glass rounded-full items-center gap-2 border border-white/10 shadow-lg backdrop-blur-md">

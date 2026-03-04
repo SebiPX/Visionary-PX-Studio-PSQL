@@ -1,7 +1,7 @@
 import { geminiProxy } from '../lib/apiClient';
 import { ContextOption, StyleOption } from "../components/SketchStudio/types";
 
-const GEMINI_MODEL = 'gemini-2.5-flash-image';
+const GEMINI_MODEL = 'gemini-3.1-flash-image-preview';
 
 /**
  * Helper to strip the data:image/...;base64, prefix

@@ -174,7 +174,7 @@ export const useStoryAI = () => {
 
             const response = await geminiProxy({
                 action: 'generateContent',
-                model: 'gemini-2.5-flash-image',
+                model: 'gemini-3.1-flash-image-preview',
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
                 config: { imageConfig: { aspectRatio: '1:1' } }
             }) as any;
