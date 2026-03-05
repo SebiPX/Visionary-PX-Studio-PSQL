@@ -32,6 +32,7 @@ import chatRoutes from './routes/chats';
 import proxyRoutes from './routes/proxy';
 import creativeAgentRoutes from './routes/creativeAgent';
 import socialAuditRoutes from './routes/socialAudit';
+import agencyRoutes from './routes/agency';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -78,6 +79,10 @@ app.use('/api/chats', chatRoutes);
 app.use('/api/proxy', proxyRoutes);
 app.use('/api/creative', creativeAgentRoutes);
 app.use('/api/social-audit', socialAuditRoutes);
+
+// Agency App (ProjectFlow) Routes
+app.use('/api', agencyRoutes); // Mounts /api/clients, /api/projects, etc. to match frontend exactly
+
 // Inventar
 app.use('/api/inventar/items',            inventarItemRoutes);
 app.use('/api/inventar/loans',            inventarLoanRoutes);
