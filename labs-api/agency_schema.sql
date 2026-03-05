@@ -34,13 +34,17 @@ CREATE TABLE IF NOT EXISTS public.agency_client_contacts (
 -- 3. agency_projects
 CREATE TABLE IF NOT EXISTS public.agency_projects (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name TEXT NOT NULL,
+    project_number SERIAL,
+    title TEXT NOT NULL,
     description TEXT,
+    category TEXT,
+    color_code TEXT DEFAULT '#3b82f6',
     client_id UUID NOT NULL REFERENCES public.agency_clients(id) ON DELETE RESTRICT,
-    status TEXT DEFAULT 'planning' CHECK (status IN ('planning', 'active', 'paused', 'completed', 'cancelled')),
+    main_contact_id UUID REFERENCES public.agency_client_contacts(id) ON DELETE SET NULL,
+    status TEXT DEFAULT 'planned' CHECK (status IN ('planned', 'active', 'on_hold', 'completed', 'cancelled')),
     start_date DATE,
-    end_date DATE,
-    budget NUMERIC(15, 2),
+    deadline DATE,
+    budget_total NUMERIC(15, 2),
     hourly_rate NUMERIC(10, 2),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
