@@ -11,7 +11,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
     let query = `
       SELECT te.*, 
         json_build_object('id', t.id, 'title', t.title) as task,
-        json_build_object('id', p.id, 'name', p.name) as project,
+        json_build_object('id', p.id, 'title', p.title) as project,
         json_build_object('id', u.id, 'full_name', u.full_name) as user
       FROM agency_time_entries te
       JOIN agency_tasks t ON te.task_id = t.id

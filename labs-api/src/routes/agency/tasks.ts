@@ -11,7 +11,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
   try {
     let query = `
       SELECT t.*, 
-        json_build_object('id', p.id, 'name', p.name) as project,
+        json_build_object('id', p.id, 'title', p.title) as project,
         json_build_object('id', u.id, 'full_name', u.full_name, 'avatar_url', u.avatar_url) as assignee
       FROM agency_tasks t
       JOIN agency_projects p ON t.project_id = p.id
@@ -38,7 +38,7 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
     const result = await pool.query(
       `SELECT t.*, 
-        json_build_object('id', p.id, 'name', p.name) as project,
+        json_build_object('id', p.id, 'title', p.title) as project,
         json_build_object('id', u.id, 'full_name', u.full_name, 'avatar_url', u.avatar_url) as assignee
       FROM agency_tasks t
       JOIN agency_projects p ON t.project_id = p.id
