@@ -153,6 +153,20 @@ CREATE TABLE IF NOT EXISTS public.agency_service_pricing (
     UNIQUE(service_id, seniority_id)
 );
 
+-- 13. agency_notifications
+CREATE TABLE IF NOT EXISTS public.agency_notifications (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    type TEXT NOT NULL CHECK (type IN ('info', 'success', 'warning', 'error')),
+    title TEXT NOT NULL,
+    message TEXT,
+    link TEXT,
+    is_read BOOLEAN DEFAULT false,
+    related_entity_id UUID,
+    related_entity_type TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- Disable Row Level Security (RLS) since backend handles authorization
 ALTER TABLE public.agency_clients DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_client_contacts DISABLE ROW LEVEL SECURITY;
@@ -166,3 +180,4 @@ ALTER TABLE public.agency_financial_documents DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_service_modules DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_seniority_levels DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_service_pricing DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_notifications DISABLE ROW LEVEL SECURITY;
