@@ -5,8 +5,13 @@
 -- 1. agency_clients
 CREATE TABLE IF NOT EXISTS public.agency_clients (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name TEXT NOT NULL,
-    industry TEXT,
+    company_name TEXT NOT NULL,
+    address_line1 TEXT,
+    zip_code TEXT,
+    city TEXT,
+    country TEXT,
+    vat_id TEXT,
+    payment_terms_days INTEGER DEFAULT 30,
     website TEXT,
     logo_url TEXT,
     status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'lead')),
