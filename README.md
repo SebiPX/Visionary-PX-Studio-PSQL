@@ -160,12 +160,12 @@ psql "$DATABASE_URL" -f /opt/docker/labs-api/inventar_migration.sql
 
 ## ✨ Features
 
-### 🏠 Dashboard
+### 🏠 Home Bereich (Dashboard & PX Intern)
 
-- Masonry-Grid mit allen Generierungen
-- Klickbare Karten für direkte Navigation
-- Echtzeit-Updates aus labs_db
-- **Tools & Apps** Bereich mit direktem Inventar-Zugang
+- **Zweizeilige Desktop-Navigation**: Aufgeräumtes Layout mit Hauptkategorien (Home, Studio, Agents, Admin) und kontextbezogener zweiter Tool-Leiste.
+- **PX Intern als Haupt-Dashboard**: Internes Agentur-Portal (Verleih, Logins, Kalender) direkt unter 'Home' integriert. Sidebar wurde zugunsten der Top-Navbar entfernt.
+- **Recent Generations Widget**: Letzte KI-Generierungen (Bilder, Videos) nahtlos in das PX Intern Dashboard integriert.
+- Konfigurierbares Layout via Masonry-Grid.
 
 ### 🎨 Image Gen
 
@@ -214,8 +214,15 @@ psql "$DATABASE_URL" -f /opt/docker/labs-api/inventar_migration.sql
 ### 🎤 PX Event Agent
 
 - Mehrstufiger KI-Workflow: Morphological Box → SCAMPER → Pitch
+- Einheitliches CI-Farbschema (Primary Brand Blue)
 - Google Search API: Ortsspezifische Vorschläge (Locations, Vendoren)
 - Selbstgenerierendes, portables HTML-Pitchbook
+
+### 📊 Social Media Audit Agent
+
+- Mock-Sync von Social Media Accounts (Instagram, TikTok) inkl. realistischem Engagement.
+- Performance Dashboard: Automatische Auswertung der Top- und Flop-Beiträge.
+- AI Insights: Automatisierte Sentiment-Analyse, Mustererkennung und Erfolgsfaktoren-Extraktion via Gemini.
 
 ### ⚙️ Settings
 
@@ -273,6 +280,10 @@ Eigenständiges JWT Auth-System — kein Supabase, kein Firebase:
 | `generated_sketches`    | Sketch-to-Image (R2-URL in DB)           |
 | `storyboard_sessions`   | Story Studio Projekte                    |
 | `chat_sessions`         | ChatBot-Verläufe                         |
+| `social_accounts`       | Social Media Profile (Audit)             |
+| `social_posts`          | Social Media Posts (Audit)               |
+| `social_metrics`        | Engagement Metriken (Audit)              |
+| `social_ai_analysis`    | Gemini Insights für Posts                |
 | `onboarding_embeddings` | RAG-Vektordaten (pgvector, 768-dim)      |
 
 ### PX INTERN Tabellen

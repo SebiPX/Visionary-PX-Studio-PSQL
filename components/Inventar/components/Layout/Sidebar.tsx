@@ -9,7 +9,6 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { to: '/',                 label: 'Dashboard',        icon: LayoutDashboard, end: true,  adminOnly: false },
   { to: '/inventar',         label: 'Inventar',          icon: Package,         end: false, adminOnly: false },
   { to: '/verleih-formular', label: 'Verleih',           icon: FileText,        end: false, adminOnly: false },
   { to: '/kalender',         label: 'Kalender',          icon: Calendar,        end: false, adminOnly: false },

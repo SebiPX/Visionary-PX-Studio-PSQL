@@ -54,7 +54,7 @@ export const AgentDashboard: React.FC = () => {
         {!isCreating && (
           <button 
             onClick={() => setIsCreating(true)}
-            className="px-6 py-2 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-medium flex items-center gap-2 transition-colors shadow-lg shadow-orange-500/20"
+            className="px-6 py-2 rounded-full bg-brand-600 hover:bg-brand-500 text-white font-medium flex items-center gap-2 transition-colors shadow-lg shadow-brand-500/20"
           >
             <span className="material-icons-round">add</span>
             New Concept
@@ -73,7 +73,7 @@ export const AgentDashboard: React.FC = () => {
                 value={newTitle} 
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="e.g. Acme Corp Launch 2026"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
                 autoFocus
               />
             </div>
@@ -84,7 +84,7 @@ export const AgentDashboard: React.FC = () => {
                 value={newOccasion} 
                 onChange={(e) => setNewOccasion(e.target.value)}
                 placeholder="e.g. Product Launch, Summer Party"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
             <div>
@@ -94,7 +94,7 @@ export const AgentDashboard: React.FC = () => {
                 value={newGuestCount} 
                 onChange={(e) => setNewGuestCount(e.target.value)}
                 placeholder="e.g. 50"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
           </div>
@@ -108,7 +108,7 @@ export const AgentDashboard: React.FC = () => {
             <button 
               onClick={handleStartProject}
               disabled={!newTitle || !newOccasion || !newGuestCount || loading}
-              className="px-6 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-medium disabled:opacity-50 transition-colors flex items-center gap-2"
+              className="px-6 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-medium disabled:opacity-50 transition-colors flex items-center gap-2"
             >
               Start Agent <span className="material-icons-round text-sm">arrow_forward</span>
             </button>
@@ -132,10 +132,10 @@ export const AgentDashboard: React.FC = () => {
             <div 
               key={p.id}
               onClick={() => handleOpenProject(p.id)}
-              className="group bg-[#161f30] rounded-2xl border border-white/5 cursor-pointer hover:border-orange-500/50 hover:-translate-y-1 transition-all overflow-hidden p-6 relative"
+              className="group bg-[#161f30] rounded-2xl border border-white/5 cursor-pointer hover:border-brand-500/50 hover:-translate-y-1 transition-all overflow-hidden p-6 relative"
             >
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">{p.title}</h3>
+                <h3 className="text-lg font-bold text-white group-hover:text-brand-400 transition-colors">{p.title}</h3>
                 <button 
                   onClick={(e) => handleDeleteProject(p.id, e)}
                   className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-500 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition-all"
@@ -164,13 +164,13 @@ export const AgentDashboard: React.FC = () => {
                   <div className={`w-2 h-2 rounded-full ${
                     p.current_step === 'finished' ? 'bg-green-500' :
                     p.current_step === 'scamper' ? 'bg-purple-500' :
-                    p.current_step === 'matrix' ? 'bg-blue-500' : 'bg-orange-500'
+                    p.current_step === 'matrix' ? 'bg-blue-500' : 'bg-brand-500'
                   } shadow-[0_0_8px_currentColor]`} />
                   <span className="text-xs uppercase tracking-wider font-bold text-slate-300">
                     Step: {p.current_step}
                   </span>
                 </div>
-                <span className="material-icons-round text-slate-500 group-hover:text-orange-500 group-hover:translate-x-1 transition-all">
+                <span className="material-icons-round text-slate-500 group-hover:text-brand-500 group-hover:translate-x-1 transition-all">
                   arrow_forward
                 </span>
               </div>

@@ -57,7 +57,7 @@ export const ScamperStep: React.FC = () => {
           const isWow = concept.how_now_wow_score === 'wow';
 
           return (
-            <div key={concept.id} className="bg-[#161f30] rounded-2xl border border-white/10 p-6 shadow-xl flex flex-col h-full relative overflow-hidden group hover:border-orange-500/30 transition-all">
+            <div key={concept.id} className="bg-[#161f30] rounded-2xl border border-white/10 p-6 shadow-xl flex flex-col h-full relative overflow-hidden group hover:border-brand-500/30 transition-all">
               
               <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
                 <h3 className="text-lg font-bold text-white">Concept {idx + 1}</h3>
@@ -84,20 +84,20 @@ export const ScamperStep: React.FC = () => {
 
                 {/* SCAMPER Wow-Factor */}
                 <div>
-                  <h4 className="flex items-center gap-2 text-xs font-bold text-orange-400 uppercase tracking-wider mb-2">
+                  <h4 className="flex items-center gap-2 text-xs font-bold text-brand-400 uppercase tracking-wider mb-2">
                     <span className="material-icons-round text-sm">auto_awesome</span> 
                     SCAMPER Refinement
                   </h4>
                   {concept.scamper_refinements?.applied_adjectives && concept.scamper_refinements.applied_adjectives.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-3">
                       {concept.scamper_refinements.applied_adjectives.map((adj, i) => (
-                        <span key={i} className="px-2 py-0.5 bg-orange-500/20 text-orange-400 text-[10px] uppercase font-bold rounded border border-orange-500/30">
+                        <span key={i} className="px-2 py-0.5 bg-brand-500/20 text-brand-400 text-[10px] uppercase font-bold rounded border border-brand-500/30">
                           {adj}
                         </span>
                       ))}
                     </div>
                   )}
-                  <p className="text-sm text-slate-300 leading-relaxed italic bg-orange-500/5 p-3 rounded-lg border border-orange-500/10 mb-4">
+                  <p className="text-sm text-slate-300 leading-relaxed italic bg-brand-500/5 p-3 rounded-lg border border-brand-500/10 mb-4">
                     "{concept.scamper_refinements?.idea}"
                   </p>
                   
@@ -161,7 +161,7 @@ export const ScamperStep: React.FC = () => {
               <button 
                 onClick={() => handleSelectConcept(concept.id)}
                 disabled={loading || selectingId !== null}
-                className="mt-6 w-full py-3 rounded-xl bg-white/5 hover:bg-orange-600 border border-white/10 hover:border-transparent text-white font-bold transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_20px_rgba(234,88,12,0.3)] disabled:opacity-50"
+                className="mt-6 w-full py-3 rounded-xl bg-white/5 hover:bg-brand-600 border border-white/10 hover:border-transparent text-white font-bold transition-all flex items-center justify-center gap-2 group-hover:shadow-[0_0_20px_rgba(234,88,12,0.3)] disabled:opacity-50"
               >
                 {selectingId === concept.id ? (
                   <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Saving...</span>
@@ -194,7 +194,7 @@ export const ScamperStep: React.FC = () => {
               if (token && currentProject) await updateProject(token, currentProject.id, { current_step: 'finished' });
             }}
             disabled={loading || selectingId !== null}
-            className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 text-lg"
+            className="px-8 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 text-lg"
           >
             Skip to Output <span className="material-icons-round text-sm">arrow_forward</span>
           </button>

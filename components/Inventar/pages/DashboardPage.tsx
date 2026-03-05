@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import type { InventarItem, InventarLoan, InternalLink, Verleihschein, Login } from '../types'
 import type { DashboardConfig } from '../hooks/useDashboardConfig'
 import { DashboardConfigDrawer } from '../components/DashboardConfigDrawer'
+import { AppView } from '../../../types'
+import { RecentGenerations } from '../../Dashboard'
 
 // ─── Avatar colour helper ─────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -88,10 +90,12 @@ interface DashboardPageProps {
   config: DashboardConfig
   onConfigSave: (next: DashboardConfig) => void
   configSaving: boolean
+  setView?: (view: AppView) => void
+  navigateToItem?: (view: AppView, itemId: string) => void
 }
 
 export function DashboardPage({
-  items, loans, links, scheine, logins, config, onConfigSave, configSaving
+  items, loans, links, scheine, logins, config, onConfigSave, configSaving, setView, navigateToItem
 }: DashboardPageProps) {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -335,6 +339,11 @@ export function DashboardPage({
           </section>
         )}
 
+      </div>
+
+      {/* ── Recent Generations ─────────────────────────────────────────────── */}
+      <div className="mt-8 border-t border-white/5 pt-8 max-w-7xl mx-auto px-6">
+          <RecentGenerations setView={setView} navigateToItem={navigateToItem} isActive={true} />
       </div>
 
       {/* Config Drawer */}

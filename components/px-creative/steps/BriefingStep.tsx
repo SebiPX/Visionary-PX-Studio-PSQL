@@ -81,7 +81,7 @@ export const BriefingStep: React.FC = () => {
                 type="text" 
                 value={occasion} 
                 onChange={(e) => setOccasion(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
             <div>
@@ -90,7 +90,7 @@ export const BriefingStep: React.FC = () => {
                 type="number" 
                 value={guestCount} 
                 onChange={(e) => setGuestCount(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
           </div>
@@ -108,7 +108,7 @@ export const BriefingStep: React.FC = () => {
                 value={budget} 
                 onChange={(e) => setBudget(e.target.value)}
                 placeholder="e.g. 50000"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
@@ -119,7 +119,7 @@ export const BriefingStep: React.FC = () => {
                 value={season} 
                 onChange={(e) => setSeason(e.target.value)}
                 placeholder="e.g. Summer, Q3 2026"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
@@ -130,7 +130,7 @@ export const BriefingStep: React.FC = () => {
                 value={industry} 
                 onChange={(e) => setIndustry(e.target.value)}
                 placeholder="e.g. Automotive, Finance"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
@@ -141,7 +141,7 @@ export const BriefingStep: React.FC = () => {
                 value={targetAudience} 
                 onChange={(e) => setTargetAudience(e.target.value)}
                 placeholder="e.g. C-Level Executives, Employees"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
@@ -152,7 +152,7 @@ export const BriefingStep: React.FC = () => {
                 value={locationPreference} 
                 onChange={(e) => setLocationPreference(e.target.value)}
                 placeholder="e.g. Southern Europe, Mountains, Urban"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
@@ -162,7 +162,7 @@ export const BriefingStep: React.FC = () => {
                 value={emotionalGoals} 
                 onChange={(e) => setEmotionalGoals(e.target.value)}
                 placeholder="e.g. We want to build absolute trust, but keep the energy very euphoric and dynamic."
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500 transition-colors min-h-[100px]"
+                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-500 transition-colors min-h-[100px]"
               />
             </div>
 
@@ -185,7 +185,7 @@ export const BriefingStep: React.FC = () => {
         <button 
           onClick={handleSaveAndContinue}
           disabled={isSaving || loading || !occasion || !guestCount}
-          className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 text-lg"
+          className="px-8 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 text-lg"
         >
           {isSaving || loading ? (
             <span className="flex items-center gap-2">

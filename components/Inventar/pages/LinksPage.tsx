@@ -270,7 +270,7 @@ export function LinksPage({ links, isAdmin, onCreate, onUpdate, onDelete }: Link
   }
 
   return (
-    <div className="p-8 space-y-6 max-w-4xl">
+    <div className="p-8 space-y-6 max-w-4xl mx-auto w-full">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

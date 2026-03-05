@@ -18,7 +18,7 @@ interface DashboardProps {
     isActive?: boolean;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ setView, navigateToItem, isActive = true }) => {
+export const RecentGenerations: React.FC<DashboardProps> = ({ setView, navigateToItem, isActive = true }) => {
     const { profile } = useAuth();
     const { loadHistory, loading } = useGeneratedContent();
     const [contentItems, setContentItems] = useState<ContentItem[]>([]);
@@ -118,38 +118,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ setView, navigateToItem, i
     };
 
     return (
-        <div className="h-full overflow-y-auto pt-6 px-4 pb-12 max-w-7xl mx-auto hide-scrollbar">
-            {/* Welcome Section */}
-            <div className="mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">
-                    Willkommen zurück, {profile?.full_name || 'User'}
-                </h2>
-                <p className="text-slate-400">Dein KI-Workspace ist bereit. Was erstellst du heute?</p>
-            </div>
-
-            {/* Tools & Apps section */}
-            {setView && (
-                <div className="mb-8">
-                    <h2 className="text-lg font-bold text-white mb-4">Tools & Apps</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                        <button
-                            onClick={() => setView(AppView.INVENTAR)}
-                            className="group relative flex items-center gap-3 p-4 rounded-2xl border border-slate-700/80 bg-slate-800/50 hover:bg-slate-800 hover:border-blue-500/40 transition-all duration-200 text-left overflow-hidden"
-                        >
-                            {/* Glow effect */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shrink-0 shadow-lg shadow-blue-900/30">
-                                <span className="material-icons-round text-white text-lg">inventory_2</span>
-                            </div>
-                            <div className="relative min-w-0">
-                                <p className="font-semibold text-white text-sm leading-tight">PX INTERN</p>
-                                <p className="text-xs text-slate-400 mt-0.5 truncate">Links · Inventar · Logins</p>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            )}
-
+        <div className="pt-6 pb-12 w-full">
             {/* Content */}
 
             <div className="flex items-center justify-between mb-6">

@@ -27,11 +27,11 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 
 ## 🚀 Features — Detailbeschreibung
 
-### 1. 🏠 Dashboard
+### 1. 🏠 Home Bereich (Dashboard & PX Intern)
 
-- Masonry-Grid mit allen Generierungen (Bilder, Videos, Thumbnails)
-- Klickbare Karten → navigieren direkt zum Tool mit vorgeladenem Content
-- **Tools & Apps** Bereich mit Direktzugang zu PX Inventar
+- **Zweizeilige Desktop-Navigation**: Aufgeräumtes Layout mit Hauptkategorien (Home, Studio, Agents, Admin) und kontextbezogener zweiter Tool-Leiste.
+- **PX Intern als Haupt-Dashboard**: Internes Agentur-Portal (Verleih, Logins, Kalender) direkt unter 'Home' integriert. Sidebar wurde zugunsten der Top-Navbar komplett entfernt.
+- **Recent Generations Widget**: Letzte KI-Generierungen (Bilder, Videos) nahtlos in das PX Intern Dashboard (Masonry-Grid) integriert.
 - Echtzeit-Daten aus `labs_db` via `apiClient`
 
 ### 2. 🎨 Image Gen
@@ -96,11 +96,18 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 ### 9. 🎤 PX Event Agent
 
 - **Mehrstufiger Ideation-Workflow:** Briefing → Morphological Box → SCAMPER Refinement → Pitch Export
+- **Einheitliches CI-Design:** Konsequente Nutzung der primären Brand-Farbe (Blau) für alle UI-Elemente
 - **Google Search Integration:** Agent liest Location-Präferenzen, sucht reale Veranstaltungsorte & Vendors via Google (Website, Adresse, Telefonnummer)
 - **Osbourne Checklist:** Erweitertes SCAMPER-Prompting mit Adjektiven zur Ideen-Herausforderung (visuell als Tags dargestellt)
 - **HTML Pitch Export:** Dynamisch generiertes, eigenständiges HTML-Pitchbook mit Tailwind CSS
 
-### 10. ⚙️ Benutzereinstellungen
+### 10. 📊 Social Media Audit Agent
+
+- **Account Management & Mock-Sync:** Erfassen von Instagram- und TikTok-Accounts mit automatischer Generierung realistischer Beitragsdaten (Reach, Likes, Shares, Comments).
+- **Performance Dashboard:** Visuelle Sortierung und Berechnung der Engagement-Rate zur schnellen Identifikation von Top- & Flop-Beiträgen.
+- **AI Insights:** "KI Analyse" Feature sendet Beitragsdaten sowie Bilder an Gemini zur Extraktion von Sentiment, Mustern und Erfolgsfaktoren. Erkenntnisse werden persistent in DB gespeichert.
+
+### 11. ⚙️ Benutzereinstellungen
 
 - Profil bearbeiten (Name)
 - Avatar-Upload → Cloudflare R2 → URL in `profiles`
@@ -190,6 +197,10 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 | `generated_sketches`    | Sketch-to-Image (R2-URL, kein base64)                       |
 | `storyboard_sessions`   | Story Studio Projekte (JSONB für Shots/Assets)              |
 | `chat_sessions`         | ChatBot-Verläufe (JSONB Messages-Array)                     |
+| `social_accounts`       | Social Media Profile (Account Details)                      |
+| `social_posts`          | Social Media Posts pro Account (Reels/Images)               |
+| `social_metrics`        | Engagement Metriken pro Post (Views, Likes, etc.)           |
+| `social_ai_analysis`    | Gemini Insights für Posts (Patterns, Sentiment)             |
 | `onboarding_embeddings` | RAG-Vektordaten (pgvector, 768-dim, `gemini-embedding-001`) |
 
 ### PX INTERN

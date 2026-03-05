@@ -85,7 +85,7 @@ export const OutputStep: React.FC = () => {
 
       {finalConcept && (
         <div ref={printRef} className="bg-[#161f30] rounded-2xl border border-white/10 p-8 shadow-xl mb-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
           
           <h3 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4 relative z-10">
             Selected Concept Summary
@@ -99,7 +99,7 @@ export const OutputStep: React.FC = () => {
                   <div className="flex justify-between"><span>Occasion:</span> <strong className="text-white">{currentProject?.occasion}</strong></div>
                   <div className="flex justify-between"><span>Guests:</span> <strong className="text-white">{currentProject?.guest_count}</strong></div>
                   <div className="flex justify-between"><span>Budget:</span> <strong className="text-white">{currentProject?.budget || 'N/A'}</strong></div>
-                  <div className="flex justify-between"><span>HNW Score:</span> <strong className="text-orange-400 uppercase">{finalConcept.how_now_wow_score}</strong></div>
+                  <div className="flex justify-between"><span>HNW Score:</span> <strong className="text-brand-400 uppercase">{finalConcept.how_now_wow_score}</strong></div>
                 </div>
               </div>
 
@@ -118,19 +118,19 @@ export const OutputStep: React.FC = () => {
 
             <div className="space-y-6">
               <div>
-                <h4 className="flex items-center gap-2 text-xs font-bold text-orange-400 uppercase tracking-wider mb-2">
+                <h4 className="flex items-center gap-2 text-xs font-bold text-brand-400 uppercase tracking-wider mb-2">
                   <span className="material-icons-round text-sm">auto_awesome</span> The Wow-Factor (SCAMPER)
                 </h4>
                 {finalConcept.scamper_refinements?.applied_adjectives && finalConcept.scamper_refinements.applied_adjectives.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4 mt-2">
                     {finalConcept.scamper_refinements.applied_adjectives.map((adj, i) => (
-                      <span key={i} className="px-3 py-1 bg-orange-500/20 text-orange-400 text-xs uppercase font-bold rounded border border-orange-500/30">
+                      <span key={i} className="px-3 py-1 bg-brand-500/20 text-brand-400 text-xs uppercase font-bold rounded border border-brand-500/30">
                         {adj}
                       </span>
                     ))}
                   </div>
                 )}
-                <div className="bg-orange-500/10 p-5 rounded-xl border border-orange-500/20 mb-6">
+                <div className="bg-brand-500/10 p-5 rounded-xl border border-brand-500/20 mb-6">
                   <p className="text-slate-200 leading-relaxed italic text-lg">
                     "{finalConcept.scamper_refinements?.idea}"
                   </p>
@@ -193,7 +193,7 @@ export const OutputStep: React.FC = () => {
           <span className="material-icons-round text-sm">arrow_back</span> Back to SCAMPER
         </button>
         <button 
-          className="px-8 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 disabled:opacity-50"
+          className="px-8 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 disabled:opacity-50"
           onClick={handleExportHTML}
           disabled={isExporting}
         >

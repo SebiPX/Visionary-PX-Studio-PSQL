@@ -3,7 +3,7 @@ import { AppView, UserProfile } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthPage } from './components/auth/AuthPage';
 import { Navigation } from './components/Navigation';
-import { Dashboard } from './components/Dashboard';
+import { RecentGenerations } from './components/Dashboard';
 import { ImageGen } from './components/ImageGen';
 import { VideoStudio } from './components/VideoStudio';
 import { TextEngine } from './components/TextEngine';
@@ -24,6 +24,7 @@ const AppContent: React.FC = () => {
   const { user, profile, loading } = useAuth();
   const [currentView, setCurrentView] = useState<AppView>(AppView.DASHBOARD);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [dashboardPath, setDashboardPath] = useState<string>('/dashboard');
 
   // Helper to navigate to a view with a selected item
   const navigateToItem = (view: AppView, itemId: string) => {
@@ -58,7 +59,7 @@ const AppContent: React.FC = () => {
   // Show main app if authenticated
   return (
     <div className="flex flex-col h-screen w-full bg-[#101622] text-slate-100 font-display overflow-hidden">
-      <Navigation currentView={currentView} setView={setCurrentView} userProfile={userProfile} />
+      <Navigation currentView={currentView} setView={setCurrentView} userProfile={userProfile} dashboardPath={dashboardPath} setDashboardPath={setDashboardPath} />
 
       {/* 
         Main Content Area 
@@ -69,7 +70,7 @@ const AppContent: React.FC = () => {
       <div className="flex-1 relative w-full overflow-hidden">
 
         <div className={`w-full h-full ${currentView === AppView.DASHBOARD ? 'block' : 'hidden'}`}>
-          <Dashboard setView={setCurrentView} navigateToItem={navigateToItem} isActive={currentView === AppView.DASHBOARD} />
+          <InventarApp onBack={() => {}} setView={setCurrentView} navigateToItem={navigateToItem} dashboardPath={dashboardPath} />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.IMAGE_GEN ? 'block' : 'hidden'}`}>
@@ -128,11 +129,6 @@ const AppContent: React.FC = () => {
           <Settings userProfile={userProfile} />
         </div>
 
-        {currentView === AppView.INVENTAR && (
-          <div className="w-full h-full">
-            <InventarApp onBack={() => setCurrentView(AppView.DASHBOARD)} />
-          </div>
-        )}
 
       </div>
     </div>

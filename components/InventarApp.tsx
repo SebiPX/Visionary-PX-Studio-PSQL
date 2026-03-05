@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { MemoryRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 
 import { useInventar } from './Inventar/hooks/useInventar'
@@ -13,7 +13,6 @@ import { useFirmendaten } from './Inventar/hooks/useFirmendaten'
 import { useLinks } from './Inventar/hooks/useLinks'
 import { useDashboardConfig } from './Inventar/hooks/useDashboardConfig'
 
-import { Sidebar } from './Inventar/components/Layout/Sidebar'
 import { DashboardPage } from './Inventar/pages/DashboardPage'
 import { InventarPage } from './Inventar/pages/InventarPage'
 import { ItemDetailPage } from './Inventar/pages/ItemDetailPage'
@@ -28,13 +27,25 @@ import { LinksPage } from './Inventar/pages/LinksPage'
 
 import { useAuth } from '../contexts/AuthContext'
 import type { InventarItem } from './Inventar/types'
+import { AppView } from '../types'
 
 interface InventarAppProps {
   onBack: () => void
+  setView?: (view: AppView) => void
+  navigateToItem?: (view: AppView, itemId: string) => void
+  dashboardPath?: string
 }
 
 /** Inner shell — lives inside MemoryRouter */
-function InventarShell({ onBack }: InventarAppProps) {
+function InventarShell({ onBack, setView, navigateToItem, dashboardPath }: InventarAppProps) {
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (dashboardPath) {
+      navigate(dashboardPath, { replace: true });
+    }
+  }, [dashboardPath, navigate]);
+
   const { user, profile: studioProfile } = useAuth()
 
   const profile = studioProfile
@@ -107,8 +118,6 @@ function InventarShell({ onBack }: InventarAppProps) {
   return (
     <div className="flex h-full bg-slate-950 relative">
 
-      <Sidebar profile={profile} isAdmin={isAdmin} onSignOut={onBack} />
-
       <main className="flex-1 overflow-y-auto relative">
         {selectedItem ? (
           <ItemDetailPage
@@ -134,6 +143,8 @@ function InventarShell({ onBack }: InventarAppProps) {
                 config={dashboardConfig}
                 onConfigSave={saveDashboardConfig}
                 configSaving={dashboardConfigSaving}
+                setView={setView}
+                navigateToItem={navigateToItem}
               />
             } />
 
@@ -199,8 +210,8 @@ function InventarShell({ onBack }: InventarAppProps) {
 }
 
 /** Public component — wraps the shell in its own MemoryRouter (isolated routing) */
-export const InventarApp: React.FC<InventarAppProps> = ({ onBack }) => (
+export const InventarApp: React.FC<InventarAppProps> = ({ onBack, setView, navigateToItem, dashboardPath }) => (
   <MemoryRouter>
-    <InventarShell onBack={onBack} />
+    <InventarShell onBack={onBack} setView={setView} navigateToItem={navigateToItem} dashboardPath={dashboardPath} />
   </MemoryRouter>
 )

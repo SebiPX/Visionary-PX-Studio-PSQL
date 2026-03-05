@@ -93,12 +93,12 @@ export const MatrixStep: React.FC = () => {
             onClick={() => setActiveConceptIndex(idx)}
             className={`flex-1 p-4 rounded-xl border transition-all ${
               activeConceptIndex === idx 
-                ? 'border-orange-500 bg-orange-500/10' 
+                ? 'border-brand-500 bg-brand-500/10' 
                 : 'border-white/10 bg-[#161f30] hover:border-white/20'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`font-bold ${activeConceptIndex === idx ? 'text-orange-500' : 'text-slate-300'}`}>
+              <span className={`font-bold ${activeConceptIndex === idx ? 'text-brand-500' : 'text-slate-300'}`}>
                 Concept {idx + 1}
               </span>
               {isConceptComplete(idx) && (
