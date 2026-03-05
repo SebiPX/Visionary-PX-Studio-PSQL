@@ -200,7 +200,8 @@ export enum AppView {
 
 export interface UserProfile {
   name: string;
-  avatarUrl: string;
+  avatarUrl?: string;
+  role?: string;
 }
 
 export interface GenerationItem {

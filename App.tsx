@@ -33,7 +33,8 @@ const AppContent: React.FC = () => {
   // Convert Supabase profile to UserProfile format
   const userProfile: UserProfile = {
     name: profile?.full_name || user?.email?.split('@')[0] || 'User',
-    avatarUrl: profile?.avatar_url || undefined
+    avatarUrl: profile?.avatar_url || undefined,
+    role: profile?.role || undefined
   };
 
   // Show loading spinner while checking auth
@@ -111,11 +112,11 @@ const AppContent: React.FC = () => {
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.MUSIC_STUDIO ? 'block' : 'hidden'}`}>
-          <MusicStudio isActive={currentView === AppView.MUSIC_STUDIO} />
+          {userProfile.role === 'admin' && <MusicStudio isActive={currentView === AppView.MUSIC_STUDIO} />}
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.I2AUDIO_STUDIO ? 'block' : 'hidden'}`}>
-          <I2AudioStudio isActive={currentView === AppView.I2AUDIO_STUDIO} />
+          {userProfile.role === 'admin' && <I2AudioStudio isActive={currentView === AppView.I2AUDIO_STUDIO} />}
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.SETTINGS ? 'block' : 'hidden'}`}>
