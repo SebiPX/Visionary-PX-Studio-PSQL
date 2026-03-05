@@ -9,7 +9,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
   try {
     const result = await pool.query(
       `SELECT p.*,
-        json_build_object('id', c.id, 'name', c.name, 'logo_url', c.logo_url) as client
+        json_build_object('id', c.id, 'company_name', c.company_name, 'logo_url', c.logo_url) as client
        FROM agency_projects p
        LEFT JOIN agency_clients c ON p.client_id = c.id
        ORDER BY p.updated_at DESC`
@@ -69,7 +69,7 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
     const result = await pool.query(
       `SELECT p.*,
-        json_build_object('id', c.id, 'name', c.name, 'logo_url', c.logo_url) as client
+        json_build_object('id', c.id, 'company_name', c.company_name, 'logo_url', c.logo_url) as client
        FROM agency_projects p
        LEFT JOIN agency_clients c ON p.client_id = c.id
        WHERE p.id = $1`,
