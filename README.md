@@ -75,11 +75,8 @@ GEMINI_API_KEY=AIzaXXX
 ### 3. Datenbank anlegen
 
 ```bash
-# Basis-Schema:
-psql $DATABASE_URL -f backend/schema.sql
-
-# PX INTERN Tabellen (Inventar):
-psql $DATABASE_URL -f backend/inventar_migration.sql
+# Einmaliges Komplett-Setup (Alle Tabellen, Extensions & Rollen):
+psql $DATABASE_URL -f backend/init_schema.sql
 ```
 
 ### 4. Frontend konfigurieren
@@ -147,11 +144,11 @@ GEMINI_API_KEY=AIzaXXX
 PORT=4000
 ```
 
-### Inventar-Tabellen auf Produktions-DB anlegen
+### Inventar- & Feature-Tabellen auf Produktions-DB anlegen
 
 ```bash
-# Einmalig – nur wenn Inventar-Tabellen noch nicht existieren:
-psql "$DATABASE_URL" -f /opt/docker/labs-api/inventar_migration.sql
+# Falls noch nicht geschehen (führt `CREATE TABLE IF NOT EXISTS` für alle Module aus):
+psql "$DATABASE_URL" -f /opt/docker/labs-api/init_schema.sql
 ```
 
 > ✅ Die Migration ist sicher — sie nutzt `CREATE TABLE IF NOT EXISTS` und kann mehrfach ausgeführt werden.
@@ -324,8 +321,7 @@ Eigenständiges JWT Auth-System — kein Supabase, kein Firebase:
 
 - [APP_INFO.md](./APP_INFO.md) — Detaillierte Feature-Beschreibung
 - [backend/README.md](./backend/README.md) — Express API Setup & Endpunkte
-- [backend/schema.sql](./backend/schema.sql) — Basis-Datenbankschema
-- [backend/inventar_migration.sql](./backend/inventar_migration.sql) — PX INTERN Tabellen
+- [backend/init_schema.sql](./backend/init_schema.sql) — Komplettes Datenbank-Setup (Alle Tabellen)
 
 ---
 

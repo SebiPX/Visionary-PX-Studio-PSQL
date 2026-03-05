@@ -20,8 +20,7 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 | `contexts/AuthContext.tsx`              | Auth-State (JWT), Login, Logout, Passwort ändern                                                     |
 | `backend/src/routes/`                   | Express-Routen: auth, gemini, images, videos, texts, sketches, storyboards, upload, rag, inventar/\* |
 | `backend/src/middleware/requireAuth.ts` | JWT-Middleware — schützt alle API-Endpunkte                                                          |
-| `backend/schema.sql`                    | Basis-Schema (profiles, generated\_\*, storyboard_sessions, chat_sessions, onboarding_embeddings)    |
-| `backend/inventar_migration.sql`        | PX INTERN Tabellen (10 Inventar-Tabellen)                                                            |
+| `backend/init_schema.sql`               | Komplettes Schema inkl. Auth, KI-Studio, PX Intern, Social Audit, 3D, Audio                          |
 
 ---
 
@@ -182,8 +181,7 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 
 ### Schema-Dateien
 
-- `backend/schema.sql` → KI-Studio + Auth Tabellen
-- `backend/inventar_migration.sql` → PX INTERN Tabellen
+- `backend/init_schema.sql` → Enthält alle Tabellen gebündelt (Auth, KI-Studio, Module, PX Intern)
 
 ### KI Studio
 
@@ -264,8 +262,7 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
     │       ├── storyboards.ts
     │       ├── upload.ts
     │       └── inventar/          # 10 Inventar-Route-Dateien
-    ├── schema.sql
-    ├── inventar_migration.sql
+    ├── init_schema.sql            # Komplettes Datenbank Backup/Deployment Script
     ├── Dockerfile
     └── docker-compose.yml
 ```
