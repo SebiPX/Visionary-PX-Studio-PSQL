@@ -12,7 +12,7 @@ const router = Router();
 router.get('/accounts', requireAuth, async (req: AuthRequest, res: Response) => {
     try {
         const result = await pool.query(
-            'SELECT * FROM social_accounts ORDER BY created_at DESC'
+            'SELECT * FROM social_accounts ORDER BY id ASC'
         );
         res.json(result.rows);
     } catch (err: any) {
