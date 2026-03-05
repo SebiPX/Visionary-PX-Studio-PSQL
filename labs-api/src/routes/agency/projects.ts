@@ -20,6 +20,50 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// GET /api/agency/projects/financial-overview
+router.get('/financial-overview', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        p.id as project_id,
+        COALESCE((SELECT SUM(amount) FROM agency_costs WHERE project_id = p.id), 0) as costs,
+        COALESCE((SELECT SUM(hours) FROM agency_time_entries te JOIN agency_tasks t ON te.task_id = t.id WHERE t.project_id = p.id AND te.billable = true), 0) * p.hourly_rate as billableValue
+      FROM agency_projects p
+    `);
+    
+    // Transform array to Record<string, { costs, billableValue, total }>
+    const overview: Record<string, any> = {};
+    for (const row of result.rows) {
+      const costs = Number(row.costs);
+      const billable = Number(row.billablevalue) || 0; // alias is returned mostly lowercase
+      overview[row.project_id] = {
+        costs: costs,
+        billableValue: billable,
+        total: billable - costs
+      };
+    }
+    res.json(overview);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agency/projects/stats
+router.get('/stats', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        COUNT(*) as total,
+        COUNT(*) FILTER (WHERE status = 'active') as active,
+        COUNT(*) FILTER (WHERE status = 'completed') as completed
+      FROM agency_projects
+    `);
+    res.json(result.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/agency/projects/:id
 router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
