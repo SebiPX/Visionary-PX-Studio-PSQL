@@ -84,6 +84,24 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// GET /api/agency/projects/:id/assets
+router.get('/:id/assets', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT a.*,
+        json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as uploader
+       FROM agency_assets a
+       LEFT JOIN profiles p ON a.uploaded_by = p.id
+       WHERE a.project_id = $1
+       ORDER BY a.created_at DESC`,
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/agency/projects
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
   const { name, client_id, description, status, start_date, end_date, budget, hourly_rate } = req.body;

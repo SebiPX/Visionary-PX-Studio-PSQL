@@ -91,11 +91,18 @@ CREATE TABLE IF NOT EXISTS public.agency_time_entries (
 CREATE TABLE IF NOT EXISTS public.agency_assets (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     project_id UUID NOT NULL REFERENCES public.agency_projects(id) ON DELETE CASCADE,
-    file_name TEXT NOT NULL,
-    file_type TEXT NOT NULL,
-    file_size BIGINT NOT NULL,
-    storage_path TEXT NOT NULL,
-    uploader_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
+    name TEXT NOT NULL,
+    description TEXT,
+    category TEXT,
+    status TEXT,
+    feedback_note TEXT,
+    storage_path TEXT,
+    file_type TEXT,
+    file_size BIGINT,
+    is_physical BOOLEAN DEFAULT false,
+    location TEXT,
+    uploaded_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    is_visible_to_client BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

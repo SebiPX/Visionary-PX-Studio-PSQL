@@ -6,6 +6,7 @@ import timeEntryRoutes from './timeEntries';
 import storageRoutes from './storage';
 import profileRoutes from './profiles';
 import notificationRoutes from './notifications';
+import assetRoutes from './assets';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/time-entries', timeEntryRoutes);
 router.use('/storage', storageRoutes);
 router.use('/profiles', profileRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/assets', assetRoutes);
 
 export default router;
