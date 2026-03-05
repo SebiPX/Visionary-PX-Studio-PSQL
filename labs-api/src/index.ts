@@ -31,6 +31,7 @@ import ragRoutes from './routes/rag';
 import chatRoutes from './routes/chats';
 import proxyRoutes from './routes/proxy';
 import creativeAgentRoutes from './routes/creativeAgent';
+import socialAuditRoutes from './routes/socialAudit';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -76,6 +77,7 @@ app.use('/api/rag', ragRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/proxy', proxyRoutes);
 app.use('/api/creative', creativeAgentRoutes);
+app.use('/api/social-audit', socialAuditRoutes);
 // Inventar
 app.use('/api/inventar/items',            inventarItemRoutes);
 app.use('/api/inventar/loans',            inventarLoanRoutes);
