@@ -169,8 +169,8 @@ router.post('/:id/members', requireAuth, async (req: AuthRequest, res) => {
   const { user_id, role, rate } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO agency_project_members (project_id, user_id, role, rate)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO agency_project_members (project_id, user_id, role, hourly_rate)
+       VALUES ($1, $2, LOWER($3), $4)
        RETURNING *`,
       [req.params.id, user_id, role ?? 'member', rate ?? 0]
     );
@@ -236,6 +236,28 @@ router.get('/:id/time-entries', requireAuth, async (req: AuthRequest, res) => {
       ORDER BY te.date DESC
     `, [req.params.id]);
     res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agency/projects/:id/billable-value
+router.get('/:id/billable-value', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        COALESCE(SUM(te.hours * pm.hourly_rate), 0) as "billableValue",
+        COALESCE(SUM(te.hours), 0) as "totalHours"
+      FROM agency_time_entries te
+      JOIN agency_tasks t ON te.task_id = t.id
+      JOIN agency_project_members pm ON t.project_id = pm.project_id AND te.user_id = pm.user_id
+      WHERE t.project_id = $1 AND te.billable = true
+    `, [req.params.id]);
+    
+    res.json({
+      billableValue: parseFloat(result.rows[0].billableValue) || 0,
+      totalHours: parseFloat(result.rows[0].totalHours) || 0
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

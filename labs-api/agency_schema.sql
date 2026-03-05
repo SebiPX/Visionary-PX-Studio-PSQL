@@ -56,8 +56,9 @@ CREATE TABLE IF NOT EXISTS public.agency_project_members (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     project_id UUID NOT NULL REFERENCES public.agency_projects(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-    role TEXT NOT NULL CHECK (role IN ('manager', 'contributor', 'viewer')),
+    role TEXT NOT NULL CHECK (role IN ('manager', 'contributor', 'viewer', 'member')),
     allocation_percent INTEGER DEFAULT 100 CHECK (allocation_percent >= 0 AND allocation_percent <= 100),
+    hourly_rate NUMERIC(10, 2) DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     UNIQUE(project_id, user_id)
 );
