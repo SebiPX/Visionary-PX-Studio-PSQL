@@ -147,6 +147,71 @@ router.get('/:id/assets', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// GET /api/agency/projects/:id/members
+router.get('/:id/members', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT pm.*,
+        json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url, 'email', p.email) as profile
+       FROM agency_project_members pm
+       JOIN profiles p ON pm.user_id = p.id
+       WHERE pm.project_id = $1`,
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agency/projects/:id/tasks
+router.get('/:id/tasks', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(`SELECT * FROM agency_tasks WHERE project_id = $1 ORDER BY created_at DESC`, [req.params.id]);
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agency/projects/:id/costs
+router.get('/:id/costs', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(`SELECT * FROM agency_costs WHERE project_id = $1 ORDER BY date DESC`, [req.params.id]);
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agency/projects/:id/financial-documents
+router.get('/:id/financial-documents', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(`SELECT * FROM agency_financial_documents WHERE project_id = $1 ORDER BY created_at DESC`, [req.params.id]);
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agency/projects/:id/time-entries
+router.get('/:id/time-entries', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT te.*,
+        json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as profile
+      FROM agency_time_entries te
+      JOIN agency_tasks t ON te.task_id = t.id
+      JOIN profiles p ON te.user_id = p.id
+      WHERE t.project_id = $1 
+      ORDER BY te.date DESC
+    `, [req.params.id]);
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/agency/projects
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
   const { title, client_id, description, category, color_code, main_contact_id, status, start_date, deadline, budget_total, hourly_rate } = req.body;
