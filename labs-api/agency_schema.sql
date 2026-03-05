@@ -22,12 +22,12 @@ CREATE TABLE IF NOT EXISTS public.agency_clients (
 CREATE TABLE IF NOT EXISTS public.agency_client_contacts (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     client_id UUID NOT NULL REFERENCES public.agency_clients(id) ON DELETE CASCADE,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    role TEXT,
+    full_name TEXT NOT NULL,
+    position TEXT,
     email TEXT,
     phone TEXT,
     is_primary BOOLEAN DEFAULT false,
+    notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
