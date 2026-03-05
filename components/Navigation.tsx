@@ -20,6 +20,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
     { view: AppView.STORY_STUDIO, icon: 'movie_creation', label: 'Story' },
     { view: AppView.SKETCH_STUDIO, icon: 'brush', label: 'Sketch' },
     { view: AppView.PX_CREATIVE, icon: 'tips_and_updates', label: 'Agent' },
+    { view: AppView.SOCIAL_AUDIT, icon: 'troubleshoot', label: 'Audit' },
     { view: AppView.CHAT_BOT, icon: 'chat_bubble', label: 'Chat' },
     { view: AppView.STUDIO_3D, icon: 'view_in_ar', label: '3D' },
     { view: AppView.VOICE_STUDIO, icon: 'record_voice_over', label: 'Voice' },

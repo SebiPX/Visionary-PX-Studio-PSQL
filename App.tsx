@@ -18,6 +18,7 @@ import I2AudioStudio from './components/I2AudioStudio';
 import { Settings } from './components/Settings';
 import { InventarApp } from './components/InventarApp';
 import { PxCreativeApp } from './components/px-creative/PxCreativeApp';
+import { SocialAuditApp } from './components/SocialAudit/SocialAuditApp';
 
 const AppContent: React.FC = () => {
   const { user, profile, loading } = useAuth();
@@ -97,6 +98,10 @@ const AppContent: React.FC = () => {
 
         <div className={`w-full h-full ${currentView === AppView.PX_CREATIVE ? 'block' : 'hidden'}`}>
           <PxCreativeApp />
+        </div>
+
+        <div className={`w-full h-full ${currentView === AppView.SOCIAL_AUDIT ? 'block' : 'hidden'}`}>
+          <SocialAuditApp />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.CHAT_BOT ? 'block' : 'hidden'}`}>

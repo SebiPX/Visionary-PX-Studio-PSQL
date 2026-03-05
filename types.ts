@@ -196,6 +196,7 @@ export enum AppView {
   VOICE_STUDIO = 'VOICE_STUDIO',
   MUSIC_STUDIO = 'MUSIC_STUDIO',
   I2AUDIO_STUDIO = 'I2AUDIO_STUDIO',
+  SOCIAL_AUDIT = 'SOCIAL_AUDIT',
 }
 
 export interface UserProfile {

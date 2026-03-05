@@ -127,6 +127,15 @@ export const i2audio = {
     delete: (id: string) => request<void>(`/api/i2audio/${id}`, { method: 'DELETE' })
 };
 
+// ── Social Audit ─────────────────────────────────────────────────
+export const socialAudit = {
+    getAccounts: () => request<any[]>('/api/social-audit/accounts'),
+    addAccount: (data: any) => request<any>('/api/social-audit/accounts', { method: 'POST', body: JSON.stringify(data) }),
+    syncAccount: (accountId: string) => request<any>(`/api/social-audit/sync/${accountId}`, { method: 'POST' }),
+    getPosts: (accountId: string) => request<any[]>(`/api/social-audit/posts/${accountId}`),
+    saveAnalysis: (data: any) => request<any>('/api/social-audit/analysis', { method: 'POST', body: JSON.stringify(data) })
+};
+
 // ── Texts ────────────────────────────────────────────────────────
 export const texts = {
     list: () => request<ApiText[]>('/api/texts'),

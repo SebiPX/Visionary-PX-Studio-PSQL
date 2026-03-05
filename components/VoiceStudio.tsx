@@ -50,7 +50,7 @@ export const VoiceStudio: React.FC = () => {
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
   const [history, setHistory] = useState<GeneratedVoice[]>([]);
   
-  const voiceOptions = ['Puck', 'Charon', 'Kore', 'Fenrir', 'Aoede', 'Aoede'];
+  const voiceOptions = ['Puck', 'Charon', 'Kore', 'Fenrir', 'Aoede'];
 
   const { saveVoice, loadHistory, deleteContent, loading } = useGeneratedContent();
 
