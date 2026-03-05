@@ -8,6 +8,7 @@ import profileRoutes from './profiles';
 import notificationRoutes from './notifications';
 import assetRoutes from './assets';
 import clientContactRoutes from './clientContacts';
+import workloadRoutes from './workload';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/profiles', profileRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/assets', assetRoutes);
 router.use('/client-contacts', clientContactRoutes);
+router.use('/workload', workloadRoutes);
 
 export default router;

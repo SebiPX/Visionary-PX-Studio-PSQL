@@ -164,6 +164,35 @@ router.get('/:id/members', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// POST /api/agency/projects/:id/members
+router.post('/:id/members', requireAuth, async (req: AuthRequest, res) => {
+  const { user_id, role, rate } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO agency_project_members (project_id, user_id, role, rate)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [req.params.id, user_id, role ?? 'member', rate ?? 0]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/agency/projects/:id/members/:userId
+router.delete('/:id/members/:userId', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    await pool.query(
+      `DELETE FROM agency_project_members WHERE project_id = $1 AND user_id = $2`,
+      [req.params.id, req.params.userId]
+    );
+    res.status(204).send();
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/agency/projects/:id/tasks
 router.get('/:id/tasks', requireAuth, async (req: AuthRequest, res) => {
   try {
