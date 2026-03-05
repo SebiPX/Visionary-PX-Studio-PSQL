@@ -166,13 +166,21 @@ router.get('/:id/members', requireAuth, async (req: AuthRequest, res) => {
 
 // POST /api/agency/projects/:id/members
 router.post('/:id/members', requireAuth, async (req: AuthRequest, res) => {
-  const { user_id, role, rate } = req.body;
+  const { user_id, profile_id, role, rate } = req.body;
+  
+  // Frontend might send profile_id instead of user_id
+  const finalUserId = user_id || profile_id;
+  
+  if (!finalUserId) {
+    return res.status(400).json({ error: 'user_id or profile_id is required' });
+  }
+
   try {
     const result = await pool.query(
       `INSERT INTO agency_project_members (project_id, user_id, role, hourly_rate)
        VALUES ($1, $2, LOWER($3), $4)
        RETURNING *`,
-      [req.params.id, user_id, role ?? 'member', rate ?? 0]
+      [req.params.id, finalUserId, role ?? 'member', rate ?? 0]
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
