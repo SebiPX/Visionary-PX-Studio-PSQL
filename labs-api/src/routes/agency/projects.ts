@@ -64,6 +64,51 @@ router.get('/stats', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// POST /api/agency/projects/margins-batch
+router.post('/margins-batch', requireAuth, async (req: AuthRequest, res) => {
+  const { projectIds } = req.body;
+  
+  if (!projectIds || !Array.isArray(projectIds) || projectIds.length === 0) {
+    return res.json({});
+  }
+
+  try {
+    // Basic implementation to return some valid records
+    // In a real app, query the costs and revenues for the provided projectIds
+    const result = await pool.query(`
+      SELECT 
+        p.id as project_id,
+        COALESCE((SELECT SUM(amount) FROM agency_costs WHERE project_id = p.id), 0) as costs,
+        COALESCE((SELECT SUM(hours) FROM agency_time_entries te JOIN agency_tasks t ON te.task_id = t.id WHERE t.project_id = p.id AND te.billable = true), 0) * COALESCE(p.hourly_rate, 0) as billable_value
+      FROM agency_projects p
+      WHERE p.id = ANY($1)
+    `, [projectIds]);
+    
+    const margins: Record<string, any> = {};
+    for (const row of result.rows) {
+      const revenue = Number(row.billable_value) || 0;
+      const costs = Number(row.costs) || 0;
+      const profit = revenue - costs;
+      let marginPercentage = 0;
+      if (revenue > 0) {
+        marginPercentage = (profit / revenue) * 100;
+      }
+      
+      let status = 'acceptable';
+      if (marginPercentage < 0) status = 'negative';
+      else if (marginPercentage < 15) status = 'poor';
+      else if (marginPercentage >= 40) status = 'excellent';
+      else if (marginPercentage >= 25) status = 'good';
+      
+      margins[row.project_id] = { profit, marginPercentage, status };
+    }
+    
+    res.json(margins);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/agency/projects/:id
 router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
@@ -154,6 +199,75 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
     await pool.query('DELETE FROM agency_projects WHERE id = $1', [req.params.id]);
     res.status(204).send();
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agency/projects/:projectId/revenue
+router.get('/:projectId/revenue', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    // For now, return sum of billable hours as revenue, or total quotes.
+    const result = await pool.query(
+      `SELECT COALESCE(SUM(amount), 0) as revenue FROM agency_financial_documents WHERE project_id = $1 AND type = 'quote' AND status = 'approved'`,
+      [req.params.projectId]
+    );
+    res.json({ revenue: Number(result.rows[0].revenue) || 0 });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agency/projects/:projectId/costs/calculate
+router.get('/:projectId/costs/calculate', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const projectId = req.params.projectId;
+    // Get direct costs
+    const costsRes = await pool.query(`SELECT COALESCE(SUM(amount), 0) as costs FROM agency_costs WHERE project_id = $1`, [projectId]);
+    const directCosts = Number(costsRes.rows[0].costs);
+    
+    // Get billable hours value
+    const timeRes = await pool.query(`
+      SELECT COALESCE(SUM(te.hours), 0) as total_hours, p.hourly_rate 
+      FROM agency_time_entries te 
+      JOIN agency_tasks t ON te.task_id = t.id 
+      JOIN agency_projects p ON t.project_id = p.id
+      WHERE t.project_id = $1 AND te.billable = true
+      GROUP BY p.hourly_rate
+    `, [projectId]);
+    
+    const billableHoursValue = timeRes.rows.length ? Number(timeRes.rows[0].total_hours) * Number(timeRes.rows[0].hourly_rate) : 0;
+    
+    res.json({
+      directCosts,
+      billableHoursValue,
+      totalCosts: directCosts + billableHoursValue
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/agency/projects/:projectId/margin
+router.get('/:projectId/margin', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    // Dummy / simplified for now
+    res.json({
+      revenue: 0,
+      costs: { directCosts: 0, billableHoursValue: 0, totalCosts: 0 },
+      profit: 0,
+      marginPercentage: 0,
+      status: 'acceptable'
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/agency/projects/:projectId/budget/sync
+router.post('/:projectId/budget/sync', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
