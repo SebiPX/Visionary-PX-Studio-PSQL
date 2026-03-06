@@ -51,22 +51,26 @@ curl http://localhost:4000/health
 
 ## API Routes
 
-| Method          | Path                        | Auth | Description                 |
-| --------------- | --------------------------- | ---- | --------------------------- |
-| POST            | `/auth/register`            | ❌   | Create account              |
-| POST            | `/auth/login`               | ❌   | Login → JWT                 |
-| GET             | `/auth/me`                  | ✅   | Current user                |
-| PATCH           | `/auth/profile`             | ✅   | Update name/avatar          |
-| GET             | `/api/images`               | ✅   | List generated images       |
-| POST            | `/api/images`               | ✅   | Save image record           |
-| DELETE          | `/api/images/:id`           | ✅   | Delete image                |
-| GET/POST/DELETE | `/api/videos`               | ✅   | Videos                      |
-| GET/POST/DELETE | `/api/thumbnails`           | ✅   | Thumbnails                  |
-| GET/POST/DELETE | `/api/sketches`             | ✅   | Sketches                    |
-| GET/POST/DELETE | `/api/texts`                | ✅   | Generated texts             |
-| GET/POST/DELETE | `/api/storyboards`          | ✅   | Storyboard sessions         |
-| POST            | `/api/upload?folder=images` | ✅   | Upload file → Cloudflare R2 |
-| POST            | `/api/gemini`               | ✅   | Gemini API proxy            |
+| Method           | Path                                         | Auth | Description                 |
+| ---------------- | -------------------------------------------- | ---- | --------------------------- |
+| POST             | `/auth/register`                             | ❌   | Create account              |
+| POST             | `/auth/login`                                | ❌   | Login → JWT                 |
+| GET              | `/auth/me`                                   | ✅   | Current user                |
+| PATCH            | `/auth/profile`                              | ✅   | Update name/avatar          |
+| GET              | `/api/images`                                | ✅   | List generated images       |
+| POST             | `/api/images`                                | ✅   | Save image record           |
+| DELETE           | `/api/images/:id`                            | ✅   | Delete image                |
+| GET/POST/DELETE  | `/api/videos`                                | ✅   | Videos                      |
+| GET/POST/DELETE  | `/api/thumbnails`                            | ✅   | Thumbnails                  |
+| GET/POST/DELETE  | `/api/sketches`                              | ✅   | Sketches                    |
+| GET/POST/DELETE  | `/api/texts`                                 | ✅   | Generated texts             |
+| GET/POST/DELETE  | `/api/storyboards`                           | ✅   | Storyboard sessions         |
+| POST             | `/api/upload?folder=images`                  | ✅   | Upload file → Cloudflare R2 |
+| POST             | `/api/gemini`                                | ✅   | Gemini API proxy            |
+| GET/POST/PUT/DEL | `/api/agency/projects`                       | ✅   | Agency projects & finances  |
+| GET              | `/api/agency/projects/:id/service-breakdown` | ✅   | Plan vs Actual variance     |
+| GET/POST/PUT/DEL | `/api/agency/tasks`                          | ✅   | Tasks & Kanban              |
+| GET/POST/PUT/DEL | `/api/agency/time-entries`                   | ✅   | Time tracking               |
 
 ---
 
