@@ -14,6 +14,30 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// GET /api/agency/service-pricing/rate
+router.get('/rate', requireAuth, async (req: AuthRequest, res) => {
+  const { moduleId, levelId } = req.query;
+  
+  if (!moduleId || !levelId) {
+    return res.status(400).json({ error: 'moduleId and levelId are required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT hourly_rate as rate, internal_cost FROM agency_service_pricing WHERE service_id = $1 AND seniority_id = $2',
+      [moduleId, levelId]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Pricing rate not found for this module and level' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/agency/service-pricing/:id
 router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
