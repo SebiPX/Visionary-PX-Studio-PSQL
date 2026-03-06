@@ -11,6 +11,7 @@ import clientContactRoutes from './clientContacts';
 import workloadRoutes from './workload';
 import serviceModuleRoutes from './serviceModules';
 import seniorityLevelRoutes from './seniorityLevels';
+import reportsRoutes from './reports';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/client-contacts', clientContactRoutes);
 router.use('/workload', workloadRoutes);
 router.use('/service-modules', serviceModuleRoutes);
 router.use('/seniority-levels', seniorityLevelRoutes);
+router.use('/reports', reportsRoutes);
 
 export default router;
