@@ -296,6 +296,92 @@ router.get('/:id/billable-value', requireAuth, async (req: AuthRequest, res) => 
     res.status(500).json({ error: err.message });
   }
 });
+// GET /api/agency/projects/:id/service-breakdown
+router.get('/:id/service-breakdown', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(`
+      WITH task_estimates AS (
+        SELECT
+          t.service_module_id,
+          sm.name as service_module_name,
+          t.seniority_level_id,
+          sl.name as seniority_level_name,
+          COUNT(t.id) as task_count,
+          COALESCE(SUM(t.estimated_hours), 0) as total_estimated_hours,
+          COALESCE(SUM(t.estimated_hours * COALESCE(t.estimated_rate, 0)), 0) as total_planned_value
+        FROM agency_tasks t
+        LEFT JOIN agency_service_modules sm ON t.service_module_id = sm.id
+        LEFT JOIN agency_seniority_levels sl ON t.seniority_level_id = sl.id
+        WHERE t.project_id = $1 AND t.service_module_id IS NOT NULL
+        GROUP BY t.service_module_id, sm.name, t.seniority_level_id, sl.name
+      ),
+      task_actuals AS (
+        SELECT
+          t.service_module_id,
+          t.seniority_level_id,
+          COALESCE(SUM(te.duration_minutes/60.0), 0) as total_actual_hours,
+          COALESCE(SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, p.hourly_rate, pr.billable_hourly_rate, 0)), 0) as total_actual_value
+        FROM agency_time_entries te
+        JOIN agency_tasks t ON te.task_id = t.id
+        LEFT JOIN profiles pr ON te.user_id = pr.id
+        LEFT JOIN agency_projects p ON t.project_id = p.id
+        LEFT JOIN agency_project_members pm ON p.id = pm.project_id AND te.user_id = pm.user_id
+        WHERE t.project_id = $1 AND t.service_module_id IS NOT NULL AND te.billable = true
+        GROUP BY t.service_module_id, t.seniority_level_id
+      )
+      SELECT 
+        e.service_module_id, 
+        e.service_module_name, 
+        e.seniority_level_id, 
+        e.seniority_level_name,
+        e.task_count,
+        e.total_estimated_hours,
+        e.total_planned_value,
+        COALESCE(a.total_actual_hours, 0) as total_actual_hours,
+        COALESCE(a.total_actual_value, 0) as total_actual_value
+      FROM task_estimates e
+      LEFT JOIN task_actuals a 
+        ON e.service_module_id = a.service_module_id 
+        AND (e.seniority_level_id = a.seniority_level_id OR (e.seniority_level_id IS NULL AND a.seniority_level_id IS NULL))
+    `, [req.params.id]);
+    
+    const breakdown = result.rows.map(row => {
+      const estimatedHours = parseFloat(row.total_estimated_hours) || 0;
+      const plannedValue = parseFloat(row.total_planned_value) || 0;
+      const actualHours = parseFloat(row.total_actual_hours) || 0;
+      const actualValue = parseFloat(row.total_actual_value) || 0;
+      
+      const hoursVariance = actualHours - estimatedHours;
+      const valueVariance = actualValue - plannedValue;
+      
+      let varianceStatus = 'on_track';
+      if (actualHours > estimatedHours * 1.1) {
+        varianceStatus = 'over';
+      } else if (actualHours < estimatedHours * 0.9) {
+        varianceStatus = 'under';
+      }
+      
+      return {
+        service_module_id: row.service_module_id,
+        service_module_name: row.service_module_name || 'Unknown',
+        seniority_level_id: row.seniority_level_id,
+        seniority_level_name: row.seniority_level_name || '',
+        task_count: parseInt(row.task_count) || 0,
+        total_estimated_hours: estimatedHours,
+        total_planned_value: plannedValue,
+        total_actual_hours: actualHours,
+        total_actual_value: actualValue,
+        hours_variance: hoursVariance,
+        value_variance: valueVariance,
+        variance_status: varianceStatus
+      };
+    });
+
+    res.json(breakdown);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // POST /api/agency/projects
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
