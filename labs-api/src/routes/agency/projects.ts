@@ -28,11 +28,12 @@ router.get('/financial-overview', requireAuth, async (req: AuthRequest, res) => 
         p.id as project_id,
         COALESCE((SELECT SUM(amount) FROM agency_costs WHERE project_id = p.id), 0) as costs,
         COALESCE((
-          SELECT SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, p.hourly_rate, pr.billable_hourly_rate, 0))
+          SELECT SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, p_inner.hourly_rate, pr.billable_hourly_rate, 0))
           FROM agency_time_entries te 
           JOIN agency_tasks t ON te.task_id = t.id 
           LEFT JOIN profiles pr ON te.user_id = pr.id
-          LEFT JOIN agency_project_members pm ON p.id = pm.project_id AND te.user_id = pm.user_id
+          LEFT JOIN agency_projects p_inner ON t.project_id = p_inner.id
+          LEFT JOIN agency_project_members pm ON t.project_id = pm.project_id AND te.user_id = pm.user_id
           WHERE t.project_id = p.id AND te.billable = true
         ), 0) as billableValue
       FROM agency_projects p
@@ -87,11 +88,12 @@ router.post('/margins-batch', requireAuth, async (req: AuthRequest, res) => {
         p.id as project_id,
         COALESCE((SELECT SUM(amount) FROM agency_costs WHERE project_id = p.id), 0) as costs,
         COALESCE((
-          SELECT SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, p.hourly_rate, pr.billable_hourly_rate, 0))
+          SELECT SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, p_inner.hourly_rate, pr.billable_hourly_rate, 0))
           FROM agency_time_entries te 
           JOIN agency_tasks t ON te.task_id = t.id 
           LEFT JOIN profiles pr ON te.user_id = pr.id
-          LEFT JOIN agency_project_members pm ON p.id = pm.project_id AND te.user_id = pm.user_id
+          LEFT JOIN agency_projects p_inner ON t.project_id = p_inner.id
+          LEFT JOIN agency_project_members pm ON t.project_id = pm.project_id AND te.user_id = pm.user_id
           WHERE t.project_id = p.id AND te.billable = true
         ), 0) as billable_value
       FROM agency_projects p
@@ -325,7 +327,7 @@ router.get('/:id/service-breakdown', requireAuth, async (req: AuthRequest, res) 
         JOIN agency_tasks t ON te.task_id = t.id
         LEFT JOIN profiles pr ON te.user_id = pr.id
         LEFT JOIN agency_projects p ON t.project_id = p.id
-        LEFT JOIN agency_project_members pm ON p.id = pm.project_id AND te.user_id = pm.user_id
+        LEFT JOIN agency_project_members pm ON t.project_id = pm.project_id AND te.user_id = pm.user_id
         WHERE t.project_id = $1 AND t.service_module_id IS NOT NULL AND te.billable = true
         GROUP BY t.service_module_id, t.seniority_level_id
       )
