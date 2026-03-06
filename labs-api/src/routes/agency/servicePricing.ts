@@ -74,8 +74,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
     const result = await pool.query(
       `UPDATE agency_service_pricing 
        SET hourly_rate = COALESCE($1, hourly_rate),
-           internal_cost = COALESCE($2, internal_cost),
-           updated_at = NOW()
+           internal_cost = COALESCE($2, internal_cost)
        WHERE id = $3
        RETURNING *`,
       [rate, internal_cost, req.params.id]
@@ -150,8 +149,7 @@ router.put('/batch', requireAuth, async (req: AuthRequest, res) => {
         const result = await client.query(
           `UPDATE agency_service_pricing 
            SET hourly_rate = COALESCE($1, hourly_rate),
-               internal_cost = COALESCE($2, internal_cost),
-               updated_at = NOW()
+               internal_cost = COALESCE($2, internal_cost)
            WHERE id = $3
            RETURNING *`,
           [data.rate, data.internal_cost, id]
