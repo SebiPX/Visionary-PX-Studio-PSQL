@@ -13,7 +13,7 @@ router.get('/service-profitability', requireAuth, async (req, res) => {
           t.service_module_id,
           COUNT(DISTINCT t.id) as tasks_count,
           SUM(te.duration_minutes / 60.0) as hours_tracked,
-          SUM((te.duration_minutes / 60.0) * COALESCE(p.internal_cost_per_hour, 0)) as cost
+          SUM((te.duration_minutes / 60.0) * 0) as cost
         FROM agency_time_entries te
         JOIN agency_tasks t ON te.task_id = t.id
         JOIN profiles p ON te.user_id = p.id

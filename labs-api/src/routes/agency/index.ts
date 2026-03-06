@@ -12,6 +12,7 @@ import workloadRoutes from './workload';
 import serviceModuleRoutes from './serviceModules';
 import seniorityLevelRoutes from './seniorityLevels';
 import reportsRoutes from './reports';
+import resourcesRoutes from './resources';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use('/workload', workloadRoutes);
 router.use('/service-modules', serviceModuleRoutes);
 router.use('/seniority-levels', seniorityLevelRoutes);
 router.use('/reports', reportsRoutes);
+router.use('/resources', resourcesRoutes);
 
 export default router;
