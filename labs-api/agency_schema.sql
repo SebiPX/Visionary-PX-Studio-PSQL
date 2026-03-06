@@ -72,8 +72,14 @@ CREATE TABLE IF NOT EXISTS public.agency_tasks (
     status TEXT DEFAULT 'todo' CHECK (status IN ('todo', 'in_progress', 'review', 'done')),
     priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
     assignee_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-    estimated_hours NUMERIC(10, 2),
+    start_date DATE,
     due_date DATE,
+    planned_minutes INTEGER,
+    estimated_hours NUMERIC(10, 2),
+    estimated_rate NUMERIC(10, 2),
+    service_module_id UUID REFERENCES public.agency_service_modules(id) ON DELETE SET NULL,
+    seniority_level_id UUID REFERENCES public.agency_seniority_levels(id) ON DELETE SET NULL,
+    is_visible_to_client BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
