@@ -13,6 +13,7 @@ import serviceModuleRoutes from './serviceModules';
 import seniorityLevelRoutes from './seniorityLevels';
 import reportsRoutes from './reports';
 import resourcesRoutes from './resources';
+import servicePricingRoutes from './servicePricing';
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use('/assets', assetRoutes);
 router.use('/client-contacts', clientContactRoutes);
 router.use('/workload', workloadRoutes);
 router.use('/service-modules', serviceModuleRoutes);
+router.use('/service-pricing', servicePricingRoutes);
 router.use('/seniority-levels', seniorityLevelRoutes);
 router.use('/reports', reportsRoutes);
 router.use('/resources', resourcesRoutes);
