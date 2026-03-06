@@ -27,7 +27,14 @@ router.get('/financial-overview', requireAuth, async (req: AuthRequest, res) => 
       SELECT 
         p.id as project_id,
         COALESCE((SELECT SUM(amount) FROM agency_costs WHERE project_id = p.id), 0) as costs,
-        COALESCE((SELECT SUM(duration_minutes)/60.0 FROM agency_time_entries te JOIN agency_tasks t ON te.task_id = t.id WHERE t.project_id = p.id AND te.billable = true), 0) * p.hourly_rate as billableValue
+        COALESCE((
+          SELECT SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, p.hourly_rate, pr.billable_hourly_rate, 0))
+          FROM agency_time_entries te 
+          JOIN agency_tasks t ON te.task_id = t.id 
+          LEFT JOIN profiles pr ON te.user_id = pr.id
+          LEFT JOIN agency_project_members pm ON p.id = pm.project_id AND te.user_id = pm.user_id
+          WHERE t.project_id = p.id AND te.billable = true
+        ), 0) as billableValue
       FROM agency_projects p
     `);
     
@@ -79,7 +86,14 @@ router.post('/margins-batch', requireAuth, async (req: AuthRequest, res) => {
       SELECT 
         p.id as project_id,
         COALESCE((SELECT SUM(amount) FROM agency_costs WHERE project_id = p.id), 0) as costs,
-        COALESCE((SELECT SUM(duration_minutes)/60.0 FROM agency_time_entries te JOIN agency_tasks t ON te.task_id = t.id WHERE t.project_id = p.id AND te.billable = true), 0) * COALESCE(p.hourly_rate, 0) as billable_value
+        COALESCE((
+          SELECT SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, p.hourly_rate, pr.billable_hourly_rate, 0))
+          FROM agency_time_entries te 
+          JOIN agency_tasks t ON te.task_id = t.id 
+          LEFT JOIN profiles pr ON te.user_id = pr.id
+          LEFT JOIN agency_project_members pm ON p.id = pm.project_id AND te.user_id = pm.user_id
+          WHERE t.project_id = p.id AND te.billable = true
+        ), 0) as billable_value
       FROM agency_projects p
       WHERE p.id = ANY($1)
     `, [projectIds]);
@@ -264,11 +278,13 @@ router.get('/:id/billable-value', requireAuth, async (req: AuthRequest, res) => 
   try {
     const result = await pool.query(`
       SELECT 
-        COALESCE(SUM((te.duration_minutes/60.0) * pm.hourly_rate), 0) as "billableValue",
+        COALESCE(SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, p.hourly_rate, pr.billable_hourly_rate, 0)), 0) as "billableValue",
         COALESCE(SUM(te.duration_minutes/60.0), 0) as "totalHours"
       FROM agency_time_entries te
       JOIN agency_tasks t ON te.task_id = t.id
-      JOIN agency_project_members pm ON t.project_id = pm.project_id AND te.user_id = pm.user_id
+      JOIN agency_projects p ON t.project_id = p.id
+      LEFT JOIN profiles pr ON te.user_id = pr.id
+      LEFT JOIN agency_project_members pm ON t.project_id = pm.project_id AND te.user_id = pm.user_id
       WHERE t.project_id = $1 AND te.billable = true
     `, [req.params.id]);
     
