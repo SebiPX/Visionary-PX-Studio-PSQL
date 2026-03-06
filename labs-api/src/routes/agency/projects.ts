@@ -204,7 +204,17 @@ router.delete('/:id/members/:userId', requireAuth, async (req: AuthRequest, res)
 // GET /api/agency/projects/:id/tasks
 router.get('/:id/tasks', requireAuth, async (req: AuthRequest, res) => {
   try {
-    const result = await pool.query(`SELECT * FROM agency_tasks WHERE project_id = $1 ORDER BY created_at DESC`, [req.params.id]);
+    const result = await pool.query(
+      `SELECT t.*, 
+        json_build_object('id', p.id, 'title', p.title) as project,
+        json_build_object('id', u.id, 'full_name', u.full_name, 'avatar_url', u.avatar_url) as assignee
+      FROM agency_tasks t
+      JOIN agency_projects p ON t.project_id = p.id
+      LEFT JOIN profiles u ON t.assignee_id = u.id
+      WHERE t.project_id = $1 
+      ORDER BY t.created_at DESC`, 
+      [req.params.id]
+    );
     res.json(result.rows);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
