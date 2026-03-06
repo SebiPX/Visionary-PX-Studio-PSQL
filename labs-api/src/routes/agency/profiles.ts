@@ -13,7 +13,7 @@ router.get('/internal', requireAuth, async (req: AuthRequest, res: Response) => 
     const result = await pool.query(
       `SELECT id, email, full_name as name, full_name, avatar_url, role, weekly_hours, billable_hourly_rate, internal_cost_per_hour
        FROM profiles 
-       WHERE role IN ('admin', 'employee', 'freelancer')
+       WHERE role IN ('admin', 'pjm', 'creative', 'guest')
        ORDER BY full_name ASC`
     );
     res.json(result.rows);
