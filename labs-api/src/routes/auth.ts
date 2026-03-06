@@ -6,7 +6,7 @@ import { AuthRequest, requireAuth } from '../middleware/requireAuth';
 
 const router = Router();
 
-// POST /auth/register — DISABLED: accounts are created by admin only
+// POST /auth/register — DISABLED: accounts are created by admin only (defaults to 'creative')
 router.post('/register', async (_req, res: Response) => {
   res.status(403).json({ error: 'Self-registration is disabled. Please contact your administrator.' });
 });
