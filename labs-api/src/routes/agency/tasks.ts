@@ -169,4 +169,23 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// GET /api/agency/tasks/:id/time-entries
+router.get('/:id/time-entries', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT te.*,
+        te.user_id as profile_id,
+        json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url, 'email', p.email) as profile
+       FROM agency_time_entries te
+       LEFT JOIN profiles p ON te.user_id = p.id
+       WHERE te.task_id = $1
+       ORDER BY te.start_time DESC`,
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
