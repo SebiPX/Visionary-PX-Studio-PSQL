@@ -89,11 +89,12 @@ CREATE TABLE IF NOT EXISTS public.agency_time_entries (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     task_id UUID NOT NULL REFERENCES public.agency_tasks(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-    date DATE NOT NULL,
-    hours NUMERIC(10, 2) NOT NULL CHECK (hours > 0),
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE,
+    duration_minutes INTEGER,
     description TEXT,
     billable BOOLEAN DEFAULT true,
-    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'pending', 'submitted', 'approved', 'rejected')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

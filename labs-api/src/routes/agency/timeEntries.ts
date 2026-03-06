@@ -10,13 +10,14 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
   try {
     let query = `
       SELECT te.*, 
+        te.user_id as profile_id,
         json_build_object('id', t.id, 'title', t.title) as task,
         json_build_object('id', p.id, 'title', p.title) as project,
-        json_build_object('id', u.id, 'full_name', u.full_name) as user
+        json_build_object('id', u.id, 'full_name', u.full_name) as profile
       FROM agency_time_entries te
       JOIN agency_tasks t ON te.task_id = t.id
       JOIN agency_projects p ON t.project_id = p.id
-      JOIN profiles u ON te.user_id = u.id
+      LEFT JOIN profiles u ON te.user_id = u.id
       WHERE 1=1
     `;
     const params: any[] = [];
@@ -31,15 +32,15 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
       params.push(user_id);
     }
     if (start_date) {
-      query += ` AND te.date >= $${paramIdx++}`;
+      query += ` AND te.start_time >= $${paramIdx++}`;
       params.push(start_date);
     }
     if (end_date) {
-      query += ` AND te.date <= $${paramIdx++}`;
+      query += ` AND te.start_time <= $${paramIdx++}`;
       params.push(end_date);
     }
 
-    query += ` ORDER BY te.date DESC, te.created_at DESC`;
+    query += ` ORDER BY te.start_time DESC, te.created_at DESC`;
 
     const result = await pool.query(query, params);
     res.json(result.rows);
@@ -50,13 +51,14 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
 
 // POST /api/agency/time-entries
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
-  const { task_id, user_id, date, hours, description, billable, status } = req.body;
+  const { task_id, user_id, profile_id, start_time, end_time, duration_minutes, description, billable, status } = req.body;
+  const actualUserId = profile_id || user_id || req.userId;
   try {
     const result = await pool.query(
-      `INSERT INTO agency_time_entries (task_id, user_id, date, hours, description, billable, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [task_id, user_id || req.userId, date, hours, description, billable ?? true, status ?? 'pending']
+      `INSERT INTO agency_time_entries (task_id, user_id, start_time, end_time, duration_minutes, description, billable, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING *, user_id as profile_id`,
+      [task_id, actualUserId, start_time, end_time, duration_minutes, description, billable ?? true, status ?? 'draft']
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
@@ -66,19 +68,20 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
 
 // PUT /api/agency/time-entries/:id
 router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
-  const { hours, description, billable, status, date } = req.body;
+  const { start_time, end_time, duration_minutes, description, billable, status } = req.body;
   try {
     const result = await pool.query(
       `UPDATE agency_time_entries 
-       SET hours = COALESCE($1, hours),
-           description = COALESCE($2, description),
-           billable = COALESCE($3, billable),
-           status = COALESCE($4, status),
-           date = COALESCE($5, date),
+       SET start_time = COALESCE($1, start_time),
+           end_time = COALESCE($2, end_time),
+           duration_minutes = COALESCE($3, duration_minutes),
+           description = COALESCE($4, description),
+           billable = COALESCE($5, billable),
+           status = COALESCE($6, status),
            updated_at = NOW()
-       WHERE id = $6
-       RETURNING *`,
-      [hours, description, billable, status, date, req.params.id]
+       WHERE id = $7
+       RETURNING *, user_id as profile_id`,
+      [start_time, end_time, duration_minutes, description, billable, status, req.params.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Time entry not found' });
