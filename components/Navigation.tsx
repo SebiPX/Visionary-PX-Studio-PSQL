@@ -144,6 +144,11 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
             >
               <div className="hidden md:block text-right">
                 <p className="text-xs font-bold text-white leading-none">{userProfile.name}</p>
+                {userProfile.role && (
+                  <p className="text-[10px] uppercase text-primary font-bold mt-1 tracking-widest text-opacity-80">
+                    {userProfile.role}
+                  </p>
+                )}
               </div>
               <div className="w-8 h-8 rounded-full border border-white/10 p-0.5 overflow-hidden relative group">
                 <img
