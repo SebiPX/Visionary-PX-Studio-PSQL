@@ -29,13 +29,13 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
 
 // POST /api/agency/service-pricing
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
-  const { service_id, seniority_id, hourly_rate, multiplier } = req.body;
+  const { service_id, seniority_id, hourly_rate } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO agency_service_pricing (service_id, seniority_id, hourly_rate, multiplier)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO agency_service_pricing (service_id, seniority_id, hourly_rate)
+       VALUES ($1, $2, $3)
        RETURNING *`,
-      [service_id, seniority_id, hourly_rate, multiplier]
+      [service_id, seniority_id, hourly_rate]
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
@@ -45,16 +45,15 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
 
 // PUT /api/agency/service-pricing/:id
 router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
-  const { hourly_rate, multiplier } = req.body;
+  const { hourly_rate } = req.body;
   try {
     const result = await pool.query(
       `UPDATE agency_service_pricing 
        SET hourly_rate = COALESCE($1, hourly_rate),
-           multiplier = COALESCE($2, multiplier),
            updated_at = NOW()
-       WHERE id = $3
+       WHERE id = $2
        RETURNING *`,
-      [hourly_rate, multiplier, req.params.id]
+      [hourly_rate, req.params.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Service pricing not found' });
@@ -89,10 +88,10 @@ router.post('/batch', requireAuth, async (req: AuthRequest, res) => {
       const results = [];
       for (const p of pricings) {
         const result = await client.query(
-          `INSERT INTO agency_service_pricing (service_id, seniority_id, hourly_rate, multiplier)
-           VALUES ($1, $2, $3, $4)
+          `INSERT INTO agency_service_pricing (service_id, seniority_id, hourly_rate)
+           VALUES ($1, $2, $3)
            RETURNING *`,
-          [p.service_id, p.seniority_id, p.hourly_rate, p.multiplier]
+          [p.service_id, p.seniority_id, p.hourly_rate]
         );
         results.push(result.rows[0]);
       }
@@ -126,11 +125,10 @@ router.put('/batch', requireAuth, async (req: AuthRequest, res) => {
         const result = await client.query(
           `UPDATE agency_service_pricing 
            SET hourly_rate = COALESCE($1, hourly_rate),
-               multiplier = COALESCE($2, multiplier),
                updated_at = NOW()
-           WHERE id = $3
+           WHERE id = $2
            RETURNING *`,
-          [data.hourly_rate, data.multiplier, id]
+          [data.hourly_rate, id]
         );
         if (result.rows.length > 0) {
             results.push(result.rows[0]);
