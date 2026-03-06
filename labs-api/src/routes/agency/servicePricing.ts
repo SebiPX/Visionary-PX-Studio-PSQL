@@ -29,7 +29,7 @@ router.get('/rate', requireAuth, async (req: AuthRequest, res) => {
     );
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Pricing rate not found for this module and level' });
+      return res.json({ rate: null, internal_cost: null });
     }
     
     res.json(result.rows[0]);
