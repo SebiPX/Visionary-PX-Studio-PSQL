@@ -22,6 +22,22 @@ router.get('/internal', requireAuth, async (req: AuthRequest, res: Response) => 
   }
 });
 
+// GET /api/agency/profiles/team-directory
+// Secure list of team members without sensitive cost data
+router.get('/team-directory', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, email, full_name as name, full_name, avatar_url, role, weekly_hours
+       FROM profiles 
+       WHERE role IN ('admin', 'pjm', 'creative', 'guest')
+       ORDER BY full_name ASC`
+    );
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/agency/profiles
 router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
   const { role } = req.query;
