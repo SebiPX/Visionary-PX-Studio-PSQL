@@ -24,7 +24,7 @@ router.get('/availability', requireAuth, async (req: AuthRequest, res) => {
     const tasksResult = await pool.query(`
       SELECT 
         t.id, t.title, t.estimated_hours, t.status, t.due_date, t.start_date, t.assignee_id,
-        p.title as project_title, p.color as project_color
+        p.title as project_title, p.color_code as project_color
       FROM agency_tasks t
       JOIN agency_projects p ON t.project_id = p.id
       WHERE t.status != 'completed' AND t.assignee_id IS NOT NULL
