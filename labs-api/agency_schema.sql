@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS public.agency_tasks (
     service_module_id UUID REFERENCES public.agency_service_modules(id) ON DELETE SET NULL,
     seniority_level_id UUID REFERENCES public.agency_seniority_levels(id) ON DELETE SET NULL,
     is_visible_to_client BOOLEAN DEFAULT false,
+    position NUMERIC DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -87,6 +88,7 @@ CREATE TABLE IF NOT EXISTS public.agency_tasks (
 -- 6. agency_time_entries
 CREATE TABLE IF NOT EXISTS public.agency_time_entries (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id UUID REFERENCES public.agency_projects(id) ON DELETE CASCADE,
     task_id UUID NOT NULL REFERENCES public.agency_tasks(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     start_time TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -95,6 +97,7 @@ CREATE TABLE IF NOT EXISTS public.agency_time_entries (
     description TEXT,
     billable BOOLEAN DEFAULT true,
     status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'pending', 'submitted', 'approved', 'rejected')),
+    rejection_reason TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -127,6 +130,8 @@ CREATE TABLE IF NOT EXISTS public.agency_costs (
     amount NUMERIC(15, 2) NOT NULL CHECK (amount > 0),
     date DATE NOT NULL,
     category TEXT CHECK (category IN ('software', 'hardware', 'travel', 'external_service', 'other')),
+    invoice_document_path TEXT,
+    is_estimated BOOLEAN DEFAULT false,
     created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -138,8 +143,13 @@ CREATE TABLE IF NOT EXISTS public.agency_financial_documents (
     type TEXT NOT NULL CHECK (type IN ('quote', 'invoice')),
     title TEXT NOT NULL,
     document_url TEXT NOT NULL,
+    document_number TEXT,
     amount NUMERIC(15, 2) NOT NULL,
+    total_net NUMERIC(15, 2),
+    vat_percent NUMERIC(5, 2),
+    total_gross NUMERIC(15, 2),
     status TEXT NOT NULL CHECK (status IN ('draft', 'sent', 'paid', 'overdue', 'cancelled')),
+    date_issued DATE,
     due_date DATE,
     created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -153,6 +163,7 @@ CREATE TABLE IF NOT EXISTS public.agency_service_modules (
     category TEXT NOT NULL,
     base_price NUMERIC(10, 2) NOT NULL DEFAULT 0,
     estimated_days INTEGER NOT NULL DEFAULT 1,
+    default_unit TEXT DEFAULT 'hour',
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -173,6 +184,7 @@ CREATE TABLE IF NOT EXISTS public.agency_service_pricing (
     service_id UUID NOT NULL REFERENCES public.agency_service_modules(id) ON DELETE CASCADE,
     seniority_id UUID NOT NULL REFERENCES public.agency_seniority_levels(id) ON DELETE CASCADE,
     hourly_rate NUMERIC(10, 2) NOT NULL,
+    internal_cost NUMERIC(10, 2) DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     UNIQUE(service_id, seniority_id)
 );

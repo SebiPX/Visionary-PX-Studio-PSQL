@@ -48,6 +48,7 @@ router.get('/pricing', requireAuth, async (req, res) => {
               'service_module_id', sp.service_id,
               'seniority_level_id', sp.seniority_id,
               'rate', sp.hourly_rate,
+              'internal_cost', sp.internal_cost,
               'created_at', sp.created_at,
               'seniority_level', json_build_object(
                 'id', sl.id,
