@@ -7,7 +7,7 @@ const router = Router();
 // GET /api/agency/tasks
 // Optionally filter by project_id
 router.get('/', requireAuth, async (req: AuthRequest, res) => {
-  const { project_id } = req.query;
+  const { project_id, assignee_id } = req.query;
   try {
     let query = `
       SELECT t.*, 
@@ -16,12 +16,18 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
       FROM agency_tasks t
       JOIN agency_projects p ON t.project_id = p.id
       LEFT JOIN profiles u ON t.assignee_id = u.id
+      WHERE 1=1
     `;
     const params: any[] = [];
     
     if (project_id) {
-      query += ` WHERE t.project_id = $1`;
       params.push(project_id);
+      query += ` AND t.project_id = $${params.length}`;
+    }
+
+    if (assignee_id) {
+      params.push(assignee_id);
+      query += ` AND t.assignee_id = $${params.length}`;
     }
     
     query += ` ORDER BY t.created_at DESC`;

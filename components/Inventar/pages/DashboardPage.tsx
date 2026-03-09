@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   Package, AlertCircle, CheckCircle, RefreshCw,
   ExternalLink, Calendar, ArrowRight, Clock, Settings, Key
@@ -9,6 +9,7 @@ import type { DashboardConfig } from '../hooks/useDashboardConfig'
 import { DashboardConfigDrawer } from '../components/DashboardConfigDrawer'
 import { AppView } from '../../../types'
 import { RecentGenerations } from '../../Dashboard'
+import { UserTasksWidget } from '../../UserTasksWidget'
 
 // ─── Avatar colour helper ─────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -339,6 +340,11 @@ export function DashboardPage({
           </section>
         )}
 
+      </div>
+
+      {/* ── User Tasks Widget ─────────────────────────────────────────────── */}
+      <div className="mt-8 max-w-7xl mx-auto px-6">
+        <UserTasksWidget />
       </div>
 
       {/* ── Recent Generations ─────────────────────────────────────────────── */}
