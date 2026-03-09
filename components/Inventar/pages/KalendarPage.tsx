@@ -38,7 +38,7 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
   const categoriesMap = useMemo(() => {
     const map = new Map<string, InventarItem[]>();
     verleihItems.forEach(item => {
-      const cat = item.kategorie || 'Unkategorisiert';
+      const cat = item.geraet || 'Unkategorisiert';
       if (!map.has(cat)) map.set(cat, []);
       map.get(cat)!.push(item);
     });
