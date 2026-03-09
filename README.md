@@ -239,7 +239,7 @@ Zugänglich über **Dashboard → „PX INTERN"**. Eigenständige React-App mit 
 | **Inventar**         | Geräteverwaltung mit Status, Fotos, Filtern, CSV-Export               |
 | **Verleih**          | Ausleihe-Tracking mit Rückgabe & Archiv                               |
 | **Verleih-Formular** | Neuen Verleihschein erstellen, Kostenberechnung, PDF                  |
-| **Kalender**         | Monatsansicht aller aktiven Ausleihen                                 |
+| **Kalender**         | Monatsansicht aller aktiven Ausleihen mit einklappbaren Gerätekategorien              |
 | **Logins**           | Zugangsdaten-Verwaltung; anpinnen im Dashboard möglich                |
 | **Handyverträge**    | Mobilfunkvertrag-Übersicht                                            |
 | **Kreditkarten**     | Kreditkarten-Verwaltung                                               |

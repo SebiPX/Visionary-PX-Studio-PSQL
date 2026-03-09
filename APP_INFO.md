@@ -130,7 +130,7 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 | **Inventar**         | Gerätliste mit Filtern, Suche, Status, Fotos, CSV-Export                                        | Alle / Admin: CRUD |
 | **Verleih**          | Aktive & archivierte Ausleihen, Rückgabe-Funktion                                               | Alle / Admin       |
 | **Verleih-Formular** | Neuen Verleihschein erstellen, Kostenberechnung, PDF-Export                                     | Alle               |
-| **Kalender**         | Monatsansicht aller aktiven Ausleihen                                                           | Alle               |
+| **Kalender**         | Monatsansicht aller aktiven Ausleihen mit einklappbaren Gerätekategorien                        | Alle               |
 | **Logins**           | Zugangsdaten (z.B. Software-Accounts); im Dashboard anpinnbar                                   | Alle / Admin: CRUD |
 | **Handyverträge**    | Mobilfunkvertrag-Übersicht                                                                      | Admin              |
 | **Kreditkarten**     | Kreditkarten-Verwaltung                                                                         | Admin              |
