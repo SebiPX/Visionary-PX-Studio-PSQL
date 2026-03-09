@@ -89,38 +89,42 @@ deploy_frontend() {
 deploy_api() {
   header "Deploying Backend (labs-api)"
 
-  # labs-api lives inside the repo as a subfolder.
-  # We need to pull the full repo first, then use the subfolder.
-  if [ -d "$API_DIR/.git" ]; then
-    # API dir is its own repo checkout
-    pull_latest "$API_DIR" "api"
+  # Since labs-api is a shared Core API, we want to update it from the main repo's 
+  # labs-api subfolder into the dedicated VPS directory (/opt/docker/labs-api).
+  
+  warn "api: Pulling main repo to sync latest labs-api subfolder..."
+  rm -rf /tmp/px-studio-temp
+  git clone --branch $BRANCH $REPO_URL /tmp/px-studio-temp
+
+  # Safety check: ensure API_DIR exists
+  mkdir -p "$API_DIR"
+
+  # Backup production .env from API_DIR
+  if [ -f "$API_DIR/.env" ]; then
+    cp "$API_DIR/.env" "/tmp/api.env.backup"
+    warn "api: Backed up production .env to /tmp/api.env.backup"
   else
-    # Pull main repo, copy labs-api subfolder
-    warn "api: Pulling main repo to get latest labs-api subfolder..."
-    rm -rf /tmp/px-studio-temp
-    git clone --branch $BRANCH $REPO_URL /tmp/px-studio-temp
-
-    # Backup .env
-    if [ -f "$API_DIR/.env" ]; then
-      cp "$API_DIR/.env" "/tmp/api.env.backup"
-      warn "api: Backed up .env to /tmp/api.env.backup"
-    fi
-
-    # Sync only labs-api subfolder contents (exclude .env)
-    rsync -a --exclude='.env' /tmp/px-studio-temp/labs-api/ "$API_DIR/"
-    rm -rf /tmp/px-studio-temp
-
-    # Restore .env
-    if [ -f "/tmp/api.env.backup" ]; then
-      cp "/tmp/api.env.backup" "$API_DIR/.env"
-      log "api: Restored .env from backup."
-    fi
-    log "api: Code synced from repo subfolder."
+    warn "api: No existing .env found in $API_DIR! (Ignore if first deploy)"
   fi
+
+  # Sync ONLY the labs-api subfolder contents into API_DIR
+  # We exclude .env to ensure we don't accidentally overwrite the VPS config with the repo's example config.
+  rsync -a --delete --exclude='.env' /tmp/px-studio-temp/labs-api/ "$API_DIR/"
+  
+  # Clean up temp clone
+  rm -rf /tmp/px-studio-temp
+
+  # Restore production .env
+  if [ -f "/tmp/api.env.backup" ]; then
+    cp "/tmp/api.env.backup" "$API_DIR/.env"
+    log "api: Restored production .env from backup."
+  fi
+  
+  log "api: Code synced successfully from repo subfolder into $API_DIR."
 
   cd "$API_DIR"
 
-  # Safety check: .env must exist
+  # Final safety check before building
   if [ ! -f ".env" ]; then
     error "No .env found in $API_DIR! Create it from .env.example first."
   fi
@@ -129,6 +133,7 @@ deploy_api() {
   docker compose build --no-cache
 
   log "Restarting container..."
+  docker compose down
   docker compose up -d
 
   log "Backend deployed! Container: labs-api"
