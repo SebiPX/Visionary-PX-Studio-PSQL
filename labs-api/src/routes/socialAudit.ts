@@ -265,6 +265,10 @@ router.post('/analysis', requireAuth, async (req: AuthRequest, res: Response) =>
         // Upsert analysis manually since we don't have UNIQUE(post_id) constraint guaranteed
         const existing = await pool.query('SELECT id FROM social_ai_analysis WHERE post_id = $1', [post_id]);
         
+        const patternsJson = typeof detected_patterns === 'string' 
+            ? detected_patterns 
+            : JSON.stringify(detected_patterns || []);
+
         let result;
         if (existing.rows.length > 0) {
             result = await pool.query(
@@ -272,14 +276,14 @@ router.post('/analysis', requireAuth, async (req: AuthRequest, res: Response) =>
                  SET sentiment = $2, detected_patterns = $3, summary_text = $4
                  WHERE post_id = $1
                  RETURNING *`,
-                [post_id, sentiment, detected_patterns || '{}', summary_text]
+                [post_id, sentiment, patternsJson, summary_text]
             );
         } else {
             result = await pool.query(
                 `INSERT INTO social_ai_analysis (post_id, sentiment, detected_patterns, summary_text)
                  VALUES ($1, $2, $3, $4)
                  RETURNING *`,
-                [post_id, sentiment, detected_patterns || '{}', summary_text]
+                [post_id, sentiment, patternsJson, summary_text]
             );
         }
 
