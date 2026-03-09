@@ -1,5 +1,5 @@
-﻿import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Calendar, Package } from 'lucide-react'
+import { useState, useMemo, Fragment } from 'react'
+import { ChevronLeft, ChevronRight, Calendar, Package, ChevronDown } from 'lucide-react'
 import type { InventarItem, Verleihschein } from '../types'
 
 interface KalendarPageProps {
@@ -33,6 +33,29 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
     () => items.filter(i => i.is_verleihartikel),
     [items]
   )
+
+  // Group items by category
+  const categoriesMap = useMemo(() => {
+    const map = new Map<string, InventarItem[]>();
+    verleihItems.forEach(item => {
+      const cat = item.kategorie || 'Unkategorisiert';
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(item);
+    });
+    // Sort categories alphabetically
+    return new Map([...map.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+  }, [verleihItems]);
+
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+  const toggleCategory = (cat: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
+      return next;
+    });
+  };
 
   // Pre-index: for each (itemId, day) which schein covers it
   const coverageMap = useMemo(() => {
@@ -127,40 +150,62 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {verleihItems.map(item => {
-                  const itemMap = coverageMap.get(item.id)
+                {Array.from(categoriesMap.entries()).map(([category, itemsInCategory]) => {
+                  const isExpanded = expandedCategories.has(category);
                   return (
-                    <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
-                      {/* Item name */}
-                      <td className="sticky left-0 z-10 bg-slate-900 py-2 px-4 font-medium text-white whitespace-nowrap">
-                        <p className="truncate max-w-44">{item.geraet}{item.modell ? ` – ${item.modell}` : ''}</p>
-                        {item.px_nummer && <p className="text-slate-500 font-mono text-[10px]">{item.px_nummer}</p>}
-                      </td>
-                      {/* Day cells */}
-                      {dayNumbers.map(d => {
-                        const schein = itemMap?.get(d)
-                        const weekend = isWeekend(d)
-                        const todayCell = isToday(d)
+                    <Fragment key={category}>
+                      {/* Category Header Row */}
+                      <tr 
+                        className="bg-slate-800/80 hover:bg-slate-700/80 transition-colors cursor-pointer group"
+                        onClick={() => toggleCategory(category)}
+                      >
+                        <td className="sticky left-0 z-20 bg-slate-800/90 group-hover:bg-slate-700/90 py-2.5 px-3 font-semibold text-brand-300 whitespace-nowrap border-b border-slate-700/50 flex items-center gap-2 transition-colors">
+                           {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                           {category} 
+                           <span className="text-xs font-normal opacity-60 ml-1">({itemsInCategory.length})</span>
+                        </td>
+                        {/* Empty cells for the dynamic days column width, so background color fills the rest */}
+                        <td colSpan={days} className="border-b border-slate-700/50 bg-slate-800/50 group-hover:bg-slate-700/50 transition-colors"></td>
+                      </tr>
+
+                      {/* Item Rows */}
+                      {isExpanded && itemsInCategory.map(item => {
+                        const itemMap = coverageMap.get(item.id)
                         return (
-                          <td key={d} className="p-0.5">
-                            <div
-                              className={`h-8 w-7 rounded-md mx-auto flex items-center justify-center cursor-default transition-colors ${
-                                schein
-                                  ? 'bg-red-500/60 border border-red-500/40 hover:bg-red-500/80'
-                                  : weekend
-                                    ? 'bg-slate-700/30'
-                                    : todayCell
-                                      ? 'bg-brand-500/20 border border-brand-500/30'
-                                      : 'bg-emerald-500/10 border border-emerald-500/10 hover:bg-emerald-500/20'
-                              }`}
-                              title={schein
-                                ? `Ausgeliehen an: ${schein.borrower_type === 'team' ? schein.profile?.full_name : schein.extern_name || '–'}\n${new Date(schein.abholzeit).toLocaleDateString('de-DE')} – ${new Date(schein.rueckgabezeit).toLocaleDateString('de-DE')}`
-                                : 'Frei'}
-                            />
-                          </td>
+                          <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
+                            {/* Item name */}
+                            <td className="sticky left-0 z-10 bg-slate-900 py-2 px-4 pl-10 font-medium text-white whitespace-nowrap">
+                              <p className="truncate max-w-44">{item.geraet}{item.modell ? ` – ${item.modell}` : ''}</p>
+                              {item.px_nummer && <p className="text-slate-500 font-mono text-[10px]">{item.px_nummer}</p>}
+                            </td>
+                            {/* Day cells */}
+                            {dayNumbers.map(d => {
+                              const schein = itemMap?.get(d)
+                              const weekend = isWeekend(d)
+                              const todayCell = isToday(d)
+                              return (
+                                <td key={d} className="p-0.5">
+                                  <div
+                                    className={`h-8 w-7 rounded-md mx-auto flex items-center justify-center cursor-default transition-colors ${
+                                      schein
+                                        ? 'bg-red-500/60 border border-red-500/40 hover:bg-red-500/80'
+                                        : weekend
+                                          ? 'bg-slate-700/30'
+                                          : todayCell
+                                            ? 'bg-brand-500/20 border border-brand-500/30'
+                                            : 'bg-emerald-500/10 border border-emerald-500/10 hover:bg-emerald-500/20'
+                                    }`}
+                                    title={schein
+                                      ? `Ausgeliehen an: ${schein.borrower_type === 'team' ? schein.profile?.full_name : schein.extern_name || '–'}\n${new Date(schein.abholzeit).toLocaleDateString('de-DE')} – ${new Date(schein.rueckgabezeit).toLocaleDateString('de-DE')}`
+                                      : 'Frei'}
+                                  />
+                                </td>
+                              )
+                            })}
+                          </tr>
                         )
                       })}
-                    </tr>
+                    </Fragment>
                   )
                 })}
               </tbody>
