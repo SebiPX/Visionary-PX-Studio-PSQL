@@ -12,6 +12,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
   const [showAddForm, setShowAddForm] = useState(false);
   const [platform, setPlatform] = useState('instagram');
   const [username, setUsername] = useState('');
+  const [syncingAccountId, setSyncingAccountId] = useState<string | null>(null);
 
   const fetchAccounts = async () => {
     const res = await loadAccounts();
@@ -44,15 +45,24 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
 
   const handleSync = async (e: React.MouseEvent, accountId: string, accountName: string) => {
     e.stopPropagation(); // Prevent row click
+    
+    if (syncingAccountId) return; // Prevent multiple syncs at once
+    setSyncingAccountId(accountId);
+    
     toast.loading(`Synchronisiere @${accountName} via Apify (Das kann 1-2 Minuten dauern)...`, { id: 'sync' });
-    const res = await runSync(accountId);
-    if (res.success) {
-      toast.success(`${res.data.count || 0} Posts synchronisiert!`, { id: 'sync' });
-      await fetchAccounts();
-      // Auto-redirect to the dashboard for this account
-      onAccountSelect(accountId);
-    } else {
-      toast.error(`Sync fehlgeschlagen: ${res.error}`, { id: 'sync' });
+    
+    try {
+      const res = await runSync(accountId);
+      if (res.success) {
+        toast.success(`${res.data.count || 0} Posts synchronisiert!`, { id: 'sync' });
+        await fetchAccounts();
+        // Auto-redirect to the dashboard for this account
+        onAccountSelect(accountId);
+      } else {
+        toast.error(`Sync fehlgeschlagen: ${res.error}`, { id: 'sync' });
+      }
+    } finally {
+      setSyncingAccountId(null);
     }
   };
 
@@ -160,11 +170,17 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
                <span>Letzter Sync: {acc.last_sync ? new Date(acc.last_sync).toLocaleString() : 'Nie'}</span>
                <button 
                   onClick={(e) => handleSync(e, acc.id, acc.username)}
-                  disabled={loading}
-                  className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 bg-indigo-400/10 px-2 py-1 rounded"
+                  disabled={loading || syncingAccountId !== null}
+                  className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
+                    syncingAccountId === acc.id 
+                    ? 'text-yellow-400 bg-yellow-400/10 cursor-wait' 
+                    : 'text-indigo-400 hover:text-indigo-300 bg-indigo-400/10'
+                  }`}
                >
-                 <span className="material-icons-round text-[14px]">sync</span>
-                 Sync Data
+                 <span className={`material-icons-round text-[14px] ${syncingAccountId === acc.id ? 'animate-spin' : ''}`}>
+                    {syncingAccountId === acc.id ? 'autorenew' : 'sync'}
+                 </span>
+                 {syncingAccountId === acc.id ? 'Syncing...' : 'Sync Data'}
                </button>
             </div>
           </div>
