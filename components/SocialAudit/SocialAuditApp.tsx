@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { AccountsView } from './AccountsView';
 import { PerformanceDashboard } from './PerformanceDashboard';
 import { AIInsightsView } from './AIInsightsView';
+import { AccountReportsView } from './AccountReportsView';
 
 export const SocialAuditApp: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'ACCOUNTS' | 'DASHBOARD' | 'INSIGHTS'>('ACCOUNTS');
+  const [activeTab, setActiveTab] = useState<'ACCOUNTS' | 'DASHBOARD' | 'INSIGHTS' | 'REPORTS'>('ACCOUNTS');
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
   const handleAccountSelect = (accountId: string) => {
@@ -47,6 +48,13 @@ export const SocialAuditApp: React.FC = () => {
             >
               AI Insights
             </button>
+            <button 
+              onClick={() => setActiveTab('REPORTS')}
+              disabled={!selectedAccountId}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'REPORTS' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:text-white'} disabled:opacity-30`}
+            >
+              AI Reports
+            </button>
         </div>
       </div>
 
@@ -62,6 +70,10 @@ export const SocialAuditApp: React.FC = () => {
         
         {activeTab === 'INSIGHTS' && selectedAccountId && (
             <AIInsightsView accountId={selectedAccountId} />
+        )}
+        
+        {activeTab === 'REPORTS' && selectedAccountId && (
+            <AccountReportsView accountId={selectedAccountId} />
         )}
       </div>
     </div>

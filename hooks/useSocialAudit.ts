@@ -94,6 +94,34 @@ export const useSocialAudit = () => {
         }
     };
 
+    const loadAccountReports = useCallback(async (accountId: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await socialAudit.getReports(accountId);
+            return { success: true, data };
+        } catch (err: any) {
+            setError(err.message);
+            return { success: false, error: err.message };
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const saveAccountReport = async (accountId: string, reportType: string, reportText: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await socialAudit.saveReport(accountId, { report_type: reportType, report_text: reportText });
+            return { success: true, data };
+        } catch (err: any) {
+            setError(err.message);
+            return { success: false, error: err.message };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         loading,
         error,
@@ -102,6 +130,8 @@ export const useSocialAudit = () => {
         runSync,
         loadPosts,
         saveAnalysis,
-        deleteAccount
+        deleteAccount,
+        loadAccountReports,
+        saveAccountReport
     };
 };

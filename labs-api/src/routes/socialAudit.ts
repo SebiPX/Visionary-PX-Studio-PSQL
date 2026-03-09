@@ -294,4 +294,49 @@ router.post('/analysis', requireAuth, async (req: AuthRequest, res: Response) =>
     }
 });
 
+// ============================================================================
+// ACCOUNT REPORTS
+// ============================================================================
+
+// GET /api/social-audit/reports/:accountId
+router.get('/reports/:accountId', requireAuth, async (req: AuthRequest, res: Response) => {
+    const { accountId } = req.params;
+    try {
+        const result = await pool.query(
+            `SELECT * FROM social_account_reports 
+             WHERE account_id = $1 
+             ORDER BY generated_at DESC`,
+            [accountId]
+        );
+        res.json(result.rows);
+    } catch (err: any) {
+        console.error('[social_audit get_reports]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/social-audit/reports/:accountId
+// Save a newly generated account report
+router.post('/reports/:accountId', requireAuth, async (req: AuthRequest, res: Response) => {
+    const { accountId } = req.params;
+    const { report_type, report_text } = req.body;
+    try {
+        if (!report_text) {
+            return res.status(400).json({ error: 'report_text is required' });
+        }
+        
+        const result = await pool.query(
+            `INSERT INTO social_account_reports (account_id, report_type, report_text)
+             VALUES ($1, $2, $3)
+             RETURNING *`,
+            [accountId, report_type || 'general', report_text]
+        );
+        
+        res.json(result.rows[0]);
+    } catch (err: any) {
+        console.error('[social_audit save_report]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;

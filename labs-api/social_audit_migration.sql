@@ -43,3 +43,14 @@ CREATE TABLE IF NOT EXISTS social_ai_analysis (
 CREATE INDEX IF NOT EXISTS idx_social_posts_account_id ON social_posts(account_id);
 CREATE INDEX IF NOT EXISTS idx_social_metrics_post_id ON social_metrics(post_id);
 CREATE INDEX IF NOT EXISTS idx_social_ai_analysis_post_id ON social_ai_analysis(post_id);
+
+-- 5. Account Reports: Wie ist die langfristige Account-Entwicklung?
+CREATE TABLE IF NOT EXISTS social_account_reports (
+    id SERIAL PRIMARY KEY,
+    account_id INTEGER REFERENCES social_accounts(id) ON DELETE CASCADE,
+    report_type VARCHAR(50) DEFAULT 'general', -- e.g., 'weekly', 'monthly', 'growth'
+    report_text TEXT NOT NULL,
+    generated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_social_account_reports_account_id ON social_account_reports(account_id);
