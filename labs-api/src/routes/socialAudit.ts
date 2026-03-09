@@ -180,9 +180,19 @@ router.post('/sync/:accountId', requireAuth, async (req: AuthRequest, res: Respo
         res.json({ success: true, message: `Synced ${insertedPosts.length} posts via Apify.`, count: insertedPosts.length });
 
     } catch (err: any) {
-        await pool.query('ROLLBACK');
-        console.error('[social_audit sync error]', err);
-        res.status(500).json({ error: err.message });
+        try {
+            await pool.query('ROLLBACK');
+        } catch (rollbackErr) {
+            console.error('[social_audit sync error] Failed to rollback:', rollbackErr);
+        }
+        console.error('===================================================');
+        console.error('[social_audit sync fatal error]');
+        console.error('Message:', err.message);
+        console.error('Stack:', err.stack);
+        if (err.code) console.error('DB Error Code:', err.code);
+        if (err.detail) console.error('DB Error Detail:', err.detail);
+        console.error('===================================================');
+        res.status(500).json({ error: err.message, stack: err.stack, detail: err.detail });
     }
 });
 
