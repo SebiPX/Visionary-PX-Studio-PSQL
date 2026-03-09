@@ -48,6 +48,27 @@ router.post('/accounts', requireAuth, async (req: AuthRequest, res: Response) =>
     }
 });
 
+// DELETE /api/social-audit/accounts/:accountId
+router.delete('/accounts/:accountId', requireAuth, async (req: AuthRequest, res: Response) => {
+    try {
+        const { accountId } = req.params;
+        
+        // Ensure the account exists
+        const check = await pool.query('SELECT id FROM social_accounts WHERE id = $1', [accountId]);
+        if (check.rows.length === 0) {
+            return res.status(404).json({ error: 'Account not found' });
+        }
+
+        // Delete the account (ON DELETE CASCADE in Postgres will handle associated posts, metrics, and analysis)
+        await pool.query('DELETE FROM social_accounts WHERE id = $1', [accountId]);
+        
+        res.json({ success: true, message: 'Account deleted successfully' });
+    } catch (err: any) {
+        console.error('[social_audit delete_account]', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ============================================================================
 // MOCK SYNC (DATA GENERATION)
 // ============================================================================
