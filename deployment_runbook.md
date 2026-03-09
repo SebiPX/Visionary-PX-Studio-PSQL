@@ -6,7 +6,7 @@ Zwei Services laufen parallel auf dem VPS:
 
 | Service                | Pfad                         | Container                 | Extern erreichbar                                  |
 | ---------------------- | ---------------------------- | ------------------------- | -------------------------------------------------- |
-| Frontend (React/Nginx) | `/opt/docker/px-studio-psql` | `visionary-px-studio-app` | https://px-studio.labs-schickeria.com              |
+| Frontend (React/Nginx) | `/opt/docker/Visionary-PX-Studio-PSQL` | `visionary-px-studio-app` | https://px-studio.labs-schickeria.com              |
 | Backend (Express API)  | `/opt/docker/labs-api`       | `labs-api`                | https://api.labs-schickeria.com (intern Port 4001) |
 
 Beide hängen im Docker-Netz `proxy-netz` hinter dem **Nginx Proxy Manager**.
@@ -65,13 +65,13 @@ ALLOWED_ORIGINS=http://localhost:5173,https://px-studio.labs-schickeria.com
 
 ```bash
 # Beide Services deployen:
-/opt/docker/px-studio-psql/deploy.sh
+/opt/docker/Visionary-PX-Studio-PSQL/deploy.sh
 
 # Nur Backend:
-/opt/docker/px-studio-psql/deploy.sh api
+/opt/docker/Visionary-PX-Studio-PSQL/deploy.sh api
 
 # Nur Frontend:
-/opt/docker/px-studio-psql/deploy.sh frontend
+/opt/docker/Visionary-PX-Studio-PSQL/deploy.sh frontend
 ```
 
 **Nach manuellem Config-Ändern** ([docker-compose.yml](file:///d:/PX%20AgenturApp/PROJECT/CODE/2026/260226/Visionary-PX-Studio-PSQL/docker-compose.yml) oder [.env](file:///d:/PX%20AgenturApp/PROJECT/CODE/2026/260226/Visionary-PX-Studio-PSQL/labs-api/.env)):

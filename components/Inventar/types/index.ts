@@ -18,6 +18,7 @@ export interface InventarItem {
   handy_nr: string | null
   notes: string | null
   department: string | null
+  kategorie?: string
   is_verleihartikel: boolean
   anschaffungsdatum: string | null
   anschaffungspreis: number | null
