@@ -80,6 +80,20 @@ export const useSocialAudit = () => {
         }
     };
 
+    const deleteAccount = async (accountId: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await socialAudit.deleteAccount(accountId);
+            return { success: true, data };
+        } catch (err: any) {
+            setError(err.message);
+            return { success: false, error: err.message };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         loading,
         error,
@@ -87,6 +101,7 @@ export const useSocialAudit = () => {
         addAccount,
         runMockSync,
         loadPosts,
-        saveAnalysis
+        saveAnalysis,
+        deleteAccount
     };
 };

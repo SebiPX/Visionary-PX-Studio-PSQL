@@ -1,8 +1,12 @@
 import { Router, Response } from 'express';
 import { AuthRequest, requireAuth } from '../middleware/requireAuth';
 import pool from '../db';
+import { ApifyClient } from 'apify-client';
 
 const router = Router();
+const apifyClient = new ApifyClient({
+    token: process.env.APIFY_API_TOKEN,
+});
 
 // ============================================================================
 // ACCOUNTS
@@ -49,7 +53,7 @@ router.post('/accounts', requireAuth, async (req: AuthRequest, res: Response) =>
 // ============================================================================
 
 // POST /api/social-audit/sync/:accountId
-// Generates mock posts and metrics for a given account
+// Synchronizes posts and metrics for a given account via Apify
 router.post('/sync/:accountId', requireAuth, async (req: AuthRequest, res: Response) => {
     const { accountId } = req.params;
     try {
@@ -60,45 +64,112 @@ router.post('/sync/:accountId', requireAuth, async (req: AuthRequest, res: Respo
         }
 
         const account = accountRes.rows[0];
+        const platform = account.platform;
+        const username = account.username;
 
-        // Generate 5 mock posts
-        const mockPosts = Array.from({ length: 5 }).map((_, i) => ({
-            external_id: `${account.platform}_mock_${Date.now()}_${i}`,
-            media_url: `https://picsum.photos/seed/${Date.now() + i}/400/600`, // Random placeholder image
-            caption: `Mock post number ${i + 1} for ${account.username} #socialmedia #test`,
-            post_type: account.platform === 'tiktok' ? 'video' : (i % 2 === 0 ? 'reel' : 'carousel'),
-            published_at: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
-            likes: Math.floor(Math.random() * 5000),
-            shares: Math.floor(Math.random() * 500),
-            comments_count: Math.floor(Math.random() * 200),
-            reach: Math.floor(Math.random() * 20000) + 5000,
-        }));
+        if (!process.env.APIFY_API_TOKEN) {
+             return res.status(500).json({ error: 'APIFY_API_TOKEN is not configured in backend.' });
+        }
+
+        console.log(`[social_audit sync] Starting Apify sync for ${platform} user: ${username}`);
+
+        let actorId = '';
+        let input = {};
+
+        if (platform === 'instagram') {
+            actorId = 'apify/instagram-profile-scraper';
+            input = {
+                usernames: [username],
+                resultsLimit: 15,
+            };
+        } else if (platform === 'tiktok') {
+             // Example using clockworks/tiktok-profile-scraper
+            actorId = 'clockworks/tiktok-profile-scraper';
+            input = {
+                profiles: [username],
+                resultsPerPage: 15,
+                shouldDownloadVideos: false,
+                shouldDownloadCovers: true
+            };
+        } else {
+             return res.status(400).json({ error: 'Unsupported platform for sync' });
+        }
+
+        // Run the Actor and wait for it to finish
+        const run = await apifyClient.actor(actorId).call(input);
+        
+        console.log(`[social_audit sync] Apify run complete. Fetching dataset items...`);
+        // Fetch results from the run's dataset
+        const { items } = await apifyClient.dataset(run.defaultDatasetId).listItems();
+        
+        if (!items || items.length === 0) {
+            return res.status(200).json({ success: true, message: 'Sync complete, but no posts found.', count: 0 });
+        }
+
+        console.log(`[social_audit sync] Found ${items.length} items. Processing...`);
 
         const insertedPosts = [];
 
         await pool.query('BEGIN');
 
-        for (const post of mockPosts) {
-            // Insert Post
+        for (const itemAny of items) {
+           const item = itemAny as any;
+           let externalId, mediaUrl, caption, postType, publishedAt;
+           let likes = 0, commentsCount = 0, shares = 0, reach = 0;
+
+           if (platform === 'instagram') {
+               externalId = item.id || item.shortCode || `${username}_${Date.now()}`;
+               mediaUrl = item.displayUrl || item.videoUrl || '';
+               caption = item.caption || '';
+               postType = item.type === 'Video' ? 'reel' : (item.type === 'Sidecar' ? 'carousel' : 'image');
+               publishedAt = item.timestamp ? new Date(item.timestamp).toISOString() : new Date().toISOString();
+               
+               likes = item.likesCount || 0;
+               commentsCount = item.commentsCount || 0;
+               // Instagram API usually doesn't give 'reach' and 'shares' easily without permissions, fallback to estimations or 0
+               shares = 0; 
+               reach = likes * 10; // Simple fallback estimate if reach is 0
+           } else if (platform === 'tiktok') {
+               externalId = item.id || item.videoMeta?.id || `${username}_${Date.now()}`;
+               mediaUrl = item.videoMeta?.coverUrl || item.covers?.[0] || '';
+               caption = item.text || item.desc || '';
+               postType = 'video';
+               publishedAt = item.createTime ? new Date(item.createTime * 1000).toISOString() : new Date().toISOString();
+               
+               likes = item.diggCount || item.stats?.diggCount || 0;
+               commentsCount = item.commentCount || item.stats?.commentCount || 0;
+               shares = item.shareCount || item.stats?.shareCount || 0;
+               reach = item.playCount || item.stats?.playCount || likes * 10; // use playCount as reach
+           }
+
+            // Upsert Post
             const postRes = await pool.query(
                 `INSERT INTO social_posts (account_id, external_id, media_url, caption, post_type, published_at)
                  VALUES ($1, $2, $3, $4, $5, $6)
-                 RETURNING *`,
-                [accountId, post.external_id, post.media_url, post.caption, post.post_type, post.published_at]
+                 ON CONFLICT (external_id) DO UPDATE 
+                 SET media_url = EXCLUDED.media_url, caption = EXCLUDED.caption, 
+                     post_type = EXCLUDED.post_type, published_at = EXCLUDED.published_at
+                 RETURNING id`,
+                [accountId, externalId, mediaUrl, caption, postType, publishedAt]
             );
             
             const newPostId = postRes.rows[0].id;
-            insertedPosts.push(postRes.rows[0]);
+            insertedPosts.push(newPostId);
 
             // Calculate Engagement Rate
-            const engagementRate = post.reach > 0 ? ((post.likes + post.comments_count + post.shares) / post.reach) * 100 : 0;
+            const engagementRate = reach > 0 ? ((likes + commentsCount + shares) / reach) * 100 : 0;
 
-            // Insert Metrics
-            await pool.query(
-                `INSERT INTO social_metrics (post_id, likes, shares, comments_count, reach, engagement_rate)
-                 VALUES ($1, $2, $3, $4, $5, $6)`,
-                [newPostId, post.likes, post.shares, post.comments_count, post.reach, engagementRate]
-            );
+            // Try to find if metrics exist for this post today
+            const checkMetrics = await pool.query('SELECT id FROM social_metrics WHERE post_id = $1 AND DATE(captured_at) = CURRENT_DATE', [newPostId]);
+
+            if (checkMetrics.rows.length === 0) {
+                // Insert New Metrics Snapshot
+                await pool.query(
+                    `INSERT INTO social_metrics (post_id, likes, shares, comments_count, reach, engagement_rate)
+                     VALUES ($1, $2, $3, $4, $5, $6)`,
+                    [newPostId, likes, shares, commentsCount, reach, Math.min(engagementRate, 100)]
+                );
+            }
         }
 
         // Update last_sync on account
@@ -106,11 +177,11 @@ router.post('/sync/:accountId', requireAuth, async (req: AuthRequest, res: Respo
 
         await pool.query('COMMIT');
 
-        res.json({ success: true, message: `Synced ${insertedPosts.length} mock posts.` });
+        res.json({ success: true, message: `Synced ${insertedPosts.length} posts via Apify.`, count: insertedPosts.length });
 
     } catch (err: any) {
         await pool.query('ROLLBACK');
-        console.error('[social_audit mock_sync]', err);
+        console.error('[social_audit sync error]', err);
         res.status(500).json({ error: err.message });
     }
 });

@@ -7,7 +7,7 @@ interface AccountsViewProps {
 }
 
 export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) => {
-  const { loadAccounts, addAccount, runMockSync, loading } = useSocialAudit();
+  const { loadAccounts, addAccount, runMockSync, deleteAccount, loading } = useSocialAudit();
   const [accounts, setAccounts] = useState<any[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [platform, setPlatform] = useState('instagram');
@@ -44,13 +44,31 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
 
   const handleSync = async (e: React.MouseEvent, accountId: string) => {
     e.stopPropagation(); // Prevent row click
-    toast.loading('Mock-Sync läuft...', { id: 'sync' });
+    toast.loading('Apify Sync läuft (das kann 1-2 Minuten dauern)...', { id: 'sync' });
     const res = await runMockSync(accountId);
     if (res.success) {
-      toast.success('5 Mock-Posts generiert!', { id: 'sync' });
+      toast.success(`${res.data.count || 0} Posts synchronisiert!`, { id: 'sync' });
       fetchAccounts();
     } else {
-      toast.error('Sync fehlgeschlagen', { id: 'sync' });
+      toast.error(`Sync fehlgeschlagen: ${res.error}`, { id: 'sync' });
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, accountId: string, accountName: string) => {
+    e.stopPropagation(); // Prevent row click
+    if (!window.confirm(`Möchtest du den Account @${accountName} wirklich löschen? Alle Daten und Analysen dazu werden entfernt.`)) {
+        return;
+    }
+
+    toast.loading('Account wird gelöscht...', { id: 'delete' });
+    const res = await deleteAccount(accountId);
+    if (res.success) {
+      toast.success('Account gelöscht!', { id: 'delete' });
+      // If the selected account was deleted, we should ideally notify parent to reset it, 
+      // but reloading the list will at least remove it from view.
+      fetchAccounts();
+    } else {
+      toast.error(`Löschen fehlgeschlagen: ${res.error}`, { id: 'delete' });
     }
   };
 
@@ -126,6 +144,14 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
                   <p className="text-xs text-slate-400 capitalize">{acc.platform}</p>
                 </div>
               </div>
+              <button 
+                onClick={(e) => handleDelete(e, acc.id, acc.username)}
+                disabled={loading}
+                className="w-8 h-8 rounded-full bg-white/5 flex flex-shrink-0 items-center justify-center text-slate-500 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                title="Account löschen"
+              >
+                <span className="material-icons-round text-sm">delete</span>
+              </button>
             </div>
 
             <div className="flex items-center justify-between text-xs text-slate-500 mt-4 border-t border-white/5 pt-4">
@@ -136,7 +162,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
                   className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 bg-indigo-400/10 px-2 py-1 rounded"
                >
                  <span className="material-icons-round text-[14px]">sync</span>
-                 Mock Sync
+                 Sync Data
                </button>
             </div>
           </div>

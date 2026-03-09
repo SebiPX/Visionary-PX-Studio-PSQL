@@ -133,7 +133,8 @@ export const socialAudit = {
     addAccount: (data: any) => request<any>('/api/social-audit/accounts', { method: 'POST', body: JSON.stringify(data) }),
     syncAccount: (accountId: string) => request<any>(`/api/social-audit/sync/${accountId}`, { method: 'POST' }),
     getPosts: (accountId: string) => request<any[]>(`/api/social-audit/posts/${accountId}`),
-    saveAnalysis: (data: any) => request<any>('/api/social-audit/analysis', { method: 'POST', body: JSON.stringify(data) })
+    saveAnalysis: (data: any) => request<any>('/api/social-audit/analysis', { method: 'POST', body: JSON.stringify(data) }),
+    deleteAccount: (accountId: string) => request<any>(`/api/social-audit/accounts/${accountId}`, { method: 'DELETE' })
 };
 
 // ── Texts ────────────────────────────────────────────────────────
