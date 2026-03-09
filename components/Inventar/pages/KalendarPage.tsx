@@ -1,4 +1,4 @@
-import { useState, useMemo, Fragment } from 'react'
+import { useState, useMemo, useEffect, Fragment } from 'react'
 import { ChevronLeft, ChevronRight, Calendar, Package, ChevronDown } from 'lucide-react'
 import type { InventarItem, Verleihschein } from '../types'
 
@@ -73,6 +73,27 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
     }
     return map
   }, [scheine, year, month, days])
+
+  // Automatically expand categories that have active loans in the current month view
+  useEffect(() => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      let madeChanges = false;
+      Array.from(categoriesMap.entries()).forEach(([category, itemsInCategory]) => {
+        // Check if any item in this category has an entry in coverageMap (meaning it's booked on at least 1 day)
+        const hasLoan = itemsInCategory.some(item => {
+          const itemCoverage = coverageMap.get(item.id);
+          return itemCoverage && itemCoverage.size > 0;
+        });
+        
+        if (hasLoan && !next.has(category)) {
+          next.add(category);
+          madeChanges = true;
+        }
+      });
+      return madeChanges ? next : prev;
+    });
+  }, [coverageMap, categoriesMap]);
 
   function prevMonth() {
     if (month === 0) { setMonth(11); setYear(y => y - 1) }
