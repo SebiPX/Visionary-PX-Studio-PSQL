@@ -102,9 +102,10 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 
 ### 10. 📊 Social Media Audit Agent
 
-- **Account Management & Mock-Sync:** Erfassen von Instagram- und TikTok-Accounts mit automatischer Generierung realistischer Beitragsdaten (Reach, Likes, Shares, Comments).
-- **Performance Dashboard:** Visuelle Sortierung und Berechnung der Engagement-Rate zur schnellen Identifikation von Top- & Flop-Beiträgen.
-- **AI Insights:** "KI Analyse" Feature sendet Beitragsdaten sowie Bilder an Gemini zur Extraktion von Sentiment, Mustern und Erfolgsfaktoren. Erkenntnisse werden persistent in DB gespeichert.
+- **Account Management & Sync:** Erfassen von Instagram- und TikTok-Accounts mit automatischer Datensynchronisierung echter Profil- und Beitragsdaten über die **Apify API**.
+- **Performance Dashboard:** Visuelle Sortierung und exakte Berechnung der Engagement-Rate (Interaktionen / Follower) zur schnellen Identifikation von Top- & Flop-Beiträgen. Image-Loading via **Image Proxy (`/api/proxy/image`)**, um CORB/CORS-Sicherheitsblockaden zu umgehen.
+- **AI Insights:** "KI Analyse" Feature sendet Beitragsdaten sowie Bilder an Gemini zur Extraktion von Sentiment, Mustern und Erfolgsfaktoren. Erkenntnisse werden persistent als `JSONB` in DB gespeichert.
+- **Account Historie & Reports:** Möglichkeit, komplette historische Metrics-Zusammenfassungen von ~30 Posts an Gemini (`gemini-2.5-flash-lite`) zu senden, um datenbasierte Wachstums-Reports (z.B. Monatsberichte) zu generieren, die chronologisch gespeichert werden.
 
 ### 11. ⚙️ Benutzereinstellungen
 
@@ -199,6 +200,7 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 | `social_posts`          | Social Media Posts pro Account (Reels/Images)               |
 | `social_metrics`        | Engagement Metriken pro Post (Views, Likes, etc.)           |
 | `social_ai_analysis`    | Gemini Insights für Posts (Patterns, Sentiment)             |
+| `social_account_reports`| Chronologische Account-Wachstumsreports via KI              |
 | `onboarding_embeddings` | RAG-Vektordaten (pgvector, 768-dim, `gemini-embedding-001`) |
 
 ### PX INTERN

@@ -281,6 +281,7 @@ Eigenständiges JWT Auth-System — kein Supabase, kein Firebase:
 | `social_posts`          | Social Media Posts (Audit)               |
 | `social_metrics`        | Engagement Metriken (Audit)              |
 | `social_ai_analysis`    | Gemini Insights für Posts                |
+| `social_account_reports`| Chronologische Account-Wachstumsreports  |
 | `onboarding_embeddings` | RAG-Vektordaten (pgvector, 768-dim)      |
 
 ### PX INTERN Tabellen

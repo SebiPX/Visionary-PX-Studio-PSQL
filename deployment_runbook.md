@@ -108,6 +108,23 @@ host labs_db schickeria_user 172.0.0.0/8 scram-sha-256
 **Ursache:** Container läuft noch mit alten Variablen.  
 **Fix:** `docker compose down && docker compose up -d` (nicht nur `docker restart`).
 
+### ❌ `Gemini API 404 / Model not found` Fehler
+
+**Ursache:** Google ändert oft die Namen der "Experimental" APIs (z.B. `gemini-2.0-flash-exp`) oder der API Key ist **abgelaufen/aufgebraucht**.  
+**Fix:**  
+1. In `src/routes/gemini.ts` oder React-Frontend das genaue, aktuell verfügbare Modell (`gemini-1.5-flash-latest` oder `gemini-2.5-flash-lite`) angeben.  
+2. Über das [Google AI Studio](https://aistudio.google.com/) einen neuen Key generieren und in `/opt/docker/labs-api/.env` ersetzen. Dann Container mit `down` und `up -d` neustarten.
+
+### ❌ `500 Server Error` beim Speichern von JSON-Arrays in Postgres
+
+**Ursache:** Der node-postgres Treiber (`pg`) kann ein reines Javascript Array (z.B. von Gemini generiertes `['Tag1', 'Tag2']`) nicht direkt in eine `JSONB` Spalte einfügen.  
+**Fix:** Das Array vor dem Insert-Query zwingend als String casten: `JSON.stringify(array)`.
+
+### ❌ `Apify Sync fehlgeschlagen` oder keine Posts gefunden
+
+**Ursache:** Der `APIFY_API_TOKEN` fehlt im Backend oder der Apify Actor läuft in ein Timeout/Login-Wall.  
+**Fix:** Stelle sicher, dass in `/opt/docker/labs-api/.env` der `APIFY_API_TOKEN` gesetzt ist. Checke die Apify Console ob der Actor (`instagram-profile-scraper`) noch Guthaben hat.
+
 ### ✅ Auth API Endpunkte
 
 | Aktion                      | Endpoint                              | Hinweis                            |
