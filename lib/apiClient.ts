@@ -466,3 +466,28 @@ export const chats = {
         request<ApiChatSession>('/api/chats', { method: 'POST', body: JSON.stringify(data) }),
     delete: (id: string) => request<void>(`/api/chats/${id}`, { method: 'DELETE' }),
 };
+
+// ── Time Entries (ProjectFlow) ─────────────────────────────────────
+export interface ApiTimeEntry {
+    id: string;
+    task_id: string;
+    profile_id: string;
+    start_time: string;
+    end_time: string | null;
+    duration_minutes: number | null;
+    status: 'draft' | 'submitted' | 'approved' | 'rejected';
+    billable: boolean;
+    description: string | null;
+    created_at: string;
+    updated_at: string;
+    profile?: { id: string; email: string; full_name: string; avatar_url?: string };
+}
+
+export const timeEntries = {
+    getByTask: (taskId: string) => request<ApiTimeEntry[]>(`/api/time-entries?task_id=${taskId}`),
+    create: (data: Partial<ApiTimeEntry>) => 
+        request<ApiTimeEntry>('/api/time-entries', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, updates: Partial<ApiTimeEntry>) => 
+        request<ApiTimeEntry>(`/api/time-entries/${id}`, { method: 'PUT', body: JSON.stringify(updates) }),
+    delete: (id: string) => request<void>(`/api/time-entries/${id}`, { method: 'DELETE' }),
+};
