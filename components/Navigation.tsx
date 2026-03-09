@@ -54,6 +54,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
         { view: AppView.THUMBNAIL_ENGINE, icon: 'dashboard_customize', label: 'Thumb' },
         { view: AppView.VOICE_STUDIO, icon: 'record_voice_over', label: 'Voice' },
         { view: AppView.STUDIO_3D, icon: 'view_in_ar', label: '3D' },
+        { view: AppView.STORY_STUDIO, icon: 'movie_creation', label: 'Story' },
+        { view: AppView.SKETCH_STUDIO, icon: 'brush', label: 'Sketch' },
       ],
     },
     {
@@ -62,8 +64,6 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
       items: [
         { view: AppView.PX_CREATIVE, icon: 'tips_and_updates', label: 'Event' },
         { view: AppView.SOCIAL_AUDIT, icon: 'troubleshoot', label: 'Audit' },
-        { view: AppView.STORY_STUDIO, icon: 'movie_creation', label: 'Story' },
-        { view: AppView.SKETCH_STUDIO, icon: 'brush', label: 'Sketch' },
         { view: AppView.CHAT_BOT, icon: 'chat_bubble', label: 'Chat' },
       ],
     },
