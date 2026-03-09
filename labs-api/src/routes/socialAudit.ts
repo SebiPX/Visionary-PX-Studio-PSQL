@@ -108,8 +108,12 @@ router.post('/sync/:accountId', requireAuth, async (req: AuthRequest, res: Respo
 
         const postsArray = items.flatMap(itemAny => {
             const i = itemAny as any;
-            if (platform === 'instagram' && i.latestPosts && Array.isArray(i.latestPosts)) return i.latestPosts;
-            if (platform === 'tiktok' && i.videos && Array.isArray(i.videos)) return i.videos;
+            if (platform === 'instagram' && i.latestPosts && Array.isArray(i.latestPosts)) {
+                return i.latestPosts.map((p: any) => ({ ...p, __profileFollowers: i.followersCount || i.edge_followed_by?.count || 0 }));
+            }
+            if (platform === 'tiktok' && i.videos && Array.isArray(i.videos)) {
+                return i.videos.map((v: any) => ({ ...v, __profileFollowers: i.authorMeta?.fans || i.userInfo?.stats?.followerCount || 0 }));
+            }
             if (i.id || i.shortCode || i.videoMeta) return [i]; // Fallback
             return [];
         });
@@ -136,9 +140,8 @@ router.post('/sync/:accountId', requireAuth, async (req: AuthRequest, res: Respo
                    
                    likes = item.likesCount || 0;
                    commentsCount = item.commentsCount || 0;
-                   // Instagram API usually doesn't give 'reach' and 'shares' easily without permissions, fallback to estimations or 0
                    shares = 0; 
-                   reach = likes * 10; // Simple fallback estimate if reach is 0
+                   reach = item.videoPlayCount || 0; // Better if we have a real play count
                } else if (platform === 'tiktok') {
                    externalId = item.id || item.videoMeta?.id || `${username}_${Date.now()}`;
                    mediaUrl = item.videoMeta?.coverUrl || item.covers?.[0] || '';
@@ -149,7 +152,7 @@ router.post('/sync/:accountId', requireAuth, async (req: AuthRequest, res: Respo
                    likes = item.diggCount || item.stats?.diggCount || 0;
                    commentsCount = item.commentCount || item.stats?.commentCount || 0;
                    shares = item.shareCount || item.stats?.shareCount || 0;
-                   reach = item.playCount || item.stats?.playCount || likes * 10; // use playCount as reach
+                   reach = item.playCount || item.stats?.playCount || 0;
                }
 
                 // Upsert Post
@@ -167,7 +170,17 @@ router.post('/sync/:accountId', requireAuth, async (req: AuthRequest, res: Respo
                 insertedPosts.push(newPostId);
 
                 // Calculate Engagement Rate
-                const engagementRate = reach > 0 ? ((likes + commentsCount + shares) / reach) * 100 : 0;
+                // Industry standard: (Interactions / Followers) * 100
+                const interactions = likes + commentsCount + shares;
+                const followers = item.__profileFollowers || 0;
+                let engagementRate = 0;
+                
+                if (followers > 0) {
+                    engagementRate = (interactions / followers) * 100;
+                } else if (reach > 0) {
+                    // Fallback to reach if follower count is missing
+                    engagementRate = (interactions / reach) * 100;
+                }
 
                 // Try to find if metrics exist for this post today
                 const checkMetrics = await client.query('SELECT id FROM social_metrics WHERE post_id = $1 AND DATE(captured_at) = CURRENT_DATE', [newPostId]);

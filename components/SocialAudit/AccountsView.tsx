@@ -7,7 +7,7 @@ interface AccountsViewProps {
 }
 
 export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) => {
-  const { loadAccounts, addAccount, runMockSync, deleteAccount, loading } = useSocialAudit();
+  const { loadAccounts, addAccount, runSync, deleteAccount, loading } = useSocialAudit();
   const [accounts, setAccounts] = useState<any[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [platform, setPlatform] = useState('instagram');
@@ -42,13 +42,15 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
     }
   };
 
-  const handleSync = async (e: React.MouseEvent, accountId: string) => {
+  const handleSync = async (e: React.MouseEvent, accountId: string, accountName: string) => {
     e.stopPropagation(); // Prevent row click
-    toast.loading('Apify Sync läuft (das kann 1-2 Minuten dauern)...', { id: 'sync' });
-    const res = await runMockSync(accountId);
+    toast.loading(`Synchronisiere @${accountName} via Apify (Das kann 1-2 Minuten dauern)...`, { id: 'sync' });
+    const res = await runSync(accountId);
     if (res.success) {
       toast.success(`${res.data.count || 0} Posts synchronisiert!`, { id: 'sync' });
-      fetchAccounts();
+      await fetchAccounts();
+      // Auto-redirect to the dashboard for this account
+      onAccountSelect(accountId);
     } else {
       toast.error(`Sync fehlgeschlagen: ${res.error}`, { id: 'sync' });
     }
@@ -157,7 +159,7 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
             <div className="flex items-center justify-between text-xs text-slate-500 mt-4 border-t border-white/5 pt-4">
                <span>Letzter Sync: {acc.last_sync ? new Date(acc.last_sync).toLocaleString() : 'Nie'}</span>
                <button 
-                  onClick={(e) => handleSync(e, acc.id)}
+                  onClick={(e) => handleSync(e, acc.id, acc.username)}
                   disabled={loading}
                   className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 bg-indigo-400/10 px-2 py-1 rounded"
                >

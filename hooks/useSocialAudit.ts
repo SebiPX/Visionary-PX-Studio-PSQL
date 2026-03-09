@@ -33,7 +33,7 @@ export const useSocialAudit = () => {
         }
     };
 
-    const runMockSync = async (accountId: string) => {
+    const runSync = async (accountId: string) => {
         setLoading(true);
         setError(null);
         try {
@@ -99,7 +99,7 @@ export const useSocialAudit = () => {
         error,
         loadAccounts,
         addAccount,
-        runMockSync,
+        runSync,
         loadPosts,
         saveAnalysis,
         deleteAccount
