@@ -17,7 +17,7 @@ set -e  # Exit immediately on any error
 
 # ── Config ────────────────────────────────────────────────────────────────────
 REPO_URL="https://github.com/SebiPX/Visionary-PX-Studio-PSQL.git"
-FRONTEND_DIR="/opt/docker/px-studio-psql"
+FRONTEND_DIR="/opt/docker/Visionary-PX-Studio-PSQL"
 API_DIR="/opt/docker/labs-api"
 BRANCH="main"
 
