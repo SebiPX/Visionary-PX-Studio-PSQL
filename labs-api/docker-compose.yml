@@ -17,6 +17,7 @@ services:
       R2_BUCKET: ${R2_BUCKET}
       R2_PUBLIC_URL: ${R2_PUBLIC_URL}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      APIFY_API_TOKEN: ${APIFY_API_TOKEN}
     extra_hosts:
       - "host.docker.internal:host-gateway" # Container kann VPS-Host-Postgres erreichen
     networks:
