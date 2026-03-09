@@ -31,6 +31,7 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 - **Zweizeilige Desktop-Navigation**: Aufgeräumtes Layout mit Hauptkategorien (Home, Studio, Agents, Admin) und kontextbezogener zweiter Tool-Leiste.
 - **PX Intern als Haupt-Dashboard**: Internes Agentur-Portal (Verleih, Logins, Kalender) direkt unter 'Home' integriert. Sidebar wurde zugunsten der Top-Navbar komplett entfernt.
 - **Recent Generations Widget**: Letzte KI-Generierungen (Bilder, Videos) nahtlos in das PX Intern Dashboard (Masonry-Grid) integriert.
+- **ProjectFlow Aufgaben:** Zugewiesene Tasks inklusive Time-Tracking (Stoppuhr/manuell) und interaktivem Status-Update direkt im Studio-Dashboard ausführen.
 - Echtzeit-Daten aus `labs_db` via `apiClient`
 
 ### 2. 🎨 Image Gen
