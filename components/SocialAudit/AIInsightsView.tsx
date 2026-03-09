@@ -43,7 +43,7 @@ Bitte extrahiere folgende Daten im JSON Format:
 
       const aiResponse = await geminiProxy({
           action: 'generateContent',
-          model: 'gemini-1.5-flash',
+          model: 'gemini-1.5-flash-latest',
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           config: { responseMimeType: 'application/json' }
       }) as any;
