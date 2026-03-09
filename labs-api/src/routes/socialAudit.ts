@@ -106,85 +106,97 @@ router.post('/sync/:accountId', requireAuth, async (req: AuthRequest, res: Respo
             return res.status(200).json({ success: true, message: 'Sync complete, but no posts found.', count: 0 });
         }
 
-        console.log(`[social_audit sync] Found ${items.length} items. Processing...`);
+        const postsArray = items.flatMap(itemAny => {
+            const i = itemAny as any;
+            if (platform === 'instagram' && i.latestPosts && Array.isArray(i.latestPosts)) return i.latestPosts;
+            if (platform === 'tiktok' && i.videos && Array.isArray(i.videos)) return i.videos;
+            if (i.id || i.shortCode || i.videoMeta) return [i]; // Fallback
+            return [];
+        });
+
+        console.log(`[social_audit sync] Extracted ${postsArray.length} posts from ${items.length} profile(s). Processing...`);
 
         const insertedPosts = [];
 
-        await pool.query('BEGIN');
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
 
-        for (const itemAny of items) {
-           const item = itemAny as any;
-           let externalId, mediaUrl, caption, postType, publishedAt;
-           let likes = 0, commentsCount = 0, shares = 0, reach = 0;
+            for (const itemAny of postsArray) {
+               const item = itemAny as any;
+               let externalId, mediaUrl, caption, postType, publishedAt;
+               let likes = 0, commentsCount = 0, shares = 0, reach = 0;
 
-           if (platform === 'instagram') {
-               externalId = item.id || item.shortCode || `${username}_${Date.now()}`;
-               mediaUrl = item.displayUrl || item.videoUrl || '';
-               caption = item.caption || '';
-               postType = item.type === 'Video' ? 'reel' : (item.type === 'Sidecar' ? 'carousel' : 'image');
-               publishedAt = item.timestamp ? new Date(item.timestamp).toISOString() : new Date().toISOString();
-               
-               likes = item.likesCount || 0;
-               commentsCount = item.commentsCount || 0;
-               // Instagram API usually doesn't give 'reach' and 'shares' easily without permissions, fallback to estimations or 0
-               shares = 0; 
-               reach = likes * 10; // Simple fallback estimate if reach is 0
-           } else if (platform === 'tiktok') {
-               externalId = item.id || item.videoMeta?.id || `${username}_${Date.now()}`;
-               mediaUrl = item.videoMeta?.coverUrl || item.covers?.[0] || '';
-               caption = item.text || item.desc || '';
-               postType = 'video';
-               publishedAt = item.createTime ? new Date(item.createTime * 1000).toISOString() : new Date().toISOString();
-               
-               likes = item.diggCount || item.stats?.diggCount || 0;
-               commentsCount = item.commentCount || item.stats?.commentCount || 0;
-               shares = item.shareCount || item.stats?.shareCount || 0;
-               reach = item.playCount || item.stats?.playCount || likes * 10; // use playCount as reach
-           }
+               if (platform === 'instagram') {
+                   externalId = item.id || item.shortCode || `${username}_${Date.now()}`;
+                   mediaUrl = item.displayUrl || item.videoUrl || '';
+                   caption = item.caption || '';
+                   postType = item.type === 'Video' ? 'reel' : (item.type === 'Sidecar' ? 'carousel' : 'image');
+                   publishedAt = item.timestamp ? new Date(item.timestamp).toISOString() : new Date().toISOString();
+                   
+                   likes = item.likesCount || 0;
+                   commentsCount = item.commentsCount || 0;
+                   // Instagram API usually doesn't give 'reach' and 'shares' easily without permissions, fallback to estimations or 0
+                   shares = 0; 
+                   reach = likes * 10; // Simple fallback estimate if reach is 0
+               } else if (platform === 'tiktok') {
+                   externalId = item.id || item.videoMeta?.id || `${username}_${Date.now()}`;
+                   mediaUrl = item.videoMeta?.coverUrl || item.covers?.[0] || '';
+                   caption = item.text || item.desc || '';
+                   postType = 'video';
+                   publishedAt = item.createTime ? new Date(item.createTime * 1000).toISOString() : new Date().toISOString();
+                   
+                   likes = item.diggCount || item.stats?.diggCount || 0;
+                   commentsCount = item.commentCount || item.stats?.commentCount || 0;
+                   shares = item.shareCount || item.stats?.shareCount || 0;
+                   reach = item.playCount || item.stats?.playCount || likes * 10; // use playCount as reach
+               }
 
-            // Upsert Post
-            const postRes = await pool.query(
-                `INSERT INTO social_posts (account_id, external_id, media_url, caption, post_type, published_at)
-                 VALUES ($1, $2, $3, $4, $5, $6)
-                 ON CONFLICT (external_id) DO UPDATE 
-                 SET media_url = EXCLUDED.media_url, caption = EXCLUDED.caption, 
-                     post_type = EXCLUDED.post_type, published_at = EXCLUDED.published_at
-                 RETURNING id`,
-                [accountId, externalId, mediaUrl, caption, postType, publishedAt]
-            );
-            
-            const newPostId = postRes.rows[0].id;
-            insertedPosts.push(newPostId);
-
-            // Calculate Engagement Rate
-            const engagementRate = reach > 0 ? ((likes + commentsCount + shares) / reach) * 100 : 0;
-
-            // Try to find if metrics exist for this post today
-            const checkMetrics = await pool.query('SELECT id FROM social_metrics WHERE post_id = $1 AND DATE(captured_at) = CURRENT_DATE', [newPostId]);
-
-            if (checkMetrics.rows.length === 0) {
-                // Insert New Metrics Snapshot
-                await pool.query(
-                    `INSERT INTO social_metrics (post_id, likes, shares, comments_count, reach, engagement_rate)
-                     VALUES ($1, $2, $3, $4, $5, $6)`,
-                    [newPostId, likes, shares, commentsCount, reach, Math.min(engagementRate, 100)]
+                // Upsert Post
+                const postRes = await client.query(
+                    `INSERT INTO social_posts (account_id, external_id, media_url, caption, post_type, published_at)
+                     VALUES ($1, $2, $3, $4, $5, $6)
+                     ON CONFLICT (external_id) DO UPDATE 
+                     SET media_url = EXCLUDED.media_url, caption = EXCLUDED.caption, 
+                         post_type = EXCLUDED.post_type, published_at = EXCLUDED.published_at
+                     RETURNING id`,
+                    [accountId, externalId, mediaUrl, caption, postType, publishedAt]
                 );
+                
+                const newPostId = postRes.rows[0].id;
+                insertedPosts.push(newPostId);
+
+                // Calculate Engagement Rate
+                const engagementRate = reach > 0 ? ((likes + commentsCount + shares) / reach) * 100 : 0;
+
+                // Try to find if metrics exist for this post today
+                const checkMetrics = await client.query('SELECT id FROM social_metrics WHERE post_id = $1 AND DATE(captured_at) = CURRENT_DATE', [newPostId]);
+
+                if (checkMetrics.rows.length === 0) {
+                    // Insert New Metrics Snapshot
+                    await client.query(
+                        `INSERT INTO social_metrics (post_id, likes, shares, comments_count, reach, engagement_rate)
+                         VALUES ($1, $2, $3, $4, $5, $6)`,
+                        [newPostId, likes, shares, commentsCount, reach, Math.min(engagementRate, 100)]
+                    );
+                }
             }
+
+            // Update last_sync on account
+            await client.query('UPDATE social_accounts SET last_sync = NOW() WHERE id = $1', [accountId]);
+
+            await client.query('COMMIT');
+
+            res.json({ success: true, message: `Synced ${insertedPosts.length} posts via Apify.`, count: insertedPosts.length });
+
+        } catch (dbErr: any) {
+            await client.query('ROLLBACK');
+            throw dbErr;
+        } finally {
+            client.release();
         }
-
-        // Update last_sync on account
-        await pool.query('UPDATE social_accounts SET last_sync = NOW() WHERE id = $1', [accountId]);
-
-        await pool.query('COMMIT');
-
-        res.json({ success: true, message: `Synced ${insertedPosts.length} posts via Apify.`, count: insertedPosts.length });
 
     } catch (err: any) {
-        try {
-            await pool.query('ROLLBACK');
-        } catch (rollbackErr) {
-            console.error('[social_audit sync error] Failed to rollback:', rollbackErr);
-        }
         console.error('===================================================');
         console.error('[social_audit sync fatal error]');
         console.error('Message:', err.message);
