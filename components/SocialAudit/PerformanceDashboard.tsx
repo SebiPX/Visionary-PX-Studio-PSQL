@@ -31,7 +31,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ acco
   const renderPostCard = (post: any, isTop: boolean) => (
     <div key={post.id} className={`glass-card p-4 rounded-xl border ${isTop ? 'border-green-500/30' : 'border-red-500/30'} flex gap-4`}>
       <div className="w-24 h-32 bg-black rounded-lg overflow-hidden flex-shrink-0">
-         <img src={post.media_url} alt="Post" className="w-full h-full object-cover" />
+         <img src={`${import.meta.env.VITE_API_URL}/api/proxy/image?url=${encodeURIComponent(post.media_url)}`} alt="Post" className="w-full h-full object-cover" />
       </div>
       <div className="flex-1 min-w-0 flex flex-col justify-between">
         <div>

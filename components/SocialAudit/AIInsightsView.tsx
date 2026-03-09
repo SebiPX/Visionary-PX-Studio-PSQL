@@ -79,7 +79,7 @@ Bitte extrahiere folgende Daten im JSON Format:
               return (
                  <div key={post.id} className="glass-card rounded-xl border border-white/5 overflow-hidden flex flex-col">
                     <div className="h-48 bg-black relative">
-                       <img src={post.media_url} className="w-full h-full object-cover opacity-80" alt="Preview" />
+                       <img src={`${import.meta.env.VITE_API_URL}/api/proxy/image?url=${encodeURIComponent(post.media_url)}`} className="w-full h-full object-cover opacity-80" alt="Preview" />
                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
                           <p className="text-white text-xs font-bold line-clamp-1">{post.caption}</p>
                        </div>
