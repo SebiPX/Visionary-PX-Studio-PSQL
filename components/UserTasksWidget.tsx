@@ -30,7 +30,7 @@ export const UserTasksWidget: React.FC = () => {
             try {
                 // Assuming labs-api is available at the standard env URL or relative path
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-                const res = await fetch(`${apiUrl}/api/agency/tasks?assignee_id=${profile.id}`, {
+                const res = await fetch(`${apiUrl}/api/tasks?assignee_id=${profile.id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
