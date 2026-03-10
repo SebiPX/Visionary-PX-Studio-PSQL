@@ -51,6 +51,12 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     const [showPreview, setShowPreview] = useState(false);
     const [showPicker, setShowPicker] = useState(false);
 
+    // Canvas & Drawing State
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [brushSize, setBrushSize] = useState(10);
+    const [brushColor, setBrushColor] = useState('#FFFFFF');
+
     // ========================================================================
     // HANDLERS
     // ========================================================================
@@ -84,6 +90,90 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     };
 
     // ========================================================================
+    // CANVAS HANDLERS
+    // ========================================================================
+
+    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        
+        let clientX, clientY;
+        if ('touches' in e) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = (e as React.MouseEvent).clientX;
+            clientY = (e as React.MouseEvent).clientY;
+        }
+        
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
+        
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        setIsDrawing(true);
+    };
+
+    const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+        if (!isDrawing || !canvasRef.current) return;
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        
+        let clientX, clientY;
+        if ('touches' in e) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = (e as React.MouseEvent).clientX;
+            clientY = (e as React.MouseEvent).clientY;
+        }
+        
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
+        
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = brushColor;
+        ctx.lineWidth = brushSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+    };
+
+    const stopDrawing = () => {
+        if (isDrawing && canvasRef.current) {
+            const ctx = canvasRef.current.getContext('2d');
+            if (ctx) ctx.closePath();
+        }
+        setIsDrawing(false);
+    };
+    
+    const clearCanvas = useCallback(() => {
+        if (activeMode === 'EDIT' && uploadedImage && canvasRef.current) {
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = uploadedImage;
+            }
+        }
+    }, [activeMode, uploadedImage]);
+
+    // ========================================================================
     // EFFECTS
     // ========================================================================
 
@@ -104,6 +194,23 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
             }
         }
     }, [selectedItemId, history]);
+
+    // Load canvas background when mode changes or image uploads
+    useEffect(() => {
+        if (activeMode === 'EDIT' && uploadedImage && canvasRef.current) {
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                const img = new Image();
+                img.onload = () => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = uploadedImage;
+            }
+        }
+    }, [activeMode, uploadedImage]);
 
     const handleGenerate = async () => {
         setIsGenerating(true);
@@ -203,14 +310,26 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
             } else {
                 // GEMINI
                 const parts: any[] = [];
-                if (activeMode !== 'TEXT' && uploadedImage) {
-                    const base64Data = uploadedImage.split(',')[1];
-                    parts.push({
-                        inlineData: {
-                            mimeType: 'image/png',
-                            data: base64Data
-                        }
-                    });
+                if (activeMode !== 'TEXT') {
+                    if (activeMode === 'EDIT' && canvasRef.current) {
+                        // Get modified canvas as base64
+                        const canvasDataUrl = canvasRef.current.toDataURL('image/png');
+                        const base64Data = canvasDataUrl.split(',')[1];
+                        parts.push({
+                            inlineData: {
+                                mimeType: 'image/png',
+                                data: base64Data
+                            }
+                        });
+                    } else if (uploadedImage) {
+                        const base64Data = uploadedImage.split(',')[1];
+                        parts.push({
+                            inlineData: {
+                                mimeType: 'image/png',
+                                data: base64Data
+                            }
+                        });
+                    }
                 }
                 parts.push({ text: prompt });
 
@@ -271,7 +390,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                 // Save both to history
                 for (const url of uploadedUrls) {
                     await saveImage({
-                        prompt: activeMode === 'UPSCALE' ? 'Upscaled Image 2x' : prompt,
+                        prompt: prompt,
                         style: activeMode,
                         image_url: url,
                         config: { aspectRatio, mode: activeMode, model: aiModel }
@@ -537,9 +656,33 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                             <p className="text-xs text-slate-500 mt-1">Upload · Webcam · Eigene Assets</p>
                                         </div>
                                     ) : (
-                                        <div className="relative border border-white/10 rounded-xl overflow-hidden bg-black/20">
-                                            <img src={uploadedImage} alt="Reference" className="w-full h-32 object-cover opacity-60" />
-                                            <div className="absolute inset-0 flex items-center justify-center gap-2">
+                                        <div className="relative border border-white/10 rounded-xl overflow-hidden bg-black/20 flex flex-col items-center">
+                                            {activeMode === 'EDIT' ? (
+                                                <div className="w-full relative">
+                                                    <div className="absolute top-2 right-2 z-20 flex gap-2">
+                                                        <input type="color" value={brushColor} onChange={e => setBrushColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" title="Brush Color" />
+                                                        <input type="range" min="1" max="50" value={brushSize} onChange={e => setBrushSize(Number(e.target.value))} className="w-24 cursor-pointer" title="Brush Size" />
+                                                        <button onClick={clearCanvas} className="bg-red-500/80 hover:bg-red-500 text-white rounded p-1.5 backdrop-blur aspect-square flex items-center justify-center">
+                                                            <span className="material-icons-round text-sm">clear</span>
+                                                        </button>
+                                                    </div>
+                                                    <canvas
+                                                        ref={canvasRef}
+                                                        onMouseDown={startDrawing}
+                                                        onMouseMove={draw}
+                                                        onMouseUp={stopDrawing}
+                                                        onMouseOut={stopDrawing}
+                                                        onTouchStart={startDrawing}
+                                                        onTouchMove={draw}
+                                                        onTouchEnd={stopDrawing}
+                                                        className="w-full h-auto max-h-[400px] object-contain cursor-crosshair touch-none"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <img src={uploadedImage} alt="Reference" className="w-full h-32 object-cover opacity-60" />
+                                            )}
+                                            
+                                            <div className="absolute bottom-2 right-2 z-20 flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => setShowPicker(true)}
                                                     className="px-3 py-1.5 bg-primary/80 hover:bg-primary text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-1"
@@ -547,15 +690,23 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                                     <span className="material-icons-round text-xs">swap_horiz</span> Ändern
                                                 </button>
                                                 <button
-                                                    onClick={() => setUploadedImage(null)}
+                                                    onClick={() => { setUploadedImage(null); if (activeMode==='EDIT') clearCanvas(); }}
                                                     className="px-3 py-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-2"
                                                 >
                                                     <span className="material-icons-round text-sm">delete</span> Remove
                                                 </button>
                                             </div>
-                                            <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 rounded text-[10px] text-white font-bold uppercase">
-                                                Reference Image
-                                            </div>
+
+                                            {activeMode !== 'EDIT' && (
+                                                <div className="absolute top-2 left-2 z-20 px-2 py-1 bg-black/50 rounded text-[10px] text-white font-bold uppercase pointer-events-none">
+                                                    Reference Image
+                                                </div>
+                                            )}
+                                            {activeMode === 'EDIT' && (
+                                                <div className="absolute top-2 left-2 z-20 px-2 py-1 bg-primary/80 rounded text-[10px] text-white font-bold uppercase pointer-events-none shadow">
+                                                    Canvas Active (Draw!)
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
