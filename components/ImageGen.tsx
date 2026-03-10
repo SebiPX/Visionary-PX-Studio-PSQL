@@ -214,78 +214,72 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                 }
                 parts.push({ text: prompt });
 
-                const response = await geminiProxy({
-                    action: 'generateContent',
-                    model: 'gemini-3.1-flash-image-preview',
-                    contents: [{ role: 'user', parts: parts }],
-                    config: {
-                        imageConfig: {
-                            aspectRatio: aspectRatio,
-                            numberOfImages: 2,
-                        }
-                    }
-                }) as any;
-
-                if (response?.error) {
-                    console.error("Gemini API Error:", response.error);
-                    throw new Error(JSON.stringify(response.error));
-                }
-                
-                if (response.promptFeedback?.blockReason) {
-                    throw new Error(`Generierung blockiert: Die Google KI hat diesen Prompt oder das Referenzbild aus Sicherheitsgründen abgelehnt. (${response.promptFeedback.blockReason})`);
-                }
-
-                if (!response.candidates || response.candidates.length === 0) {
-                    throw new Error("Die Bild-KI hat keine Antwort geliefert. Bitte versuche es noch einmal.");
-                }
-
-                const candidate = response.candidates[0];
-                
-                if (candidate.finishReason === 'IMAGE_OTHER' || candidate.finishReason === 'SAFETY' || candidate.finishReason === 'OTHER') {
-                    throw new Error("Generierung abgelehnt: Die Google KI weigert sich dieses Bild aufgrund ihrer strengen Sicherheitsrichtlinien zu generieren. Dies passiert oft bei fotorealistischen Anpassungen echter Personen. Bitte formuliere den Prompt um oder wähle ein anderes Bild.");
-                }
-
-                const respParts = candidate.content?.parts;
-                let foundImage = false;
-                
-                if (respParts) {
-                    for (const part of respParts) {
-                        if (part.inlineData) {
-                            const mimeType = part.inlineData.mimeType || 'image/png';
-                            const ext = mimeType.split('/')[1] || 'png';
-
-                            const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
-                            const imageBlob = await (await fetch(dataUri)).blob();
-                            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.${ext}`;
-                            const imageFile = new File([imageBlob], fileName, { type: mimeType });
-                            const uploadedUrl = await uploadFile(imageFile, 'images');
-                            
-                            // Save every generated image individually into history
-                            await saveImage({
-                                prompt: activeMode === 'UPSCALE' ? 'Upscaled Image 2x' : prompt,
-                                style: activeMode,
-                                image_url: uploadedUrl,
-                                config: { aspectRatio, mode: activeMode, model: aiModel }
-                            });
-                            
-                            // If it's the first image in the loop, set it as the currently displayed one
-                            if (!foundImage) {
-                                finalImageUrl = uploadedUrl;
+                const generateSingleImage = async () => {
+                    const response = await geminiProxy({
+                        action: 'generateContent',
+                        model: 'gemini-3.1-flash-image-preview',
+                        contents: [{ role: 'user', parts: parts }],
+                        config: {
+                            imageConfig: {
+                                aspectRatio: aspectRatio,
                             }
-                            foundImage = true;
                         }
+                    }) as any;
+
+                    if (response?.error) {
+                        console.error("Gemini API Error:", response.error);
+                        throw new Error(JSON.stringify(response.error));
                     }
                     
-                    if (!foundImage) {
+                    if (response.promptFeedback?.blockReason) {
+                        throw new Error(`Generierung blockiert: Die Google KI hat diesen Prompt oder das Referenzbild aus Sicherheitsgründen abgelehnt. (${response.promptFeedback.blockReason})`);
+                    }
+
+                    if (!response.candidates || response.candidates.length === 0) {
+                        throw new Error("Die Bild-KI hat keine Antwort geliefert. Bitte versuche es noch einmal.");
+                    }
+
+                    const candidate = response.candidates[0];
+                    if (candidate.finishReason === 'IMAGE_OTHER' || candidate.finishReason === 'SAFETY' || candidate.finishReason === 'OTHER') {
+                        throw new Error("Generierung abgelehnt: Die Google KI weigert sich dieses Bild aufgrund ihrer strengen Sicherheitsrichtlinien zu generieren.");
+                    }
+
+                    const respParts = candidate.content?.parts;
+                    if (respParts) {
+                        for (const part of respParts) {
+                            if (part.inlineData) {
+                                const mimeType = part.inlineData.mimeType || 'image/png';
+                                const ext = mimeType.split('/')[1] || 'png';
+                                const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
+                                const imageBlob = await (await fetch(dataUri)).blob();
+                                const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.${ext}`;
+                                const imageFile = new File([imageBlob], fileName, { type: mimeType });
+                                return await uploadFile(imageFile, 'images');
+                            }
+                        }
                         const textPart = respParts.find((p: any) => p.text);
                         if (textPart) {
                             throw new Error(`Die KI hat mit Text statt einem Bild geantwortet: "${textPart.text}"`);
                         }
-                        throw new Error("Es wurde kein sichtbares Bild generiert.");
                     }
-                } else {
                     throw new Error("Fehler: Die Antwort der Google KI war ungültig (fehlende Daten).");
+                };
+
+                // Request 2 images in parallel
+                const uploadedUrls = await Promise.all([generateSingleImage(), generateSingleImage()]);
+                
+                // Save both to history
+                for (const url of uploadedUrls) {
+                    await saveImage({
+                        prompt: activeMode === 'UPSCALE' ? 'Upscaled Image 2x' : prompt,
+                        style: activeMode,
+                        image_url: url,
+                        config: { aspectRatio, mode: activeMode, model: aiModel }
+                    });
                 }
+                
+                // Set the first one as the active main image
+                finalImageUrl = uploadedUrls[0];
             }
 
             setCurrentImage(finalImageUrl);
