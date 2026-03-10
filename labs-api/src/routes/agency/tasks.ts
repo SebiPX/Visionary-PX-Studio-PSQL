@@ -109,53 +109,53 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
 
 // PUT /api/agency/tasks/:id
 router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
-  const { 
-    title, description, status, priority, 
-    assignee_id, assigned_to,
-    start_date, due_date, planned_minutes,
-    estimated_hours, estimated_rate,
-    service_module_id, seniority_level_id, is_visible_to_client
-  } = req.body;
-  const actualAssignee = assignee_id !== undefined ? assignee_id : (assigned_to !== undefined ? assigned_to : null);
-
   try {
-    const args = [
-      title ?? null,
-      description ?? null,
-      status ?? null,
-      priority ?? null,
-      actualAssignee ?? null,
-      start_date ?? null,
-      due_date ?? null,
-      planned_minutes ?? null,
-      estimated_hours ?? null,
-      estimated_rate ?? null,
-      service_module_id ?? null,
-      seniority_level_id ?? null,
-      is_visible_to_client ?? null,
-      req.params.id
+    const updates = req.body;
+    const allowedFields = [
+      'title', 'description', 'status', 'priority', 
+      'assignee_id', 'start_date', 'due_date', 
+      'planned_minutes', 'estimated_hours', 'estimated_rate', 
+      'service_module_id', 'seniority_level_id', 'is_visible_to_client'
     ];
 
-    const result = await pool.query(
-      `UPDATE agency_tasks 
-       SET title = COALESCE($1, title),
-           description = COALESCE($2, description),
-           status = COALESCE($3, status),
-           priority = COALESCE($4, priority),
-           assignee_id = $5, -- Allow nullifying assignee
-           start_date = COALESCE($6, start_date),
-           due_date = COALESCE($7, due_date),
-           planned_minutes = COALESCE($8, planned_minutes),
-           estimated_hours = COALESCE($9, estimated_hours),
-           estimated_rate = COALESCE($10, estimated_rate),
-           service_module_id = $11,
-           seniority_level_id = $12,
-           is_visible_to_client = COALESCE($13, is_visible_to_client),
-           updated_at = NOW()
-       WHERE id = $14
-       RETURNING *`,
-      args
-    );
+    const setClauses: string[] = [];
+    const args: any[] = [];
+    let paramIdx = 1;
+
+    for (const field of allowedFields) {
+      if (updates[field] !== undefined) {
+        setClauses.push(`${field} = $${paramIdx}`);
+        args.push(updates[field]);
+        paramIdx++;
+      }
+    }
+    
+    // Add support for legacy assigned_to
+    if (updates.assigned_to !== undefined && updates.assignee_id === undefined) {
+      setClauses.push(`assignee_id = $${paramIdx}`);
+      args.push(updates.assigned_to);
+      paramIdx++;
+    }
+
+    if (setClauses.length === 0) {
+      // If nothing is provided, just return the task
+      const existing = await pool.query('SELECT * FROM agency_tasks WHERE id = $1', [req.params.id]);
+      if (existing.rows.length === 0) return res.status(404).json({ error: 'Task not found' });
+      return res.json(existing.rows[0]);
+    }
+
+    setClauses.push('updated_at = NOW()');
+    args.push(req.params.id);
+
+    const query = `
+      UPDATE agency_tasks 
+      SET ${setClauses.join(', ')}
+      WHERE id = $${paramIdx}
+      RETURNING *
+    `;
+
+    const result = await pool.query(query, args);
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Task not found' });
     }
