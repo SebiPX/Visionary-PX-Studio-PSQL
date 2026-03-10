@@ -60,9 +60,6 @@ export const UserTasksWidget: React.FC = () => {
     }, [profile]);
 
     const handleStatusChange = async (taskId: string, newStatus: string) => {
-        // Get the full task data to prevent the backend from nullifying omitted fields (like assignee_id)
-        const fullTaskToUpdate = tasks.find(t => t.id === taskId);
-        
         // Optimistic update
         setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
 
@@ -75,11 +72,7 @@ export const UserTasksWidget: React.FC = () => {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
-                    ...fullTaskToUpdate,
-                    status: newStatus,
-                    assignee_id: fullTaskToUpdate?.assignee_id || profile?.id 
-                })
+                body: JSON.stringify({ status: newStatus })
             });
 
             if (!res.ok) {
