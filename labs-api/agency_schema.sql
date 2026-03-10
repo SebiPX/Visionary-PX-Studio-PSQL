@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS public.agency_projects (
     deadline DATE,
     budget_total NUMERIC(15, 2),
     hourly_rate NUMERIC(10, 2),
+    is_archived BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

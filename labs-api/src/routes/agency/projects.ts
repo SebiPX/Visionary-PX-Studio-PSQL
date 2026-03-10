@@ -442,6 +442,26 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// PATCH /api/agency/projects/:id/archive
+router.patch('/:id/archive', requireAuth, async (req: AuthRequest, res) => {
+  const { is_archived } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE agency_projects 
+       SET is_archived = $1, updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [is_archived, req.params.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/agency/projects/:projectId/revenue
 router.get('/:projectId/revenue', requireAuth, async (req: AuthRequest, res) => {
   try {
