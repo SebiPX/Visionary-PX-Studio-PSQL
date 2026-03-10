@@ -221,6 +221,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                     config: {
                         imageConfig: {
                             aspectRatio: aspectRatio,
+                            numberOfImages: 2,
                         }
                     }
                 }) as any;
@@ -257,9 +258,21 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                             const imageBlob = await (await fetch(dataUri)).blob();
                             const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.${ext}`;
                             const imageFile = new File([imageBlob], fileName, { type: mimeType });
-                            finalImageUrl = await uploadFile(imageFile, 'images');
+                            const uploadedUrl = await uploadFile(imageFile, 'images');
+                            
+                            // Save every generated image individually into history
+                            await saveImage({
+                                prompt: activeMode === 'UPSCALE' ? 'Upscaled Image 2x' : prompt,
+                                style: activeMode,
+                                image_url: uploadedUrl,
+                                config: { aspectRatio, mode: activeMode, model: aiModel }
+                            });
+                            
+                            // If it's the first image in the loop, set it as the currently displayed one
+                            if (!foundImage) {
+                                finalImageUrl = uploadedUrl;
+                            }
                             foundImage = true;
-                            break;
                         }
                     }
                     
@@ -276,12 +289,6 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
             }
 
             setCurrentImage(finalImageUrl);
-            await saveImage({
-                prompt: activeMode === 'UPSCALE' ? 'Upscaled Image 2x' : prompt,
-                style: activeMode,
-                image_url: finalImageUrl,
-                config: { aspectRatio, mode: activeMode, model: activeMode === 'UPSCALE' ? 'FAL_TOPAZ' : aiModel }
-            });
             await loadImageHistory();
 
         } catch (e: any) {
