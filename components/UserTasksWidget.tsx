@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getToken } from '../lib/apiClient';
-import { Clock, LayoutList, PlayCircle, ChevronDown } from 'lucide-react';
+import { Clock, LayoutList, PlayCircle, ChevronDown, AlignLeft, ChevronUp } from 'lucide-react';
 import { TimeTrackingModal } from './TimeTrackingModal';
 
 interface Task {
   id: string;
   title: string;
+  description?: string | null;
   status: string;
   due_date: string | null;
   project_id: string;
@@ -30,6 +31,16 @@ export const UserTasksWidget: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTaskForTime, setSelectedTaskForTime] = useState<Task | null>(null);
+    const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
+
+    const toggleExpand = (taskId: string) => {
+        setExpandedTasks(prev => {
+            const next = new Set(prev);
+            if (next.has(taskId)) next.delete(taskId);
+            else next.add(taskId);
+            return next;
+        });
+    };
 
     const fetchTasks = async () => {
         const token = getToken();
@@ -128,11 +139,27 @@ export const UserTasksWidget: React.FC = () => {
                         const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed' && task.status !== 'done';
                         const colorClass = statusColors[task.status] || statusColors['todo'];
 
+                        const isExpanded = expandedTasks.has(task.id);
+                        const hasDescription = !!task.description?.trim();
+
                         return (
-                            <div key={task.id} className="px-5 py-3 flex items-center justify-between hover:bg-slate-700/30 transition-colors group">
+                            <div key={task.id} className="px-5 py-3 hover:bg-slate-700/30 transition-colors group border-b border-slate-700/50 last:border-0">
+                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col items-start gap-1 flex-1 min-w-0 pr-4">
                                     <div className="min-w-0 flex-1 w-full flex justify-between items-start">
-                                        <p className="text-sm text-white font-medium truncate">{task.title}</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-sm text-white font-medium truncate">{task.title}</p>
+                                            {hasDescription && (
+                                                <button 
+                                                    onClick={() => toggleExpand(task.id)}
+                                                    className="text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1"
+                                                    title="Beschreibung umschalten"
+                                                >
+                                                    <AlignLeft size={14} />
+                                                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
                                         <span className="truncate max-w-[150px]">{task.project?.title || 'Unknown Project'}</span>
@@ -168,6 +195,14 @@ export const UserTasksWidget: React.FC = () => {
                                         <PlayCircle size={18} />
                                     </button>
                                 </div>
+                             </div>
+                             
+                             {/* Anzeigebereich für die Beschreibung, falls ausgeklappt */}
+                             {isExpanded && hasDescription && (
+                                 <div className="mt-3 text-sm text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-700/60 whitespace-pre-wrap leading-relaxed mr-2">
+                                     {task.description}
+                                 </div>
+                             )}
                             </div>
                         );
                     })}
