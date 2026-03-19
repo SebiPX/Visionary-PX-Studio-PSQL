@@ -10,6 +10,7 @@ import { DashboardConfigDrawer } from '../components/DashboardConfigDrawer'
 import { AppView } from '../../../types'
 import { RecentGenerations } from '../../Dashboard'
 import { UserTasksWidget } from '../../UserTasksWidget'
+import { NewsWidget } from '../../NewsWidget'
 
 // ─── Avatar colour helper ─────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -342,8 +343,9 @@ export function DashboardPage({
 
       </div>
 
-      {/* ── User Tasks Widget ─────────────────────────────────────────────── */}
-      <div className="mt-8 max-w-7xl mx-auto px-6">
+      {/* ── News & Tasks Widgets ─────────────────────────────────────────────── */}
+      <div className="mt-8 max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <NewsWidget />
         <UserTasksWidget />
       </div>
 

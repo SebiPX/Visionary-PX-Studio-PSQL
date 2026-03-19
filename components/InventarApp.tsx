@@ -24,6 +24,7 @@ import { HandyvertraegePage } from './Inventar/pages/HandyvertraegePage'
 import { KreditkartenPage } from './Inventar/pages/KreditkartenPage'
 import { FirmendatenPage } from './Inventar/pages/FirmendatenPage'
 import { LinksPage } from './Inventar/pages/LinksPage'
+import { NewsAdminPage } from './Inventar/pages/NewsAdminPage'
 
 import { useAuth } from '../contexts/AuthContext'
 import type { InventarItem } from './Inventar/types'
@@ -195,6 +196,10 @@ function InventarShell({ onBack, setView, navigateToItem, dashboardPath }: Inven
 
             <Route path="/links" element={
               <LinksPage links={links} isAdmin={isAdmin} onCreate={createLink} onUpdate={updateLink} onDelete={deleteLink} />
+            } />
+
+            <Route path="/news" element={
+              isAdmin ? <NewsAdminPage /> : <Navigate to="/dashboard" replace />
             } />
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
