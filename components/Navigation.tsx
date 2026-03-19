@@ -37,6 +37,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
         { view: AppView.DASHBOARD, path: '/kalender', icon: 'event', label: 'Kalender' },
         { view: AppView.DASHBOARD, path: '/logins', icon: 'password', label: 'Logins' },
         ...(userProfile.role === 'admin' ? [
+          { view: AppView.DASHBOARD, path: '/news', icon: 'campaign', label: 'News' },
           { view: AppView.DASHBOARD, path: '/handyvertraege', icon: 'smartphone', label: 'Verträge' },
           { view: AppView.DASHBOARD, path: '/kreditkarten', icon: 'credit_card', label: 'Karten' },
           { view: AppView.DASHBOARD, path: '/firmendaten', icon: 'business', label: 'Firma' },

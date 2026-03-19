@@ -29,6 +29,21 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
     }
 
     const { rows } = await pool.query(query, params);
+
+    // Auto-Curate Background Task
+    // If we're fetching the standard dashboard feed, check if we lack today's AI news.
+    if (all !== 'true' && (!type || type === 'external')) {
+       const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+       const hasRecentAiNews = rows.some((r: any) => 
+          r.type === 'external' && new Date(r.publish_date).getTime() > twentyFourHoursAgo
+       );
+       if (!hasRecentAiNews) {
+          // Trigger curation in the background so we don't block the dashboard loading!
+          console.log('[News] No recent AI news found. Triggering background curation...');
+          curateAiNews().catch(err => console.error('[News] Auto-curation failed:', err));
+       }
+    }
+
     res.json(rows);
   } catch (err: any) {
     console.error('Error fetching news:', err);
