@@ -128,7 +128,16 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
        RETURNING *, user_id as profile_id`,
       [task_id, actualUserId, start_time, end_time, duration_minutes, description, billable ?? true, status ?? 'draft']
     );
-    res.status(201).json(result.rows[0]);
+    const newEntry = result.rows[0];
+
+    // Attempt to sync to MOCO if it's submitted
+    if (newEntry.status === 'submitted' || newEntry.status === 'approved') {
+      import('../../services/mocoService').then(({ syncTimeEntryToMoco }) => {
+        syncTimeEntryToMoco(newEntry.id).catch(console.error);
+      });
+    }
+
+    res.status(201).json(newEntry);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -154,7 +163,16 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Time entry not found' });
     }
-    res.json(result.rows[0]);
+    const updatedEntry = result.rows[0];
+
+    // Attempt to sync to MOCO if it's submitted
+    if (updatedEntry.status === 'submitted' || updatedEntry.status === 'approved') {
+      import('../../services/mocoService').then(({ syncTimeEntryToMoco }) => {
+        syncTimeEntryToMoco(updatedEntry.id).catch(console.error);
+      });
+    }
+
+    res.json(updatedEntry);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
