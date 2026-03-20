@@ -11,10 +11,10 @@ router.get('/availability', requireAuth, async (req: AuthRequest, res) => {
   try {
     // 1. Fetch all users who have active tasks in this date range or are part of projects
     const usersResult = await pool.query(`
-      SELECT DISTINCT p.id, p.full_name, p.avatar_url, p.email, p.moco_user_id
-      FROM profiles p
-      JOIN agency_tasks t ON t.assignee_id = p.id
-      WHERE t.status != 'completed'
+      SELECT id, full_name, avatar_url, email, moco_user_id
+      FROM profiles
+      WHERE role IN ('admin', 'pjm', 'creative', 'employee') OR role IS NULL
+      ORDER BY full_name ASC
     `);
 
     const users = usersResult.rows;
