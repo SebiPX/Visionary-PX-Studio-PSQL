@@ -30,6 +30,7 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 
 - **Zweizeilige Desktop-Navigation**: Aufgeräumtes Layout mit Hauptkategorien (Home, Studio, Agents, Admin) und kontextbezogener zweiter Tool-Leiste.
 - **PX Intern als Haupt-Dashboard**: Internes Agentur-Portal (Verleih, Logins, Kalender) direkt unter 'Home' integriert. Sidebar wurde zugunsten der Top-Navbar komplett entfernt.
+- **News Of The Day**: Zentraler Feed auf dem Dashboard mit internen Ankündigungen und einem **AI Curator Agent**, der täglich im Hintergrund über Google Search die aktuellsten KI-News zusammenfasst (Gemini 2.5 Flash).
 - **Recent Generations Widget**: Letzte KI-Generierungen (Bilder, Videos) nahtlos in das PX Intern Dashboard (Masonry-Grid) integriert.
 - **ProjectFlow Aufgaben:** Zugewiesene Tasks inklusive Time-Tracking (Stoppuhr/manuell) und nahtloser 2-Wege-Synchronisation (robuste dynamische Status-Updates erhalten Datenbank-Zuweisungen konsistent) direkt im Studio-Dashboard ausführen.
 - Echtzeit-Daten aus `labs_db` via `apiClient`
@@ -137,6 +138,7 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 | **Kreditkarten**     | Kreditkarten-Verwaltung                                                                         | Admin              |
 | **Firmendaten**      | Bankverbindung & Handelsregisterdaten                                                           | Admin              |
 | **Interne Links**    | Team-Links mit Kategorien, Google Favicon CDN, Buchstaben-Fallback                              | Alle / Admin: CRUD |
+| **News Admin**       | Verwaltung des News-Widgets und manueller Trigger für den KI-News-Curator                       | Admin              |
 
 ### Dashboard-Konfiguration (pro User)
 
@@ -203,6 +205,7 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 | `social_ai_analysis`    | Gemini Insights für Posts (Patterns, Sentiment)             |
 | `social_account_reports`| Chronologische Account-Wachstumsreports via KI              |
 | `onboarding_embeddings` | RAG-Vektordaten (pgvector, 768-dim, `gemini-embedding-001`) |
+| `agency_news`           | News of the Day Feed inkl. KI-kuratierter Meldungen         |
 
 ### PX INTERN
 

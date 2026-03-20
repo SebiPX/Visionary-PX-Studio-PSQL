@@ -161,6 +161,7 @@ psql "$DATABASE_URL" -f /opt/docker/labs-api/init_schema.sql
 
 - **Zweizeilige Desktop-Navigation**: Aufgeräumtes Layout mit Hauptkategorien (Home, Studio, Agents, Admin) und kontextbezogener zweiter Tool-Leiste.
 - **PX Intern als Haupt-Dashboard**: Internes Agentur-Portal (Verleih, Logins, Kalender) direkt unter 'Home' integriert. Sidebar wurde zugunsten der Top-Navbar entfernt.
+- **News Of The Day**: Dashboard-Feed mit internen Ankündigungen und einem **auto-kuratierenden KI-News Agenten** (Gemini 2.5).
 - **Recent Generations Widget**: Letzte KI-Generierungen (Bilder, Videos) nahtlos in das PX Intern Dashboard integriert.
 - Konfigurierbares Layout via Masonry-Grid.
 
@@ -283,6 +284,7 @@ Eigenständiges JWT Auth-System — kein Supabase, kein Firebase:
 | `social_ai_analysis`    | Gemini Insights für Posts                |
 | `social_account_reports`| Chronologische Account-Wachstumsreports  |
 | `onboarding_embeddings` | RAG-Vektordaten (pgvector, 768-dim)      |
+| `agency_news`           | News of the Day Feed (Interne & KI-News) |
 
 ### PX INTERN Tabellen
 
