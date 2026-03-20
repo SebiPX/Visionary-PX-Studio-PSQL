@@ -545,25 +545,41 @@ router.post('/sync-moco', requireAuth, async (req: AuthRequest, res) => {
     for (const p of mocoProjects) {
       // 1. Ensure client exists
       let clientId = null;
-      if (p.company) {
+      const mocoCustomer = p.customer || p.company; // MOCO API uses 'customer'
+
+      if (mocoCustomer) {
         // Look up by moco_company_id
-        const clientRes = await pool.query('SELECT id FROM agency_clients WHERE moco_company_id = $1', [p.company.id]);
+        const clientRes = await pool.query('SELECT id FROM agency_clients WHERE moco_company_id = $1', [mocoCustomer.id]);
         if (clientRes.rows.length > 0) {
           clientId = clientRes.rows[0].id;
         } else {
           // Look up by name just in case
-          const clientNameRes = await pool.query('SELECT id FROM agency_clients WHERE company_name = $1', [p.company.name]);
+          const clientNameRes = await pool.query('SELECT id FROM agency_clients WHERE company_name = $1', [mocoCustomer.name]);
           if (clientNameRes.rows.length > 0) {
              clientId = clientNameRes.rows[0].id;
-             await pool.query('UPDATE agency_clients SET moco_company_id = $1 WHERE id = $2', [p.company.id, clientId]);
+             await pool.query('UPDATE agency_clients SET moco_company_id = $1 WHERE id = $2', [mocoCustomer.id, clientId]);
           } else {
              // Create new client
              const newClientRes = await pool.query(
                'INSERT INTO agency_clients (company_name, moco_company_id, status) VALUES ($1, $2, $3) RETURNING id',
-               [p.company.name, p.company.id, 'active']
+               [mocoCustomer.name || 'Unknown MOCO Client', mocoCustomer.id, 'active']
              );
              clientId = newClientRes.rows[0].id;
           }
+        }
+      }
+
+      // If STILL no clientId (e.g. internal projects without a customer), create/use a fallback client
+      if (!clientId) {
+        const fallbackRes = await pool.query("SELECT id FROM agency_clients WHERE company_name = 'Interne Projekte (MOCO)'");
+        if (fallbackRes.rows.length > 0) {
+          clientId = fallbackRes.rows[0].id;
+        } else {
+          const newFallback = await pool.query(
+            "INSERT INTO agency_clients (company_name, status) VALUES ($1, $2) RETURNING id",
+            ['Interne Projekte (MOCO)', 'active']
+          );
+          clientId = newFallback.rows[0].id;
         }
       }
 
@@ -575,7 +591,7 @@ router.post('/sync-moco', requireAuth, async (req: AuthRequest, res) => {
         await pool.query(`
           INSERT INTO agency_projects (title, moco_project_id, client_id, status, budget_total)
           VALUES ($1, $2, $3, $4, $5)
-        `, [p.name, p.id, clientId, 'active', budget]);
+        `, [p.name || 'Unnamed Project', p.id, clientId, 'active', budget]);
         importedCount++;
       }
     }
