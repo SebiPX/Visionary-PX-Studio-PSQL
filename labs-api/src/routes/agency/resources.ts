@@ -102,4 +102,61 @@ router.get('/availability', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// POST /api/agency/resources/sync-moco-data
+router.post('/sync-moco-data', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const { syncUsers, syncSchedules } = await import('../../services/mocoService');
+    
+    // 1. Sync & Map Users
+    const mocoUsers = await syncUsers();
+    let usersMapped = 0;
+    
+    if (Array.isArray(mocoUsers)) {
+      for (const mu of mocoUsers) {
+        if (mu.email) {
+          // Update profile with matching email
+          const updateRes = await pool.query(
+            `UPDATE profiles SET moco_user_id = $1 WHERE email = $2 RETURNING id`,
+            [mu.id, mu.email]
+          );
+          if (updateRes.rows.length > 0) usersMapped++;
+        }
+      }
+    }
+
+    // 2. Sync Absences from Schedules
+    const mocoSchedules = await syncSchedules();
+    let absencesImported = 0;
+
+    if (Array.isArray(mocoSchedules)) {
+      for (const entry of mocoSchedules) {
+        // We only care about absences (Urlaub, Krankheit, Feiertage)
+        if (entry.assignment && entry.assignment.type === 'Absence' && entry.user?.id) {
+          
+          const reason = entry.assignment.name || 'Abwesenheit';
+          const date = entry.date;
+          const am = entry.am ?? true;
+          const pm = entry.pm ?? true;
+          const mocoUserId = entry.user.id;
+          const scheduleId = entry.id;
+
+          await pool.query(`
+            INSERT INTO agency_moco_absences (moco_absence_id, moco_user_id, date, am, pm, reason)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (moco_absence_id) 
+            DO UPDATE SET date = EXCLUDED.date, am = EXCLUDED.am, pm = EXCLUDED.pm, reason = EXCLUDED.reason
+          `, [scheduleId, mocoUserId, date, am, pm, reason]);
+          
+          absencesImported++;
+        }
+      }
+    }
+
+    res.json({ success: true, usersMapped, absencesImported });
+  } catch (err: any) {
+    console.error('Error syncing MOCO resources:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
