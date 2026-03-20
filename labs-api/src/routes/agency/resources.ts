@@ -10,9 +10,8 @@ router.get('/availability', requireAuth, async (req: AuthRequest, res) => {
   
   try {
     // 1. Fetch all users who have active tasks in this date range or are part of projects
-    // For now, let's just fetch all profiles that have tasks.
     const usersResult = await pool.query(`
-      SELECT DISTINCT p.id, p.full_name, p.avatar_url, p.email
+      SELECT DISTINCT p.id, p.full_name, p.avatar_url, p.email, p.moco_user_id
       FROM profiles p
       JOIN agency_tasks t ON t.assignee_id = p.id
       WHERE t.status != 'completed'
@@ -32,14 +31,21 @@ router.get('/availability', requireAuth, async (req: AuthRequest, res) => {
 
     const tasks = tasksResult.rows;
 
+    // 3. Fetch MOCO Absences for these users
+    const absencesResult = await pool.query(`
+      SELECT a.date, a.reason, p.id as user_id 
+      FROM agency_moco_absences a
+      JOIN profiles p ON a.moco_user_id = p.moco_user_id
+    `);
+    const absences = absencesResult.rows;
+
     const resourceData = users.map(user => {
       const userTasks = tasks.filter(t => t.assignee_id === user.id);
+      const userAbsences = absences.filter(a => a.user_id === user.id);
       
-      // Group tasks by due_date to simulate allocation
       const allocations: Record<string, any> = {};
       
       userTasks.forEach(t => {
-        // If task has no due date, put it on today
         let dateKey = new Date().toISOString().split('T')[0];
         if (t.due_date) {
             const d = new Date(t.due_date);
@@ -52,7 +58,8 @@ router.get('/availability', requireAuth, async (req: AuthRequest, res) => {
           allocations[dateKey] = {
             date: dateKey,
             hours: 0,
-            tasks: []
+            tasks: [],
+            absences: []
           };
         }
         
@@ -66,6 +73,20 @@ router.get('/availability', requireAuth, async (req: AuthRequest, res) => {
           hours: hours,
           status: t.status
         });
+      });
+
+      userAbsences.forEach(a => {
+         const dateKey = new Date(a.date).toISOString().split('T')[0];
+         if (!allocations[dateKey]) {
+           allocations[dateKey] = {
+             date: dateKey,
+             hours: 0,
+             tasks: [],
+             absences: []
+           };
+         }
+         if (!allocations[dateKey].absences) allocations[dateKey].absences = [];
+         allocations[dateKey].absences.push({ reason: a.reason || 'Abwesend' });
       });
 
       return {

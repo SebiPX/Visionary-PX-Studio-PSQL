@@ -15,6 +15,8 @@ import reportsRoutes from './reports';
 import resourcesRoutes from './resources';
 import servicePricingRoutes from './servicePricing';
 
+import mocoWebhookRoutes from './mocoWebhooks';
+
 const router = Router();
 
 router.use('/clients', clientRoutes);
@@ -32,5 +34,5 @@ router.use('/service-pricing', servicePricingRoutes);
 router.use('/seniority-levels', seniorityLevelRoutes);
 router.use('/reports', reportsRoutes);
 router.use('/resources', resourcesRoutes);
-
+router.use('/webhooks/moco', mocoWebhookRoutes);
 export default router;

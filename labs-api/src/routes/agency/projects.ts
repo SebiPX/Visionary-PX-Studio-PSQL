@@ -531,4 +531,60 @@ router.post('/:projectId/budget/sync', requireAuth, async (req: AuthRequest, res
   }
 });
 
+// POST /api/agency/projects/sync-moco
+router.post('/sync-moco', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const { syncProjects } = await import('../../services/mocoService');
+    const mocoProjects = await syncProjects();
+
+    if (!Array.isArray(mocoProjects)) {
+      return res.status(500).json({ error: 'Failed to fetch MOCO projects' });
+    }
+
+    let importedCount = 0;
+    for (const p of mocoProjects) {
+      // 1. Ensure client exists
+      let clientId = null;
+      if (p.company) {
+        // Look up by moco_company_id
+        const clientRes = await pool.query('SELECT id FROM agency_clients WHERE moco_company_id = $1', [p.company.id]);
+        if (clientRes.rows.length > 0) {
+          clientId = clientRes.rows[0].id;
+        } else {
+          // Look up by name just in case
+          const clientNameRes = await pool.query('SELECT id FROM agency_clients WHERE company_name = $1', [p.company.name]);
+          if (clientNameRes.rows.length > 0) {
+             clientId = clientNameRes.rows[0].id;
+             await pool.query('UPDATE agency_clients SET moco_company_id = $1 WHERE id = $2', [p.company.id, clientId]);
+          } else {
+             // Create new client
+             const newClientRes = await pool.query(
+               'INSERT INTO agency_clients (company_name, moco_company_id, status) VALUES ($1, $2, $3) RETURNING id',
+               [p.company.name, p.company.id, 'active']
+             );
+             clientId = newClientRes.rows[0].id;
+          }
+        }
+      }
+
+      // 2. Ensure project exists
+      const projRes = await pool.query('SELECT id FROM agency_projects WHERE moco_project_id = $1', [p.id]);
+      if (projRes.rows.length === 0) {
+        // Insert new project
+        const budget = p.budget || 0;
+        await pool.query(`
+          INSERT INTO agency_projects (title, moco_project_id, client_id, status, budget_total)
+          VALUES ($1, $2, $3, $4, $5)
+        `, [p.name, p.id, clientId, 'active', budget]);
+        importedCount++;
+      }
+    }
+
+    res.json({ success: true, imported: importedCount });
+  } catch (err: any) {
+    console.error('Error syncing MOCO projects:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

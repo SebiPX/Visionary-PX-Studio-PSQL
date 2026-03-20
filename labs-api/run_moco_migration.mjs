@@ -1,0 +1,35 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import pg from 'pg';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Path to the script we generated in the ProjectFlow project
+const sqlFilePath = path.join(__dirname, '../../ProjectFlow/scripts/moco_integration_schema.sql');
+const sql = fs.readFileSync(sqlFilePath, 'utf8');
+
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+async function runMigration() {
+  console.log('Connecting to database...');
+  const client = await pool.connect();
+  try {
+    console.log('Running migration moco_integration_schema.sql...');
+    await client.query(sql);
+    console.log('Migration completed successfully.');
+  } catch (err) {
+    console.error('Error running migration:', err);
+  } finally {
+    client.release();
+    await pool.end();
+  }
+}
+
+runMigration();
