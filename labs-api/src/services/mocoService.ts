@@ -57,7 +57,7 @@ export async function syncTimeEntryToMoco(timeEntryId: number) {
   // 1. Fetch time entry details
   const result = await pool.query(`
     SELECT te.*, 
-           t.moco_task_id, t.project_id, t.title as task_title,
+           t.moco_task_id, t.project_id, t.title as task_title, t.description as task_desc,
            p.moco_project_id,
            u.moco_user_id
     FROM agency_time_entries te
@@ -94,14 +94,23 @@ export async function syncTimeEntryToMoco(timeEntryId: number) {
   const dateStr = new Date(entry.start_time).toISOString().split('T')[0];
   const hours = entry.duration_minutes / 60.0;
 
-  // 4. Push or Update
+  // 4. Format description (Fallback to Task Title + Description if no custom entry description)
+  let mocoDescription = entry.description;
+  if (!mocoDescription) {
+    mocoDescription = entry.task_title || 'Zeit erfasst via PX-Flow';
+    if (entry.task_desc) {
+      mocoDescription += `\n\n${entry.task_desc}`;
+    }
+  }
+
+  // 5. Push or Update
   const mocoRes = await pushActivity(
     entry.moco_user_id,
     entry.moco_project_id,
     finalMocoTaskId,
     dateStr,
     hours,
-    entry.description || entry.task_title || 'Zeit erfasst via PX-Flow',
+    mocoDescription,
     entry.moco_activity_id
   );
 
