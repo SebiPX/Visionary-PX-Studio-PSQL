@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_data (
   document_id UUID PRIMARY KEY REFERENCES agency_documents(id) ON DELETE CASCADE,
   location_name VARCHAR(255),
   location_address TEXT,
+  location_lat VARCHAR(50),
+  location_lng VARCHAR(50),
   weather_info TEXT,
   hospital_info TEXT,
   general_notes TEXT,
@@ -75,6 +77,10 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_contacts (
     try {
       await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN shoot_date VARCHAR(50);');
     } catch(e) { /* ignore if column already exists */ }
+    try {
+      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_lat VARCHAR(50);');
+      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_lng VARCHAR(50);');
+    } catch(e) { /* ignore */ }
     res.json({ message: 'Tables created successfully' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -238,7 +244,7 @@ router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, r
 // CALL SHEET SPECIFIC ENDPOINTS
 // --------------------------------------------------------------------------
 router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) => {
-  const { location_name, location_address, weather_info, hospital_info, general_notes, shoot_date } = req.body;
+  const { location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, shoot_date } = req.body;
   try {
     const result = await pool.query(
       `UPDATE agency_call_sheet_data 
@@ -248,16 +254,18 @@ router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) =>
            hospital_info = COALESCE($4, hospital_info),
            general_notes = COALESCE($5, general_notes),
            shoot_date = COALESCE($7, shoot_date),
+           location_lat = COALESCE($8, location_lat),
+           location_lng = COALESCE($9, location_lng),
            updated_at = NOW()
        WHERE document_id = $6 RETURNING *`,
-      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date]
+      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date, location_lat, location_lng]
     );
     // If updating 0 rows (missing initial row), create it
     if (result.rows.length === 0) {
       const insResult = await pool.query(
-        `INSERT INTO agency_call_sheet_data (document_id, location_name, location_address, weather_info, hospital_info, general_notes, shoot_date)
-         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, shoot_date]
+        `INSERT INTO agency_call_sheet_data (document_id, location_name, location_address, weather_info, hospital_info, general_notes, shoot_date, location_lat, location_lng)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, shoot_date, location_lat, location_lng]
       );
       return res.json(insResult.rows[0]);
     }
