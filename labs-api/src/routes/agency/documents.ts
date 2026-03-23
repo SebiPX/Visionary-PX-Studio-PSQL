@@ -43,9 +43,17 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_data (
   weather_info TEXT,
   hospital_info TEXT,
   general_notes TEXT,
+  shoot_date VARCHAR(50),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+    `;
+    await pool.query(sql);
+
+    // Provide safe schema migration for existing tables that already exist
+    try {
+      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN shoot_date VARCHAR(50);');
+    } catch(e) { /* ignore if column already exists */ }
 
 CREATE TABLE IF NOT EXISTS agency_call_sheet_schedule (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -233,7 +241,7 @@ router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, r
 // CALL SHEET SPECIFIC ENDPOINTS
 // --------------------------------------------------------------------------
 router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) => {
-  const { location_name, location_address, weather_info, hospital_info, general_notes } = req.body;
+  const { location_name, location_address, weather_info, hospital_info, general_notes, shoot_date } = req.body;
   try {
     const result = await pool.query(
       `UPDATE agency_call_sheet_data 
@@ -242,16 +250,17 @@ router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) =>
            weather_info = COALESCE($3, weather_info),
            hospital_info = COALESCE($4, hospital_info),
            general_notes = COALESCE($5, general_notes),
+           shoot_date = COALESCE($7, shoot_date),
            updated_at = NOW()
        WHERE document_id = $6 RETURNING *`,
-      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id]
+      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date]
     );
     // If updating 0 rows (missing initial row), create it
     if (result.rows.length === 0) {
       const insResult = await pool.query(
-        `INSERT INTO agency_call_sheet_data (document_id, location_name, location_address, weather_info, hospital_info, general_notes)
-         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes]
+        `INSERT INTO agency_call_sheet_data (document_id, location_name, location_address, weather_info, hospital_info, general_notes, shoot_date)
+         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, shoot_date]
       );
       return res.json(insResult.rows[0]);
     }
