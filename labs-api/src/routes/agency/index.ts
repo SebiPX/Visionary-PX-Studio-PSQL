@@ -14,6 +14,7 @@ import seniorityLevelRoutes from './seniorityLevels';
 import reportsRoutes from './reports';
 import resourcesRoutes from './resources';
 import servicePricingRoutes from './servicePricing';
+import documentRoutes from './documents';
 
 import mocoWebhookRoutes from './mocoWebhooks';
 
@@ -34,5 +35,6 @@ router.use('/service-pricing', servicePricingRoutes);
 router.use('/seniority-levels', seniorityLevelRoutes);
 router.use('/reports', reportsRoutes);
 router.use('/resources', resourcesRoutes);
+router.use('/documents', documentRoutes);
 router.use('/webhooks/moco', mocoWebhookRoutes);
 export default router;
