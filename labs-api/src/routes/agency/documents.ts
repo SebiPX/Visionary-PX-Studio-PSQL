@@ -47,14 +47,6 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_data (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-    `;
-    await pool.query(sql);
-
-    // Provide safe schema migration for existing tables that already exist
-    try {
-      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN shoot_date VARCHAR(50);');
-    } catch(e) { /* ignore if column already exists */ }
-
 CREATE TABLE IF NOT EXISTS agency_call_sheet_schedule (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   document_id UUID NOT NULL REFERENCES agency_documents(id) ON DELETE CASCADE,
@@ -78,6 +70,11 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_contacts (
 );
     `;
     await pool.query(sql);
+
+    // Provide safe schema migration for existing tables that already exist
+    try {
+      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN shoot_date VARCHAR(50);');
+    } catch(e) { /* ignore if column already exists */ }
     res.json({ message: 'Tables created successfully' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
