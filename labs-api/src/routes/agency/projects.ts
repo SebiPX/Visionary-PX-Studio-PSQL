@@ -583,16 +583,51 @@ router.post('/sync-moco', requireAuth, async (req: AuthRequest, res) => {
         }
       }
 
+      const budget = p.budget || 0;
+      const deadline = p.finish_date || null;
+      let projectId;
+
       // 2. Ensure project exists
       const projRes = await pool.query('SELECT id FROM agency_projects WHERE moco_project_id = $1', [p.id]);
       if (projRes.rows.length === 0) {
         // Insert new project
-        const budget = p.budget || 0;
-        await pool.query(`
-          INSERT INTO agency_projects (title, moco_project_id, client_id, status, budget_total)
-          VALUES ($1, $2, $3, $4, $5)
-        `, [p.name || 'Unnamed Project', p.id, clientId, 'active', budget]);
+        const newProjRes = await pool.query(`
+          INSERT INTO agency_projects (title, moco_project_id, client_id, status, budget_total, deadline)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          RETURNING id
+        `, [p.name || 'Unnamed Project', p.id, clientId, 'active', budget, deadline]);
+        projectId = newProjRes.rows[0].id;
         importedCount++;
+      } else {
+        // Update existing project with MOCO data as source of truth
+        projectId = projRes.rows[0].id;
+        await pool.query(`
+          UPDATE agency_projects 
+          SET title = $1, budget_total = $2, deadline = $3, updated_at = NOW()
+          WHERE id = $4
+        `, [p.name || 'Unnamed Project', budget, deadline, projectId]);
+      }
+
+      // 3. Map Project Leader -> Project Manager
+      if (p.leader && p.leader.id) {
+        const leaderRes = await pool.query('SELECT id FROM profiles WHERE moco_user_id = $1', [p.leader.id]);
+        if (leaderRes.rows.length > 0) {
+          const profileId = leaderRes.rows[0].id;
+          
+          // Ensure they are in project_members as PJM
+          const memberRes = await pool.query('SELECT role FROM agency_project_members WHERE project_id = $1 AND user_id = $2', [projectId, profileId]);
+          
+          if (memberRes.rows.length === 0) {
+            await pool.query(`
+              INSERT INTO agency_project_members (project_id, user_id, role, hourly_rate)
+              VALUES ($1, $2, $3, $4)
+            `, [projectId, profileId, 'PJM', 0]);
+          } else if (memberRes.rows[0].role !== 'PJM') {
+            await pool.query(`
+              UPDATE agency_project_members SET role = 'PJM' WHERE project_id = $1 AND user_id = $2
+            `, [projectId, profileId]);
+          }
+        }
       }
     }
 
