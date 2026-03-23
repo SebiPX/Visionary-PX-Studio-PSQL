@@ -96,7 +96,7 @@ router.get('/project/:projectId', requireAuth, async (req: AuthRequest, res) => 
 // POST /api/agency/documents
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
   const { project_id, title, type } = req.body;
-  const userId = req.user?.id;
+  const userId = req.userId;
   try {
     // 1. Create document entry
     const docRes = await pool.query(
