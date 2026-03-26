@@ -1,12 +1,12 @@
 import { Router, Response } from 'express';
-import pool from '../../../db';
+import pool from '../../db';
 import { requireAuth, AuthRequest } from '../../middleware/requireAuth';
 
 const router = Router();
 
 // GET /api/chat/:channelId
 router.get('/:channelId', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { channelId } = req.params;
+  const { channelId } = (req as any).params;
   
   try {
     const { rows } = await pool.query(
@@ -29,8 +29,8 @@ router.get('/:channelId', requireAuth, async (req: AuthRequest, res: Response) =
 
 // POST /api/chat/:channelId
 router.post('/:channelId', requireAuth, async (req: AuthRequest, res: Response): Promise<any> => {
-  const { channelId } = req.params;
-  const { content } = req.body;
+  const { channelId } = (req as any).params;
+  const { content } = (req as any).body;
 
   if (!content || !content.trim()) {
     return res.status(400).json({ error: 'Content is required' });
@@ -65,7 +65,7 @@ router.post('/:channelId', requireAuth, async (req: AuthRequest, res: Response):
 
 // DELETE /api/chat/messages/:id (Soft Delete)
 router.delete('/messages/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<any> => {
-  const { id } = req.params;
+  const { id } = (req as any).params;
   // TODO: Verify if user is sender or admin
   try {
     const { rowCount } = await pool.query(
