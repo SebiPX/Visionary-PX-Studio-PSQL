@@ -16,5 +16,3 @@ CREATE INDEX IF NOT EXISTS idx_agency_chat_channel ON agency_chat_messages(chann
 CREATE INDEX IF NOT EXISTS idx_agency_chat_created ON agency_chat_messages(created_at);
 
 -- Add some basic Row Level Security if needed in the future, for now backend fully enforces it.
--- Grant permissions to supabase backend roles
-GRANT ALL ON agency_chat_messages TO anon, authenticated, service_role;
