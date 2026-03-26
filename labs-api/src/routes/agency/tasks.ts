@@ -12,10 +12,16 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
     let query = `
       SELECT t.*, 
         json_build_object('id', p.id, 'title', p.title) as project,
-        json_build_object('id', u.id, 'full_name', u.full_name, 'avatar_url', u.avatar_url) as assignee
+        COALESCE(
+          (
+            SELECT json_agg(json_build_object('id', u.id, 'full_name', u.full_name, 'avatar_url', u.avatar_url))
+            FROM profiles u
+            WHERE u.id = ANY(t.assignee_ids)
+          ), 
+          '[]'::json
+        ) as assignees
       FROM agency_tasks t
       JOIN agency_projects p ON t.project_id = p.id
-      LEFT JOIN profiles u ON t.assignee_id = u.id
       WHERE 1=1
     `;
     const params: any[] = [];
@@ -27,7 +33,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
 
     if (assignee_id) {
       params.push(assignee_id);
-      query += ` AND t.assignee_id = $${params.length}`;
+      query += ` AND $${params.length} = ANY(t.assignee_ids)`;
     }
     
     query += ` ORDER BY t.created_at DESC`;
@@ -45,10 +51,16 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
     const result = await pool.query(
       `SELECT t.*, 
         json_build_object('id', p.id, 'title', p.title) as project,
-        json_build_object('id', u.id, 'full_name', u.full_name, 'avatar_url', u.avatar_url) as assignee
+        COALESCE(
+          (
+            SELECT json_agg(json_build_object('id', u.id, 'full_name', u.full_name, 'avatar_url', u.avatar_url))
+            FROM profiles u
+            WHERE u.id = ANY(t.assignee_ids)
+          ), 
+          '[]'::json
+        ) as assignees
       FROM agency_tasks t
       JOIN agency_projects p ON t.project_id = p.id
-      LEFT JOIN profiles u ON t.assignee_id = u.id
       WHERE t.id = $1`,
       [req.params.id]
     );
@@ -65,12 +77,13 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
   const { 
     project_id, title, description, status, priority, 
-    assignee_id, assigned_to,
+    assignee_ids, assigned_to,
     start_date, due_date, planned_minutes,
     estimated_hours, estimated_rate,
     service_module_id, seniority_level_id, is_visible_to_client
   } = req.body;
-  const actualAssignee = assignee_id !== undefined ? assignee_id : (assigned_to !== undefined ? assigned_to : null);
+  const actualAssigneeIds = Array.isArray(assignee_ids) ? assignee_ids : (assigned_to ? [assigned_to] : []);
+  const primaryAssignee = actualAssigneeIds.length > 0 ? actualAssigneeIds[0] : null;
 
   try {
     const args = [
@@ -79,7 +92,8 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
       description ?? null,
       status ?? null,
       priority ?? null,
-      actualAssignee ?? null,
+      primaryAssignee,
+      actualAssigneeIds,
       start_date ?? null,
       due_date ?? null,
       planned_minutes ?? null,
@@ -93,11 +107,11 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
     const result = await pool.query(
       `INSERT INTO agency_tasks (
         project_id, title, description, status, priority, 
-        assignee_id, start_date, due_date, planned_minutes,
+        assignee_id, assignee_ids, start_date, due_date, planned_minutes,
         estimated_hours, estimated_rate,
         service_module_id, seniority_level_id, is_visible_to_client
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        RETURNING *`,
       args
     );
@@ -113,7 +127,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
     const updates = req.body;
     const allowedFields = [
       'title', 'description', 'status', 'priority', 
-      'assignee_id', 'start_date', 'due_date', 
+      'assignee_ids', 'start_date', 'due_date', 
       'planned_minutes', 'estimated_hours', 'estimated_rate', 
       'service_module_id', 'seniority_level_id', 'is_visible_to_client'
     ];
@@ -130,10 +144,17 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
       }
     }
     
-    // Add support for legacy assigned_to
-    if (updates.assigned_to !== undefined && updates.assignee_id === undefined) {
+    // Add support for legacy assigned_to array format
+    if (updates.assigned_to !== undefined && updates.assignee_ids === undefined) {
+      setClauses.push(`assignee_ids = $${paramIdx}`);
+      args.push(Array.isArray(updates.assigned_to) ? updates.assigned_to : [updates.assigned_to]);
+      paramIdx++;
+    }
+
+    // Keep assignee_id updated for legacy single-assignee integrations 
+    if (updates.assignee_ids !== undefined) {
       setClauses.push(`assignee_id = $${paramIdx}`);
-      args.push(updates.assigned_to);
+      args.push(updates.assignee_ids.length > 0 ? updates.assignee_ids[0] : null);
       paramIdx++;
     }
 
