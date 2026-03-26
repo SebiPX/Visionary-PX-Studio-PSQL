@@ -17,6 +17,7 @@ import servicePricingRoutes from './servicePricing';
 import documentRoutes from './documents';
 
 import mocoWebhookRoutes from './mocoWebhooks';
+import chatRoutes from './chat';
 
 const router = Router();
 
@@ -37,4 +38,6 @@ router.use('/reports', reportsRoutes);
 router.use('/resources', resourcesRoutes);
 router.use('/documents', documentRoutes);
 router.use('/webhooks/moco', mocoWebhookRoutes);
+router.use('/chat', chatRoutes);
+
 export default router;
