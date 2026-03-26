@@ -20,6 +20,27 @@ router.get('/summary', requireAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// GET /api/chat/channels
+router.get('/channels', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT DISTINCT p.id, p.title as name, 'project' as type
+       FROM agency_projects p
+       LEFT JOIN agency_project_members pm ON p.id = pm.project_id
+       LEFT JOIN agency_tasks t ON p.id = t.project_id
+       WHERE pm.user_id = $1 
+          OR t.assignee_id = $1 
+          OR p.title IN ('Studio Vermietung', 'INTERNES - NWB 2026')
+       ORDER BY p.title ASC`,
+      [req.userId]
+    );
+    res.json(rows);
+  } catch (err: any) {
+    console.error('[GET /api/chat/channels]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/chat/:channelId
 router.get('/:channelId', requireAuth, async (req: AuthRequest, res: Response) => {
   const { channelId } = (req as any).params;
