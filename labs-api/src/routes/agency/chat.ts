@@ -4,6 +4,22 @@ import { requireAuth, AuthRequest } from '../../middleware/requireAuth';
 
 const router = Router();
 
+// GET /api/chat/summary
+router.get('/summary', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT channel_id, MAX(created_at) as last_message_at 
+       FROM agency_chat_messages 
+       WHERE is_deleted = false 
+       GROUP BY channel_id`
+    );
+    res.json(rows);
+  } catch (err: any) {
+    console.error('[GET /api/chat/summary]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/chat/:channelId
 router.get('/:channelId', requireAuth, async (req: AuthRequest, res: Response) => {
   const { channelId } = (req as any).params;
