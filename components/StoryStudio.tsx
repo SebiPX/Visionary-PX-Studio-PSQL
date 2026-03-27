@@ -802,7 +802,7 @@ Jeder Shot muss exakt dieser Struktur folgen:
 
             const styleDescription = styleDescriptions[storyboardStyle] || styleDescriptions['realistic'];
 
-            const prompt = `Create a professional storyboard frame for the following shot.
+            const prompt = `CRITICAL INSTRUCTION: Generate a pure, edge-to-edge cinematic image representing this shot. Do NOT draw a storyboard template. Do NOT include any borders, frames, text, timecodes, arrows, paper textures, or UI elements in the image. The output must be 100% full-bleed artwork depicting the scene itself.
 
 SHOT DETAILS:
 Title: ${shot.title}
@@ -837,7 +837,7 @@ ${hasRefs
                 const result = await fal.subscribe("fal-ai/qwen-image-2/text-to-image", {
                     input: {
                         prompt: prompt,
-                        negative_prompt: "low resolution, error, worst quality, low quality, deformed, ugly",
+                        negative_prompt: "low resolution, error, worst quality, low quality, deformed, ugly, text, watermark, borders, frames, storyboard template, paper, panels, ui elements",
                         image_size: { width: 2048, height: 1152 },
                         enable_prompt_expansion: true,
                         enable_safety_checker: true,
