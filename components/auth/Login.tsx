@@ -60,7 +60,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
             <div className="max-w-md w-full space-y-8 p-8 bg-card rounded-xl shadow-2xl border border-border">
                 {/* Logo/Header */}
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold text-foreground mb-2">Visionary PX Studio</h1>
+                    <h1 className="text-4xl font-bold text-foreground mb-2">PX-Studio</h1>
                     <p className="text-muted-foreground">Create the Future</p>
                 </div>
 
