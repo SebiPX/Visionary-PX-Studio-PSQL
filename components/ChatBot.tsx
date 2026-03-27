@@ -94,7 +94,7 @@ const PERSONAS: Persona[] = [
     name: 'Gemini General',
     icon: 'auto_awesome',
     desc: 'Allgemeiner Assistent für alle Themen.',
-    instruction: 'Du bist Visionary AI, ein hilfreicher, zukunftsorientierter Assistent in einer kreativen Studio-Suite. Du bist höflich, professionell und kenntnisreich zu allen Themen.'
+    instruction: 'Du bist der KI-Assistent der PIXELSCHICKERIA in der PX-Studio Suite. Du bist höflich, professionell und kenntnisreich zu allen Themen.'
   },
   {
     id: 'onboarding',

@@ -50,7 +50,7 @@ export const ResetPassword: React.FC<ResetPasswordProps> = ({ onComplete }) => {
                 {/* Logo/Title */}
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-[#135bec] to-[#4a90ff] bg-clip-text text-transparent mb-2">
-                        Visionary PX Studio
+                        PX-Studio
                     </h1>
                     <p className="text-muted-foreground">Change Your Password</p>
                 </div>
