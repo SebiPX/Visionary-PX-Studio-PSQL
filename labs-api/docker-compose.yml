@@ -20,6 +20,7 @@ services:
       APIFY_API_TOKEN: ${APIFY_API_TOKEN}
       MOCO_API_URL: ${MOCO_API_URL}
       MOCO_API_KEY: ${MOCO_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
     extra_hosts:
       - "host.docker.internal:host-gateway" # Container kann VPS-Host-Postgres erreichen
     networks:
