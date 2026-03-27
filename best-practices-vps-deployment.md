@@ -1,6 +1,6 @@
 # Best Practices: React + Express API + Docker + Cloudflare R2 auf VPS
 
-Erkenntnisse aus dem Deployment von **Visionary PX Studio** (React/Vite Frontend + Express Backend + PostgreSQL + Cloudflare R2).
+Erkenntnisse aus dem Deployment von **PX-Studio** (React/Vite Frontend + Express Backend + PostgreSQL + Cloudflare R2).
 
 ---
 

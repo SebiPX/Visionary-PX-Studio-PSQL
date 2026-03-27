@@ -1,6 +1,6 @@
-# Visionary PX Studio — App Info
+# PX-Studio — App Info
 
-**Visionary PX Studio** ist eine webbasierte KI-Content-Creation-Suite mit integriertem internen Teamportal (PX INTERN). Die gesamte Backend-Logik läuft auf einem selbst gehosteten Express.js Server (`labs-api`) mit PostgreSQL — kein Supabase, kein Firebase.
+**PX-Studio** ist eine webbasierte KI-Content-Creation-Suite mit integriertem internen Teamportal (PX INTERN). Die gesamte Backend-Logik läuft auf einem selbst gehosteten Express.js Server (`labs-api`) mit PostgreSQL — kein Supabase, kein Firebase.
 
 ---
 
@@ -9,7 +9,7 @@
 ```
 React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
                                           →  Cloudflare R2 (Storage)
-                                          →  Google Gemini API
+                                          →  Google Gemini API & OpenRouter API
 ```
 
 ### Wichtige Dateien
@@ -87,12 +87,13 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 ### 8. 💬 Chat Bot
 
 - **6 Personas:** Medien-Analyst, DevX Assistant, Content Stratege, Marketing & SEO Pro, Gemini General, **Onboarding Support**
+- **LLM-Auswahl:** Dropdown für Google Gemini, Claude Sonnet 4.6, GPT-5 Chat, Nemotron 3 via OpenRouter API.
 - **Onboarding Support (RAG):**
   - Frage wird mit `gemini-embedding-001` (768-dim) vektorisiert
   - `POST /api/rag` auf dem Backend führt pgvector Cosine-Similarity-Suche durch
   - Ergebnisse aus `onboarding_embeddings` werden als Kontext injiziert
   - Graceful Fallback: funktioniert auch ohne pgvector Extension
-- **Chat-History:** Gespeichert in `chat_sessions`, wiederherstellbar
+- **Chat-History:** Gespeichert in `chat_sessions`, wiederherstellbar und einzeln löschbar
 - **Markdown-Rendering:** Alle Bot-Antworten als formatiertes Markdown
 
 ### 9. 🎤 PX Event Agent
@@ -287,4 +288,4 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 
 ---
 
-_Visionary PX Studio — Create the Future with AI 🚀_
+_PX-Studio — Create the Future with AI 🚀_

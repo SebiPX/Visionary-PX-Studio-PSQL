@@ -1,4 +1,4 @@
-# Visionary PX Studio — VPS Deployment Runbook
+# PX-Studio — VPS Deployment Runbook
 
 ## Architektur
 

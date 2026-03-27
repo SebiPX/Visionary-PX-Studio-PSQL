@@ -1,4 +1,4 @@
-# Visionary PX Studio
+# PX-Studio
 
 <div align="center">
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
@@ -6,7 +6,7 @@
 
 **Eine hochmoderne KI-Content-Creation-Suite mit integriertem internen Teamportal**
 
-Visionary PX Studio vereint Google's leistungsstärkste KI-Modelle (Gemini & Veo) in einer futuristischen Glassmorphism-Benutzeroberfläche – plus ein vollständiges internes Portal (PX INTERN) mit Inventar, Verleih, Logins, Firmendaten und konfigurierbarem Dashboard.
+PX-Studio vereint Google's leistungsstärkste KI-Modelle (Gemini & Veo) in einer futuristischen Glassmorphism-Benutzeroberfläche – plus ein vollständiges internes Portal (PX INTERN) mit Inventar, Verleih, Logins, Firmendaten und konfigurierbarem Dashboard.
 
 ---
 
@@ -205,9 +205,9 @@ psql "$DATABASE_URL" -f /opt/docker/labs-api/init_schema.sql
 
 ### 💬 Chat Bot
 
-- 6 Personas: Creative, Tech, Marketing, SEO, General, Onboarding
+- 6 Personas mit Dropdown zur Wahl verschiedener LLMs (Gemini, Claude, GPT-5, Nemotron via OpenRouter)
 - **Onboarding Bot** mit RAG (pgvector Cosine-Similarity über `onboarding_embeddings`)
-- Markdown-Rendering, Chat-History
+- Markdown-Rendering, Chat-History (wiederherstellbar und einzeln löschbar)
 
 ### 🎤 PX Event Agent
 
@@ -337,4 +337,4 @@ Cyberpunk / Futuristic Glassmorphism:
 
 ---
 
-**Visionary PX Studio** - Create the Future with AI 🚀
+**PX-Studio** - Create the Future with AI 🚀
