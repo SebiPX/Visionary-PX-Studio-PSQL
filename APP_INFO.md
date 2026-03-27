@@ -28,8 +28,9 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 
 ### 1. 🏠 Home Bereich (Dashboard & PX Intern)
 
-- **Zweizeilige Desktop-Navigation**: Aufgeräumtes Layout mit Hauptkategorien (Home, Studio, Agents, Admin) und kontextbezogener zweiter Tool-Leiste.
-- **PX Intern als Haupt-Dashboard**: Internes Agentur-Portal (Verleih, Logins, Kalender) direkt unter 'Home' integriert. Sidebar wurde zugunsten der Top-Navbar komplett entfernt.
+- **Zweizeilige Desktop-Navigation**: Aufgeräumtes Layout mit Hauptkategorien (PX Desk, AI Chat, AI Studio, AI Agents) und kontextbezogener zweiter Tool-Leiste plus externem Link zu PX-Flow.
+- **PX Intern als Haupt-Dashboard**: Internes Agentur-Portal (Verleih, Logins, Kalender) direkt unter 'PX Desk' integriert. Sidebar wurde zugunsten der Top-Navbar komplett entfernt.
+- **Einheitliches Design-System**: Alle Module im AI Studio (Video, Voice, Image, Text) teilen sich nun ein einheitliches Sidebar-Layout mit pill-basierten Segment-Controls und präzisen Labeling-Regeln für maximales "Premium Feeling" im Light & Dark Mode.
 - **News Of The Day**: Zentraler Feed auf dem Dashboard mit internen Ankündigungen und einem **AI Curator Agent**, der täglich im Hintergrund über Google Search die aktuellsten KI-News zusammenfasst (Gemini 2.5 Flash).
 - **Recent Generations Widget**: Letzte KI-Generierungen (Bilder, Videos) nahtlos in das PX Intern Dashboard (Masonry-Grid) integriert.
 - **ProjectFlow Aufgaben:** Zugewiesene Tasks inklusive Time-Tracking (Stoppuhr/manuell) und nahtloser 2-Wege-Synchronisation (robuste dynamische Status-Updates erhalten Datenbank-Zuweisungen konsistent) direkt im Studio-Dashboard ausführen.
