@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AppView, UserProfile } from './types';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthPage } from './components/auth/AuthPage';
 import { Navigation } from './components/Navigation';
 import { RecentGenerations } from './components/Dashboard';
@@ -42,10 +43,10 @@ const AppContent: React.FC = () => {
   // Show loading spinner while checking auth
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen w-full bg-[#101622]">
+      <div className="flex items-center justify-center h-screen w-full bg-background text-foreground">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#135bec] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading...</p>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -58,7 +59,7 @@ const AppContent: React.FC = () => {
 
   // Show main app if authenticated
   return (
-    <div className="flex flex-col h-screen w-full bg-[#101622] text-slate-100 font-display overflow-hidden">
+    <div className="flex flex-col h-screen w-full bg-background text-foreground font-display overflow-hidden transition-colors duration-200">
       <Navigation currentView={currentView} setView={setCurrentView} userProfile={userProfile} dashboardPath={dashboardPath} setDashboardPath={setDashboardPath} />
 
       {/* 
@@ -137,9 +138,11 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

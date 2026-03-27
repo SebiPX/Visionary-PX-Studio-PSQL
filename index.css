@@ -1,3 +1,76 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* 
+      PIXELSCHICKERIA DESIGN SYSTEM 
+      Light Mode
+    */
+    --background: 0 0% 100%;          /* Weiß */
+    --foreground: 224 71% 4%;         /* Sehr dunkles Blau-Schwarz */
+    
+    /* CI Colors */
+    --primary: 252 75% 51%;           /* Knalliges 3D PX Blau/Lila */
+    --primary-foreground: 210 40% 98%;/* Weiß für Text auf Primary */
+    
+    --accent: 330 100% 50%;           /* Lebendiges Pink/Magenta */
+    --accent-foreground: 210 40% 98%;
+    
+    /* Layout & Surface Colors */
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    
+    --muted: 220 14% 96%;             /* Leichtes Grau für Backgrounds */
+    --muted-foreground: 220 9% 46%;   /* Gedämpfter Text */
+    
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 252 75% 51%;
+    
+    --radius: 0.75rem;                /* Weichere, moderne Ecken */
+  }
+ 
+  .dark {
+    /* 
+      Dark Mode
+    */
+    --background: 225 30% 8%;         /* Tiefes, sattes Dunkelblau #0f131f */
+    --foreground: 210 40% 98%;
+    
+    /* CI Colors */
+    --primary: 252 80% 65%;           /* Etwas helleres Blau für besseren Kontrast */
+    --primary-foreground: 224 71% 4%;
+    
+    --accent: 330 90% 65%;
+    --accent-foreground: 224 71% 4%;
+    
+    /* Layout & Surface Colors */
+    --card: 225 25% 12%;              /* Leicht abgehobener Dark-Background */
+    --card-foreground: 210 40% 98%;
+    --popover: 225 25% 12%;
+    --popover-foreground: 210 40% 98%;
+    
+    --muted: 225 25% 15%;
+    --muted-foreground: 215 20% 65%;
+    
+    --border: 225 25% 18%;
+    --input: 225 25% 18%;
+    --ring: 252 80% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground transition-colors duration-200;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

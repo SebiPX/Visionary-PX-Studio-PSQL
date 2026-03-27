@@ -10,10 +10,9 @@
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23101622'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='13' fill='%23135bec'>PX</text></svg>"
     />
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
       rel="stylesheet"
@@ -24,12 +23,6 @@
     />
 
     <style>
-      body {
-        background-color: #101622;
-        color: #f1f5f9;
-        font-family: "Plus Jakarta Sans", sans-serif;
-        -webkit-tap-highlight-color: transparent;
-      }
       .glass {
         background: rgba(16, 22, 34, 0.7);
         backdrop-filter: blur(12px);
@@ -53,15 +46,9 @@
       }
       /* Animation Utilities */
       @keyframes float {
-        0% {
-          transform: translateY(0px);
-        }
-        50% {
-          transform: translateY(-5px);
-        }
-        100% {
-          transform: translateY(0px);
-        }
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0px); }
       }
       .animate-float {
         animation: float 6s ease-in-out infinite;
