@@ -65,32 +65,32 @@ export const BriefingStep: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto w-full pb-20">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold font-display tracking-tight text-white mb-2">Step 1: Event Briefing</h2>
-        <p className="text-slate-400">Specify the parameters for your event. The more details you provide, the more tailored the AI matrix will be.</p>
+        <h2 className="text-2xl font-bold font-display tracking-tight text-foreground mb-2">Step 1: Event Briefing</h2>
+        <p className="text-muted-foreground">Specify the parameters for your event. The more details you provide, the more tailored the AI matrix will be.</p>
       </div>
 
-      <div className="bg-[#161f30] rounded-2xl border border-white/10 p-8 shadow-xl space-y-6">
+      <div className="bg-card rounded-2xl border border-border p-8 shadow-xl space-y-6">
         
         {/* Required Fields Group */}
-        <div className="pb-6 border-b border-white/10">
-          <h3 className="text-lg font-bold text-white mb-4">Required Parameters <span className="text-red-500 text-sm font-normal ml-2">*</span></h3>
+        <div className="pb-6 border-b border-border">
+          <h3 className="text-lg font-bold text-foreground mb-4">Required Parameters <span className="text-red-500 text-sm font-normal ml-2">*</span></h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">Occasion</label>
+              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Occasion</label>
               <input 
                 type="text" 
                 value={occasion} 
                 onChange={(e) => setOccasion(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">Guest Count</label>
+              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Guest Count</label>
               <input 
                 type="number" 
                 value={guestCount} 
                 onChange={(e) => setGuestCount(e.target.value)}
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
           </div>
@@ -98,71 +98,71 @@ export const BriefingStep: React.FC = () => {
 
         {/* Optional Fields Group */}
         <div>
-          <h3 className="text-lg font-bold text-white mb-4">Optional Constraints & Goals</h3>
+          <h3 className="text-lg font-bold text-foreground mb-4">Optional Constraints & Goals</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <div>
-              <label className="block text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">Budget (€)</label>
+              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Budget (€)</label>
               <input 
                 type="text" 
                 value={budget} 
                 onChange={(e) => setBudget(e.target.value)}
                 placeholder="e.g. 50000"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">Season / Date</label>
+              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Season / Date</label>
               <input 
                 type="text" 
                 value={season} 
                 onChange={(e) => setSeason(e.target.value)}
                 placeholder="e.g. Summer, Q3 2026"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">Industry</label>
+              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Industry</label>
               <input 
                 type="text" 
                 value={industry} 
                 onChange={(e) => setIndustry(e.target.value)}
                 placeholder="e.g. Automotive, Finance"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">Target Audience</label>
+              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Target Audience</label>
               <input 
                 type="text" 
                 value={targetAudience} 
                 onChange={(e) => setTargetAudience(e.target.value)}
                 placeholder="e.g. C-Level Executives, Employees"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">Location Preference</label>
+              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Location Preference</label>
               <input 
                 type="text" 
                 value={locationPreference} 
                 onChange={(e) => setLocationPreference(e.target.value)}
                 placeholder="e.g. Southern Europe, Mountains, Urban"
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-500 transition-colors"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs text-slate-400 uppercase tracking-wider mb-2 font-semibold">Emotional Goals / Vibe</label>
+              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Emotional Goals / Vibe</label>
               <textarea 
                 value={emotionalGoals} 
                 onChange={(e) => setEmotionalGoals(e.target.value)}
                 placeholder="e.g. We want to build absolute trust, but keep the energy very euphoric and dynamic."
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-500 transition-colors min-h-[100px]"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-brand-500 transition-colors min-h-[100px]"
               />
             </div>
 
@@ -176,7 +176,7 @@ export const BriefingStep: React.FC = () => {
           <button 
             onClick={handleContinue}
             disabled={isSaving || loading}
-            className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+            className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-foreground font-bold border border-border transition-colors flex items-center gap-2"
           >
             Skip to Matrix <span className="material-icons-round text-sm">arrow_forward</span>
           </button>
@@ -185,7 +185,7 @@ export const BriefingStep: React.FC = () => {
         <button 
           onClick={handleSaveAndContinue}
           disabled={isSaving || loading || !occasion || !guestCount}
-          className="px-8 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 text-lg"
+          className="px-8 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-foreground font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 text-lg"
         >
           {isSaving || loading ? (
             <span className="flex items-center gap-2">

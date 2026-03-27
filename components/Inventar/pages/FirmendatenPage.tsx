@@ -10,7 +10,7 @@ interface Props {
   onDelete: (id: string) => Promise<void>
 }
 
-const inputCls = 'w-full px-2 py-1.5 bg-slate-900 border border-slate-600 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500'
+const inputCls = 'w-full px-2 py-1.5 bg-card border border-border/80 rounded-lg text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary-500'
 
 type Kat = 'Bankverbindung' | 'Handelsregister'
 
@@ -26,30 +26,30 @@ function BankSection({ rows, onEdit, onDelete, onAdd }: {
   onAdd: () => void
 }) {
   return (
-    <div className="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-700 bg-slate-900/40">
+    <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card/40">
         <div className="flex items-center gap-2.5">
-          <Landmark size={18} className="text-brand-400" />
-          <h2 className="font-semibold text-white">Bankverbindung</h2>
-          <span className="text-xs text-slate-500">{rows.length} Einträge</span>
+          <Landmark size={18} className="text-primary-400" />
+          <h2 className="font-semibold text-foreground">Bankverbindung</h2>
+          <span className="text-xs text-muted-foreground">{rows.length} Einträge</span>
         </div>
-        <button onClick={onAdd} className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-lg transition-colors">
+        <button onClick={onAdd} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-500 text-foreground text-xs font-semibold rounded-lg transition-colors">
           <Plus size={13} /> Neu
         </button>
       </div>
-      <div className="divide-y divide-slate-700/50">
+      <div className="divide-y divide-border/50">
         {rows.map(f => (
-          <div key={f.id} className="flex items-start gap-4 px-5 py-3 hover:bg-slate-700/20 transition-colors group">
-            <span className="w-40 shrink-0 text-xs font-semibold text-slate-400 uppercase tracking-wider pt-0.5">{f.bezeichner}</span>
+          <div key={f.id} className="flex items-start gap-4 px-5 py-3 hover:bg-muted/20 transition-colors group">
+            <span className="w-40 shrink-0 text-xs font-semibold text-muted-foreground uppercase tracking-wider pt-0.5">{f.bezeichner}</span>
             <div className="flex-1 min-w-0">
-              <span className="font-mono text-sm text-white break-all select-all">{f.wert || '–'}</span>
+              <span className="font-mono text-sm text-foreground break-all select-all">{f.wert || '–'}</span>
               {f.anmerkung && (
-                <p className="text-xs text-slate-500 mt-0.5 whitespace-pre-wrap">{f.anmerkung}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 whitespace-pre-wrap">{f.anmerkung}</p>
               )}
             </div>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-              <button onClick={() => onEdit(f)} className="p-1.5 text-slate-500 hover:text-brand-400 transition-colors"><Pencil size={13} /></button>
-              <button onClick={() => onDelete(f.id, f.bezeichner)} className="p-1.5 text-slate-500 hover:text-red-400 transition-colors"><Trash2 size={13} /></button>
+              <button onClick={() => onEdit(f)} className="p-1.5 text-muted-foreground hover:text-primary-400 transition-colors"><Pencil size={13} /></button>
+              <button onClick={() => onDelete(f.id, f.bezeichner)} className="p-1.5 text-muted-foreground hover:text-red-400 transition-colors"><Trash2 size={13} /></button>
             </div>
           </div>
         ))}
@@ -66,33 +66,33 @@ function RegisterSection({ rows, onEdit, onDelete, onAdd }: {
   onAdd: () => void
 }) {
   return (
-    <div className="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-700 bg-slate-900/40">
+    <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card/40">
         <div className="flex items-center gap-2.5">
-          <FileText size={18} className="text-brand-400" />
-          <h2 className="font-semibold text-white">Handelsregister</h2>
-          <span className="text-xs text-slate-500">{rows.length} Einträge</span>
+          <FileText size={18} className="text-primary-400" />
+          <h2 className="font-semibold text-foreground">Handelsregister</h2>
+          <span className="text-xs text-muted-foreground">{rows.length} Einträge</span>
         </div>
-        <button onClick={onAdd} className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-lg transition-colors">
+        <button onClick={onAdd} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-500 text-foreground text-xs font-semibold rounded-lg transition-colors">
           <Plus size={13} /> Neu
         </button>
       </div>
-      <div className="divide-y divide-slate-700/50">
+      <div className="divide-y divide-border/50">
         {rows.map(f => (
-          <div key={f.id} className="flex items-start gap-4 px-5 py-3.5 hover:bg-slate-700/20 transition-colors group">
+          <div key={f.id} className="flex items-start gap-4 px-5 py-3.5 hover:bg-muted/20 transition-colors group">
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white text-sm">{f.bezeichner}</p>
-              {f.anmerkung && <p className="text-xs text-slate-400 mt-0.5">{f.anmerkung}</p>}
+              <p className="font-semibold text-foreground text-sm">{f.bezeichner}</p>
+              {f.anmerkung && <p className="text-xs text-muted-foreground mt-0.5">{f.anmerkung}</p>}
               {f.datei_name && (
-                <span className="inline-flex items-center gap-1.5 mt-1.5 text-xs text-slate-400 bg-slate-700/50 border border-slate-600 rounded-lg px-2.5 py-1">
-                  <FileText size={11} className="text-slate-500" />
+                <span className="inline-flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground bg-muted/50 border border-border/80 rounded-lg px-2.5 py-1">
+                  <FileText size={11} className="text-muted-foreground" />
                   {f.datei_name}
                 </span>
               )}
             </div>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-              <button onClick={() => onEdit(f)} className="p-1.5 text-slate-500 hover:text-brand-400 transition-colors"><Pencil size={13} /></button>
-              <button onClick={() => onDelete(f.id, f.bezeichner)} className="p-1.5 text-slate-500 hover:text-red-400 transition-colors"><Trash2 size={13} /></button>
+              <button onClick={() => onEdit(f)} className="p-1.5 text-muted-foreground hover:text-primary-400 transition-colors"><Pencil size={13} /></button>
+              <button onClick={() => onDelete(f.id, f.bezeichner)} className="p-1.5 text-muted-foreground hover:text-red-400 transition-colors"><Trash2 size={13} /></button>
             </div>
           </div>
         ))}
@@ -113,16 +113,16 @@ function EditModal({ entry, onSave, onClose, saving }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg mx-4">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
-          <h3 className="font-semibold text-white">
+      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg mx-4">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h3 className="font-semibold text-foreground">
             {entry.bezeichner ? `Bearbeiten: ${entry.bezeichner}` : 'Neuer Eintrag'}
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors"><X size={18} /></button>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors"><X size={18} /></button>
         </div>
         <div className="p-5 space-y-3">
           <label className="block">
-            <span className="text-xs text-slate-400 uppercase tracking-wider mb-1 block">Kategorie</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wider mb-1 block">Kategorie</span>
             <select value={data.kategorie} onChange={e => set('kategorie', e.target.value)}
               className={inputCls + ' cursor-pointer'}>
               <option value="Bankverbindung">Bankverbindung</option>
@@ -130,29 +130,29 @@ function EditModal({ entry, onSave, onClose, saving }: {
             </select>
           </label>
           <label className="block">
-            <span className="text-xs text-slate-400 uppercase tracking-wider mb-1 block">Bezeichner / Name</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wider mb-1 block">Bezeichner / Name</span>
             <input value={data.bezeichner || ''} onChange={e => set('bezeichner', e.target.value)} className={inputCls} placeholder="z.B. IBAN oder HRB 209335" />
           </label>
           <label className="block">
-            <span className="text-xs text-slate-400 uppercase tracking-wider mb-1 block">Wert</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wider mb-1 block">Wert</span>
             <input value={data.wert || ''} onChange={e => set('wert', e.target.value)} className={inputCls} placeholder="Inhalt / Wert" />
           </label>
           <label className="block">
-            <span className="text-xs text-slate-400 uppercase tracking-wider mb-1 block">Anmerkung</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wider mb-1 block">Anmerkung</span>
             <textarea value={data.anmerkung || ''} onChange={e => set('anmerkung', e.target.value)}
               className={inputCls + ' resize-none h-20'} placeholder="Zusätzliche Infos" />
           </label>
           {data.kategorie === 'Handelsregister' && (
             <label className="block">
-              <span className="text-xs text-slate-400 uppercase tracking-wider mb-1 block">Datei-Name</span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider mb-1 block">Datei-Name</span>
               <input value={data.datei_name || ''} onChange={e => set('datei_name', e.target.value)} className={inputCls} placeholder="z.B. HRB_209335.pdf" />
             </label>
           )}
         </div>
-        <div className="flex justify-end gap-2 px-5 py-4 border-t border-slate-700">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg transition-colors">Abbrechen</button>
+        <div className="flex justify-end gap-2 px-5 py-4 border-t border-border">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg transition-colors">Abbrechen</button>
           <button onClick={() => onSave(data)} disabled={saving}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-500 text-foreground text-sm font-semibold rounded-xl transition-colors disabled:opacity-50">
             <Check size={14} /> Speichern
           </button>
         </div>
@@ -208,10 +208,10 @@ export function FirmendatenPage({ firmendaten, onCreate, onUpdate, onDelete }: P
     <div className="p-6 max-w-[900px] mx-auto space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-          <Building2 size={24} className="text-brand-400" /> Firmendaten
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
+          <Building2 size={24} className="text-primary-400" /> Firmendaten
         </h1>
-        <p className="text-slate-400 text-sm mt-1">Bankverbindung & Handelsregister — nur für Admins sichtbar</p>
+        <p className="text-muted-foreground text-sm mt-1">Bankverbindung & Handelsregister — nur für Admins sichtbar</p>
       </div>
 
       <BankSection

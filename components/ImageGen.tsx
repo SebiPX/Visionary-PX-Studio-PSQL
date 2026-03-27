@@ -429,93 +429,83 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     };
 
     return (
-        <div className="h-full flex flex-col md:flex-row bg-[#080c14] relative overflow-hidden">
+        <div className="h-full flex flex-col md:flex-row bg-background relative overflow-hidden">
             {/* Sidebar Controls - Widened to match VideoStudio */}
-            <aside className="w-full md:w-80 bg-glass z-20 flex flex-col border-b md:border-b-0 md:border-r border-white/5 order-2 md:order-1 flex-shrink-0 h-full">
+            <aside className="w-full md:w-80 bg-card border-r border-border z-20 flex flex-col border-b md:border-b-0 md:border-r border-border/50 order-2 md:order-1 flex-shrink-0 h-full">
 
                 <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-8">
-                    {/* Mode Switcher */}
-                    <div className="w-full space-y-2">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Generation Mode</h3>
-                        <div className="flex flex-col gap-2">
-                            <button
-                                onClick={() => { setActiveMode('TEXT'); setUploadedImage(null); }}
-                                className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center gap-3 transition-all ${activeMode === 'TEXT' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}
-                            >
-                                <span className="material-icons-round text-lg">description</span>
-                                Text to Image
-                            </button>
-                            <button
-                                onClick={() => setActiveMode('IMG2IMG')}
-                                className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center gap-3 transition-all ${activeMode === 'IMG2IMG' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}
-                            >
-                                <span className="material-icons-round text-lg">add_photo_alternate</span>
-                                Image to Image
-                            </button>
-                            <button
-                                onClick={() => setActiveMode('EDIT')}
-                                className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center gap-3 transition-all ${activeMode === 'EDIT' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}
-                            >
-                                <span className="material-icons-round text-lg">brush</span>
-                                Image Edit / Inpaint
-                            </button>
-                            <button
-                                onClick={() => setActiveMode('UPSCALE')}
-                                className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center gap-3 transition-all ${activeMode === 'UPSCALE' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}
-                            >
-                                <span className="material-icons-round text-lg">high_quality</span>
-                                Upscale Image (2x)
-                            </button>
-                        </div>
+                    {/* Input Mode Switcher */}
+                    <div className="bg-white/5 p-1 rounded-xl grid grid-cols-2 gap-1">
+                        <button
+                            onClick={() => { setActiveMode('TEXT'); setUploadedImage(null); }}
+                            className={`py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${activeMode === 'TEXT' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            Text to Image
+                        </button>
+                        <button
+                            onClick={() => setActiveMode('IMG2IMG')}
+                            className={`py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${activeMode === 'IMG2IMG' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            Image to Image
+                        </button>
+                        <button
+                            onClick={() => setActiveMode('EDIT')}
+                            className={`py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${activeMode === 'EDIT' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            Inpaint / Edit
+                        </button>
+                        <button
+                            onClick={() => setActiveMode('UPSCALE')}
+                            className={`py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all ${activeMode === 'UPSCALE' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            AI Upscale
+                        </button>
                     </div>
-
-                    <div className="w-full h-px bg-white/10 mt-6 mb-6"></div>
-
-                    {/* AI Model Switcher */}
-                    <div className="w-full space-y-2">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">AI Engine</h3>
-                        <div className="flex bg-white/5 p-1 rounded-xl">
-                            <button
-                                onClick={() => setAiModel('GEMINI')}
-                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${aiModel === 'GEMINI' ? 'bg-primary text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                            >
-                                Google Gemini
-                            </button>
-                            <button
-                                onClick={() => setAiModel('FAL_QWEN')}
-                                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${aiModel === 'FAL_QWEN' ? 'bg-primary text-white shadow' : 'text-slate-400 hover:text-white'}`}
-                            >
-                                Fal.ai (Qwen)
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="w-full h-px bg-white/10 mt-6 mb-6"></div>
 
                     {/* Settings Group */}
-                    <div className="w-full space-y-6">
-                        <div className="space-y-3">
-                            <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Aspect Ratio</label>
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Settings</h3>
+
+                        <div className="space-y-2">
+                            <label className="text-xs text-foreground/90">AI Engine</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={() => setAiModel('GEMINI')}
+                                    className={`py-2 px-3 rounded-lg border transition-all text-[10px] sm:text-xs flex items-center justify-center gap-1 font-bold ${aiModel === 'GEMINI' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                >
+                                    Google Gemini
+                                </button>
+                                <button
+                                    onClick={() => setAiModel('FAL_QWEN')}
+                                    className={`py-2 px-3 rounded-lg border transition-all text-[10px] sm:text-xs flex items-center justify-center gap-1 font-bold ${aiModel === 'FAL_QWEN' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                >
+                                    Fal.ai (Qwen)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs text-foreground/90">Aspect Ratio</label>
                             <div className="grid grid-cols-3 gap-2">
                                 <button
                                     onClick={() => setAspectRatio('1:1')}
-                                    className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all gap-1 ${aspectRatio === '1:1' ? 'bg-primary border border-primary/50 text-white shadow-lg' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10'}`}
+                                    className={`py-2 px-2 rounded-lg border transition-all text-xs flex flex-col items-center justify-center gap-1 ${aspectRatio === '1:1' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
-                                    <span className="material-icons-round">crop_square</span>
+                                    <span className="material-icons-round text-sm">crop_square</span>
                                     <span className="text-[9px]">1:1</span>
                                 </button>
                                 <button
                                     onClick={() => setAspectRatio('16:9')}
-                                    className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all gap-1 ${aspectRatio === '16:9' ? 'bg-primary border border-primary/50 text-white shadow-lg' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10'}`}
+                                    className={`py-2 px-2 rounded-lg border transition-all text-xs flex flex-col items-center justify-center gap-1 ${aspectRatio === '16:9' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
-                                    <span className="material-icons-round">crop_16_9</span>
+                                    <span className="material-icons-round text-sm">crop_16_9</span>
                                     <span className="text-[9px]">16:9</span>
                                 </button>
                                 <button
                                     onClick={() => setAspectRatio('9:16')}
-                                    className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all gap-1 ${aspectRatio === '9:16' ? 'bg-primary border border-primary/50 text-white shadow-lg' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10'}`}
+                                    className={`py-2 px-2 rounded-lg border transition-all text-xs flex flex-col items-center justify-center gap-1 ${aspectRatio === '9:16' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
-                                    <span className="material-icons-round">crop_portrait</span>
+                                    <span className="material-icons-round text-sm">crop_portrait</span>
                                     <span className="text-[9px]">9:16</span>
                                 </button>
                             </div>
@@ -523,8 +513,8 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                     </div>
 
                     {/* History Section */}
-                    <div className="w-full pt-4 border-t border-white/10">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                    <div className="w-full pt-4 border-t border-border">
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
                             <span className="material-icons-round text-sm">history</span>
                             Your Images ({history.length})
                         </h3>
@@ -538,7 +528,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                     <button
                                         key={item.id}
                                         onClick={() => restoreFromHistory(item)}
-                                        className={`relative overflow-hidden rounded-lg border border-white/10 group hover:border-primary/50 transition-all ${
+                                        className={`relative overflow-hidden rounded-lg border border-border group hover:border-primary/50 transition-all ${
                                             item.config?.aspectRatio === '9:16' ? 'aspect-[9/16]' :
                                             item.config?.aspectRatio === '1:1' ? 'aspect-square' : 'aspect-video'
                                         }`}
@@ -546,10 +536,10 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                     >
                                         <img src={item.image_url} alt="History" className="w-full h-full object-cover" />
                                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <span className="material-icons-round text-white text-sm">restore</span>
+                                            <span className="material-icons-round text-foreground text-sm">restore</span>
                                         </div>
                                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <p className="text-[9px] text-white/80 truncate">{item.prompt}</p>
+                                            <p className="text-[9px] text-foreground/80 truncate">{item.prompt}</p>
                                         </div>
                                     </button>
                                 ))}
@@ -557,7 +547,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         ) : (
                             <div className="text-center py-8">
                                 <span className="material-icons-round text-3xl text-slate-700 mb-2">image</span>
-                                <p className="text-xs text-slate-500">No images yet</p>
+                                <p className="text-xs text-muted-foreground">No images yet</p>
                             </div>
                         )}
                     </div>
@@ -567,32 +557,14 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
             {/* Main Area Wrapper */}
             <div className="flex-1 relative flex flex-col order-1 md:order-2 h-full min-w-0">
 
-                {/* Fixed Header Overlay */}
-                <header className="absolute top-0 left-0 right-0 p-4 md:p-6 flex justify-between items-center z-20 pointer-events-none">
-                    <div className="pointer-events-auto flex gap-3">
-                        <div className="px-4 py-2 glass rounded-full flex items-center gap-2 border border-white/10 shadow-lg backdrop-blur-md">
-                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span className="text-xs font-medium text-slate-200 uppercase tracking-wider">
-                                {activeMode === 'TEXT' ? 'Gemini 3.1 Flash Image' : activeMode === 'IMG2IMG' ? 'Img2Img Mode' : activeMode === 'UPSCALE' ? 'AI Upscaler' : 'Inpainting'}
-                            </span>
-                        </div>
-                        <div className="hidden md:flex px-4 py-2 glass rounded-full items-center gap-2 border border-white/10 shadow-lg backdrop-blur-md">
-                            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Ratio: {aspectRatio}</span>
-                        </div>
-                    </div>
-                    <div className="pointer-events-auto flex gap-3">
-                        <button className="px-5 py-2 bg-primary rounded-full text-sm font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary-hover transition-colors">
-                            Export
-                        </button>
-                    </div>
-                </header>
+
 
                 {/* Scrollable Content Container */}
                 <div className="flex-1 overflow-y-auto hide-scrollbar flex flex-col">
 
                     {/* Canvas Area */}
                     <div className="flex-1 flex items-center justify-center p-4 md:p-12 pt-20 relative min-h-[500px] shrink-0">
-                        <div className={`relative w-full ${getAspectClass()} transition-all duration-500 rounded-2xl overflow-hidden shadow-2xl shadow-black border border-white/5 bg-[#101622] group`}>
+                        <div className={`relative w-full ${getAspectClass()} transition-all duration-500 rounded-2xl overflow-hidden shadow-2xl shadow-black border border-border/50 bg-background group`}>
                             {isGenerating && (
                                 <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
                                     <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -610,14 +582,14 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                             <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                     onClick={handlePreview}
-                                    className="p-2 glass rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                                    className="p-2 glass rounded-lg text-foreground/80 hover:bg-white/10 hover:text-foreground transition-colors"
                                     title="Fullscreen Preview"
                                 >
                                     <span className="material-icons-round">fullscreen</span>
                                 </button>
                                 <button
                                     onClick={handleDownload}
-                                    className="p-2 glass rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                                    className="p-2 glass rounded-lg text-foreground/80 hover:bg-white/10 hover:text-foreground transition-colors"
                                     title="Download Image"
                                 >
                                     <span className="material-icons-round">download</span>
@@ -643,26 +615,26 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                     {!uploadedImage ? (
                                         <div
                                             onClick={() => setShowPicker(true)}
-                                            className="border-2 border-dashed border-white/10 rounded-xl p-6 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
+                                            className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
                                         >
                                             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                                <span className="material-icons-round text-2xl text-slate-400 group-hover:text-primary">
+                                                <span className="material-icons-round text-2xl text-muted-foreground group-hover:text-primary">
                                                     {activeMode === 'EDIT' ? 'brush' : activeMode === 'UPSCALE' ? 'high_quality' : 'add_photo_alternate'}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-slate-300 font-medium">
+                                            <p className="text-sm text-foreground/90 font-medium">
                                                 {activeMode === 'EDIT' ? 'Bild zum Bearbeiten wählen' : activeMode === 'UPSCALE' ? 'Bild zum Skalieren wählen' : 'Referenzbild wählen'}
                                             </p>
-                                            <p className="text-xs text-slate-500 mt-1">Upload · Webcam · Eigene Assets</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Upload · Webcam · Eigene Assets</p>
                                         </div>
                                     ) : (
-                                        <div className="relative border border-white/10 rounded-xl overflow-hidden bg-black/20 flex flex-col items-center">
+                                        <div className="relative border border-border rounded-xl overflow-hidden bg-black/20 flex flex-col items-center">
                                             {activeMode === 'EDIT' ? (
                                                 <div className="w-full relative">
                                                     <div className="absolute top-2 right-2 z-20 flex gap-2">
                                                         <input type="color" value={brushColor} onChange={e => setBrushColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" title="Brush Color" />
                                                         <input type="range" min="1" max="50" value={brushSize} onChange={e => setBrushSize(Number(e.target.value))} className="w-24 cursor-pointer" title="Brush Size" />
-                                                        <button onClick={clearCanvas} className="bg-red-500/80 hover:bg-red-500 text-white rounded p-1.5 backdrop-blur aspect-square flex items-center justify-center">
+                                                        <button onClick={clearCanvas} className="bg-red-500/80 hover:bg-red-500 text-foreground rounded p-1.5 backdrop-blur aspect-square flex items-center justify-center">
                                                             <span className="material-icons-round text-sm">clear</span>
                                                         </button>
                                                     </div>
@@ -685,25 +657,25 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                             <div className="absolute bottom-2 right-2 z-20 flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => setShowPicker(true)}
-                                                    className="px-3 py-1.5 bg-primary/80 hover:bg-primary text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-1"
+                                                    className="px-3 py-1.5 bg-primary/80 hover:bg-primary text-primary-foreground rounded-lg text-xs font-bold backdrop-blur flex items-center gap-1"
                                                 >
                                                     <span className="material-icons-round text-xs">swap_horiz</span> Ändern
                                                 </button>
                                                 <button
                                                     onClick={() => { setUploadedImage(null); if (activeMode==='EDIT') clearCanvas(); }}
-                                                    className="px-3 py-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-2"
+                                                    className="px-3 py-1.5 bg-red-500/80 hover:bg-red-500 text-foreground rounded-lg text-xs font-bold backdrop-blur flex items-center gap-2"
                                                 >
                                                     <span className="material-icons-round text-sm">delete</span> Remove
                                                 </button>
                                             </div>
 
                                             {activeMode !== 'EDIT' && (
-                                                <div className="absolute top-2 left-2 z-20 px-2 py-1 bg-black/50 rounded text-[10px] text-white font-bold uppercase pointer-events-none">
+                                                <div className="absolute top-2 left-2 z-20 px-2 py-1 bg-black/50 rounded text-[10px] text-foreground font-bold uppercase pointer-events-none">
                                                     Reference Image
                                                 </div>
                                             )}
                                             {activeMode === 'EDIT' && (
-                                                <div className="absolute top-2 left-2 z-20 px-2 py-1 bg-primary/80 rounded text-[10px] text-white font-bold uppercase pointer-events-none shadow">
+                                                <div className="absolute top-2 left-2 z-20 px-2 py-1 bg-primary/80 rounded text-[10px] text-foreground font-bold uppercase pointer-events-none shadow">
                                                     Canvas Active (Draw!)
                                                 </div>
                                             )}
@@ -716,7 +688,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                             {activeMode === 'TEXT' && (
                                 <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-2">
                                     {['Cinematic', '3D Render', 'Anime', 'Cyberpunk', 'Oil Painting'].map((style, i) => (
-                                        <button key={style} onClick={() => setPrompt(prev => prev + `, ${style} style`)} className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${i === 0 ? 'bg-primary/20 border border-primary/40 text-primary' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10'}`}>
+                                        <button key={style} onClick={() => setPrompt(prev => prev + `, ${style} style`)} className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${i === 0 ? 'bg-primary/20 border border-primary/40 text-primary' : 'bg-white/5 border border-border text-muted-foreground hover:bg-white/10'}`}>
                                             {style}
                                         </button>
                                     ))}
@@ -724,7 +696,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                             )}
 
                             {/* Input Bar */}
-                            <div className="relative flex items-end gap-2 bg-[#1a1f2e] border border-white/10 rounded-2xl p-2 pl-4 shadow-xl">
+                            <div className="relative flex items-end gap-2 bg-card border border-border rounded-2xl p-2 pl-4 shadow-xl">
                                 <textarea
                                     value={prompt}
                                     onChange={(e) => setPrompt(e.target.value)}
@@ -735,7 +707,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                             handleGenerate();
                                         }
                                     }}
-                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-200 placeholder-slate-500 py-3 resize-none max-h-32 disabled:opacity-50"
+                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground py-3 resize-none max-h-32 disabled:opacity-50"
                                     placeholder={
                                         activeMode === 'TEXT' ? "Describe a futuristic city with neon lights..." :
                                             activeMode === 'IMG2IMG' ? "Describe how to transform the reference image..." :
@@ -747,7 +719,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                 <button
                                     onClick={handleGenerate}
                                     disabled={isGenerating || (activeMode === 'TEXT' && !prompt) || (activeMode === 'UPSCALE' && !uploadedImage)}
-                                    className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/40 flex-shrink-0 hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                                    className="w-12 h-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/40 flex-shrink-0 hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                                 >
                                     <span className="material-icons-round">{isGenerating ? 'hourglass_empty' : 'send'}</span>
                                 </button>
@@ -766,7 +738,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                 >
                     <button
                         onClick={() => setShowPreview(false)}
-                        className="absolute top-4 right-4 p-3 glass rounded-lg text-white hover:bg-white/10 transition-colors z-10"
+                        className="absolute top-4 right-4 p-3 glass rounded-lg text-foreground hover:bg-white/10 transition-colors z-10"
                         title="Close Preview"
                     >
                         <span className="material-icons-round">close</span>
@@ -776,7 +748,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                             e.stopPropagation();
                             handleDownload();
                         }}
-                        className="absolute top-4 right-20 p-3 glass rounded-lg text-white hover:bg-white/10 transition-colors z-10"
+                        className="absolute top-4 right-20 p-3 glass rounded-lg text-foreground hover:bg-white/10 transition-colors z-10"
                         title="Download Image"
                     >
                         <span className="material-icons-round">download</span>

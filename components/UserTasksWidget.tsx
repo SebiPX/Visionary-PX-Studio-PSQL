@@ -19,7 +19,7 @@ interface Task {
 }
 
 const statusColors: Record<string, string> = {
-    'todo': 'text-slate-400 bg-slate-800/80 border-slate-600',
+    'todo': 'text-muted-foreground bg-card/80 border-border/80',
     'in_progress': 'text-blue-400 bg-blue-500/10 border-blue-500/30',
     'review': 'text-purple-400 bg-purple-500/10 border-purple-500/30',
     'done': 'text-green-400 bg-green-500/10 border-green-500/30',
@@ -104,7 +104,7 @@ export const UserTasksWidget: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 flex items-center justify-center h-32">
+            <div className="bg-card/60 border border-border rounded-2xl p-5 flex items-center justify-center h-32">
                 <div className="w-8 h-8 border-4 border-[#135bec] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
@@ -112,21 +112,21 @@ export const UserTasksWidget: React.FC = () => {
 
     if (tasks.length === 0) {
         return (
-            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-5">
+            <div className="bg-card/60 border border-border rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-4">
                     <LayoutList size={18} className="text-blue-400" />
-                    <h2 className="font-semibold text-white">Meine ProjectFlow Tasks</h2>
+                    <h2 className="font-semibold text-foreground">Meine ProjectFlow Tasks</h2>
                 </div>
-                <p className="text-sm text-slate-500 text-center py-4">Keine offenen Tasks zugewiesen. Gut gemacht!</p>
+                <p className="text-sm text-muted-foreground text-center py-4">Keine offenen Tasks zugewiesen. Gut gemacht!</p>
             </div>
         );
     }
 
     return (
         <>
-            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
-                    <h2 className="font-semibold text-white flex items-center gap-2">
+            <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+                    <h2 className="font-semibold text-foreground flex items-center gap-2">
                         <LayoutList size={18} className="text-blue-400" />
                         Meine ProjectFlow Tasks
                         <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/20">
@@ -134,7 +134,7 @@ export const UserTasksWidget: React.FC = () => {
                         </span>
                     </h2>
                 </div>
-                <div className="divide-y divide-slate-700/60 max-h-[300px] overflow-y-auto w-full relative">
+                <div className="divide-y divide-border/60 max-h-[300px] overflow-y-auto w-full relative">
                     {tasks.map(task => {
                         const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed' && task.status !== 'done';
                         const colorClass = statusColors[task.status] || statusColors['todo'];
@@ -143,16 +143,16 @@ export const UserTasksWidget: React.FC = () => {
                         const hasDescription = !!task.description?.trim();
 
                         return (
-                            <div key={task.id} className="px-5 py-3 hover:bg-slate-700/30 transition-colors group border-b border-slate-700/50 last:border-0">
+                            <div key={task.id} className="px-5 py-3 hover:bg-muted/30 transition-colors group border-b border-border/50 last:border-0">
                              <div className="flex items-center justify-between">
                                 <div className="flex flex-col items-start gap-1 flex-1 min-w-0 pr-4">
                                     <div className="min-w-0 flex-1 w-full flex justify-between items-start">
                                         <div className="flex items-center gap-2">
-                                            <p className="text-sm text-white font-medium truncate">{task.title}</p>
+                                            <p className="text-sm text-foreground font-medium truncate">{task.title}</p>
                                             {hasDescription && (
                                                 <button 
                                                     onClick={() => toggleExpand(task.id)}
-                                                    className="text-slate-500 hover:text-blue-400 transition-colors flex items-center gap-1"
+                                                    className="text-muted-foreground hover:text-blue-400 transition-colors flex items-center gap-1"
                                                     title="Beschreibung umschalten"
                                                 >
                                                     <AlignLeft size={14} />
@@ -161,10 +161,10 @@ export const UserTasksWidget: React.FC = () => {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
+                                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                                         <span className="truncate max-w-[150px]">{task.project?.title || 'Unknown Project'}</span>
                                         {task.due_date && (
-                                            <div className={`flex items-center gap-1 font-medium ${isOverdue ? 'text-red-400' : 'text-slate-500'}`}>
+                                            <div className={`flex items-center gap-1 font-medium ${isOverdue ? 'text-red-400' : 'text-muted-foreground'}`}>
                                                 <Clock size={12} />
                                                 {new Date(task.due_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short' })}
                                             </div>
@@ -189,7 +189,7 @@ export const UserTasksWidget: React.FC = () => {
 
                                     <button 
                                         onClick={() => setSelectedTaskForTime(task)}
-                                        className="text-slate-400 hover:text-green-400 hover:bg-green-400/10 p-1.5 rounded-full transition-colors"
+                                        className="text-muted-foreground hover:text-green-400 hover:bg-green-400/10 p-1.5 rounded-full transition-colors"
                                         title="Zeit erfassen"
                                     >
                                         <PlayCircle size={18} />
@@ -199,7 +199,7 @@ export const UserTasksWidget: React.FC = () => {
                              
                              {/* Anzeigebereich für die Beschreibung, falls ausgeklappt */}
                              {isExpanded && hasDescription && (
-                                 <div className="mt-3 text-sm text-slate-300 bg-slate-900/60 p-3 rounded-lg border border-slate-700/60 whitespace-pre-wrap leading-relaxed mr-2">
+                                 <div className="mt-3 text-sm text-foreground/90 bg-card/60 p-3 rounded-lg border border-border/60 whitespace-pre-wrap leading-relaxed mr-2">
                                      {task.description}
                                  </div>
                              )}

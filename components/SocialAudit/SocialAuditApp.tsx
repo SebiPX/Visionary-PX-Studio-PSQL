@@ -14,44 +14,44 @@ export const SocialAuditApp: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#101622] text-slate-100 overflow-hidden relative">
+    <div className="w-full h-full flex flex-col bg-background text-foreground overflow-hidden relative">
       {/* Top Header */}
-      <div className="flex bg-[#161f30] border-b border-white/5 px-6 py-4 items-center justify-between z-10">
+      <div className="flex bg-card border-b border-border/50 px-6 py-4 items-center justify-between z-10">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center neon-glow">
             <span className="material-icons-round">troubleshoot</span>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white tracking-tight">Social Audit Agent</h2>
-            <p className="text-xs text-slate-400">KI-gestützte Social Media Analyse</p>
+            <h2 className="text-xl font-bold text-foreground tracking-tight">Social Audit Agent</h2>
+            <p className="text-xs text-muted-foreground">KI-gestützte Social Media Analyse</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2 bg-[#0a0f18] p-1 rounded-xl border border-white/5">
+        <div className="flex items-center gap-2 bg-card p-1 rounded-xl border border-border/50">
             <button 
               onClick={() => setActiveTab('ACCOUNTS')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'ACCOUNTS' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:text-white'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'ACCOUNTS' ? 'bg-indigo-500/20 text-indigo-400' : 'text-muted-foreground hover:text-foreground'}`}
             >
               Accounts
             </button>
             <button 
               onClick={() => setActiveTab('DASHBOARD')}
               disabled={!selectedAccountId}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'DASHBOARD' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:text-white'} disabled:opacity-30`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'DASHBOARD' ? 'bg-indigo-500/20 text-indigo-400' : 'text-muted-foreground hover:text-foreground'} disabled:opacity-30`}
             >
               Dashboard
             </button>
             <button 
               onClick={() => setActiveTab('INSIGHTS')}
               disabled={!selectedAccountId}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'INSIGHTS' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:text-white'} disabled:opacity-30`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'INSIGHTS' ? 'bg-indigo-500/20 text-indigo-400' : 'text-muted-foreground hover:text-foreground'} disabled:opacity-30`}
             >
               AI Insights
             </button>
             <button 
               onClick={() => setActiveTab('REPORTS')}
               disabled={!selectedAccountId}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'REPORTS' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-400 hover:text-white'} disabled:opacity-30`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'REPORTS' ? 'bg-indigo-500/20 text-indigo-400' : 'text-muted-foreground hover:text-foreground'} disabled:opacity-30`}
             >
               AI Reports
             </button>

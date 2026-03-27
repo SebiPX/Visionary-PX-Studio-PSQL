@@ -27,7 +27,7 @@ export function RoleBadge({ role }: RoleBadgeProps) {
   const isAdmin = role === 'admin'
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-      isAdmin ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-slate-500/20 text-slate-300 border border-slate-500/30'
+      isAdmin ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-muted-foreground/20 text-foreground/90 border border-slate-500/30'
     }`}>
       {isAdmin ? 'Admin' : role}
     </span>

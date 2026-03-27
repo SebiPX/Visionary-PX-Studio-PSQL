@@ -146,21 +146,21 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
     };
 
     return (
-        <div className="h-full flex flex-col md:flex-row bg-[#080c14] relative overflow-hidden">
-            <div className="w-[400px] border-r border-[#1E293B] bg-[#0F172A] flex flex-col p-6 overflow-y-auto">
+        <div className="h-full flex flex-col md:flex-row bg-background relative overflow-hidden">
+            <div className="w-[400px] border-r border-[#1E293B] bg-card flex flex-col p-6 overflow-y-auto">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <Sparkles className="w-6 h-6 text-white" />
+                        <Sparkles className="w-6 h-6 text-foreground" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-200">i2Audio Studio</h2>
-                        <p className="text-xs text-slate-400">Animate Image with Audio</p>
+                        <h2 className="text-xl font-bold text-foreground">i2Audio Studio</h2>
+                        <p className="text-xs text-muted-foreground">Animate Image with Audio</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleGenerate} className="flex-1 flex flex-col gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Reference Image</label>
+                        <label className="block text-sm font-medium text-foreground/90 mb-2">Reference Image</label>
                         {imageUrl ? (
                             <div className="relative w-full h-32 rounded-xl overflow-hidden border border-[#334155] mb-2 group">
                                 <img src={imageUrl} alt="Upload preview" className="w-full h-full object-cover" />
@@ -169,7 +169,7 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
                                     onClick={() => setImageUrl(null)}
                                     className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                    <Trash2 className="w-6 h-6 text-white" />
+                                    <Trash2 className="w-6 h-6 text-foreground" />
                                 </button>
                             </div>
                         ) : (
@@ -177,18 +177,18 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => handleFileUpload(e, 'IMAGE')}
-                                className="w-full bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3 text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
+                                className="w-full bg-card border border-[#334155] rounded-xl px-4 py-3 text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-foreground hover:file:bg-indigo-500 cursor-pointer"
                             />
                         )}
-                        <p className="text-xs text-slate-500 mt-1">Ein Portrait-Bild (16:9, 1:1 oder 9:16)</p>
+                        <p className="text-xs text-muted-foreground mt-1">Ein Portrait-Bild (16:9, 1:1 oder 9:16)</p>
                     </div>
                     
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Voice Audio File</label>
+                        <label className="block text-sm font-medium text-foreground/90 mb-2">Voice Audio File</label>
                         {audioUrl ? (
-                            <div className="flex items-center justify-between bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3">
+                            <div className="flex items-center justify-between bg-card border border-[#334155] rounded-xl px-4 py-3">
                                 <span className="text-indigo-400 text-sm truncate max-w-[200px]">Audio wurde geladen</span>
-                                <button type="button" onClick={() => setAudioUrl(null)} className="text-slate-400 hover:text-red-400">
+                                <button type="button" onClick={() => setAudioUrl(null)} className="text-muted-foreground hover:text-red-400">
                                     <Trash2 className="w-5 h-5" />
                                 </button>
                             </div>
@@ -197,19 +197,19 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
                                 type="file"
                                 accept="audio/*"
                                 onChange={(e) => handleFileUpload(e, 'AUDIO')}
-                                className="w-full bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3 text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
+                                className="w-full bg-card border border-[#334155] rounded-xl px-4 py-3 text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-foreground hover:file:bg-indigo-500 cursor-pointer"
                             />
                         )}
-                        <p className="text-xs text-slate-500 mt-1">Upload an audio file (MP3, WAV)</p>
+                        <p className="text-xs text-muted-foreground mt-1">Upload an audio file (MP3, WAV)</p>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Prompt Setup</label>
+                        <label className="block text-sm font-medium text-foreground/90 mb-2">Prompt Setup</label>
                         <textarea
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                             placeholder="Describe how the speaker should act..."
-                            className="w-full h-40 bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors resize-none"
+                            className="w-full h-40 bg-card border border-[#334155] rounded-xl px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors resize-none"
                         />
                     </div>
 
@@ -217,7 +217,7 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
                         <button
                             type="submit"
                             disabled={isGenerating || !imageUrl || !audioUrl}
-                            className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-foreground rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
                         >
                             {isGenerating ? (
                                 <>
@@ -240,18 +240,18 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
                     {/* Video Player Area */}
                     <div className="flex-1 flex flex-col items-center justify-center">
                         {currentVideo ? (
-                            <div className="w-full max-w-2xl bg-[#0F172A] rounded-2xl p-4 shadow-xl border border-slate-800 flex flex-col gap-4">
+                            <div className="w-full max-w-2xl bg-card rounded-2xl p-4 shadow-xl border border-border flex flex-col gap-4">
                                 <video controls src={currentVideo} className="w-full rounded-lg bg-black" />
                                 <button
                                     onClick={(e) => handleDownload(e, currentVideo, 'animated.mp4')}
-                                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg flex items-center justify-center gap-2 transition-colors mx-auto"
+                                    className="px-4 py-2 bg-secondary hover:bg-muted-foreground/20 text-foreground text-sm rounded-lg flex items-center justify-center gap-2 transition-colors mx-auto"
                                 >
                                     <Download className="w-4 h-4" />
                                     Video Herunterladen
                                 </button>
                             </div>
                         ) : (
-                            <div className="text-center text-slate-500">
+                            <div className="text-center text-muted-foreground">
                                 <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-20" />
                                 <p>Bereit das Video zu generieren</p>
                             </div>
@@ -259,9 +259,9 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
                     </div>
                     
                     {/* Status Console Area */}
-                    <div className="w-full lg:w-80 bg-[#0F172A] rounded-2xl border border-slate-800 p-4 shadow-xl flex flex-col h-[400px]">
-                         <p className="text-xs font-semibold text-slate-400 mb-2 uppercase">Status Logs</p>
-                         <div className="flex-1 overflow-y-auto flex flex-col-reverse space-y-1 space-y-reverse text-xs text-slate-300 font-mono">
+                    <div className="w-full lg:w-80 bg-card rounded-2xl border border-border p-4 shadow-xl flex flex-col h-[400px]">
+                         <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase">Status Logs</p>
+                         <div className="flex-1 overflow-y-auto flex flex-col-reverse space-y-1 space-y-reverse text-xs text-foreground/90 font-mono">
                              {logs.map((log, idx) => (
                                  <div key={idx} className="opacity-80">&gt; {log}</div>
                              ))}
@@ -270,21 +270,21 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
                 </div>
 
                 {/* History Bar */}
-                <div className="h-64 border-t border-[#1E293B] bg-[#0F172A] p-6 overflow-x-auto flex flex-col">
+                <div className="h-64 border-t border-[#1E293B] bg-card p-6 overflow-x-auto flex flex-col">
                     <div className="flex items-center gap-2 mb-4">
-                        <PlayCircle className="w-5 h-5 text-slate-400" />
-                        <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Erstellte Videos</h3>
+                        <PlayCircle className="w-5 h-5 text-muted-foreground" />
+                        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Erstellte Videos</h3>
                     </div>
 
                     {historyLoading ? (
-                        <div className="flex items-center gap-2 text-slate-500">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                             <Loader2 className="w-4 h-4 animate-spin" />
                             <span className="text-sm">Lade Historie...</span>
                         </div>
                     ) : (
                         <div className="flex gap-4 pb-2">
                             {history.length > 0 ? history.map((item: any) => (
-                                <div key={item.id} className="min-w-[300px] w-[300px] bg-[#1E293B] rounded-xl p-4 border border-[#334155] flex flex-col hover:border-indigo-500/50 transition-colors group">
+                                <div key={item.id} className="min-w-[300px] w-[300px] bg-card rounded-xl p-4 border border-[#334155] flex flex-col hover:border-indigo-500/50 transition-colors group">
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex items-center gap-2 text-indigo-400">
                                             <PlayCircle className="w-4 h-4" />
@@ -292,24 +292,24 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
                                         </div>
                                         <button
                                             onClick={(e) => handleDelete(item.id, e)}
-                                            className="p-1.5 rounded-lg text-slate-500 hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
+                                            className="p-1.5 rounded-lg text-muted-foreground hover:bg-red-500 hover:text-foreground transition-opacity opacity-0 group-hover:opacity-100"
                                             title="Delete track"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
-                                    <p className="text-xs text-slate-300 line-clamp-2 italic flex-1 mb-3">"{item.prompt}"</p>
+                                    <p className="text-xs text-foreground/90 line-clamp-2 italic flex-1 mb-3">"{item.prompt}"</p>
                                     <video src={item.video_url} className="h-16 w-full object-cover rounded bg-black mb-3 cursor-pointer" onClick={() => setCurrentVideo(item.video_url)} />
                                     
                                     <button
                                         onClick={(e) => handleDownload(e, item.video_url, 'i2audio-video.mp4')}
-                                        className="w-full py-1.5 bg-[#334155] hover:bg-indigo-500 text-white text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
+                                        className="w-full py-1.5 bg-[#334155] hover:bg-indigo-500 text-foreground text-xs rounded-lg transition-colors flex items-center justify-center gap-1"
                                     >
                                         <Download className="w-3 h-3" /> Herunterladen
                                     </button>
                                 </div>
                             )) : (
-                                <p className="text-sm text-slate-500 italic">Noch keine Videos generiert.</p>
+                                <p className="text-sm text-muted-foreground italic">Noch keine Videos generiert.</p>
                             )}
                         </div>
                     )}

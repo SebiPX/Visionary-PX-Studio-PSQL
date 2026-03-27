@@ -31,13 +31,13 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-card border border-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="p-6 border-b border-white/10 flex justify-between items-center">
-                    <h2 className="text-2xl font-bold text-white">Edit Shot</h2>
+                <div className="p-6 border-b border-border flex justify-between items-center">
+                    <h2 className="text-2xl font-bold text-foreground">Edit Shot</h2>
                     <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-white transition-colors"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
                     >
                         <span className="material-icons-round">close</span>
                     </button>
@@ -47,47 +47,47 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                     {/* Basis-Informationen */}
                     <section>
-                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                             <span className="material-icons-round text-primary">info</span>
                             Basis-Informationen
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Szene & Shot-Nummer</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Szene & Shot-Nummer</label>
                                 <input
                                     type="text"
                                     value={editedShot.scene_number}
                                     onChange={(e) => updateField('scene_number', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                     placeholder="z.B. 4A"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Location</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Location</label>
                                 <input
                                     type="text"
                                     value={editedShot.location}
                                     onChange={(e) => updateField('location', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                     placeholder="Innen/Außen, spezifischer Ort"
                                 />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm text-slate-400 mb-2">Titel</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Titel</label>
                                 <input
                                     type="text"
                                     value={editedShot.title}
                                     onChange={(e) => updateField('title', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                     placeholder="Kurzbeschreibung"
                                 />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm text-slate-400 mb-2">Beschreibung</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Beschreibung</label>
                                 <textarea
                                     value={editedShot.description}
                                     onChange={(e) => updateField('description', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white resize-none"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground resize-none"
                                     rows={3}
                                     placeholder="Was passiert in diesem Moment?"
                                 />
@@ -97,38 +97,38 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
 
                     {/* Dialog */}
                     <section>
-                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                             <span className="material-icons-round text-primary">record_voice_over</span>
                             Dialog / Gesprochener Text
                         </h3>
                         <div>
-                            <label className="block text-sm text-slate-400 mb-2">
-                                Format: <span className="text-white font-mono text-xs">ACTORNAME: Text</span>
+                            <label className="block text-sm text-muted-foreground mb-2">
+                                Format: <span className="text-foreground font-mono text-xs">ACTORNAME: Text</span>
                             </label>
                             <textarea
                                 value={editedShot.dialog || ''}
                                 onChange={(e) => updateField('dialog', e.target.value)}
-                                className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white resize-none font-mono text-sm"
+                                className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground resize-none font-mono text-sm"
                                 rows={4}
                                 placeholder={"ACTOR1: Hallo, mein Freund! Wie geht's?\nACTOR2: Was geht dich das an?"}
                             />
-                            <p className="text-xs text-slate-500 mt-1">Eine Zeile pro Sprechakt. Leer lassen wenn kein Dialog.</p>
+                            <p className="text-xs text-muted-foreground mt-1">Eine Zeile pro Sprechakt. Leer lassen wenn kein Dialog.</p>
                         </div>
                     </section>
 
                     {/* Visuelle Gestaltung */}
                     <section>
-                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                             <span className="material-icons-round text-primary">videocam</span>
                             Visuelle Gestaltung (Kamera & Bild)
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Einstellungsgröße (Framing)</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Einstellungsgröße (Framing)</label>
                                 <select
                                     value={editedShot.framing}
                                     onChange={(e) => updateField('framing', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                 >
                                     <option value="extreme-wide-shot">Extreme Wide Shot</option>
                                     <option value="wide-shot">Wide Shot / Totale</option>
@@ -139,11 +139,11 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Kameraperspektive</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Kameraperspektive</label>
                                 <select
                                     value={editedShot.camera_angle}
                                     onChange={(e) => updateField('camera_angle', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                 >
                                     <option value="eye-level">Augenhöhe (Eye-Level)</option>
                                     <option value="high-angle">Vogelperspektive (High Angle)</option>
@@ -153,11 +153,11 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Kamerabewegung</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Kamerabewegung</label>
                                 <select
                                     value={editedShot.camera_movement}
                                     onChange={(e) => updateField('camera_movement', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                 >
                                     <option value="static">Statisch (Stativ)</option>
                                     <option value="pan">Pan (Schwenk)</option>
@@ -170,12 +170,12 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Objektiv/Brennweite</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Objektiv/Brennweite</label>
                                 <input
                                     type="text"
                                     value={editedShot.focal_length}
                                     onChange={(e) => updateField('focal_length', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                     placeholder="z.B. 24mm, 50mm, 85mm"
                                 />
                             </div>
@@ -184,17 +184,17 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
 
                     {/* Technische & Logistische Details */}
                     <section>
-                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                             <span className="material-icons-round text-primary">settings</span>
                             Technische & Logistische Details
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Lichtstimmung</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Lichtstimmung</label>
                                 <select
                                     value={editedShot.lighting}
                                     onChange={(e) => updateField('lighting', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                 >
                                     <option value="day">Tag</option>
                                     <option value="night">Nacht</option>
@@ -204,32 +204,32 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Voraussichtliche Dauer (Minuten)</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Voraussichtliche Dauer (Minuten)</label>
                                 <input
                                     type="number"
                                     value={editedShot.estimated_duration}
                                     onChange={(e) => updateField('estimated_duration', parseInt(e.target.value) || 0)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                     min="0"
                                 />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm text-slate-400 mb-2">Equipment</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Equipment</label>
                                 <input
                                     type="text"
                                     value={editedShot.equipment}
                                     onChange={(e) => updateField('equipment', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                     placeholder="Gimbal, Kran, Filter, etc."
                                 />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm text-slate-400 mb-2">Audio-Notizen</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Audio-Notizen</label>
                                 <input
                                     type="text"
                                     value={editedShot.audio_notes}
                                     onChange={(e) => updateField('audio_notes', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                     placeholder="Dialog, MOS (Motor Only Shot), etc."
                                 />
                             </div>
@@ -238,27 +238,27 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
 
                     {/* Storyboard-spezifisch */}
                     <section>
-                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                             <span className="material-icons-round text-primary">draw</span>
                             Storyboard-spezifisch
                         </h3>
                         <div className="grid grid-cols-1 gap-4">
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Bewegungsnotizen</label>
+                                <label className="block text-sm text-muted-foreground mb-2">Bewegungsnotizen</label>
                                 <textarea
                                     value={editedShot.movement_notes}
                                     onChange={(e) => updateField('movement_notes', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white resize-none"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground resize-none"
                                     rows={2}
                                     placeholder="Pfeile für Bewegung (Kamera oder Schauspieler)"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">VFX-Notizen</label>
+                                <label className="block text-sm text-muted-foreground mb-2">VFX-Notizen</label>
                                 <textarea
                                     value={editedShot.vfx_notes}
                                     onChange={(e) => updateField('vfx_notes', e.target.value)}
-                                    className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white resize-none"
+                                    className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground resize-none"
                                     rows={2}
                                     placeholder="Green Screen, digitale Effekte, etc."
                                 />
@@ -268,17 +268,17 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
 
                     {/* Shot-Dauer */}
                     <section>
-                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                             <span className="material-icons-round text-primary">schedule</span>
                             Shot-Dauer
                         </h3>
                         <div>
-                            <label className="block text-sm text-slate-400 mb-2">Dauer (Sekunden)</label>
+                            <label className="block text-sm text-muted-foreground mb-2">Dauer (Sekunden)</label>
                             <input
                                 type="number"
                                 value={editedShot.duration}
                                 onChange={(e) => updateField('duration', parseInt(e.target.value) || 0)}
-                                className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white"
+                                className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground"
                                 min="0"
                             />
                         </div>
@@ -286,14 +286,14 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
 
                     {/* Zusätzliche Notizen */}
                     <section>
-                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                             <span className="material-icons-round text-primary">note</span>
                             Zusätzliche Notizen
                         </h3>
                         <textarea
                             value={editedShot.notes}
                             onChange={(e) => updateField('notes', e.target.value)}
-                            className="w-full bg-slate-800/50 border border-white/10 rounded-lg px-3 py-2 text-white resize-none"
+                            className="w-full bg-muted/50 border border-border rounded-lg px-3 py-2 text-foreground resize-none"
                             rows={3}
                             placeholder="Weitere Anmerkungen..."
                         />
@@ -301,16 +301,16 @@ export const ShotEditor: React.FC<ShotEditorProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-white/10 flex justify-end gap-3">
+                <div className="p-6 border-t border-border flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-all"
+                        className="px-6 py-2.5 bg-secondary hover:bg-muted-foreground/20 text-foreground font-semibold rounded-lg transition-all"
                     >
                         Abbrechen
                     </button>
                     <button
                         onClick={handleSave}
-                        className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-all flex items-center gap-2"
+                        className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-foreground font-semibold rounded-lg transition-all flex items-center gap-2"
                     >
                         <span className="material-icons-round text-sm">save</span>
                         Speichern

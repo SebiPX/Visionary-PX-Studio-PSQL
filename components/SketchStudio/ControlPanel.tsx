@@ -23,11 +23,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   isGenerating,
 }) => {
   return (
-    <div className="bg-slate-900/30 backdrop-blur-sm border border-slate-800/50 rounded-xl p-6 flex flex-col gap-6 h-full overflow-y-auto">
+    <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl p-6 flex flex-col gap-6 h-full overflow-y-auto">
 
       {/* Context Selection */}
       <div>
-        <label className="block text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+        <label className="block text-sm font-semibold text-foreground/90 mb-3 flex items-center gap-2">
           <span className="material-icons-round text-[#135bec]">category</span>
           Subject Context
         </label>
@@ -37,8 +37,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               key={key}
               onClick={() => setContext(value)}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${context === value
-                ? 'bg-[#135bec] text-white shadow-lg shadow-[#135bec]/50'
-                : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                ? 'bg-card text-foreground shadow-lg shadow-[#135bec]/50'
+                : 'bg-muted/50 text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
                 }`}
             >
               {value}
@@ -49,7 +49,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
       {/* Style Selection */}
       <div>
-        <label className="block text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+        <label className="block text-sm font-semibold text-foreground/90 mb-3 flex items-center gap-2">
           <span className="material-icons-round text-[#135bec]">palette</span>
           Artistic Style
         </label>
@@ -59,8 +59,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               key={key}
               onClick={() => setStyle(value)}
               className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${style === value
-                ? 'bg-[#135bec] text-white shadow-lg shadow-[#135bec]/50'
-                : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                ? 'bg-card text-foreground shadow-lg shadow-[#135bec]/50'
+                : 'bg-muted/50 text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
                 }`}
             >
               {value}
@@ -71,7 +71,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
       {/* Aspect Ratio Selection */}
       <div>
-        <label className="block text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+        <label className="block text-sm font-semibold text-foreground/90 mb-3 flex items-center gap-2">
           <span className="material-icons-round text-[#135bec]">aspect_ratio</span>
           Aspect Ratio
         </label>
@@ -79,8 +79,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <button
             onClick={() => setAspectRatio('1:1')}
             className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-lg transition-all ${aspectRatio === '1:1'
-                ? 'bg-[#135bec] text-white shadow-lg shadow-[#135bec]/50'
-                : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                ? 'bg-card text-foreground shadow-lg shadow-[#135bec]/50'
+                : 'bg-muted/50 text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
               }`}
           >
             <span className="material-icons-round">crop_square</span>
@@ -89,8 +89,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <button
             onClick={() => setAspectRatio('16:9')}
             className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-lg transition-all ${aspectRatio === '16:9'
-                ? 'bg-[#135bec] text-white shadow-lg shadow-[#135bec]/50'
-                : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                ? 'bg-card text-foreground shadow-lg shadow-[#135bec]/50'
+                : 'bg-muted/50 text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
               }`}
           >
             <span className="material-icons-round">crop_landscape</span>
@@ -99,8 +99,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <button
             onClick={() => setAspectRatio('9:16')}
             className={`flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-lg transition-all ${aspectRatio === '9:16'
-                ? 'bg-[#135bec] text-white shadow-lg shadow-[#135bec]/50'
-                : 'bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                ? 'bg-card text-foreground shadow-lg shadow-[#135bec]/50'
+                : 'bg-muted/50 text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
               }`}
           >
             <span className="material-icons-round">crop_portrait</span>
@@ -114,8 +114,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         onClick={onGenerate}
         disabled={isGenerating}
         className={`mt-auto py-4 px-6 rounded-lg font-bold text-lg transition-all flex items-center justify-center gap-2 ${isGenerating
-          ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-          : 'bg-gradient-to-r from-[#135bec] to-[#0d4bb8] text-white hover:shadow-lg hover:shadow-[#135bec]/50 hover:scale-105'
+          ? 'bg-secondary text-muted-foreground cursor-not-allowed'
+          : 'bg-gradient-to-r from-[#135bec] to-[#0d4bb8] text-foreground hover:shadow-lg hover:shadow-[#135bec]/50 hover:scale-105'
           }`}
       >
         {isGenerating ? (
@@ -132,7 +132,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       </button>
 
       {/* Info */}
-      <div className="text-xs text-slate-500 text-center">
+      <div className="text-xs text-muted-foreground text-center">
         <p>Draw your sketch on the canvas, then click Generate to transform it into a photorealistic image.</p>
       </div>
     </div>

@@ -248,11 +248,11 @@ const DrawingCanvas = forwardRef<CanvasRef, DrawingCanvasProps>(({ onCanvasReady
   return (
     <div className="flex flex-col h-full w-full gap-4">
       {/* Toolbar */}
-      <div className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg shadow-md border border-slate-700/50">
+      <div className="flex items-center justify-between p-2 bg-muted/50 rounded-lg shadow-md border border-border/50">
         <div className="flex gap-2">
           <button
             onClick={() => setTool('pen')}
-            className={`p-2 rounded transition-colors ${tool === 'pen' ? 'bg-[#135bec] text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+            className={`p-2 rounded transition-colors ${tool === 'pen' ? 'bg-card text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             title="Pen"
           >
@@ -260,14 +260,14 @@ const DrawingCanvas = forwardRef<CanvasRef, DrawingCanvasProps>(({ onCanvasReady
           </button>
           <button
             onClick={() => setTool('eraser')}
-            className={`p-2 rounded transition-colors ${tool === 'eraser' ? 'bg-[#135bec] text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+            className={`p-2 rounded transition-colors ${tool === 'eraser' ? 'bg-card text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             title="Eraser"
           >
             <span className="material-icons-round">auto_fix_high</span>
           </button>
 
-          <div className="w-px h-8 bg-slate-700 mx-2"></div>
+          <div className="w-px h-8 bg-secondary mx-2"></div>
 
           <input
             type="range"
@@ -275,18 +275,18 @@ const DrawingCanvas = forwardRef<CanvasRef, DrawingCanvasProps>(({ onCanvasReady
             max="20"
             value={lineWidth}
             onChange={(e) => setLineWidth(Number(e.target.value))}
-            className="w-24 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer self-center accent-[#135bec]"
+            className="w-24 h-2 bg-secondary rounded-lg appearance-none cursor-pointer self-center accent-[#135bec]"
             title="Brush Size"
           />
 
-          <div className="w-px h-8 bg-slate-700 mx-2"></div>
+          <div className="w-px h-8 bg-secondary mx-2"></div>
 
           <button
             onClick={handleUndo}
             disabled={historyStep <= 0}
             className={`p-2 rounded transition-colors ${historyStep <= 0
-              ? 'text-slate-600 cursor-not-allowed'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              ? 'text-muted-foreground/80 cursor-not-allowed'
+              : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             title="Undo (Ctrl+Z)"
           >
@@ -296,8 +296,8 @@ const DrawingCanvas = forwardRef<CanvasRef, DrawingCanvasProps>(({ onCanvasReady
             onClick={handleRedo}
             disabled={historyStep >= history.length - 1}
             className={`p-2 rounded transition-colors ${historyStep >= history.length - 1
-              ? 'text-slate-600 cursor-not-allowed'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+              ? 'text-muted-foreground/80 cursor-not-allowed'
+              : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
               }`}
             title="Redo (Ctrl+Y)"
           >
@@ -315,7 +315,7 @@ const DrawingCanvas = forwardRef<CanvasRef, DrawingCanvasProps>(({ onCanvasReady
       </div>
 
       {/* Canvas Area */}
-      <div ref={containerRef} className="flex-1 relative bg-white rounded-lg overflow-hidden shadow-inner cursor-crosshair border-2 border-dashed border-slate-700/50 hover:border-[#135bec]/50 transition-colors">
+      <div ref={containerRef} className="flex-1 relative bg-white rounded-lg overflow-hidden shadow-inner cursor-crosshair border-2 border-dashed border-border/50 hover:border-[#135bec]/50 transition-colors">
         <canvas
           ref={canvasRef}
           onMouseDown={startDrawing}
@@ -327,7 +327,7 @@ const DrawingCanvas = forwardRef<CanvasRef, DrawingCanvasProps>(({ onCanvasReady
           onTouchMove={draw}
           className="absolute top-0 left-0 w-full h-full touch-none"
         />
-        <div className="absolute bottom-2 right-2 pointer-events-none text-slate-300 text-xs opacity-50 bg-black/10 px-2 py-1 rounded">
+        <div className="absolute bottom-2 right-2 pointer-events-none text-foreground/90 text-xs opacity-50 bg-black/10 px-2 py-1 rounded">
           Draw here
         </div>
       </div>

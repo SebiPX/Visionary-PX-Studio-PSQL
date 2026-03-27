@@ -34,8 +34,8 @@ export function LoanForm({ itemId, itemName, profiles, currentUserId, onSave, on
 
   const selectedProfile = profiles.find(p => p.id === profileId)
 
-  const inputCls = 'w-full px-3 py-2.5 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all'
-  const labelCls = 'block text-xs font-medium text-slate-400 mb-1'
+  const inputCls = 'w-full px-3 py-2.5 bg-card border border-border/80 rounded-xl text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-brand-500/20 transition-all'
+  const labelCls = 'block text-xs font-medium text-muted-foreground mb-1'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -56,9 +56,9 @@ export function LoanForm({ itemId, itemName, profiles, currentUserId, onSave, on
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="p-3 bg-brand-500/10 border border-brand-500/20 rounded-xl">
-        <p className="text-xs text-brand-300 font-medium">Gerät</p>
-        <p className="text-white font-semibold mt-0.5">{itemName}</p>
+      <div className="p-3 bg-primary-500/10 border border-primary-500/20 rounded-xl">
+        <p className="text-xs text-primary-300 font-medium">Gerät</p>
+        <p className="text-foreground font-semibold mt-0.5">{itemName}</p>
       </div>
 
       {/* Mitarbeiter aus profiles */}
@@ -101,12 +101,12 @@ export function LoanForm({ itemId, itemName, profiles, currentUserId, onSave, on
         <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} className={inputCls} />
       </div>
 
-      <div className="flex gap-3 pt-2 border-t border-slate-700">
-        <button type="button" onClick={onCancel} className="flex-1 py-2.5 rounded-xl border border-slate-600 text-slate-300 text-sm hover:bg-slate-700 transition-colors">
+      <div className="flex gap-3 pt-2 border-t border-border">
+        <button type="button" onClick={onCancel} className="flex-1 py-2.5 rounded-xl border border-border/80 text-foreground/90 text-sm hover:bg-muted transition-colors">
           Abbrechen
         </button>
         <button type="submit" disabled={loading || (!profileId && !customName)}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:opacity-60 text-white text-sm font-medium transition-colors">
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:opacity-60 text-foreground text-sm font-medium transition-colors">
           <Save size={16} />
           {loading ? 'Speichert …' : 'Ausleihe erfassen'}
         </button>

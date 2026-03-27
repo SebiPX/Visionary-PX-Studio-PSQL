@@ -394,12 +394,12 @@ export const ChatBot: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col md:flex-row bg-[#080c14] overflow-hidden">
+    <div className="h-full flex flex-col md:flex-row bg-background overflow-hidden">
 
       {/* Sidebar: Persona Selector */}
-      <aside className="w-full md:w-72 bg-glass border-b md:border-b-0 md:border-r border-white/5 z-20 flex flex-col order-2 md:order-1 flex-shrink-0">
+      <aside className="w-full md:w-72 bg-card border-r border-border border-b md:border-b-0 md:border-r border-border/50 z-20 flex flex-col order-2 md:order-1 flex-shrink-0">
         <div className="p-6 pb-2" ref={dropdownRef}>
-          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">AI Persona</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">AI Persona</h3>
           <div className="relative">
             {/* Active Persona Button */}
             <button
@@ -407,22 +407,22 @@ export const ChatBot: React.FC = () => {
               className="w-full text-left p-3 rounded-xl border bg-primary/10 border-primary/50 flex items-center justify-between transition-all"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary text-white">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary text-primary-foreground">
                   <span className="material-icons-round text-sm">{activePersona.icon}</span>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-white">{activePersona.name}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">{activePersona.desc}</p>
+                  <p className="text-xs font-bold text-foreground">{activePersona.name}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{activePersona.desc}</p>
                 </div>
               </div>
-              <span className="material-icons-round text-slate-400 text-sm">
+              <span className="material-icons-round text-muted-foreground text-sm">
                 {isPersonaDropdownOpen ? 'expand_less' : 'expand_more'}
               </span>
             </button>
 
             {/* Dropdown Menu */}
             {isPersonaDropdownOpen && (
-              <div className="absolute top-full left-0 w-full mt-2 bg-[#0c121e] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden">
+              <div className="absolute top-full left-0 w-full mt-2 bg-card border border-border rounded-xl shadow-2xl z-50 overflow-hidden">
                 <div className="max-h-64 overflow-y-auto hide-scrollbar p-2 space-y-1">
                   {PERSONAS.map(p => (
                     <button
@@ -433,12 +433,12 @@ export const ChatBot: React.FC = () => {
                       }}
                       className={`w-full text-left p-2.5 rounded-lg transition-colors flex items-start gap-3 ${activePersona.id === p.id ? 'bg-primary/20 bg-opacity-50' : 'hover:bg-white/5'}`}
                     >
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${activePersona.id === p.id ? 'bg-primary text-white' : 'bg-white/10 text-slate-400'}`}>
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${activePersona.id === p.id ? 'bg-primary text-primary-foreground' : 'bg-white/10 text-muted-foreground'}`}>
                         <span className="material-icons-round text-xs">{p.icon}</span>
                       </div>
                       <div className="min-w-0">
-                        <p className={`text-[11px] font-bold ${activePersona.id === p.id ? 'text-white' : 'text-slate-300'}`}>{p.name}</p>
-                        <p className="text-[9px] text-slate-500 mt-0.5 truncate">{p.desc}</p>
+                        <p className={`text-[11px] font-bold ${activePersona.id === p.id ? 'text-foreground' : 'text-foreground/90'}`}>{p.name}</p>
+                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">{p.desc}</p>
                       </div>
                     </button>
                   ))}
@@ -449,9 +449,9 @@ export const ChatBot: React.FC = () => {
         </div>
 
         {/* Chat History */}
-        <div className="flex-1 overflow-y-auto hide-scrollbar p-6 pt-4 border-t border-white/5 mt-4">
+        <div className="flex-1 overflow-y-auto hide-scrollbar p-6 pt-4 border-t border-border/50 mt-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Chat History</h3>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Chat History</h3>
             <button
               onClick={startNewChat}
               className="text-xs text-primary hover:text-primary-hover flex items-center gap-1"
@@ -465,22 +465,22 @@ export const ChatBot: React.FC = () => {
             <div className="space-y-6">
               {groupChatHistory(chatSessions).map(group => (
                 <div key={group.label} className="space-y-2">
-                  <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest pl-1">{group.label}</h4>
+                  <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest pl-1">{group.label}</h4>
                   {group.sessions.map((session) => (
                     <button
                       key={session.id}
                       onClick={() => loadSession(session)}
-                      className={`w-full text-left p-3 rounded-lg border transition-all ${currentSessionId === session.id ? 'bg-primary/10 border-primary/50' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
+                      className={`w-full text-left p-3 rounded-lg border transition-all ${currentSessionId === session.id ? 'bg-primary/10 border-primary/50' : 'bg-white/5 border-border/50 hover:bg-white/10'}`}
                     >
                       <div className="flex items-start gap-2">
-                        <span className="material-icons-round text-xs text-slate-400 mt-0.5">
+                        <span className="material-icons-round text-xs text-muted-foreground mt-0.5">
                           {PERSONAS.find(p => p.id === session.bot_id)?.icon || 'chat'}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs text-slate-300 font-medium truncate">
+                          <p className="text-xs text-foreground/90 font-medium truncate">
                             {session.title || 'Untitled Chat'}
                           </p>
-                          <p className="text-[10px] text-slate-500 mt-1">
+                          <p className="text-[10px] text-muted-foreground mt-1">
                             {new Date(session.created_at).toLocaleDateString()}
                           </p>
                         </div>
@@ -492,39 +492,39 @@ export const ChatBot: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <span className="material-icons-round text-slate-600 text-2xl mb-2">chat_bubble_outline</span>
-              <p className="text-xs text-slate-500">No chat history yet</p>
+              <span className="material-icons-round text-muted-foreground/80 text-2xl mb-2">chat_bubble_outline</span>
+              <p className="text-xs text-muted-foreground">No chat history yet</p>
             </div>
           )}
         </div>
       </aside>
 
       {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col order-1 md:order-2 relative min-w-0 bg-gradient-to-b from-[#080c14] to-[#101622]">
+      <main className="flex-1 flex flex-col order-1 md:order-2 relative min-w-0 bg-background">
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 hide-scrollbar">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-2 ${msg.role === 'user' ? 'bg-white text-black' : 'bg-primary text-white'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-2 ${msg.role === 'user' ? 'bg-foreground text-background' : 'bg-primary text-primary-foreground'}`}>
                 <span className="material-icons-round text-sm">{msg.role === 'user' ? 'person' : 'auto_awesome'}</span>
               </div>
-              <div className={`max-w-[85%] md:max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed ${msg.role === 'user' ? 'bg-white text-black rounded-tr-none whitespace-pre-wrap' : 'glass-card text-slate-200 rounded-tl-none border-white/10'}`}>
+              <div className={`max-w-[85%] md:max-w-[70%] p-4 rounded-2xl text-sm leading-relaxed ${msg.role === 'user' ? 'bg-foreground text-background rounded-tr-none whitespace-pre-wrap' : 'glass-card text-foreground rounded-tl-none border-border'}`}>
                 {msg.role === 'user' ? msg.text : (
                   <ReactMarkdown
                     components={{
-                      h1: ({ children }) => <h1 className="text-base font-bold text-white mb-2 mt-1">{children}</h1>,
-                      h2: ({ children }) => <h2 className="text-sm font-bold text-white mb-1.5 mt-3">{children}</h2>,
-                      h3: ({ children }) => <h3 className="text-sm font-semibold text-slate-200 mb-1 mt-2">{children}</h3>,
-                      p: ({ children }) => <p className="mb-2 last:mb-0 text-slate-200">{children}</p>,
-                      ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-2 text-slate-300">{children}</ul>,
-                      ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-2 text-slate-300">{children}</ol>,
+                      h1: ({ children }) => <h1 className="text-base font-bold text-foreground mb-2 mt-1">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-sm font-bold text-foreground mb-1.5 mt-3">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-sm font-semibold text-foreground mb-1 mt-2">{children}</h3>,
+                      p: ({ children }) => <p className="mb-2 last:mb-0 text-foreground">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-2 text-foreground/90">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-2 text-foreground/90">{children}</ol>,
                       li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                      strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
-                      em: ({ children }) => <em className="italic text-slate-300">{children}</em>,
+                      strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+                      em: ({ children }) => <em className="italic text-foreground/90">{children}</em>,
                       code: ({ children }) => <code className="bg-black/40 text-primary px-1.5 py-0.5 rounded text-xs font-mono">{children}</code>,
-                      blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 my-2 text-slate-400 italic">{children}</blockquote>,
-                      hr: () => <hr className="border-white/10 my-3" />,
+                      blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 my-2 text-muted-foreground italic">{children}</blockquote>,
+                      hr: () => <hr className="border-border my-3" />,
                       a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{children}</a>,
                     }}
                   >
@@ -536,10 +536,10 @@ export const ChatBot: React.FC = () => {
           ))}
           {isTyping && (
             <div className="flex gap-4">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-2 bg-primary text-white">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-2 bg-primary text-primary-foreground">
                 <span className="material-icons-round text-sm">auto_awesome</span>
               </div>
-              <div className="p-4 rounded-2xl rounded-tl-none glass-card border-white/10 flex items-center gap-1">
+              <div className="p-4 rounded-2xl rounded-tl-none glass-card border-border flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-100"></span>
                 <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce delay-200"></span>
@@ -550,8 +550,8 @@ export const ChatBot: React.FC = () => {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 md:p-6 bg-[#101622] border-t border-white/5 z-20">
-          <div className="max-w-4xl mx-auto relative flex items-end gap-2 bg-[#0a0f18] border border-white/10 rounded-2xl p-2 shadow-xl">
+        <div className="p-4 md:p-6 bg-background border-t border-border/50 z-20">
+          <div className="max-w-4xl mx-auto relative flex items-end gap-2 bg-card border border-border rounded-2xl p-2 shadow-xl">
             <input
               type="file"
               accept="image/*"
@@ -560,18 +560,18 @@ export const ChatBot: React.FC = () => {
               onChange={handleFileUpload}
             />
             <button 
-              className="w-10 h-10 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex-shrink-0 flex items-center justify-center"
+              className="w-10 h-10 rounded-xl hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 flex items-center justify-center"
               onClick={() => fileInputRef.current?.click()}
             >
               <span className="material-icons-round">add_circle</span>
             </button>
             <div className="flex-1 flex flex-col justify-end">
               {uploadedImage && (
-                <div className="mb-2 relative w-20 h-20 rounded-lg overflow-hidden border border-white/20 shadow-md">
+                <div className="mb-2 relative w-20 h-20 rounded-lg overflow-hidden border border-border/80 shadow-md">
                   <img src={uploadedImage} alt="Upload preview" className="w-full h-full object-cover" />
                   <button 
                     onClick={() => setUploadedImage(null)}
-                    className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-500/80 transition-colors"
+                    className="absolute top-1 right-1 bg-black/60 text-foreground rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-500/80 transition-colors"
                   >
                     <span className="material-icons-round" style={{ fontSize: '14px' }}>close</span>
                   </button>
@@ -587,20 +587,20 @@ export const ChatBot: React.FC = () => {
                 }
               }}
               placeholder={`Message ${activePersona.name}...`}
-              className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-slate-200 placeholder-slate-500 py-3 resize-none max-h-32 hide-scrollbar"
+              className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground py-3 resize-none max-h-32 hide-scrollbar"
               rows={1}
               />
             </div>
             <button
               onClick={handleSend}
               disabled={!inputText.trim() || isTyping}
-              className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0 hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+              className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0 hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
             >
               <span className="material-icons-round text-sm">send</span>
             </button>
           </div>
           <div className="text-center mt-2">
-            <p className="text-[10px] text-slate-600">AI can make mistakes. Please verify important information.</p>
+            <p className="text-[10px] text-muted-foreground/80">AI can make mistakes. Please verify important information.</p>
           </div>
         </div>
       </main>

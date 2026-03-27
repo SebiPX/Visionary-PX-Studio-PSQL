@@ -34,12 +34,12 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={e => { if (e.target === overlayRef.current) onClose() }}
     >
-      <div className={`w-full ${sizeClasses[size]} bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]`}>
-        <div className="flex items-center justify-between p-6 border-b border-slate-700 shrink-0">
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
+      <div className={`w-full ${sizeClasses[size]} bg-card border border-border rounded-2xl shadow-2xl flex flex-col max-h-[90vh]`}>
+        <div className="flex items-center justify-between p-6 border-b border-border shrink-0">
+          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <X size={18} />
           </button>

@@ -18,17 +18,17 @@ export const PxCreativeApp: React.FC = () => {
   }, [fetchProjects]);
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#101622] text-slate-100 overflow-hidden relative">
+    <div className="w-full h-full flex flex-col bg-background text-foreground overflow-hidden relative">
       {/* Top Header */}
-      <div className="flex bg-[#161f30] border-b border-white/5 px-6 py-4 items-center justify-between z-10">
+      <div className="flex bg-card border-b border-border/50 px-6 py-4 items-center justify-between z-10">
         <div className="flex items-center gap-3">
           {/* Title removed since side navigation shows current context */}
         </div>
         
         {currentProject && (
           <div className="flex items-center gap-4">
-            <div className="text-sm text-slate-400">
-              Editing: <span className="text-white font-medium">{currentProject.title}</span>
+            <div className="text-sm text-muted-foreground">
+              Editing: <span className="text-foreground font-medium">{currentProject.title}</span>
             </div>
             <button 
               onClick={() => setCurrentProject(null)}

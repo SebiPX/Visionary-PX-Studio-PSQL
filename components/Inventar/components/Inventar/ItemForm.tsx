@@ -91,8 +91,8 @@ export function ItemForm({ item, profiles = [], onSave, onCancel }: ItemFormProp
     setSaving(false)
   }
 
-  const inputCls = 'w-full px-3 py-2.5 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all'
-  const labelCls = 'block text-xs font-medium text-slate-400 mb-1'
+  const inputCls = 'w-full px-3 py-2.5 bg-card border border-border/80 rounded-xl text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-brand-500/20 transition-all'
+  const labelCls = 'block text-xs font-medium text-muted-foreground mb-1'
   const selectCls = inputCls + ' cursor-pointer'
 
   return (
@@ -103,20 +103,20 @@ export function ItemForm({ item, profiles = [], onSave, onCancel }: ItemFormProp
         <div className="flex gap-4 items-start">
           {imagePreview ? (
             <div className="relative">
-              <img src={imagePreview} alt="Vorschau" className="w-24 h-24 object-cover rounded-xl border border-slate-600" />
+              <img src={imagePreview} alt="Vorschau" className="w-24 h-24 object-cover rounded-xl border border-border/80" />
               <button type="button" onClick={() => { setImagePreview(null); setImageFile(null) }}
-                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white">
+                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-foreground">
                 <X size={12} />
               </button>
             </div>
           ) : (
-            <label className="w-24 h-24 border-2 border-dashed border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-brand-500 transition-colors text-slate-500 hover:text-brand-400">
+            <label className="w-24 h-24 border-2 border-dashed border-border/80 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 transition-colors text-muted-foreground hover:text-primary-400">
               <Upload size={20} />
               <span className="text-xs mt-1">Bild</span>
               <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
           )}
-          <p className="text-xs text-slate-500 pt-2">JPG, PNG, WebP bis 5 MB</p>
+          <p className="text-xs text-muted-foreground pt-2">JPG, PNG, WebP bis 5 MB</p>
         </div>
       </div>
 
@@ -210,22 +210,22 @@ export function ItemForm({ item, profiles = [], onSave, onCancel }: ItemFormProp
       <div className="flex gap-6">
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={form.px_eigentum} onChange={e => set('px_eigentum', e.target.checked)}
-            className="w-4 h-4 rounded border-slate-600 bg-slate-900 accent-brand-500" />
-          <span className="text-sm text-slate-300">PX Eigentum</span>
+            className="w-4 h-4 rounded border-border/80 bg-card accent-brand-500" />
+          <span className="text-sm text-foreground/90">PX Eigentum</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={form.is_verleihartikel} onChange={e => set('is_verleihartikel', e.target.checked)}
-            className="w-4 h-4 rounded border-slate-600 bg-slate-900 accent-brand-500" />
-          <span className="text-sm text-slate-300">Verleihartikel</span>
+            className="w-4 h-4 rounded border-border/80 bg-card accent-brand-500" />
+          <span className="text-sm text-foreground/90">Verleihartikel</span>
         </label>
       </div>
 
       {/* Buttons */}
-      <div className="flex gap-3 pt-2 border-t border-slate-700">
-        <button type="button" onClick={onCancel} className="flex-1 py-2.5 rounded-xl border border-slate-600 text-slate-300 text-sm font-medium hover:bg-slate-700 transition-colors">
+      <div className="flex gap-3 pt-2 border-t border-border">
+        <button type="button" onClick={onCancel} className="flex-1 py-2.5 rounded-xl border border-border/80 text-foreground/90 text-sm font-medium hover:bg-muted transition-colors">
           Abbrechen
         </button>
-        <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-60 text-white text-sm font-medium transition-colors">
+        <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-500 disabled:opacity-60 text-foreground text-sm font-medium transition-colors">
           <Save size={16} />
           {loading ? 'Speichert …' : (item ? 'Speichern' : 'Anlegen')}
         </button>

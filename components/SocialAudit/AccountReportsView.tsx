@@ -102,11 +102,11 @@ Formatiere die Antwort in sauberem Markdown. Keine Begrüßungen, direkt der Rep
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-white">Account Historie & Reports</h3>
+        <h3 className="text-xl font-bold text-foreground">Account Historie & Reports</h3>
         <button 
           onClick={handleGenerateReport}
           disabled={generating || loading}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 disabled:opacity-50"
+          className="bg-indigo-600 hover:bg-indigo-700 text-foreground px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 disabled:opacity-50"
         >
           {generating ? (
              <span className="material-icons-round text-sm animate-spin">refresh</span>
@@ -118,26 +118,26 @@ Formatiere die Antwort in sauberem Markdown. Keine Begrüßungen, direkt der Rep
       </div>
 
       {reports.length === 0 && !loading && (
-        <div className="text-center py-12 border border-white/5 border-dashed rounded-xl bg-white/5">
-          <span className="material-icons-round text-slate-500 text-4xl mb-4">history</span>
-          <p className="text-slate-400">Noch keine Wachstums-Reports für diesen Account verfasst.</p>
+        <div className="text-center py-12 border border-border/50 border-dashed rounded-xl bg-white/5">
+          <span className="material-icons-round text-muted-foreground text-4xl mb-4">history</span>
+          <p className="text-muted-foreground">Noch keine Wachstums-Reports für diesen Account verfasst.</p>
         </div>
       )}
 
       <div className="space-y-6">
         {reports.map((report) => (
-          <div key={report.id} className="glass-card p-6 rounded-xl border border-white/5 relative pl-8">
+          <div key={report.id} className="glass-card p-6 rounded-xl border border-border/50 relative pl-8">
             <div className="absolute left-[15px] top-6 bottom-[-24px] w-px bg-white/10 last:hidden"></div>
             <div className="absolute left-[11px] top-6 w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
             
             <div className="flex justify-between items-start mb-4">
                <div>
-                  <h4 className="font-bold text-white text-lg">{report.report_type}</h4>
-                  <p className="text-xs text-slate-400">{new Date(report.generated_at).toLocaleString()}</p>
+                  <h4 className="font-bold text-foreground text-lg">{report.report_type}</h4>
+                  <p className="text-xs text-muted-foreground">{new Date(report.generated_at).toLocaleString()}</p>
                </div>
             </div>
             
-            <div className="prose prose-invert prose-sm max-w-none text-slate-300">
+            <div className="prose prose-invert prose-sm max-w-none text-foreground/90">
                {/* Extremely simple Markdown renderer for the demo. In a real app we'd use react-markdown */}
                {report.report_text.split('\n\n').map((paragraph: string, i: number) => {
                   if (paragraph.startsWith('-')) {
@@ -150,7 +150,7 @@ Formatiere die Antwort in sauberem Markdown. Keine Begrüßungen, direkt der Rep
                      );
                   }
                   if (paragraph.startsWith('###')) {
-                     return <h5 key={i} className="text-white font-bold mt-4 mb-2">{paragraph.replace(/^### /, '')}</h5>;
+                     return <h5 key={i} className="text-foreground font-bold mt-4 mb-2">{paragraph.replace(/^### /, '')}</h5>;
                   }
                   return <p key={i} className="mb-4">{paragraph}</p>;
                })}

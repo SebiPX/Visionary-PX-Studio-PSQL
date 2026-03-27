@@ -42,19 +42,19 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
     };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-[#101622] p-4">
+        <div className="min-h-screen w-full flex items-center justify-center bg-background p-4">
             <div className="w-full max-w-md">
                 {/* Logo/Title */}
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-[#135bec] to-[#4a90ff] bg-clip-text text-transparent mb-2">
                         Visionary PX Studio
                     </h1>
-                    <p className="text-slate-400">Create the Future</p>
+                    <p className="text-muted-foreground">Create the Future</p>
                 </div>
 
                 {/* Signup Card */}
-                <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl shadow-[#135bec]/10">
-                    <h2 className="text-2xl font-semibold text-slate-100 mb-6">Create Account</h2>
+                <div className="bg-muted/40 backdrop-blur-xl border border-border/50 rounded-2xl p-8 shadow-2xl shadow-[#135bec]/10">
+                    <h2 className="text-2xl font-semibold text-foreground mb-6">Create Account</h2>
 
                     {success ? (
                         <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-4 text-green-400 text-center">
@@ -65,7 +65,7 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Full Name Input */}
                             <div>
-                                <label htmlFor="fullName" className="block text-sm font-medium text-slate-300 mb-2">
+                                <label htmlFor="fullName" className="block text-sm font-medium text-foreground/90 mb-2">
                                     Full Name
                                 </label>
                                 <input
@@ -74,14 +74,14 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
                                     required
-                                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#135bec] focus:border-transparent transition-all"
+                                    className="w-full px-4 py-3 bg-card/50 border border-border/80/50 rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#135bec] focus:border-transparent transition-all"
                                     placeholder="John Doe"
                                 />
                             </div>
 
                             {/* Email Input */}
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
+                                <label htmlFor="email" className="block text-sm font-medium text-foreground/90 mb-2">
                                     Email
                                 </label>
                                 <input
@@ -90,14 +90,14 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#135bec] focus:border-transparent transition-all"
+                                    className="w-full px-4 py-3 bg-card/50 border border-border/80/50 rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#135bec] focus:border-transparent transition-all"
                                     placeholder="you@example.com"
                                 />
                             </div>
 
                             {/* Password Input */}
                             <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
+                                <label htmlFor="password" className="block text-sm font-medium text-foreground/90 mb-2">
                                     Password
                                 </label>
                                 <input
@@ -106,10 +106,10 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#135bec] focus:border-transparent transition-all"
+                                    className="w-full px-4 py-3 bg-card/50 border border-border/80/50 rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#135bec] focus:border-transparent transition-all"
                                     placeholder="••••••••"
                                 />
-                                <p className="text-xs text-slate-500 mt-1">Minimum 6 characters</p>
+                                <p className="text-xs text-muted-foreground mt-1">Minimum 6 characters</p>
                             </div>
 
                             {/* Error Message */}
@@ -123,7 +123,7 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-3 bg-gradient-to-r from-[#135bec] to-[#4a90ff] text-white font-semibold rounded-lg shadow-lg shadow-[#135bec]/30 hover:shadow-[#135bec]/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full py-3 bg-gradient-to-r from-[#135bec] to-[#4a90ff] text-foreground font-semibold rounded-lg shadow-lg shadow-[#135bec]/30 hover:shadow-[#135bec]/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? 'Creating Account...' : 'Sign Up'}
                             </button>
@@ -133,7 +133,7 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
                     {/* Switch to Login */}
                     {!success && (
                         <div className="mt-6 text-center">
-                            <p className="text-slate-400 text-sm">
+                            <p className="text-muted-foreground text-sm">
                                 Already have an account?{' '}
                                 <button
                                     onClick={onSwitchToLogin}

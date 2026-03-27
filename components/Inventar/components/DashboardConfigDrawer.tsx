@@ -19,8 +19,8 @@ function Toggle({ checked, onChange, label, sub }: {
   return (
     <label className="flex items-center justify-between gap-3 py-3 cursor-pointer group">
       <div>
-        <p className="text-sm font-medium text-white group-hover:text-blue-300 transition-colors">{label}</p>
-        {sub && <p className="text-xs text-slate-500 mt-0.5">{sub}</p>}
+        <p className="text-sm font-medium text-foreground group-hover:text-blue-300 transition-colors">{label}</p>
+        {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
       </div>
       <button
         type="button"
@@ -28,7 +28,7 @@ function Toggle({ checked, onChange, label, sub }: {
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 transition-colors duration-200 focus:outline-none ${
-          checked ? 'bg-blue-600 border-blue-600' : 'bg-slate-700 border-slate-600'
+          checked ? 'bg-blue-600 border-blue-600' : 'bg-muted border-border/80'
         }`}
       >
         <span className={`inline-block h-4 w-4 mt-0.5 rounded-full bg-white shadow transition-transform duration-200 ${
@@ -99,11 +99,11 @@ export function DashboardConfigDrawer({
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-slate-900 border-l border-slate-700 z-50 flex flex-col shadow-2xl">
+      <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-card border-l border-border z-50 flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700 shrink-0">
-          <h2 className="font-semibold text-white text-base">Dashboard anpassen</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors p-1 rounded">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
+          <h2 className="font-semibold text-foreground text-base">Dashboard anpassen</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded">
             <X size={18} />
           </button>
         </div>
@@ -113,10 +113,10 @@ export function DashboardConfigDrawer({
 
           {/* ── Widgets ─────────────────────────────────────────────────── */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1 flex items-center gap-2">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1 flex items-center gap-2">
               <BarChart2 size={12} /> Widgets
             </h3>
-            <div className="divide-y divide-slate-800">
+            <div className="divide-y divide-border">
               <Toggle
                 label="Interne Links"
                 sub="Link-Kacheln im Dashboard"
@@ -148,7 +148,7 @@ export function DashboardConfigDrawer({
           {draft.show_links && allLinkCategories.length > 0 && (
             <section>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                   <Link2 size={12} /> Sichtbare Link-Kategorien
                 </h3>
                 <button
@@ -166,13 +166,13 @@ export function DashboardConfigDrawer({
                       key={cat}
                       onClick={() => toggleCategory(cat)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left ${
-                        active ? 'bg-blue-600/20 text-blue-300 border border-blue-500/20' : 'text-slate-400 hover:bg-slate-800'
+                        active ? 'bg-blue-600/20 text-blue-300 border border-blue-500/20' : 'text-muted-foreground hover:bg-card'
                       }`}
                     >
                       <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                        active ? 'bg-blue-600 border-blue-600' : 'border-slate-600'
+                        active ? 'bg-blue-600 border-blue-600' : 'border-border/80'
                       }`}>
-                        {active && <Check size={10} className="text-white" />}
+                        {active && <Check size={10} className="text-foreground" />}
                       </span>
                       {cat}
                     </button>
@@ -185,17 +185,17 @@ export function DashboardConfigDrawer({
           {/* ── Pinned Logins ────────────────────────────────────────────── */}
           {allLogins.length > 0 && (
             <section>
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2 flex items-center gap-2">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2 flex items-center gap-2">
                 <Key size={12} /> Logins anpinnen
               </h3>
-              <p className="text-xs text-slate-500 mb-3">Angeheftete Logins werden als Widget im Dashboard angezeigt.</p>
+              <p className="text-xs text-muted-foreground mb-3">Angeheftete Logins werden als Widget im Dashboard angezeigt.</p>
               <div className="relative mb-2">
-                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   value={loginSearch}
                   onChange={e => setLoginSearch(e.target.value)}
                   placeholder="Logins suchen…"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-card border border-border rounded-lg pl-8 pr-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
@@ -206,16 +206,16 @@ export function DashboardConfigDrawer({
                       key={login.id}
                       onClick={() => toggleLogin(login.id)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left ${
-                        pinned ? 'bg-violet-600/20 text-violet-300 border border-violet-500/20' : 'text-slate-400 hover:bg-slate-800'
+                        pinned ? 'bg-violet-600/20 text-violet-300 border border-violet-500/20' : 'text-muted-foreground hover:bg-card'
                       }`}
                     >
                       <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                        pinned ? 'bg-violet-600 border-violet-600' : 'border-slate-600'
+                        pinned ? 'bg-violet-600 border-violet-600' : 'border-border/80'
                       }`}>
-                        {pinned && <Check size={10} className="text-white" />}
+                        {pinned && <Check size={10} className="text-foreground" />}
                       </span>
                       <span className="flex-1 truncate">{login.name || login.website || login.id}</span>
-                      {login.kategorie && <span className="text-xs text-slate-600 shrink-0">{login.kategorie}</span>}
+                      {login.kategorie && <span className="text-xs text-muted-foreground/80 shrink-0">{login.kategorie}</span>}
                     </button>
                   )
                 })}
@@ -225,17 +225,17 @@ export function DashboardConfigDrawer({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-slate-700 shrink-0 flex gap-3">
+        <div className="px-5 py-4 border-t border-border shrink-0 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 rounded-xl border border-slate-700 text-sm text-slate-300 hover:bg-slate-800 transition-colors"
+            className="flex-1 px-4 py-2 rounded-xl border border-border text-sm text-foreground/90 hover:bg-card transition-colors"
           >
             Abbrechen
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-foreground text-sm font-semibold transition-colors disabled:opacity-50"
           >
             {saving ? 'Speichern…' : 'Speichern'}
           </button>

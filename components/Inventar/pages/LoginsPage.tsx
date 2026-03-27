@@ -13,7 +13,7 @@ interface Props {
 
 const KATEGORIEN = ['Alle', 'Interne Logins', 'Externe Logins', 'Social Media']
 
-const inputCls = 'w-full px-2.5 py-1.5 bg-slate-900 border border-slate-600 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500'
+const inputCls = 'w-full px-2.5 py-1.5 bg-card border border-border/80 rounded-lg text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary-500'
 
 function emptyLogin(): Omit<Login, 'id' | 'created_at' | 'updated_at'> {
   return { name: '', website: '', login_name: '', passwort: '', anmerkung: '', kategorie: 'Interne Logins', department: '' }
@@ -22,15 +22,15 @@ function emptyLogin(): Omit<Login, 'id' | 'created_at' | 'updated_at'> {
 // Single-cell password reveal
 function PwCell({ value }: { value: string | null }) {
   const [show, setShow] = useState(false)
-  if (!value) return <span className="text-slate-600">–</span>
+  if (!value) return <span className="text-muted-foreground/80">–</span>
   return (
     <span className="flex items-center gap-1.5 font-mono text-sm">
       {show ? (
         <span className="text-emerald-300 select-all">{value}</span>
       ) : (
-        <span className="text-slate-500 tracking-widest">{'•'.repeat(Math.min(value.length, 12))}</span>
+        <span className="text-muted-foreground tracking-widest">{'•'.repeat(Math.min(value.length, 12))}</span>
       )}
-      <button onClick={() => setShow(s => !s)} className="text-slate-500 hover:text-slate-300 transition-colors shrink-0">
+      <button onClick={() => setShow(s => !s)} className="text-muted-foreground hover:text-foreground/90 transition-colors shrink-0">
         {show ? <EyeOff size={13} /> : <Eye size={13} />}
       </button>
     </span>
@@ -80,22 +80,22 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
     finally { setSaving(false) }
   }
 
-  const th = 'px-3 py-2.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider'
-  const td = 'px-3 py-2.5 text-sm text-slate-300 align-top'
+  const th = 'px-3 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider'
+  const td = 'px-3 py-2.5 text-sm text-foreground/90 align-top'
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <KeyRound size={24} className="text-brand-400" /> Logins & Passwörter
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
+            <KeyRound size={24} className="text-primary-400" /> Logins & Passwörter
           </h1>
-          <p className="text-slate-400 text-sm mt-1">{logins.length} Einträge — Passwörter nur für eingeloggte User sichtbar</p>
+          <p className="text-muted-foreground text-sm mt-1">{logins.length} Einträge — Passwörter nur für eingeloggte User sichtbar</p>
         </div>
         {isAdmin && (
           <button onClick={() => setAdding(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition-colors">
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-foreground text-sm font-semibold rounded-xl transition-colors">
             <Plus size={16} /> Neu
           </button>
         )}
@@ -105,11 +105,11 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
       <div className="flex flex-wrap gap-3">
         <input value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Suche nach Name, Website, Login …"
-          className="flex-1 min-w-56 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500" />
-        <div className="flex gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
+          className="flex-1 min-w-56 px-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary-500" />
+        <div className="flex gap-1 bg-card p-1 rounded-xl border border-border">
           {KATEGORIEN.map(k => (
             <button key={k} onClick={() => setKat(k)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${kat === k ? 'bg-brand-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${kat === k ? 'bg-primary-600 text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
               {k}
             </button>
           ))}
@@ -117,10 +117,10 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
       </div>
 
       {/* Table */}
-      <div className="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden">
+      <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-900/60 border-b border-slate-700">
+            <thead className="bg-card/60 border-b border-border">
               <tr>
                 <th className={th}>Name</th>
                 <th className={th}>Website</th>
@@ -132,10 +132,10 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
                 {isAdmin && <th className={th + ' w-20'}></th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700/50">
+            <tbody className="divide-y divide-border/50">
               {/* Add row */}
               {adding && (
-                <tr className="bg-brand-500/5">
+                <tr className="bg-primary-500/5">
                   {(['name','website','login_name','passwort','anmerkung','kategorie','department'] as const).map(f => (
                     <td key={f} className="px-2 py-1.5">
                       <input value={(newData[f] as string) || ''} onChange={e => setNewData(p => ({ ...p, [f]: e.target.value }))}
@@ -145,16 +145,16 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
                   <td className="px-2 py-1.5">
                     <div className="flex gap-1">
                       <button onClick={handleAdd} disabled={saving} className="p-1.5 text-emerald-400 hover:text-emerald-300"><Check size={15} /></button>
-                      <button onClick={() => setAdding(false)} className="p-1.5 text-slate-500 hover:text-slate-300"><X size={15} /></button>
+                      <button onClick={() => setAdding(false)} className="p-1.5 text-muted-foreground hover:text-foreground/90"><X size={15} /></button>
                     </div>
                   </td>
                 </tr>
               )}
               {filtered.length === 0 && (
-                <tr><td colSpan={8} className="text-center py-12 text-slate-500">Keine Einträge gefunden</td></tr>
+                <tr><td colSpan={8} className="text-center py-12 text-muted-foreground">Keine Einträge gefunden</td></tr>
               )}
               {filtered.map(l => (
-                <tr key={l.id} className="hover:bg-slate-700/20 transition-colors">
+                <tr key={l.id} className="hover:bg-muted/20 transition-colors">
                   {editId === l.id ? (
                     <>
                       {(['name','website','login_name','passwort','anmerkung','kategorie','department'] as const).map(f => (
@@ -166,42 +166,42 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
                       <td className="px-2 py-1.5">
                         <div className="flex gap-1">
                           <button onClick={saveEdit} disabled={saving} className="p-1.5 text-emerald-400 hover:text-emerald-300"><Check size={15} /></button>
-                          <button onClick={cancelEdit} className="p-1.5 text-slate-500 hover:text-slate-300"><X size={15} /></button>
+                          <button onClick={cancelEdit} className="p-1.5 text-muted-foreground hover:text-foreground/90"><X size={15} /></button>
                         </div>
                       </td>
                     </>
                   ) : (
                     <>
-                      <td className={td}><span className="font-medium text-white">{l.name || <span className="text-slate-600">–</span>}</span></td>
+                      <td className={td}><span className="font-medium text-foreground">{l.name || <span className="text-muted-foreground/80">–</span>}</span></td>
                       <td className={td}>
                         {l.website ? (
                           <a href={l.website.startsWith('http') ? l.website : `https://${l.website}`}
                             target="_blank" rel="noreferrer"
-                            className="text-brand-400 hover:text-brand-300 flex items-center gap-1 max-w-[180px] truncate">
+                            className="text-primary-400 hover:text-primary-300 flex items-center gap-1 max-w-[180px] truncate">
                             {l.website.replace(/https?:\/\//, '').slice(0, 30)}
                             <ExternalLink size={11} className="shrink-0" />
                           </a>
-                        ) : <span className="text-slate-600">–</span>}
+                        ) : <span className="text-muted-foreground/80">–</span>}
                       </td>
-                      <td className={td}><span className="font-mono text-xs text-slate-300">{l.login_name || <span className="text-slate-600">–</span>}</span></td>
+                      <td className={td}><span className="font-mono text-xs text-foreground/90">{l.login_name || <span className="text-muted-foreground/80">–</span>}</span></td>
                       <td className={td}><PwCell value={l.passwort} /></td>
-                      <td className={td}><span className="text-slate-400 text-xs max-w-[200px] block">{l.anmerkung || ''}</span></td>
+                      <td className={td}><span className="text-muted-foreground text-xs max-w-[200px] block">{l.anmerkung || ''}</span></td>
                       <td className={td}>
                         {l.kategorie && (
                           <span className={`text-xs px-2 py-0.5 rounded-full border
                             ${l.kategorie.includes('Intern') ? 'bg-sky-500/10 text-sky-300 border-sky-500/20'
                             : l.kategorie.includes('Social') ? 'bg-purple-500/10 text-purple-300 border-purple-500/20'
-                            : 'bg-slate-700 text-slate-300 border-slate-600'}`}>
+                            : 'bg-muted text-foreground/90 border-border/80'}`}>
                             {l.kategorie}
                           </span>
                         )}
                       </td>
-                      <td className={td}><span className="text-xs text-slate-500">{l.department || ''}</span></td>
+                      <td className={td}><span className="text-xs text-muted-foreground">{l.department || ''}</span></td>
                       {isAdmin && (
                         <td className={td}>
                           <div className="flex gap-1">
-                            <button onClick={() => startEdit(l)} className="p-1.5 text-slate-500 hover:text-brand-400 transition-colors"><Pencil size={13} /></button>
-                            <button onClick={() => handleDelete(l.id, l.name)} className="p-1.5 text-slate-500 hover:text-red-400 transition-colors"><Trash2 size={13} /></button>
+                            <button onClick={() => startEdit(l)} className="p-1.5 text-muted-foreground hover:text-primary-400 transition-colors"><Pencil size={13} /></button>
+                            <button onClick={() => handleDelete(l.id, l.name)} className="p-1.5 text-muted-foreground hover:text-red-400 transition-colors"><Trash2 size={13} /></button>
                           </div>
                         </td>
                       )}
@@ -212,7 +212,7 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
             </tbody>
           </table>
         </div>
-        <div className="px-4 py-2.5 border-t border-slate-700/50 text-xs text-slate-600">
+        <div className="px-4 py-2.5 border-t border-border/50 text-xs text-muted-foreground/80">
           {filtered.length} von {logins.length} Einträgen
         </div>
       </div>

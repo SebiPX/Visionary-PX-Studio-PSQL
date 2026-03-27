@@ -120,7 +120,7 @@ export const Studio3D: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full w-full bg-[#101622]">
+    <div className="flex h-full w-full bg-background">
       {/* Sidebar for Controls */}
       <div className="w-96 border-r border-[#1e293b] flex flex-col hide-scrollbar overflow-y-auto">
         <div className="p-6">
@@ -129,15 +129,15 @@ export const Studio3D: React.FC = () => {
               <span className="material-icons-round">view_in_ar</span>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">3D Studio</h2>
-              <p className="text-xs text-slate-400">Image-to-3D Object Synthesis</p>
+              <h2 className="text-xl font-bold text-foreground tracking-tight">3D Studio</h2>
+              <p className="text-xs text-muted-foreground">Image-to-3D Object Synthesis</p>
             </div>
           </div>
 
           <div className="space-y-6">
              {/* Upload Section */}
              <div>
-              <label className="text-sm font-medium text-slate-300 mb-2 block">Referenzbild (2D)</label>
+              <label className="text-sm font-medium text-foreground/90 mb-2 block">Referenzbild (2D)</label>
               
               {showPicker && (
                 <ImageSourcePicker
@@ -149,22 +149,22 @@ export const Studio3D: React.FC = () => {
 
               <div 
                 onClick={() => setShowPicker(true)}
-                className="group relative h-48 rounded-xl border-2 border-dashed border-white/10 bg-[#0a0f18] hover:border-primary/50 transition-colors cursor-pointer overflow-hidden flex items-center justify-center"
+                className="group relative h-48 rounded-xl border-2 border-dashed border-border bg-card hover:border-primary/50 transition-colors cursor-pointer overflow-hidden flex items-center justify-center"
               >
                 {sourceImage ? (
                   <>
                     <img src={sourceImage} alt="Reference" className="w-full h-full object-contain" />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="text-white bg-black/50 px-4 py-2 rounded-lg text-sm font-medium shadow-xl backdrop-blur-sm flex items-center gap-2">
+                      <span className="text-foreground bg-black/50 px-4 py-2 rounded-lg text-sm font-medium shadow-xl backdrop-blur-sm flex items-center gap-2">
                         <span className="material-icons-round">edit</span> Bild ändern
                       </span>
                     </div>
                   </>
                 ) : (
                   <div className="text-center">
-                    <span className="material-icons-round text-4xl text-slate-500 mb-2 group-hover:text-primary transition-colors">cloud_upload</span>
-                    <p className="text-sm text-slate-400 font-medium">Klicken zum Upload</p>
-                    <p className="text-xs text-slate-500 mt-1">PNG, JPG, WebP unterstützt</p>
+                    <span className="material-icons-round text-4xl text-muted-foreground mb-2 group-hover:text-primary transition-colors">cloud_upload</span>
+                    <p className="text-sm text-muted-foreground font-medium">Klicken zum Upload</p>
+                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WebP unterstützt</p>
                   </div>
                 )}
               </div>
@@ -174,7 +174,7 @@ export const Studio3D: React.FC = () => {
             <div className="pt-2">
               <button 
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <span className="material-icons-round text-lg transition-transform duration-300" style={{ transform: showAdvanced ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                   expand_more
@@ -183,19 +183,19 @@ export const Studio3D: React.FC = () => {
               </button>
               
               {showAdvanced && (
-                <div className="mt-4 space-y-4 p-4 bg-white/5 border border-white/5 rounded-xl">
+                <div className="mt-4 space-y-4 p-4 bg-white/5 border border-border/50 rounded-xl">
                   {/* Texture Size */}
                   <div>
                     <div className="flex justify-between mb-1">
-                      <label className="text-xs font-medium text-slate-300">Textur-Auflösung</label>
-                      <span className="text-xs text-slate-400">{textureSize}px</span>
+                      <label className="text-xs font-medium text-foreground/90">Textur-Auflösung</label>
+                      <span className="text-xs text-muted-foreground">{textureSize}px</span>
                     </div>
                     <div className="flex gap-2">
                       {[1024, 2048, 4096].map(val => (
                         <button
                           key={val}
                           onClick={() => setTextureSize(val as any)}
-                          className={`flex-1 py-1.5 text-xs rounded-md transition-colors ${textureSize === val ? 'bg-primary text-white font-medium' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}
+                          className={`flex-1 py-1.5 text-xs rounded-md transition-colors ${textureSize === val ? 'bg-primary text-primary-foreground font-medium' : 'bg-white/5 text-muted-foreground hover:bg-white/10'}`}
                         >
                           {val}
                         </button>
@@ -206,8 +206,8 @@ export const Studio3D: React.FC = () => {
                   {/* Polygon Count (Decimation) */}
                   <div>
                     <div className="flex justify-between mb-1">
-                      <label className="text-xs font-medium text-slate-300">Geometrie-Detail (Polygone)</label>
-                      <span className="text-xs text-slate-400">
+                      <label className="text-xs font-medium text-foreground/90">Geometrie-Detail (Polygone)</label>
+                      <span className="text-xs text-muted-foreground">
                         {decimationTarget === 50000 ? 'Low Poly' : decimationTarget === 100000 ? 'Medium' : 'High Poly'}
                       </span>
                     </div>
@@ -218,9 +218,9 @@ export const Studio3D: React.FC = () => {
                       step="50000"
                       value={decimationTarget}
                       onChange={(e) => setDecimationTarget(Number(e.target.value))}
-                      className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                      className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
                     />
-                    <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                    <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
                       <span>50k (Schneller)</span>
                       <span>500k (Detaillierter)</span>
                     </div>
@@ -229,8 +229,8 @@ export const Studio3D: React.FC = () => {
                   {/* Sampling Steps */}
                   <div>
                     <div className="flex justify-between mb-1">
-                      <label className="text-xs font-medium text-slate-300">KI Detail-Schritte</label>
-                      <span className="text-xs text-slate-400">{samplingSteps} Steps</span>
+                      <label className="text-xs font-medium text-foreground/90">KI Detail-Schritte</label>
+                      <span className="text-xs text-muted-foreground">{samplingSteps} Steps</span>
                     </div>
                     <input 
                       type="range" 
@@ -239,9 +239,9 @@ export const Studio3D: React.FC = () => {
                       step="2"
                       value={samplingSteps}
                       onChange={(e) => setSamplingSteps(Number(e.target.value))}
-                      className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                      className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
                     />
-                     <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                     <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
                       <span>10 (Draft)</span>
                       <span>24 (Hi-Res)</span>
                     </div>
@@ -250,11 +250,11 @@ export const Studio3D: React.FC = () => {
               )}
             </div>
 
-            <div className="pt-4 border-t border-white/5">
+            <div className="pt-4 border-t border-border/50">
               <button
                 onClick={handleGenerate}
                 disabled={!sourceImage || isGenerating}
-                className="w-full h-12 bg-primary hover:bg-blue-600 disabled:opacity-50 disabled:hover:bg-primary text-white font-medium rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+                className="w-full h-12 bg-primary hover:bg-blue-600 disabled:opacity-50 disabled:hover:bg-primary text-primary-foreground font-medium rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
                    <>
@@ -274,9 +274,9 @@ export const Studio3D: React.FC = () => {
       </div>
 
       {/* Main Canvas Area */}
-      <div className="flex-1 bg-[#0a0f18] relative overflow-hidden flex items-center justify-center">
+      <div className="flex-1 bg-card relative overflow-hidden flex items-center justify-center">
          {!sourceImage && !isGenerating && !generatedModelUrl && (
-            <div className="text-center text-slate-500 animate-pulse">
+            <div className="text-center text-muted-foreground animate-pulse">
                <span className="material-icons-round text-6xl mb-4 opacity-50 block">3d_rotation</span>
                <p className="font-medium text-lg">Lade ein Bild hoch, um es in 3D zu verwandeln.</p>
             </div>
@@ -292,10 +292,10 @@ export const Studio3D: React.FC = () => {
                   <span className="absolute inset-0 flex items-center justify-center material-icons-round text-primary/80">3d_rotation</span>
                 </div>
                 
-                <h3 className="text-white text-lg font-bold mb-2">Trellis arbeitet...</h3>
-                <p className="text-slate-400 text-sm mb-4 h-5 overflow-hidden">{statusText}</p>
+                <h3 className="text-foreground text-lg font-bold mb-2">Trellis arbeitet...</h3>
+                <p className="text-muted-foreground text-sm mb-4 h-5 overflow-hidden">{statusText}</p>
                 
-                <div className="w-full bg-[#1a2333] rounded-full h-2 shadow-inner overflow-hidden border border-white/5">
+                <div className="w-full bg-card rounded-full h-2 shadow-inner overflow-hidden border border-border/50">
                   <div 
                     className="bg-primary h-2 rounded-full transition-all duration-300 relative" 
                     style={{ width: `${progress}%` }}
@@ -325,10 +325,10 @@ export const Studio3D: React.FC = () => {
                <div className="absolute top-6 right-6 flex items-center gap-3">
                  <button 
                   onClick={() => window.open(generatedModelUrl, '_blank')}
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full shadow-xl backdrop-blur-md flex items-center gap-2 transition-colors"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-border rounded-full shadow-xl backdrop-blur-md flex items-center gap-2 transition-colors"
                  >
-                   <span className="material-icons-round text-sm text-slate-300">download</span>
-                   <span className="text-sm font-medium text-slate-300">Objekt Download (.glb)</span>
+                   <span className="material-icons-round text-sm text-foreground/90">download</span>
+                   <span className="text-sm font-medium text-foreground/90">Objekt Download (.glb)</span>
                  </button>
                </div>
             </div>

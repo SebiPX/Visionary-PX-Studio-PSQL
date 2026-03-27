@@ -183,91 +183,92 @@ export const TextEngine: React.FC = () => {
     };
 
     return (
-        <div className="h-full flex flex-col md:flex-row bg-[#080c14] overflow-hidden">
+        <div className="h-full flex flex-col md:flex-row bg-background overflow-hidden">
             {/* Sidebar Controls */}
-            <aside className="w-full md:w-80 bg-glass border-b md:border-b-0 md:border-r border-white/5 z-20 flex flex-col order-2 md:order-1 flex-shrink-0 h-full">
-                <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-6">
+            <aside className="w-full md:w-80 bg-card border-r border-border z-20 flex flex-col order-2 md:order-1 flex-shrink-0 h-full">
+                <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-8">
 
-                    {/* Platform Selector */}
-                    <div className="space-y-3">
-                        <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Platform</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {['Blog Post', 'Facebook', 'Instagram', 'LinkedIn'].map((type) => (
-                                <button
-                                    key={type}
-                                    onClick={() => {
-                                        setActivePlatform(type);
-                                        // If we have generated content for this platform, show it
-                                        if (allPlatformContent[type]) {
-                                            setContent(allPlatformContent[type]);
-                                        }
-                                    }}
-                                    className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-300 ${activePlatform === type ? 'bg-primary text-white shadow-lg' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'} ${allPlatformContent[type] ? 'ring-1 ring-green-500/30' : ''}`}
-                                >
-                                    {type}
-                                    {allPlatformContent[type] && (
-                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
+                    {/* Platform Selector as Pill */}
+                    <div className="bg-muted/50 p-1 rounded-xl grid grid-cols-2 gap-1">
+                        {['Blog Post', 'Facebook', 'Instagram', 'LinkedIn'].map((type) => (
+                            <button
+                                key={type}
+                                onClick={() => {
+                                    setActivePlatform(type);
+                                    if (allPlatformContent[type]) {
+                                        setContent(allPlatformContent[type]);
+                                    }
+                                }}
+                                className={`py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 ${activePlatform === type ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'} ${allPlatformContent[type] ? 'ring-1 ring-green-500/30' : ''}`}
+                            >
+                                {type}
+                                {allPlatformContent[type] && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                )}
+                            </button>
+                        ))}
                     </div>
 
-                    {/* Input Fields */}
+                    {/* Settings Group */}
                     <div className="space-y-4">
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Settings</h3>
+                        
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Core Topic</label>
+                            <label className="text-xs text-foreground/90">Core Topic</label>
                             <input
                                 type="text"
                                 value={topic}
                                 onChange={(e) => setTopic(e.target.value)}
-                                className="w-full bg-[#0a0f18] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-600"
+                                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-muted-foreground/80"
                                 placeholder="e.g. AI in Healthcare"
                             />
                         </div>
+
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Audience</label>
+                            <label className="text-xs text-foreground/90">Audience</label>
                             <input
                                 type="text"
                                 value={audience}
                                 onChange={(e) => setAudience(e.target.value)}
-                                className="w-full bg-[#0a0f18] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-1 focus:ring-primary outline-none placeholder:text-slate-600"
+                                className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground/80"
                                 placeholder="e.g. Doctors"
                             />
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tone</label>
-                            <select
-                                value={tone}
-                                onChange={(e) => setTone(e.target.value)}
-                                className="w-full bg-[#0a0f18] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-slate-300 focus:ring-1 focus:ring-primary outline-none appearance-none"
-                            >
-                                <option>Professional</option>
-                                <option>Casual</option>
-                                <option>Funny</option>
-                                <option>Inspirational</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Sprache / Language</label>
-                            <select
-                                value={language}
-                                onChange={(e) => setLanguage(e.target.value)}
-                                className="w-full bg-[#0a0f18] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-slate-300 focus:ring-1 focus:ring-primary outline-none appearance-none"
-                            >
-                                <option value="Deutsch">🇩🇪 Deutsch</option>
-                                <option value="English">🇬🇧 English</option>
-                                <option value="Français">🇫🇷 Français</option>
-                                <option value="Español">🇪🇸 Español</option>
-                                <option value="Italiano">🇮🇹 Italiano</option>
-                                <option value="Português">🇵🇹 Português</option>
-                                <option value="Türkçe">🇹🇷 Türkçe</option>
-                            </select>
+
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-foreground/90">Tone</label>
+                                <select
+                                    value={tone}
+                                    onChange={(e) => setTone(e.target.value)}
+                                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground/90 focus:ring-1 focus:ring-primary outline-none appearance-none"
+                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+                                >
+                                    <option>Professional</option>
+                                    <option>Casual</option>
+                                    <option>Funny</option>
+                                    <option>Inspirational</option>
+                                </select>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-foreground/90">Language</label>
+                                <select
+                                    value={language}
+                                    onChange={(e) => setLanguage(e.target.value)}
+                                    className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs text-foreground/90 focus:ring-1 focus:ring-primary outline-none appearance-none"
+                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+                                >
+                                    <option value="Deutsch">🇩🇪 Deutsch</option>
+                                    <option value="English">🇬🇧 English</option>
+                                    <option value="Français">🇫🇷 Français</option>
+                                    <option value="Español">🇪🇸 Español</option>
+                                </select>
+                            </div>
                         </div>
 
                         {/* Trend Research Toggle */}
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                        <div className="space-y-2 pt-2">
+                            <label className="text-xs text-foreground/90 flex items-center justify-between">
                                 <span>Use Latest Trends</span>
                                 <span className="text-[8px] text-green-500 flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
@@ -276,9 +277,9 @@ export const TextEngine: React.FC = () => {
                             </label>
                             <button
                                 onClick={() => setUseTrends(!useTrends)}
-                                className={`w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-between transition-all ${useTrends
-                                    ? 'bg-primary text-white shadow-lg'
-                                    : 'bg-[#0a0f18] border border-white/10 text-slate-400 hover:bg-white/5'
+                                className={`w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-between transition-all border ${useTrends
+                                    ? 'bg-primary border-primary text-primary-foreground shadow-lg'
+                                    : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'
                                     }`}
                             >
                                 <span className="flex items-center gap-2">
@@ -287,18 +288,18 @@ export const TextEngine: React.FC = () => {
                                 </span>
                             </button>
                             {useTrends && (
-                                <p className="text-[9px] text-slate-500 mt-1">
+                                <p className="text-[9px] text-muted-foreground mt-1">
                                     ✨ AI will use Google Search to find latest trends and news
                                 </p>
                             )}
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-white/10 space-y-2">
+                    <div className="pt-4 border-t border-border space-y-2">
                         <button
                             onClick={() => generateContent(false)}
                             disabled={isGenerating || isGeneratingAll}
-                            className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-[0_0_20px_rgba(19,91,236,0.3)] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-primary hover:bg-primary-hover text-foreground font-bold py-3 rounded-xl shadow-[0_0_20px_rgba(19,91,236,0.3)] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isGenerating ? (
                                 <span className="material-icons-round animate-spin text-sm">autorenew</span>
@@ -311,7 +312,7 @@ export const TextEngine: React.FC = () => {
                         <button
                             onClick={generateAll}
                             disabled={isGenerating || isGeneratingAll}
-                            className="w-full bg-gradient-to-r from-purple-600 to-primary hover:from-purple-500 hover:to-primary-hover text-white font-bold py-3 rounded-xl shadow-[0_0_20px_rgba(147,51,234,0.3)] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-gradient-to-r from-purple-600 to-primary hover:from-purple-500 hover:to-primary-hover text-foreground font-bold py-3 rounded-xl shadow-[0_0_20px_rgba(147,51,234,0.3)] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isGeneratingAll ? (
                                 <span className="material-icons-round animate-spin text-sm">autorenew</span>
@@ -324,8 +325,8 @@ export const TextEngine: React.FC = () => {
 
                     {/* History Section */}
                     {history.length > 0 && (
-                        <div className="w-full pt-4 border-t border-white/10">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                        <div className="w-full pt-4 border-t border-border">
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
                                 <span className="material-icons-round text-sm">history</span> Recent Texts
                             </h3>
                             <div className="flex flex-col gap-2">
@@ -339,14 +340,14 @@ export const TextEngine: React.FC = () => {
                                             setAudience((item as any).config?.audience || '');
                                             setTone((item as any).config?.tone || 'Professional');
                                         }}
-                                        className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg p-3 group transition-all"
+                                        className="w-full text-left bg-white/5 hover:bg-white/10 border border-border/50 rounded-lg p-3 group transition-all"
                                     >
                                         <div className="flex justify-between items-start mb-1">
                                             <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase font-bold">{(item as any).type || 'Text'}</span>
-                                            <span className="text-[9px] text-slate-500">{new Date(item.created_at).toLocaleTimeString()}</span>
+                                            <span className="text-[9px] text-muted-foreground">{new Date(item.created_at).toLocaleTimeString()}</span>
                                         </div>
-                                        <p className="text-xs text-slate-300 font-medium truncate">{(item as any).prompt || 'Untitled'}</p>
-                                        <p className="text-[10px] text-slate-500 mt-1 line-clamp-2">{item.content}</p>
+                                        <p className="text-xs text-foreground/90 font-medium truncate">{(item as any).prompt || 'Untitled'}</p>
+                                        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{item.content}</p>
                                     </button>
                                 ))}
                             </div>
@@ -356,10 +357,10 @@ export const TextEngine: React.FC = () => {
             </aside>
 
             {/* Editor */}
-            <div className="flex-1 flex flex-col order-1 md:order-2 h-full min-w-0 bg-[#101622] p-4 md:p-8 overflow-y-auto">
-                <div className="max-w-4xl mx-auto w-full h-full bg-[#0a0f18] rounded-2xl border border-white/10 p-6 md:p-10 shadow-2xl flex flex-col">
+            <div className="flex-1 flex flex-col order-1 md:order-2 h-full min-w-0 bg-background p-4 md:p-8 overflow-y-auto">
+                <div className="max-w-4xl mx-auto w-full h-full bg-card rounded-2xl border border-border p-6 md:p-10 shadow-2xl flex flex-col">
                     <div className="flex justify-between items-start mb-6">
-                        <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                        <h2 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
                             {topic || "Untitled Draft"}
                         </h2>
                         <div className="flex gap-2">
@@ -389,7 +390,7 @@ export const TextEngine: React.FC = () => {
                                 }}
                                 className={`p-2 rounded-lg transition-all ${copied
                                     ? 'bg-green-500/20 text-green-500'
-                                    : 'bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white'
+                                    : 'bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground'
                                     }`}
                                 title={copied ? 'Copied!' : 'Copy'}
                             >
@@ -402,17 +403,17 @@ export const TextEngine: React.FC = () => {
                         {content.split('\n').map((line, i) => {
                             // Check if line is a heading
                             if (line.startsWith('# ')) {
-                                return <h1 key={i} className="text-3xl font-bold text-white mt-6 mb-4">{line.substring(2)}</h1>;
+                                return <h1 key={i} className="text-3xl font-bold text-foreground mt-6 mb-4">{line.substring(2)}</h1>;
                             } else if (line.startsWith('## ')) {
-                                return <h2 key={i} className="text-2xl font-bold text-white mt-5 mb-3">{line.substring(3)}</h2>;
+                                return <h2 key={i} className="text-2xl font-bold text-foreground mt-5 mb-3">{line.substring(3)}</h2>;
                             } else if (line.startsWith('### ')) {
-                                return <h3 key={i} className="text-xl font-bold text-slate-200 mt-4 mb-2">{line.substring(4)}</h3>;
+                                return <h3 key={i} className="text-xl font-bold text-foreground mt-4 mb-2">{line.substring(4)}</h3>;
                             }
 
                             // Format bold text **text**
                             const formattedLine = line.split(/(\*\*.*?\*\*)/).map((part, j) => {
                                 if (part.startsWith('**') && part.endsWith('**')) {
-                                    return <strong key={j} className="font-bold text-white">{part.slice(2, -2)}</strong>;
+                                    return <strong key={j} className="font-bold text-foreground">{part.slice(2, -2)}</strong>;
                                 }
                                 return part;
                             });
@@ -423,15 +424,15 @@ export const TextEngine: React.FC = () => {
                             }
 
                             return (
-                                <p key={i} className="text-slate-300 leading-relaxed mb-3">
+                                <p key={i} className="text-foreground/90 leading-relaxed mb-3">
                                     {formattedLine}
                                 </p>
                             );
                         })}
                     </div>
 
-                    <div className="mt-8 pt-6 border-t border-white/5 flex justify-between items-center">
-                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <div className="mt-8 pt-6 border-t border-border/50 flex justify-between items-center">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span className="material-icons-round text-sm">text_fields</span>
                             {content.split(' ').length} words
                         </div>

@@ -167,12 +167,12 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
 
   return (
     <div className="h-full overflow-y-auto p-4 md:p-8 flex items-center justify-center">
-      <div className="max-w-2xl w-full bg-[#0a0f18] border border-white/10 rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
+      <div className="max-w-2xl w-full bg-card border border-border rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
 
         {/* Background Decor */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
-        <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+        <h2 className="text-2xl font-bold text-foreground mb-8 flex items-center gap-3">
           <span className="material-icons-round text-primary">manage_accounts</span>
           User Settings
         </h2>
@@ -181,7 +181,7 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
 
           {/* Avatar Section */}
           <div className="space-y-4">
-            <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Profile Avatar</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Profile Avatar</label>
             <div className="flex flex-col md:flex-row gap-6 items-start">
               {/* Current Preview */}
               <div className="relative group shrink-0">
@@ -191,7 +191,7 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="absolute bottom-0 right-0 w-8 h-8 bg-[#1a1f2e] border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-colors shadow-lg disabled:opacity-50"
+                  className="absolute bottom-0 right-0 w-8 h-8 bg-card border border-border rounded-full flex items-center justify-center text-foreground hover:bg-white/10 transition-colors shadow-lg disabled:opacity-50"
                 >
                   <span className="material-icons-round text-sm">{isUploading ? 'hourglass_empty' : 'upload'}</span>
                 </button>
@@ -207,14 +207,14 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
 
               {/* Presets */}
               <div className="flex-1">
-                <p className="text-xs text-slate-400 mb-3">Choose a preset or upload your own:</p>
+                <p className="text-xs text-muted-foreground mb-3">Choose a preset or upload your own:</p>
                 <div className="flex flex-wrap gap-3">
                   {PRESET_AVATARS.map((avatar, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedAvatar(avatar)}
                       disabled={isUploading}
-                      className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all duration-300 ${selectedAvatar === avatar ? 'border-primary scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100 hover:border-white/20'} disabled:opacity-30`}
+                      className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all duration-300 ${selectedAvatar === avatar ? 'border-primary scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100 hover:border-border/80'} disabled:opacity-30`}
                     >
                       <img src={avatar} alt={`Preset ${index}`} className="w-full h-full object-cover" />
                     </button>
@@ -228,59 +228,59 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
 
           {/* Name Section */}
           <div className="space-y-4">
-            <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Screen Name</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Screen Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={isUploading}
-              className="w-full bg-[#1a1f2e] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-600 disabled:opacity-50"
+              className="w-full bg-card border border-border rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-muted-foreground/80 disabled:opacity-50"
               placeholder="Enter your display name"
             />
-            <p className="text-[10px] text-slate-500">This name will be displayed on your dashboard and generated content.</p>
+            <p className="text-[10px] text-muted-foreground">This name will be displayed on your dashboard and generated content.</p>
           </div>
 
           <div className="w-full h-px bg-white/5"></div>
 
           {/* Password Change Section */}
           <div className="space-y-4">
-            <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Change Password</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Change Password</label>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div>
-                <label htmlFor="current-password" className="block text-xs text-slate-400 mb-2">Aktuelles Passwort</label>
+                <label htmlFor="current-password" className="block text-xs text-muted-foreground mb-2">Aktuelles Passwort</label>
                 <input
                   id="current-password"
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   disabled={passwordLoading}
-                  className="w-full bg-[#1a1f2e] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-600 disabled:opacity-50"
+                  className="w-full bg-card border border-border rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-muted-foreground/80 disabled:opacity-50"
                   placeholder="Aktuelles Passwort eingeben"
                 />
               </div>
 
               <div>
-                <label htmlFor="new-password" className="block text-xs text-slate-400 mb-2">New Password</label>
+                <label htmlFor="new-password" className="block text-xs text-muted-foreground mb-2">New Password</label>
                 <input
                   id="new-password"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={passwordLoading}
-                  className="w-full bg-[#1a1f2e] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-600 disabled:opacity-50"
+                  className="w-full bg-card border border-border rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-muted-foreground/80 disabled:opacity-50"
                   placeholder="Enter new password (min 6 characters)"
                 />
               </div>
 
               <div>
-                <label htmlFor="confirm-password" className="block text-xs text-slate-400 mb-2">Confirm Password</label>
+                <label htmlFor="confirm-password" className="block text-xs text-muted-foreground mb-2">Confirm Password</label>
                 <input
                   id="confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={passwordLoading}
-                  className="w-full bg-[#1a1f2e] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-slate-600 disabled:opacity-50"
+                  className="w-full bg-card border border-border rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-muted-foreground/80 disabled:opacity-50"
                   placeholder="Confirm new password"
                 />
               </div>
@@ -301,7 +301,7 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
               <button
                 type="submit"
                 disabled={passwordLoading || !newPassword || !confirmPassword}
-                className="w-full py-3 rounded-xl font-bold text-sm bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 rounded-xl font-bold text-sm bg-white/5 hover:bg-white/10 border border-border text-foreground transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="material-icons-round text-sm">lock_reset</span>
                 {passwordLoading ? 'Updating...' : 'Update Password'}
@@ -322,7 +322,7 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
                   <select
                     value={adminTargetId}
                     onChange={e => setAdminTargetId(e.target.value)}
-                    className="w-full bg-[#1a1f2e] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-amber-400 outline-none transition-all"
+                    className="w-full bg-card border border-border rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-amber-400 outline-none transition-all"
                   >
                     <option value="">— User auswählen —</option>
                     {adminUsers.map(u => (
@@ -336,13 +336,13 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
                       value={adminNewPw}
                       onChange={e => setAdminNewPw(e.target.value)}
                       placeholder="Neues Passwort (min. 6 Zeichen)"
-                      className="flex-1 bg-[#1a1f2e] border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-amber-400 outline-none transition-all font-mono text-sm placeholder:text-slate-600"
+                      className="flex-1 bg-card border border-border rounded-xl px-4 py-3 text-foreground focus:ring-1 focus:ring-amber-400 outline-none transition-all font-mono text-sm placeholder:text-muted-foreground/80"
                     />
                     <button
                       type="button"
                       onClick={() => setAdminNewPw(generatePassword())}
                       title="Passwort generieren"
-                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 transition-all"
+                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-border rounded-xl text-foreground/90 transition-all"
                     >
                       <span className="material-icons-round text-sm">casino</span>
                     </button>
@@ -351,7 +351,7 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
                       onClick={copyAdminPw}
                       disabled={!adminNewPw}
                       title="Passwort kopieren"
-                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 transition-all disabled:opacity-30"
+                      className="px-3 py-2 bg-white/5 hover:bg-white/10 border border-border rounded-xl text-foreground/90 transition-all disabled:opacity-30"
                     >
                       <span className="material-icons-round text-sm">{adminCopied ? 'check' : 'content_copy'}</span>
                     </button>
@@ -399,7 +399,7 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
             <button
               onClick={handleSave}
               disabled={isUploading}
-              className={`px-8 py-3 rounded-xl font-bold text-sm shadow-lg transition-all flex items-center gap-2 ${isSaved ? 'bg-green-500 text-white' : 'bg-primary hover:bg-primary-hover text-white'} disabled:opacity-50`}
+              className={`px-8 py-3 rounded-xl font-bold text-sm shadow-lg transition-all flex items-center gap-2 ${isSaved ? 'bg-green-500 text-foreground' : 'bg-primary hover:bg-primary-hover text-foreground'} disabled:opacity-50`}
             >
               {isSaved ? (
                 <>

@@ -25,10 +25,10 @@ interface ItemDetailPageProps {
 function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
   if (!value) return null
   return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-slate-800 last:border-0">
-      <Icon size={15} className="text-slate-500 mt-0.5 shrink-0" />
-      <span className="text-slate-500 text-sm w-32 shrink-0">{label}</span>
-      <span className="text-slate-200 text-sm">{value}</span>
+    <div className="flex items-start gap-3 py-2.5 border-b border-border last:border-0">
+      <Icon size={15} className="text-muted-foreground mt-0.5 shrink-0" />
+      <span className="text-muted-foreground text-sm w-32 shrink-0">{label}</span>
+      <span className="text-foreground text-sm">{value}</span>
     </div>
   )
 }
@@ -93,37 +93,37 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
   return (
     <div className="p-8 max-w-4xl mx-auto">
       {/* Back */}
-      <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 text-sm">
+      <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 text-sm">
         <ArrowLeft size={16} /> Zurück zur Liste
       </button>
 
       {/* Header */}
       <div className="flex gap-6 items-start mb-8">
         {item.bild_url ? (
-          <img src={item.bild_url} alt={item.geraet} className="w-28 h-28 object-cover rounded-2xl border border-slate-700 shrink-0" />
+          <img src={item.bild_url} alt={item.geraet} className="w-28 h-28 object-cover rounded-2xl border border-border shrink-0" />
         ) : (
-          <div className="w-28 h-28 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0">
-            <Package size={36} className="text-slate-600" />
+          <div className="w-28 h-28 rounded-2xl bg-card border border-border flex items-center justify-center shrink-0">
+            <Package size={36} className="text-muted-foreground/80" />
           </div>
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">{item.geraet}</h1>
-              {item.modell && <p className="text-slate-400 mt-1">{item.modell}</p>}
+              <h1 className="text-2xl font-bold text-foreground">{item.geraet}</h1>
+              {item.modell && <p className="text-muted-foreground mt-1">{item.modell}</p>}
               <div className="flex items-center gap-3 mt-3">
                 <StatusBadge status={item.status} size="md" />
                 {item.px_nummer && (
-                  <span className="font-mono text-xs text-slate-300 bg-slate-800 px-3 py-1 rounded-lg border border-slate-700">{item.px_nummer}</span>
+                  <span className="font-mono text-xs text-foreground/90 bg-card px-3 py-1 rounded-lg border border-border">{item.px_nummer}</span>
                 )}
                 {item.is_verleihartikel && (
-                  <span className="text-xs text-brand-300 bg-brand-500/10 border border-brand-500/20 px-2 py-1 rounded-full">Verleihartikel</span>
+                  <span className="text-xs text-primary-300 bg-primary-500/10 border border-primary-500/20 px-2 py-1 rounded-full">Verleihartikel</span>
                 )}
               </div>
             </div>
             {isAdmin && (
               <div className="flex gap-2 shrink-0">
-                <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition-colors">
+                <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted border border-border transition-colors">
                   <Pencil size={14} /> Bearbeiten
                 </button>
                 <button onClick={() => setShowDeleteConfirm(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 transition-colors">
@@ -136,11 +136,11 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-slate-800/60 p-1 rounded-xl w-fit border border-slate-700">
+      <div className="flex gap-1 mb-6 bg-card/60 p-1 rounded-xl w-fit border border-border">
         {[{ id: 'info', label: 'Gerätedaten', icon: Info }, { id: 'loans', label: `Ausleihen (${activeLoans.length})`, icon: RefreshCw }].map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id as 'info' | 'loans')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === tab.id ? 'bg-brand-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'
+              activeTab === tab.id ? 'bg-primary-600 text-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'
             }`}>
             <tab.icon size={15} />
             {tab.label}
@@ -150,7 +150,7 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
 
       {/* Tab Content */}
       {activeTab === 'info' && (
-        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6">
+        <div className="bg-card/60 border border-border rounded-2xl p-6">
           <DetailRow icon={Hash} label="PX-Nummer" value={item.px_nummer} />
           <DetailRow icon={Monitor} label="Seriennummer" value={item.seriennummer} />
           <DetailRow icon={MapPin} label="Standort" value={item.ort} />
@@ -163,14 +163,14 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
           <DetailRow icon={Clock} label="Angeschafft" value={item.anschaffungsdatum ? new Date(item.anschaffungsdatum).toLocaleDateString('de-DE') : undefined} />
           <DetailRow icon={Info} label="Preis" value={Number(item.anschaffungspreis) > 0 ? `€ ${Number(item.anschaffungspreis).toFixed(2)}` : undefined} />
           {item.notes && (
-            <div className="mt-4 p-3 bg-slate-900 rounded-xl">
-              <p className="text-xs text-slate-500 mb-1">Notizen</p>
-              <p className="text-sm text-slate-300 whitespace-pre-wrap">{item.notes}</p>
+            <div className="mt-4 p-3 bg-card rounded-xl">
+              <p className="text-xs text-muted-foreground mb-1">Notizen</p>
+              <p className="text-sm text-foreground/90 whitespace-pre-wrap">{item.notes}</p>
             </div>
           )}
 
           {/* QR Code */}
-          <div className="mt-6 pt-4 border-t border-slate-700 flex items-center gap-6">
+          <div className="mt-6 pt-4 border-t border-border flex items-center gap-6">
             <div className="bg-white p-2.5 rounded-xl shadow-lg shrink-0">
               <QRCodeSVG
                 value={`PX-INVENTAR | ${item.px_nummer || item.id} | ${item.geraet}${item.modell ? ' ' + item.modell : ''}`}
@@ -179,9 +179,9 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
               />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white mb-0.5">QR-Code für dieses Gerät</p>
-              <p className="text-xs text-slate-500">Ausdrucken und am Gerät befestigen</p>
-              <p className="text-xs text-slate-600 mt-1 font-mono">{item.px_nummer || item.id}</p>
+              <p className="text-sm font-semibold text-foreground mb-0.5">QR-Code für dieses Gerät</p>
+              <p className="text-xs text-muted-foreground">Ausdrucken und am Gerät befestigen</p>
+              <p className="text-xs text-muted-foreground/80 mt-1 font-mono">{item.px_nummer || item.id}</p>
             </div>
           </div>
         </div>
@@ -191,20 +191,20 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
         <div className="space-y-4">
           {isAdmin && (
             <button onClick={() => setShowLoanForm(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold rounded-xl transition-colors">
+              className="flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-foreground text-sm font-semibold rounded-xl transition-colors">
               <RefreshCw size={16} /> Jetzt ausleihen
             </button>
           )}
-          <div className="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden">
-            <div className="p-4 border-b border-slate-700">
-              <h3 className="font-semibold text-white text-sm">Aktive Ausleihen</h3>
+          <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
+            <div className="p-4 border-b border-border">
+              <h3 className="font-semibold text-foreground text-sm">Aktive Ausleihen</h3>
             </div>
             <LoanTable loans={activeLoans} isAdmin={isAdmin} onReturn={handleReturn} onDelete={handleDeleteLoan} />
           </div>
           {pastLoans.length > 0 && (
-            <div className="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden">
-              <div className="p-4 border-b border-slate-700">
-                <h3 className="font-semibold text-white text-sm text-slate-400">Historie</h3>
+            <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
+              <div className="p-4 border-b border-border">
+                <h3 className="font-semibold text-foreground text-sm text-muted-foreground">Historie</h3>
               </div>
               <LoanTable loans={pastLoans} isAdmin={isAdmin} onReturn={handleReturn} onDelete={handleDeleteLoan} />
             </div>

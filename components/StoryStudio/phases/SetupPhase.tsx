@@ -34,7 +34,7 @@ export const SetupPhase: React.FC<SetupPhaseProps> = ({
     return (
         <div className="space-y-8">
             <div>
-                <h3 className="text-lg font-bold text-white mb-4">Actors ({actors.length})</h3>
+                <h3 className="text-lg font-bold text-foreground mb-4">Actors ({actors.length})</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {actors.map((actor, index) => (
                         <AssetCard
@@ -52,7 +52,7 @@ export const SetupPhase: React.FC<SetupPhaseProps> = ({
             </div>
 
             <div>
-                <h3 className="text-lg font-bold text-white mb-4">Environment</h3>
+                <h3 className="text-lg font-bold text-foreground mb-4">Environment</h3>
                 {environment && (
                     <div className="max-w-md">
                         <AssetCard
@@ -69,7 +69,7 @@ export const SetupPhase: React.FC<SetupPhaseProps> = ({
             </div>
 
             <div>
-                <h3 className="text-lg font-bold text-white mb-4">Product</h3>
+                <h3 className="text-lg font-bold text-foreground mb-4">Product</h3>
                 {product && (
                     <div className="max-w-md">
                         <AssetCard
@@ -87,7 +87,7 @@ export const SetupPhase: React.FC<SetupPhaseProps> = ({
 
             <button
                 onClick={onNext}
-                className="px-6 py-3 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-all"
+                className="px-6 py-3 bg-primary hover:bg-primary-hover text-foreground font-semibold rounded-lg transition-all"
             >
                 Continue to Story →
             </button>

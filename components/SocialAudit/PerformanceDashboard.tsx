@@ -20,7 +20,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ acco
   }, [accountId, loadPosts]);
 
   if (loading) {
-    return <div className="text-slate-400">Lade Dashboard...</div>;
+    return <div className="text-muted-foreground">Lade Dashboard...</div>;
   }
 
   // Determine Top 3 and Flop 3 based on engagement_rate
@@ -35,16 +35,16 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ acco
       </div>
       <div className="flex-1 min-w-0 flex flex-col justify-between">
         <div>
-           <p className="text-xs text-slate-400 mb-1">{new Date(post.published_at).toLocaleDateString()} • {post.post_type.toUpperCase()}</p>
-           <p className="text-sm text-slate-200 line-clamp-2">{post.caption}</p>
+           <p className="text-xs text-muted-foreground mb-1">{new Date(post.published_at).toLocaleDateString()} • {post.post_type.toUpperCase()}</p>
+           <p className="text-sm text-foreground line-clamp-2">{post.caption}</p>
         </div>
-        <div className="flex items-center gap-4 mt-2 border-t border-white/5 pt-2">
+        <div className="flex items-center gap-4 mt-2 border-t border-border/50 pt-2">
            <div className="text-center">
-             <p className="text-lg font-bold text-white">{post.engagement_rate}%</p>
-             <p className="text-[10px] text-slate-500 tracking-wider uppercase">Engagement</p>
+             <p className="text-lg font-bold text-foreground">{post.engagement_rate}%</p>
+             <p className="text-[10px] text-muted-foreground tracking-wider uppercase">Engagement</p>
            </div>
            <div className="h-8 w-px bg-white/10"></div>
-           <div className="flex gap-3 text-xs text-slate-400">
+           <div className="flex gap-3 text-xs text-muted-foreground">
              <span className="flex items-center gap-1"><span className="material-icons-round text-[14px]">favorite</span> {post.likes}</span>
              <span className="flex items-center gap-1"><span className="material-icons-round text-[14px]">visibility</span> {post.reach}</span>
            </div>
@@ -56,10 +56,10 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ acco
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
-        <h3 className="text-xl font-bold text-white mb-6">Performance Dashboard</h3>
+        <h3 className="text-xl font-bold text-foreground mb-6">Performance Dashboard</h3>
         {posts.length === 0 ? (
-          <div className="text-center py-12 border border-white/5 border-dashed rounded-xl bg-white/5">
-             <p className="text-slate-400">Keine Posts gefunden. Bitte führe zuerst einen Sync durch.</p>
+          <div className="text-center py-12 border border-border/50 border-dashed rounded-xl bg-white/5">
+             <p className="text-muted-foreground">Keine Posts gefunden. Bitte führe zuerst einen Sync durch.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -67,7 +67,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ acco
              <div>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="material-icons-round text-green-400">trending_up</span>
-                  <h4 className="font-bold text-lg text-white">Top Performer</h4>
+                  <h4 className="font-bold text-lg text-foreground">Top Performer</h4>
                 </div>
                 <div className="space-y-4">
                   {topPosts.map(p => renderPostCard(p, true))}
@@ -78,7 +78,7 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({ acco
              <div>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="material-icons-round text-red-400">trending_down</span>
-                  <h4 className="font-bold text-lg text-white">Low Performer</h4>
+                  <h4 className="font-bold text-lg text-foreground">Low Performer</h4>
                 </div>
                 <div className="space-y-4">
                   {flopPosts.map(p => renderPostCard(p, false))}

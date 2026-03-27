@@ -299,30 +299,30 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
     ];
 
     return (
-        <div className="h-full flex flex-col md:flex-row bg-[#080c14] overflow-hidden">
+        <div className="h-full flex flex-col md:flex-row bg-background overflow-hidden">
 
             {/* Sidebar Navigation */}
-            <aside className="w-20 md:w-24 bg-glass z-20 flex flex-col items-center py-6 gap-6 border-r border-white/5 flex-shrink-0">
+            <aside className="w-20 md:w-24 bg-card border-r border-border z-20 flex flex-col items-center py-6 gap-6 border-r border-border/50 flex-shrink-0">
                 {tools.map((tool) => (
                     <button
                         key={tool.id}
                         onClick={() => setActiveTool(tool.id as any)}
                         className="flex flex-col items-center gap-2 group w-full px-2"
                     >
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${activeTool === tool.id ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-white'}`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${activeTool === tool.id ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' : 'bg-white/5 text-muted-foreground group-hover:bg-white/10 group-hover:text-foreground'}`}>
                             <span className="material-icons-round text-xl">{tool.icon}</span>
                         </div>
-                        <span className={`text-[9px] font-bold uppercase tracking-wide ${activeTool === tool.id ? 'text-white' : 'text-slate-500'}`}>{tool.label}</span>
+                        <span className={`text-[9px] font-bold uppercase tracking-wide ${activeTool === tool.id ? 'text-foreground' : 'text-muted-foreground'}`}>{tool.label}</span>
                     </button>
                 ))}
             </aside>
 
             {/* Control Panel (Dynamic based on selection) */}
-            <div className="w-full md:w-80 bg-[#101622] border-r border-white/5 p-6 flex flex-col overflow-y-auto z-10">
+            <div className="w-full md:w-80 bg-background border-r border-border/50 p-6 flex flex-col overflow-y-auto z-10">
 
                 {/* Global Context Input */}
-                <div className="mb-8 p-4 rounded-xl bg-white/5 border border-white/10">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block flex items-center gap-2">
+                <div className="mb-8 p-4 rounded-xl bg-white/5 border border-border">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block flex items-center gap-2">
                         <span className="material-icons-round text-sm text-primary">topic</span>
                         Content Context
                     </label>
@@ -331,14 +331,14 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                         value={videoTopic}
                         onChange={(e) => setVideoTopic(e.target.value)}
                         placeholder="e.g. Minecraft Survival Ep. 1"
-                        className="w-full bg-[#0a0e17] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:ring-1 focus:ring-primary outline-none"
+                        className="w-full bg-card border border-border rounded-lg px-3 py-2 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none"
                     />
-                    <p className="text-[9px] text-slate-500 mt-2">Enter your video topic here to power the AI suggestions below.</p>
+                    <p className="text-[9px] text-muted-foreground mt-2">Enter your video topic here to power the AI suggestions below.</p>
                 </div>
 
                 {/* Dynamic Controls Section */}
                 <div>
-                    <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
                         <span className="material-icons-round text-primary">
                             {tools.find(t => t.id === activeTool)?.icon}
                         </span>
@@ -351,9 +351,9 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                     {activeTool === 'BACKGROUND' && (
                         <div className="space-y-6 animate-[float_0.3s_ease-out]">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase">Description</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Description</label>
                                 <textarea
-                                    className="w-full h-32 bg-[#0a0e17] border border-white/10 rounded-xl p-3 text-sm text-slate-200 placeholder-slate-600 focus:ring-1 focus:ring-primary resize-none"
+                                    className="w-full h-32 bg-card border border-border rounded-xl p-3 text-sm text-foreground placeholder-muted-foreground/80 focus:ring-1 focus:ring-primary resize-none"
                                     placeholder="e.g., A futuristic cyberpunk city street at night with neon signs and rain..."
                                     value={bgPrompt}
                                     onChange={(e) => setBgPrompt(e.target.value)}
@@ -361,7 +361,7 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 <button
                                     onClick={() => generateVisualIdea('BACKGROUND')}
                                     disabled={isGeneratingIdea}
-                                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-primary flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-border rounded-lg text-xs font-bold text-primary flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                                 >
                                     <span className={`material-icons-round text-sm ${isGeneratingIdea ? 'animate-spin' : ''}`}>{isGeneratingIdea ? 'autorenew' : 'auto_awesome'}</span>
                                     {isGeneratingIdea ? 'Thinking...' : 'Generate Idea from Topic'}
@@ -373,24 +373,24 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 {!bgImage ? (
                                     <div
                                         onClick={() => setShowBgPicker(true)}
-                                        className="p-4 rounded-xl border border-dashed border-white/10 bg-white/5 flex flex-col items-center text-center cursor-pointer hover:bg-white/10 transition-colors"
+                                        className="p-4 rounded-xl border border-dashed border-border bg-white/5 flex flex-col items-center text-center cursor-pointer hover:bg-white/10 transition-colors"
                                     >
-                                        <span className="material-icons-round text-slate-500 mb-2">upload_file</span>
-                                        <p className="text-xs text-slate-300 font-bold">Referenz auswählen</p>
-                                        <p className="text-[10px] text-slate-500 mt-1">Upload · Webcam · Eigene Assets</p>
+                                        <span className="material-icons-round text-muted-foreground mb-2">upload_file</span>
+                                        <p className="text-xs text-foreground/90 font-bold">Referenz auswählen</p>
+                                        <p className="text-[10px] text-muted-foreground mt-1">Upload · Webcam · Eigene Assets</p>
                                     </div>
                                 ) : (
-                                    <div className="relative rounded-xl overflow-hidden border border-white/10 group">
+                                    <div className="relative rounded-xl overflow-hidden border border-border group">
                                         <img src={bgImage} alt="Bg Ref" className="w-full h-32 object-cover opacity-60" />
                                         <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-                                            <button onClick={() => setShowBgPicker(true)} className="px-2 py-1 bg-primary/80 hover:bg-primary text-white rounded text-[10px] font-bold">
+                                            <button onClick={() => setShowBgPicker(true)} className="px-2 py-1 bg-primary/80 hover:bg-primary text-primary-foreground rounded text-[10px] font-bold">
                                                 Ändern
                                             </button>
-                                            <span className="text-xs font-bold text-white">BG geladen</span>
+                                            <span className="text-xs font-bold text-foreground">BG geladen</span>
                                         </div>
                                         <button
                                             onClick={() => setBgImage(null)}
-                                            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500/80 text-white flex items-center justify-center hover:bg-red-500"
+                                            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500/80 text-foreground flex items-center justify-center hover:bg-red-500"
                                         >
                                             <span className="material-icons-round text-xs">close</span>
                                         </button>
@@ -404,9 +404,9 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                     {activeTool === 'ELEMENTS' && (
                         <div className="space-y-6 animate-[float_0.3s_ease-out]">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase">Main Subject</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Main Subject</label>
                                 <textarea
-                                    className="w-full h-32 bg-[#0a0e17] border border-white/10 rounded-xl p-3 text-sm text-slate-200 placeholder-slate-600 focus:ring-1 focus:ring-primary resize-none"
+                                    className="w-full h-32 bg-card border border-border rounded-xl p-3 text-sm text-foreground placeholder-muted-foreground/80 focus:ring-1 focus:ring-primary resize-none"
                                     placeholder="e.g., A surprised young man holding a glowing smartphone looking at the camera..."
                                     value={elementPrompt}
                                     onChange={(e) => setElementPrompt(e.target.value)}
@@ -414,7 +414,7 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 <button
                                     onClick={() => generateVisualIdea('ELEMENT')}
                                     disabled={isGeneratingIdea}
-                                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-primary flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-border rounded-lg text-xs font-bold text-primary flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                                 >
                                     <span className={`material-icons-round text-sm ${isGeneratingIdea ? 'animate-spin' : ''}`}>{isGeneratingIdea ? 'autorenew' : 'auto_awesome'}</span>
                                     {isGeneratingIdea ? 'Thinking...' : 'Generate Idea from Topic'}
@@ -426,24 +426,24 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 {!elementImage ? (
                                     <div
                                         onClick={() => setShowElPicker(true)}
-                                        className="p-4 rounded-xl border border-dashed border-white/10 bg-white/5 flex flex-col items-center text-center cursor-pointer hover:bg-white/10 transition-colors"
+                                        className="p-4 rounded-xl border border-dashed border-border bg-white/5 flex flex-col items-center text-center cursor-pointer hover:bg-white/10 transition-colors"
                                     >
-                                        <span className="material-icons-round text-slate-500 mb-2">person_add</span>
-                                        <p className="text-xs text-slate-300 font-bold">Subject wählen</p>
-                                        <p className="text-[10px] text-slate-500 mt-1">Upload · Webcam · Eigene Assets</p>
+                                        <span className="material-icons-round text-muted-foreground mb-2">person_add</span>
+                                        <p className="text-xs text-foreground/90 font-bold">Subject wählen</p>
+                                        <p className="text-[10px] text-muted-foreground mt-1">Upload · Webcam · Eigene Assets</p>
                                     </div>
                                 ) : (
-                                    <div className="relative rounded-xl overflow-hidden border border-white/10 group">
+                                    <div className="relative rounded-xl overflow-hidden border border-border group">
                                         <img src={elementImage} alt="El Ref" className="w-full h-32 object-cover opacity-60" />
                                         <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-                                            <button onClick={() => setShowElPicker(true)} className="px-2 py-1 bg-primary/80 hover:bg-primary text-white rounded text-[10px] font-bold">
+                                            <button onClick={() => setShowElPicker(true)} className="px-2 py-1 bg-primary/80 hover:bg-primary text-primary-foreground rounded text-[10px] font-bold">
                                                 Ändern
                                             </button>
-                                            <span className="text-xs font-bold text-white">Subject geladen</span>
+                                            <span className="text-xs font-bold text-foreground">Subject geladen</span>
                                         </div>
                                         <button
                                             onClick={() => setElementImage(null)}
-                                            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500/80 text-white flex items-center justify-center hover:bg-red-500"
+                                            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500/80 text-foreground flex items-center justify-center hover:bg-red-500"
                                         >
                                             <span className="material-icons-round text-xs">close</span>
                                         </button>
@@ -457,10 +457,10 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                     {activeTool === 'TEXT' && (
                         <div className="space-y-6 animate-[float_0.3s_ease-out]">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase">Thumbnail Text</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Thumbnail Text</label>
                                 <input
                                     type="text"
-                                    className="w-full bg-[#0a0e17] border border-white/10 rounded-xl px-3 py-3 text-sm text-slate-200 placeholder-slate-600 focus:ring-1 focus:ring-primary"
+                                    className="w-full bg-card border border-border rounded-xl px-3 py-3 text-sm text-foreground placeholder-muted-foreground/80 focus:ring-1 focus:ring-primary"
                                     placeholder="e.g., AI IS CRAZY!"
                                     value={textContent}
                                     onChange={(e) => setTextContent(e.target.value)}
@@ -468,7 +468,7 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 <button
                                     onClick={generateTextIdea}
                                     disabled={isGeneratingIdea}
-                                    className="w-full py-2 bg-gradient-to-r from-purple-500/20 to-primary/20 hover:from-purple-500/30 hover:to-primary/30 border border-purple-500/30 rounded-lg text-xs font-bold text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                                    className="w-full py-2 bg-gradient-to-r from-purple-500/20 to-primary/20 hover:from-purple-500/30 hover:to-primary/30 border border-purple-500/30 rounded-lg text-xs font-bold text-foreground flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                                 >
                                     <span className={`material-icons-round text-sm ${isGeneratingIdea ? 'animate-spin' : ''}`}>{isGeneratingIdea ? 'autorenew' : 'psychology'}</span>
                                     {isGeneratingIdea ? 'Writing...' : 'AI Magic Writer'}
@@ -476,11 +476,11 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase">Font Style</label>
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Font Style</label>
                                 <select
                                     value={textStyle}
                                     onChange={(e) => setTextStyle(e.target.value)}
-                                    className="w-full bg-[#0a0e17] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-slate-300 focus:ring-1 focus:ring-primary outline-none appearance-none"
+                                    className="w-full bg-card border border-border rounded-xl px-3 py-2.5 text-sm text-foreground/90 focus:ring-1 focus:ring-primary outline-none appearance-none"
                                 >
                                     <option>Bold & Modern</option>
                                     <option>Neon & Glowing</option>
@@ -495,8 +495,8 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
 
                 {/* History Section */}
                 {history.length > 0 && (
-                    <div className="w-full pt-6 mt-6 border-t border-white/10">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                    <div className="w-full pt-6 mt-6 border-t border-border">
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
                             <span className="material-icons-round text-sm">history</span> Recent Thumbnails
                         </h3>
                         <div className="grid grid-cols-2 gap-3">
@@ -504,14 +504,14 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 <button
                                     key={item.id}
                                     onClick={() => restoreFromHistory(item)}
-                                    className={`relative overflow-hidden rounded-lg border border-white/10 group hover:border-primary/50 transition-all ${
+                                    className={`relative overflow-hidden rounded-lg border border-border group hover:border-primary/50 transition-all ${
                                         item.config?.aspectRatio === '9:16' ? 'aspect-[9/16]' :
                                         item.config?.aspectRatio === '1:1' ? 'aspect-square' : 'aspect-video'
                                     }`}
                                 >
                                     <img src={item.image_url} alt="History" className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <span className="material-icons-round text-white text-sm">restore</span>
+                                        <span className="material-icons-round text-foreground text-sm">restore</span>
                                     </div>
                                 </button>
                             ))}
@@ -524,15 +524,15 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
             <div className="flex-1 flex flex-col relative min-w-0">
 
                 {/* Top Bar: Ratio */}
-                <div className="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-[#0a0e17]/50 backdrop-blur">
+                <div className="h-16 border-b border-border/50 flex items-center justify-between px-6 bg-card/50 backdrop-blur">
                     <div className="flex items-center gap-4">
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Aspect Ratio:</span>
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Aspect Ratio:</span>
                         <div className="flex bg-white/5 rounded-lg p-1">
                             {['16:9', '9:16', '1:1'].map((ratio) => (
                                 <button
                                     key={ratio}
                                     onClick={() => setAspectRatio(ratio as any)}
-                                    className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${aspectRatio === ratio ? 'bg-primary text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                                    className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${aspectRatio === ratio ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
                                     {ratio}
                                 </button>
@@ -543,7 +543,7 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                     <button
                         onClick={handleFinalGeneration}
                         disabled={isGenerating}
-                        className="px-6 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl font-bold text-xs shadow-[0_0_20px_rgba(19,91,236,0.3)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="px-6 py-2 bg-primary hover:bg-primary-hover text-foreground rounded-xl font-bold text-xs shadow-[0_0_20px_rgba(19,91,236,0.3)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                         {isGenerating ? <span className="material-icons-round animate-spin text-sm">autorenew</span> : <span className="material-icons-round text-sm">stars</span>}
                         GENERATE THUMBNAIL
@@ -554,7 +554,7 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                 <div className="flex-1 overflow-y-auto p-8 flex items-center justify-center relative">
                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
-                    <div className={`relative w-full ${getAspectClass()} bg-[#0f1219] rounded-xl border border-white/10 shadow-2xl overflow-hidden group transition-all duration-500`}>
+                    <div className={`relative w-full ${getAspectClass()} bg-card rounded-xl border border-border shadow-2xl overflow-hidden group transition-all duration-500`}>
 
                         {generatedImage ? (
                             <>
@@ -564,17 +564,17 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
                                     <button
                                         onClick={handlePreview}
-                                        className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all"
+                                        className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-border/80 flex items-center justify-center hover:bg-white/20 transition-all"
                                         title="Fullscreen Preview"
                                     >
-                                        <span className="material-icons-round text-white">fullscreen</span>
+                                        <span className="material-icons-round text-foreground">fullscreen</span>
                                     </button>
                                     <button
                                         onClick={handleDownload}
-                                        className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all"
+                                        className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-border/80 flex items-center justify-center hover:bg-white/20 transition-all"
                                         title="Download"
                                     >
-                                        <span className="material-icons-round text-white">download</span>
+                                        <span className="material-icons-round text-foreground">download</span>
                                     </button>
                                 </div>
                             </>
@@ -587,7 +587,7 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
 
                                 {(bgPrompt || bgImage) && (
                                     <div className="absolute inset-0 bg-primary/5 flex items-center justify-center">
-                                        <p className="text-white/10 text-4xl font-black uppercase tracking-widest rotate-12 select-none">
+                                        <p className="text-foreground/10 text-4xl font-black uppercase tracking-widest rotate-12 select-none">
                                             {bgImage ? "Image Background" : "Background"}
                                         </p>
                                     </div>
@@ -596,12 +596,12 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 {/* Elements Placeholder */}
                                 <div className="z-10 relative">
                                     {(elementPrompt || elementImage) ? (
-                                        <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4 mx-auto animate-pulse overflow-hidden">
-                                            {elementImage ? <img src={elementImage} className="w-full h-full object-cover opacity-50" /> : <span className="material-icons-round text-4xl text-slate-500">person</span>}
+                                        <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-white/5 border border-border flex items-center justify-center mb-4 mx-auto animate-pulse overflow-hidden">
+                                            {elementImage ? <img src={elementImage} className="w-full h-full object-cover opacity-50" /> : <span className="material-icons-round text-4xl text-muted-foreground">person</span>}
                                         </div>
                                     ) : (
-                                        <div className="w-24 h-24 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center mb-4 mx-auto opacity-50">
-                                            <span className="text-[10px] text-slate-500">No Subject</span>
+                                        <div className="w-24 h-24 rounded-full border-2 border-dashed border-border flex items-center justify-center mb-4 mx-auto opacity-50">
+                                            <span className="text-[10px] text-muted-foreground">No Subject</span>
                                         </div>
                                     )}
                                 </div>
@@ -609,18 +609,18 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                                 {/* Text Placeholder */}
                                 <div className="z-20 relative max-w-full">
                                     {textContent ? (
-                                        <h1 className="text-4xl md:text-6xl font-black text-white drop-shadow-[0_4px_0_rgba(0,0,0,1)] uppercase leading-tight tracking-tight break-words">
+                                        <h1 className="text-4xl md:text-6xl font-black text-foreground drop-shadow-[0_4px_0_rgba(0,0,0,1)] uppercase leading-tight tracking-tight break-words">
                                             {textContent}
                                         </h1>
                                     ) : (
-                                        <h1 className="text-2xl font-bold text-white/20 uppercase tracking-widest border-2 border-dashed border-white/10 px-4 py-2 rounded-lg inline-block">
+                                        <h1 className="text-2xl font-bold text-foreground/20 uppercase tracking-widest border-2 border-dashed border-border px-4 py-2 rounded-lg inline-block">
                                             Text Overlay
                                         </h1>
                                     )}
                                 </div>
 
                                 <div className="absolute bottom-4 left-0 right-0 text-center">
-                                    <p className="text-[10px] text-slate-500 font-mono">
+                                    <p className="text-[10px] text-muted-foreground font-mono">
                                         {isGenerating ? "AI IS COMPOSING..." : "COMPOSITION PREVIEW"}
                                     </p>
                                 </div>
@@ -632,17 +632,17 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
                                 <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
                                 <p className="text-primary font-bold tracking-[0.2em] animate-pulse">RENDERING PIXELS</p>
-                                <p className="text-slate-500 text-xs mt-2">Merging layers & typography...</p>
+                                <p className="text-muted-foreground text-xs mt-2">Merging layers & typography...</p>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Prompt Summary Footer */}
-                <div className="h-16 bg-[#0a0e17] border-t border-white/5 px-6 flex items-center gap-4 text-xs text-slate-400">
+                <div className="h-16 bg-card border-t border-border/50 px-6 flex items-center gap-4 text-xs text-muted-foreground">
                     <span className="material-icons-round text-sm text-primary">info</span>
                     <p className="truncate flex-1">
-                        <span className="font-bold text-slate-300">Prompt Preview: </span>
+                        <span className="font-bold text-foreground/90">Prompt Preview: </span>
                         {(bgPrompt || bgImage) ? `BG: [${bgImage ? 'Image' : 'Prompt'}]` : 'BG: N/A'} +
                         {(elementPrompt || elementImage) ? ` Subj: [${elementImage ? 'Image' : 'Prompt'}]` : ' Subj: N/A'} +
                         {textContent ? ` Text: "${textContent}"` : ' Text: N/A'}
@@ -658,18 +658,18 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                 >
                     <button
                         onClick={() => setShowPreview(false)}
-                        className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-10"
+                        className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-border/80 flex items-center justify-center hover:bg-white/20 transition-all z-10"
                     >
-                        <span className="material-icons-round text-white">close</span>
+                        <span className="material-icons-round text-foreground">close</span>
                     </button>
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
                             handleDownload();
                         }}
-                        className="absolute top-4 right-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all z-10"
+                        className="absolute top-4 right-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-border/80 flex items-center justify-center hover:bg-white/20 transition-all z-10"
                     >
-                        <span className="material-icons-round text-white">download</span>
+                        <span className="material-icons-round text-foreground">download</span>
                     </button>
                     <img
                         src={generatedImage}

@@ -44,14 +44,14 @@ interface ExternalContact {
   name: string; firma: string; email: string; telefon: string
 }
 
-const inputCls = 'w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition-colors'
-const labelCls = 'block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5'
+const inputCls = 'w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary-500 transition-colors'
+const labelCls = 'block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5'
 
 function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
   return (
-    <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-4">
-      <h2 className="font-semibold text-white flex items-center gap-2 text-base mb-2">
-        <Icon size={16} className="text-brand-400" /> {title}
+    <div className="bg-card/60 border border-border rounded-2xl p-6 space-y-4">
+      <h2 className="font-semibold text-foreground flex items-center gap-2 text-base mb-2">
+        <Icon size={16} className="text-primary-400" /> {title}
       </h2>
       {children}
     </div>
@@ -293,19 +293,19 @@ export function VerleihFormularPage({
       {/* Header + Tabs */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <FileText size={24} className="text-brand-400" /> Verleih-Formular
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
+            <FileText size={24} className="text-primary-400" /> Verleih-Formular
           </h1>
-          <p className="text-slate-400 text-sm mt-1">Verleihscheine erfassen und verwalten</p>
+          <p className="text-muted-foreground text-sm mt-1">Verleihscheine erfassen und verwalten</p>
         </div>
-        <div className="flex gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
+        <div className="flex gap-1 bg-card p-1 rounded-xl border border-border">
           {([
             ['neu',   'Neuer Schein',                           Plus],
             ['aktiv', `Aktive Scheine (${scheine.length})`,     List],
             ['archiv',`Archiv (${archivierte.length})`,         Archive],
           ] as const).map(([t, label, Icon]) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? 'bg-brand-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? 'bg-primary-600 text-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}>
               <Icon size={14} />{label}
             </button>
           ))}
@@ -316,10 +316,10 @@ export function VerleihFormularPage({
       {tab === 'neu' && (
         <>
           {/* Artikel */}
-          <div className="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-3">
-            <h2 className="font-semibold text-white flex items-center gap-2"><Plus size={16} className="text-brand-400" /> Artikel auswählen</h2>
+          <div className="bg-card/60 border border-border rounded-2xl p-6 space-y-3">
+            <h2 className="font-semibold text-foreground flex items-center gap-2"><Plus size={16} className="text-primary-400" /> Artikel auswählen</h2>
             {verleihItems.length === 0 ? (
-              <p className="text-slate-500 text-sm">Keine Verleihartikel im Inventar markiert.</p>
+              <p className="text-muted-foreground text-sm">Keine Verleihartikel im Inventar markiert.</p>
             ) : (
               <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                 {verleihItems.map(item => {
@@ -337,16 +337,16 @@ export function VerleihFormularPage({
 
                   return (
                     <label key={item.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all
-                      ${ selected  ? 'border-brand-500/50 bg-brand-500/10 cursor-pointer'
+                      ${ selected  ? 'border-primary-500/50 bg-primary-500/10 cursor-pointer'
                        : blocked   ? 'border-red-800/40 bg-red-900/10 opacity-60 cursor-not-allowed'
-                       : 'border-slate-700 hover:border-slate-600 bg-slate-900/40 cursor-pointer'}`}>
+                       : 'border-border hover:border-border/80 bg-card/40 cursor-pointer'}`}>
                       <input type="checkbox" checked={selected} disabled={blocked}
                         onChange={() => toggleItem(item.id)} className="w-4 h-4 accent-brand-500" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {item.geraet}{item.modell ? ` – ${item.modell}` : ''}
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-muted-foreground">
                           {item.px_nummer && <span className="font-mono mr-2">{item.px_nummer}</span>}
                           {toNum(item.anschaffungspreis) > 0 && <span>Kaufpreis: € {toNum(item.anschaffungspreis).toFixed(2)}</span>}
                           {blocked && conflictName && (
@@ -381,7 +381,7 @@ export function VerleihFormularPage({
               <div><label className={labelCls}>Abholzeitpunkt</label><input type="datetime-local" value={abholzeit} onChange={e => setAbholzeit(e.target.value)} className={inputCls} /></div>
               <div><label className={labelCls}>Rückgabezeitpunkt</label><input type="datetime-local" value={rueckgabezeit} onChange={e => setRueckgabezeit(e.target.value)} className={inputCls} /></div>
             </div>
-            {dauer !== null && <p className="text-sm text-slate-300">Dauer: <span className="font-semibold text-white">{dauer.toFixed(1)} Tag(e)</span></p>}
+            {dauer !== null && <p className="text-sm text-foreground/90">Dauer: <span className="font-semibold text-foreground">{dauer.toFixed(1)} Tag(e)</span></p>}
             <div><label className={labelCls}>Verwendungszweck</label><input type="text" value={zweck} onChange={e => setZweck(e.target.value)} placeholder="z.B. Messe, Fotoshooting …" className={inputCls} /></div>
           </Section>
 
@@ -392,33 +392,33 @@ export function VerleihFormularPage({
                 <label className={labelCls}>Tagessatz (% vom Kaufpreis)</label>
                 <div className="relative">
                   <input type="number" min="0" max="100" step="0.5" value={prozentsatz} onChange={e => setProzentsatz(e.target.value)} className={inputCls + ' pr-8'} />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">%</span>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 pb-2.5">Kaufpreis × % × Tage</p>
+              <p className="text-xs text-muted-foreground pb-2.5">Kaufpreis × % × Tage</p>
             </div>
             {selectedItems.length > 0 && (
-              <div className="bg-slate-900 rounded-xl overflow-hidden">
+              <div className="bg-card rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead><tr className="border-b border-slate-700">
-                    <th className="text-left py-2.5 px-4 text-xs text-slate-400 font-semibold">Artikel</th>
-                    <th className="text-right py-2.5 px-4 text-xs text-slate-400 font-semibold">Kaufpreis</th>
-                    <th className="text-right py-2.5 px-4 text-xs text-slate-400 font-semibold">Tagesrate</th>
-                    <th className="text-right py-2.5 px-4 text-xs text-slate-400 font-semibold">Gesamt</th>
+                  <thead><tr className="border-b border-border">
+                    <th className="text-left py-2.5 px-4 text-xs text-muted-foreground font-semibold">Artikel</th>
+                    <th className="text-right py-2.5 px-4 text-xs text-muted-foreground font-semibold">Kaufpreis</th>
+                    <th className="text-right py-2.5 px-4 text-xs text-muted-foreground font-semibold">Tagesrate</th>
+                    <th className="text-right py-2.5 px-4 text-xs text-muted-foreground font-semibold">Gesamt</th>
                   </tr></thead>
-                  <tbody className="divide-y divide-slate-800">
+                  <tbody className="divide-y divide-border">
                     {itemCosts.map(({ item, tagespreis, gesamtpreis }) => (
                       <tr key={item.id}>
-                        <td className="py-2.5 px-4 text-white">{item.geraet}{item.modell ? ` – ${item.modell}` : ''}{item.px_nummer && <span className="text-slate-500 font-mono text-xs ml-2">{item.px_nummer}</span>}</td>
-                        <td className="py-2.5 px-4 text-slate-300 text-right">{toNum(item.anschaffungspreis) > 0 ? `€ ${toNum(item.anschaffungspreis).toFixed(2)}` : '–'}</td>
-                        <td className="py-2.5 px-4 text-slate-300 text-right">{tagespreis > 0 ? `€ ${tagespreis.toFixed(2)}` : '–'}</td>
-                        <td className="py-2.5 px-4 text-right font-semibold text-white">{gesamtpreis > 0 ? `€ ${gesamtpreis.toFixed(2)}` : '–'}</td>
+                        <td className="py-2.5 px-4 text-foreground">{item.geraet}{item.modell ? ` – ${item.modell}` : ''}{item.px_nummer && <span className="text-muted-foreground font-mono text-xs ml-2">{item.px_nummer}</span>}</td>
+                        <td className="py-2.5 px-4 text-foreground/90 text-right">{toNum(item.anschaffungspreis) > 0 ? `€ ${toNum(item.anschaffungspreis).toFixed(2)}` : '–'}</td>
+                        <td className="py-2.5 px-4 text-foreground/90 text-right">{tagespreis > 0 ? `€ ${tagespreis.toFixed(2)}` : '–'}</td>
+                        <td className="py-2.5 px-4 text-right font-semibold text-foreground">{gesamtpreis > 0 ? `€ ${gesamtpreis.toFixed(2)}` : '–'}</td>
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot><tr className="border-t-2 border-slate-600 bg-slate-800/60">
-                    <td colSpan={3} className="py-3 px-4 text-right font-bold text-white">Gesamtbetrag:</td>
-                    <td className="py-3 px-4 text-right font-bold text-brand-300 text-lg">{gesamtkosten > 0 ? `€ ${gesamtkosten.toFixed(2)}` : '–'}</td>
+                  <tfoot><tr className="border-t-2 border-border/80 bg-card/60">
+                    <td colSpan={3} className="py-3 px-4 text-right font-bold text-foreground">Gesamtbetrag:</td>
+                    <td className="py-3 px-4 text-right font-bold text-primary-300 text-lg">{gesamtkosten > 0 ? `€ ${gesamtkosten.toFixed(2)}` : '–'}</td>
                   </tr></tfoot>
                 </table>
               </div>
@@ -427,9 +427,9 @@ export function VerleihFormularPage({
 
           {/* Ausleiher */}
           <Section title="Ausleiher" icon={User}>
-            <div className="flex gap-1 bg-slate-900 p-1 rounded-xl w-fit border border-slate-700 mb-4">
+            <div className="flex gap-1 bg-card p-1 rounded-xl w-fit border border-border mb-4">
               {(['team', 'extern'] as const).map(t => (
-                <button key={t} onClick={() => setBorrowerType(t)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${borrowerType === t ? 'bg-brand-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>
+                <button key={t} onClick={() => setBorrowerType(t)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${borrowerType === t ? 'bg-primary-600 text-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}>
                   {t === 'team' ? <><User size={14} /> Team-Mitglied</> : <><Building2 size={14} /> Externer Kontakt</>}
                 </button>
               ))}
@@ -457,15 +457,15 @@ export function VerleihFormularPage({
           </Section>
 
           {/* CTA */}
-          <div className="flex items-center justify-between bg-slate-800/60 border border-slate-700 rounded-2xl p-5">
+          <div className="flex items-center justify-between bg-card/60 border border-border rounded-2xl p-5">
             <div>
-              {!canSubmit && <p className="text-xs text-slate-500">
+              {!canSubmit && <p className="text-xs text-muted-foreground">
                 {selectedIds.size === 0 ? 'Artikel auswählen' : !abholzeit || !rueckgabezeit ? 'Zeitraum eingeben' : 'Ausleiher angeben'}
               </p>}
-              {canSubmit && gesamtkosten > 0 && <p className="text-sm text-white">Gesamt: <span className="font-bold text-brand-300 text-lg">€ {gesamtkosten.toFixed(2)}</span></p>}
+              {canSubmit && gesamtkosten > 0 && <p className="text-sm text-foreground">Gesamt: <span className="font-bold text-primary-300 text-lg">€ {gesamtkosten.toFixed(2)}</span></p>}
             </div>
             <button onClick={handleSubmit} disabled={!canSubmit}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${canSubmit ? 'bg-brand-600 hover:bg-brand-500 text-white shadow-lg shadow-brand-900/40' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}>
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${canSubmit ? 'bg-primary-600 hover:bg-primary-500 text-foreground shadow-lg shadow-primary-900/40' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
               {saving ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Download size={18} />}
               {saving ? 'Wird gespeichert…' : 'Speichern & PDF herunterladen'}
             </button>
@@ -477,7 +477,7 @@ export function VerleihFormularPage({
       {tab === 'aktiv' && (
         <div className="space-y-4">
           {scheine.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
               <CheckCircle size={48} className="mb-3 opacity-40 text-emerald-500" />
               <p className="text-lg font-medium">Keine aktiven Verleihscheine</p>
               <p className="text-sm">Alle Geräte sind zurückgegeben.</p>
@@ -488,32 +488,32 @@ export function VerleihFormularPage({
             const itemIds = schein.items?.map(i => i.item_id) || []
             const isOverdue = schein.rueckgabezeit && new Date(schein.rueckgabezeit) < new Date()
             return (
-              <div key={schein.id} className={`border rounded-2xl overflow-hidden ${isOverdue ? 'border-red-500/30 bg-red-500/5' : 'border-slate-700 bg-slate-800/60'}`}>
+              <div key={schein.id} className={`border rounded-2xl overflow-hidden ${isOverdue ? 'border-red-500/30 bg-red-500/5' : 'border-border bg-card/60'}`}>
                 <div className="flex items-start justify-between gap-4 p-5">
                   <div className="space-y-1">
-                    <p className="font-semibold text-white flex items-center gap-2">
+                    <p className="font-semibold text-foreground flex items-center gap-2">
                       {isOverdue && <AlertCircle size={15} className="text-red-400" />}
                       {name}{firma}
                       {schein.borrower_type === 'team' && <span className="text-xs text-sky-400 bg-sky-500/10 px-1.5 py-0.5 rounded-full border border-sky-500/20">Team</span>}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       📦 {schein.items?.length || 0} Artikel · {formatDT(schein.abholzeit)} → {formatDT(schein.rueckgabezeit)}
                       {isOverdue && <span className="text-red-400 ml-2 font-semibold">Überfällig!</span>}
                     </p>
-                    {schein.zweck && <p className="text-xs text-slate-500">Zweck: {schein.zweck}</p>}
-                    {schein.gesamtkosten != null && toNum(schein.gesamtkosten) > 0 && <p className="text-xs text-brand-300 font-semibold">€ {toNum(schein.gesamtkosten).toFixed(2)}</p>}
+                    {schein.zweck && <p className="text-xs text-muted-foreground">Zweck: {schein.zweck}</p>}
+                    {schein.gesamtkosten != null && toNum(schein.gesamtkosten) > 0 && <p className="text-xs text-primary-300 font-semibold">€ {toNum(schein.gesamtkosten).toFixed(2)}</p>}
                   </div>
                   <button onClick={() => handleErledigt(schein)}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition-colors shrink-0">
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-foreground text-sm font-semibold rounded-xl transition-colors shrink-0">
                     <CheckCircle size={15} /> Erledigt
                   </button>
                 </div>
                 {schein.items && schein.items.length > 0 && (
-                  <div className="border-t border-slate-700 divide-y divide-slate-800">
+                  <div className="border-t border-border divide-y divide-border">
                     {schein.items.map(li => (
                       <div key={li.id} className="flex items-center justify-between px-5 py-2.5">
-                        <p className="text-sm text-slate-300">{li.item?.geraet}{li.item?.modell ? ` – ${li.item.modell}` : ''}{li.item?.px_nummer && <span className="font-mono text-xs text-slate-500 ml-2">{li.item.px_nummer}</span>}</p>
-                        {li.gesamtpreis != null && toNum(li.gesamtpreis) > 0 && <p className="text-xs text-slate-400">€ {toNum(li.gesamtpreis).toFixed(2)}</p>}
+                        <p className="text-sm text-foreground/90">{li.item?.geraet}{li.item?.modell ? ` – ${li.item.modell}` : ''}{li.item?.px_nummer && <span className="font-mono text-xs text-muted-foreground ml-2">{li.item.px_nummer}</span>}</p>
+                        {li.gesamtpreis != null && toNum(li.gesamtpreis) > 0 && <p className="text-xs text-muted-foreground">€ {toNum(li.gesamtpreis).toFixed(2)}</p>}
                       </div>
                     ))}
                   </div>
@@ -528,7 +528,7 @@ export function VerleihFormularPage({
       {tab === 'archiv' && (
         <div className="space-y-3">
           {archivierte.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
               <Archive size={48} className="mb-3 opacity-30" />
               <p className="text-lg font-medium">Noch keine abgeschlossenen Scheine</p>
             </div>
@@ -537,45 +537,45 @@ export function VerleihFormularPage({
               ? (schein.profile?.full_name || schein.profile?.email || '–')
               : [schein.extern_name, schein.extern_firma].filter(Boolean).join(' · ') || '–'
             return (
-              <div key={schein.id} className="border border-slate-700/60 bg-slate-800/30 rounded-2xl overflow-hidden">
+              <div key={schein.id} className="border border-border/60 bg-card/30 rounded-2xl overflow-hidden">
                 <div className="flex items-start justify-between gap-4 px-5 py-4">
                   <div className="space-y-1">
-                    <p className="font-semibold text-slate-300 flex items-center gap-2">
+                    <p className="font-semibold text-foreground/90 flex items-center gap-2">
                       <CheckCircle size={14} className="text-emerald-500 opacity-70" />
                       {name}
                       {schein.borrower_type === 'team' && (
                         <span className="text-xs text-sky-400/70 bg-sky-500/10 px-1.5 py-0.5 rounded-full border border-sky-500/20">Team</span>
                       )}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       📦 {schein.items?.length || 0} Artikel
                       &nbsp;·&nbsp;
                       {formatDT(schein.abholzeit)} → {formatDT(schein.rueckgabezeit)}
                     </p>
-                    {schein.zweck && <p className="text-xs text-slate-600">Zweck: {schein.zweck}</p>}
+                    {schein.zweck && <p className="text-xs text-muted-foreground/80">Zweck: {schein.zweck}</p>}
                     <p className="text-xs text-slate-700">
                       Erledigt am: {schein.erledigt_am ? formatDT(schein.erledigt_am) : '–'}
                     </p>
                     {schein.gesamtkosten != null && toNum(schein.gesamtkosten) > 0 && (
-                      <p className="text-xs text-slate-500 font-semibold">€ {toNum(schein.gesamtkosten).toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground font-semibold">€ {toNum(schein.gesamtkosten).toFixed(2)}</p>
                     )}
                   </div>
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-slate-700/60 text-slate-400 border border-slate-600/40 shrink-0 mt-1">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/80/40 shrink-0 mt-1">
                     Erledigt
                   </span>
                 </div>
                 {schein.items && schein.items.length > 0 && (
-                  <div className="border-t border-slate-700/40 divide-y divide-slate-800/60">
+                  <div className="border-t border-border/40 divide-y divide-border/60">
                     {schein.items.map(li => (
                       <div key={li.id} className="flex items-center justify-between px-5 py-2">
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-muted-foreground">
                           {li.item?.geraet}{li.item?.modell ? ` – ${li.item.modell}` : ''}
                           {li.item?.px_nummer && (
-                            <span className="font-mono text-xs text-slate-600 ml-2">{li.item.px_nummer}</span>
+                            <span className="font-mono text-xs text-muted-foreground/80 ml-2">{li.item.px_nummer}</span>
                           )}
                         </p>
                         {li.gesamtpreis != null && toNum(li.gesamtpreis) > 0 && (
-                          <p className="text-xs text-slate-600">€ {toNum(li.gesamtpreis).toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground/80">€ {toNum(li.gesamtpreis).toFixed(2)}</p>
                         )}
                       </div>
                     ))}

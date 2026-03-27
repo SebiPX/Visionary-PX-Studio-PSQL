@@ -120,84 +120,84 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <Calendar size={24} className="text-brand-400" /> Kalender
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
+            <Calendar size={24} className="text-primary-400" /> Kalender
           </h1>
-          <p className="text-slate-400 text-sm mt-1">Verfügbarkeit der Verleihartikel im Überblick</p>
+          <p className="text-muted-foreground text-sm mt-1">Verfügbarkeit der Verleihartikel im Überblick</p>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={prevMonth} className="p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition-colors">
+          <button onClick={prevMonth} className="p-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-colors">
             <ChevronLeft size={18} />
           </button>
-          <span className="text-white font-semibold w-44 text-center">{monthName}</span>
-          <button onClick={nextMonth} className="p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition-colors">
+          <span className="text-foreground font-semibold w-44 text-center">{monthName}</span>
+          <button onClick={nextMonth} className="p-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-colors">
             <ChevronRight size={18} />
           </button>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-xs text-slate-400">
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-emerald-500/40 border border-emerald-500/60" /> Frei</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-red-500/60 border border-red-500/40" /> Ausgeliehen</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-slate-700 border border-slate-600" /> Wochenende</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-muted border border-border/80" /> Wochenende</span>
       </div>
 
       {verleihItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
           <Package size={48} className="mb-3 opacity-40" />
           <p className="text-lg font-medium">Keine Verleihartikel vorhanden</p>
           <p className="text-sm">Markiere Geräte im Inventar als „Verleihartikel".</p>
         </div>
       ) : (
-        <div className="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden">
+        <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-xs" style={{ minWidth: `${100 + days * 32}px` }}>
               <thead>
-                <tr className="border-b border-slate-700">
+                <tr className="border-b border-border">
                   {/* Item name column */}
-                  <th className="sticky left-0 z-10 bg-slate-900 text-left py-3 px-4 text-slate-400 font-semibold w-48 min-w-48">Gerät</th>
+                  <th className="sticky left-0 z-10 bg-card text-left py-3 px-4 text-muted-foreground font-semibold w-48 min-w-48">Gerät</th>
                   {/* Day headers */}
                   {dayNumbers.map(d => (
                     <th key={d} className={`py-3 w-8 text-center font-medium select-none ${
-                      isToday(d) ? 'text-brand-400' : isWeekend(d) ? 'text-slate-600' : 'text-slate-400'
+                      isToday(d) ? 'text-primary-400' : isWeekend(d) ? 'text-muted-foreground/80' : 'text-muted-foreground'
                     }`}>
                       {d}
-                      <div className={`text-[9px] ${isWeekend(d) ? 'text-slate-700' : 'text-slate-600'}`}>
+                      <div className={`text-[9px] ${isWeekend(d) ? 'text-slate-700' : 'text-muted-foreground/80'}`}>
                         {new Date(year, month, d).toLocaleDateString('de-DE', { weekday: 'short' }).slice(0, 2)}
                       </div>
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-border">
                 {Array.from(categoriesMap.entries()).map(([category, itemsInCategory]) => {
                   const isExpanded = expandedCategories.has(category);
                   return (
                     <Fragment key={category}>
                       {/* Category Header Row */}
                       <tr 
-                        className="bg-slate-800/80 hover:bg-slate-700/80 transition-colors cursor-pointer group"
+                        className="bg-card/80 hover:bg-muted/80 transition-colors cursor-pointer group"
                         onClick={() => toggleCategory(category)}
                       >
-                        <td className="sticky left-0 z-20 bg-slate-800/90 group-hover:bg-slate-700/90 py-2.5 px-3 font-semibold text-brand-300 whitespace-nowrap border-b border-slate-700/50 flex items-center gap-2 transition-colors">
+                        <td className="sticky left-0 z-20 bg-card/90 group-hover:bg-muted/90 py-2.5 px-3 font-semibold text-primary-300 whitespace-nowrap border-b border-border/50 flex items-center gap-2 transition-colors">
                            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                            {category} 
                            <span className="text-xs font-normal opacity-60 ml-1">({itemsInCategory.length})</span>
                         </td>
                         {/* Empty cells for the dynamic days column width, so background color fills the rest */}
-                        <td colSpan={days} className="border-b border-slate-700/50 bg-slate-800/50 group-hover:bg-slate-700/50 transition-colors"></td>
+                        <td colSpan={days} className="border-b border-border/50 bg-card/50 group-hover:bg-muted/50 transition-colors"></td>
                       </tr>
 
                       {/* Item Rows */}
                       {isExpanded && itemsInCategory.map(item => {
                         const itemMap = coverageMap.get(item.id)
                         return (
-                          <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
+                          <tr key={item.id} className="hover:bg-card/40 transition-colors">
                             {/* Item name */}
-                            <td className="sticky left-0 z-10 bg-slate-900 py-2 px-4 pl-10 font-medium text-white whitespace-nowrap">
+                            <td className="sticky left-0 z-10 bg-card py-2 px-4 pl-10 font-medium text-foreground whitespace-nowrap">
                               <p className="truncate max-w-44">{item.geraet}{item.modell ? ` – ${item.modell}` : ''}</p>
-                              {item.px_nummer && <p className="text-slate-500 font-mono text-[10px]">{item.px_nummer}</p>}
+                              {item.px_nummer && <p className="text-muted-foreground font-mono text-[10px]">{item.px_nummer}</p>}
                             </td>
                             {/* Day cells */}
                             {dayNumbers.map(d => {
@@ -211,9 +211,9 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
                                       schein
                                         ? 'bg-red-500/60 border border-red-500/40 hover:bg-red-500/80'
                                         : weekend
-                                          ? 'bg-slate-700/30'
+                                          ? 'bg-muted/30'
                                           : todayCell
-                                            ? 'bg-brand-500/20 border border-brand-500/30'
+                                            ? 'bg-primary-500/20 border border-primary-500/30'
                                             : 'bg-emerald-500/10 border border-emerald-500/10 hover:bg-emerald-500/20'
                                     }`}
                                     title={schein

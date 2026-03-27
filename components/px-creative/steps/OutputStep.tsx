@@ -45,7 +45,7 @@ export const OutputStep: React.FC = () => {
     </style>
 </head>
 <body class="min-h-screen py-10 px-4 md:px-10 flex flex-col items-center">
-    <div class="max-w-4xl w-full bg-[#161f30] rounded-2xl border border-white/10 p-8 shadow-xl relative overflow-hidden">
+    <div class="max-w-4xl w-full bg-card rounded-2xl border border-border p-8 shadow-xl relative overflow-hidden">
         ${content}
     </div>
 </body>
@@ -77,39 +77,39 @@ export const OutputStep: React.FC = () => {
         <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 neon-glow shadow-[0_0_30px_rgba(34,197,94,0.4)]">
           <span className="material-icons-round text-4xl text-green-400">task_alt</span>
         </div>
-        <h2 className="text-3xl font-bold font-display tracking-tight text-white mb-4">Event Concept Finalized!</h2>
-        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+        <h2 className="text-3xl font-bold font-display tracking-tight text-foreground mb-4">Event Concept Finalized!</h2>
+        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
           You have successfully generated, mapped out, and refined a unique event concept for <b>{currentProject?.title}</b>.
         </p>
       </div>
 
       {finalConcept && (
-        <div ref={printRef} className="bg-[#161f30] rounded-2xl border border-white/10 p-8 shadow-xl mb-8 relative overflow-hidden">
+        <div ref={printRef} className="bg-card rounded-2xl border border-border p-8 shadow-xl mb-8 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
           
-          <h3 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4 relative z-10">
+          <h3 className="text-xl font-bold text-foreground mb-6 border-b border-border pb-4 relative z-10">
             Selected Concept Summary
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
             <div className="space-y-6">
               <div>
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Event Parameters</h4>
-                <div className="bg-black/20 p-4 rounded-xl border border-white/5 space-y-2 text-sm text-slate-300">
-                  <div className="flex justify-between"><span>Occasion:</span> <strong className="text-white">{currentProject?.occasion}</strong></div>
-                  <div className="flex justify-between"><span>Guests:</span> <strong className="text-white">{currentProject?.guest_count}</strong></div>
-                  <div className="flex justify-between"><span>Budget:</span> <strong className="text-white">{currentProject?.budget || 'N/A'}</strong></div>
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Event Parameters</h4>
+                <div className="bg-black/20 p-4 rounded-xl border border-border/50 space-y-2 text-sm text-foreground/90">
+                  <div className="flex justify-between"><span>Occasion:</span> <strong className="text-foreground">{currentProject?.occasion}</strong></div>
+                  <div className="flex justify-between"><span>Guests:</span> <strong className="text-foreground">{currentProject?.guest_count}</strong></div>
+                  <div className="flex justify-between"><span>Budget:</span> <strong className="text-foreground">{currentProject?.budget || 'N/A'}</strong></div>
                   <div className="flex justify-between"><span>HNW Score:</span> <strong className="text-brand-400 uppercase">{finalConcept.how_now_wow_score}</strong></div>
                 </div>
               </div>
 
               <div>
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Core Matrix Pillars</h4>
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Core Matrix Pillars</h4>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(finalConcept.selected_parameters).map(([key, val]) => (
-                    <div key={key} className="bg-white/5 border border-white/10 px-3 py-2 rounded-lg text-xs">
-                      <span className="block text-[10px] text-slate-500 uppercase mb-1">{key}</span>
-                      <span className="text-white font-medium">{val as string}</span>
+                    <div key={key} className="bg-white/5 border border-border px-3 py-2 rounded-lg text-xs">
+                      <span className="block text-[10px] text-muted-foreground uppercase mb-1">{key}</span>
+                      <span className="text-foreground font-medium">{val as string}</span>
                     </div>
                   ))}
                 </div>
@@ -131,37 +131,37 @@ export const OutputStep: React.FC = () => {
                   </div>
                 )}
                 <div className="bg-brand-500/10 p-5 rounded-xl border border-brand-500/20 mb-6">
-                  <p className="text-slate-200 leading-relaxed italic text-lg">
+                  <p className="text-foreground leading-relaxed italic text-lg">
                     "{finalConcept.scamper_refinements?.idea}"
                   </p>
                 </div>
 
                 {finalConcept.scamper_refinements?.real_world_validation && (
                   <div>
-                    <h4 className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    <h4 className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                       <span className="material-icons-round text-sm">travel_explore</span> Real-World Validation
                     </h4>
-                    <div className="bg-slate-800/50 p-5 rounded-xl border border-slate-700/50 space-y-4">
+                    <div className="bg-muted/50 p-5 rounded-xl border border-border/50 space-y-4">
                       {finalConcept.scamper_refinements.real_world_validation.location && (
                         <div>
-                          <span className="block text-xs uppercase text-slate-500 mb-1">Real Location</span>
+                          <span className="block text-xs uppercase text-muted-foreground mb-1">Real Location</span>
                           <strong className="text-green-400 text-base block">{finalConcept.scamper_refinements.real_world_validation.location.name}</strong>
-                          <p className="text-sm text-slate-400 mt-1 mb-2">{finalConcept.scamper_refinements.real_world_validation.location.description}</p>
-                          {finalConcept.scamper_refinements.real_world_validation.location.address && <p className="text-xs text-slate-300 mt-1"><span className="opacity-50">📍</span> {finalConcept.scamper_refinements.real_world_validation.location.address}</p>}
-                          {finalConcept.scamper_refinements.real_world_validation.location.contact && <p className="text-xs text-slate-300"><span className="opacity-50">📞</span> {finalConcept.scamper_refinements.real_world_validation.location.contact}</p>}
+                          <p className="text-sm text-muted-foreground mt-1 mb-2">{finalConcept.scamper_refinements.real_world_validation.location.description}</p>
+                          {finalConcept.scamper_refinements.real_world_validation.location.address && <p className="text-xs text-foreground/90 mt-1"><span className="opacity-50">📍</span> {finalConcept.scamper_refinements.real_world_validation.location.address}</p>}
+                          {finalConcept.scamper_refinements.real_world_validation.location.contact && <p className="text-xs text-foreground/90"><span className="opacity-50">📞</span> {finalConcept.scamper_refinements.real_world_validation.location.contact}</p>}
                           {finalConcept.scamper_refinements.real_world_validation.location.website && <p className="text-xs text-blue-400 truncate"><a href={finalConcept.scamper_refinements.real_world_validation.location.website.startsWith('http') ? finalConcept.scamper_refinements.real_world_validation.location.website : `https://${finalConcept.scamper_refinements.real_world_validation.location.website}`} target="_blank" rel="noreferrer" className="hover:underline"><span className="opacity-70">🌐</span> {finalConcept.scamper_refinements.real_world_validation.location.website}</a></p>}
                         </div>
                       )}
                       
                       {finalConcept.scamper_refinements.real_world_validation.nearby_vendors && finalConcept.scamper_refinements.real_world_validation.nearby_vendors.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-slate-700/50">
-                          <span className="block text-xs uppercase text-slate-500 mb-3">Nearby Vendors</span>
+                        <div className="mt-4 pt-4 border-t border-border/50">
+                          <span className="block text-xs uppercase text-muted-foreground mb-3">Nearby Vendors</span>
                           <div className="space-y-4">
                             {finalConcept.scamper_refinements.real_world_validation.nearby_vendors.map((v: any, vi: number) => (
-                              <div key={vi} className="bg-white/5 p-3 rounded-lg border border-white/5">
-                                <strong className="text-blue-400 text-sm block">{v.name} <span className="text-xs text-slate-500 font-normal">({v.type})</span></strong>
-                                <p className="text-xs text-slate-400 mt-1">{v.description}</p>
-                                <p className="text-xs text-slate-300 mt-2"><span className="opacity-50">📞</span> {renderWithLinks(v.contact)}</p>
+                              <div key={vi} className="bg-white/5 p-3 rounded-lg border border-border/50">
+                                <strong className="text-blue-400 text-sm block">{v.name} <span className="text-xs text-muted-foreground font-normal">({v.type})</span></strong>
+                                <p className="text-xs text-muted-foreground mt-1">{v.description}</p>
+                                <p className="text-xs text-foreground/90 mt-2"><span className="opacity-50">📞</span> {renderWithLinks(v.contact)}</p>
                               </div>
                             ))}
                           </div>
@@ -179,7 +179,7 @@ export const OutputStep: React.FC = () => {
       <div className="flex justify-center gap-4">
         <button 
           onClick={() => setCurrentProject(null)}
-          className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+          className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-foreground font-bold border border-border transition-colors flex items-center gap-2"
         >
           <span className="material-icons-round text-sm">home</span> Dashboard
         </button>
@@ -188,12 +188,12 @@ export const OutputStep: React.FC = () => {
              const token = getToken();
              if (token && currentProject) await updateProject(token, currentProject.id, { current_step: 'scamper' });
           }}
-          className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+          className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-foreground font-bold border border-border transition-colors flex items-center gap-2"
         >
           <span className="material-icons-round text-sm">arrow_back</span> Back to SCAMPER
         </button>
         <button 
-          className="px-8 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 disabled:opacity-50"
+          className="px-8 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-foreground font-bold transition-all shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center gap-2 disabled:opacity-50"
           onClick={handleExportHTML}
           disabled={isExporting}
         >

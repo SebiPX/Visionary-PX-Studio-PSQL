@@ -27,12 +27,12 @@ export const StoryboardPhase: React.FC<StoryboardPhaseProps> = ({
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold text-white">Shots ({shots.length})</h3>
+                <h3 className="text-lg font-bold text-foreground">Shots ({shots.length})</h3>
                 <div className="flex gap-3">
                     <button
                         onClick={onGenerateShots}
                         disabled={isGenerating}
-                        className="px-4 py-2 bg-gradient-to-r from-purple-600 to-primary hover:from-purple-700 hover:to-primary-hover disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all flex items-center gap-2"
+                        className="px-4 py-2 bg-gradient-to-r from-purple-600 to-primary hover:from-purple-700 hover:to-primary-hover disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-foreground font-semibold rounded-lg transition-all flex items-center gap-2"
                     >
                         {isGenerating ? (
                             <>
@@ -48,7 +48,7 @@ export const StoryboardPhase: React.FC<StoryboardPhaseProps> = ({
                     </button>
                     <button
                         onClick={onAddShot}
-                        className="px-4 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-all flex items-center gap-2"
+                        className="px-4 py-2 bg-primary hover:bg-primary-hover text-foreground font-semibold rounded-lg transition-all flex items-center gap-2"
                     >
                         <span className="material-icons-round text-sm">add</span>
                         Add Shot
@@ -60,12 +60,12 @@ export const StoryboardPhase: React.FC<StoryboardPhaseProps> = ({
                 {shots.map((shot, index) => (
                     <div
                         key={shot.id}
-                        className="bg-slate-800/40 border border-white/10 rounded-xl p-4 hover:border-primary/30 transition-all cursor-pointer"
+                        className="bg-muted/40 border border-border rounded-xl p-4 hover:border-primary/30 transition-all cursor-pointer"
                         onClick={() => onEditShot(shot)}
                     >
                         <div className="flex justify-between items-start mb-3">
                             <div>
-                                <span className="text-xs text-slate-500">Shot {index + 1}</span>
+                                <span className="text-xs text-muted-foreground">Shot {index + 1}</span>
                                 {shot.scene_number && (
                                     <span className="ml-2 text-xs text-primary">#{shot.scene_number}</span>
                                 )}
@@ -80,30 +80,30 @@ export const StoryboardPhase: React.FC<StoryboardPhaseProps> = ({
                                 <span className="material-icons-round text-sm">delete</span>
                             </button>
                         </div>
-                        <h4 className="text-white font-medium mb-2">{shot.title || 'Untitled Shot'}</h4>
-                        <p className="text-slate-400 text-xs mb-3 line-clamp-2">{shot.description || 'No description'}</p>
+                        <h4 className="text-foreground font-medium mb-2">{shot.title || 'Untitled Shot'}</h4>
+                        <p className="text-muted-foreground text-xs mb-3 line-clamp-2">{shot.description || 'No description'}</p>
 
                         {/* Dialog */}
                         {shot.dialog && (
-                            <div className="mb-3 bg-slate-900/60 border border-white/5 rounded-lg px-3 py-2">
+                            <div className="mb-3 bg-card/60 border border-border/50 rounded-lg px-3 py-2">
                                 <div className="flex items-center gap-1 mb-1">
                                     <span className="material-icons-round text-xs text-primary">record_voice_over</span>
-                                    <span className="text-xs text-slate-500">Dialog</span>
+                                    <span className="text-xs text-muted-foreground">Dialog</span>
                                 </div>
                                 {shot.dialog.split('\n').slice(0, 3).map((line, i) => (
-                                    <p key={i} className="text-xs text-slate-300 font-mono line-clamp-1">{line}</p>
+                                    <p key={i} className="text-xs text-foreground/90 font-mono line-clamp-1">{line}</p>
                                 ))}
                                 {shot.dialog.split('\n').length > 3 && (
-                                    <p className="text-xs text-slate-500 italic">+{shot.dialog.split('\n').length - 3} weitere Zeilen...</p>
+                                    <p className="text-xs text-muted-foreground italic">+{shot.dialog.split('\n').length - 3} weitere Zeilen...</p>
                                 )}
                             </div>
                         )}
 
                         <div className="flex flex-wrap gap-1 mb-2">
                             <span className="px-2 py-0.5 bg-primary/20 text-primary text-xs rounded">{shot.framing}</span>
-                            <span className="px-2 py-0.5 bg-slate-700 text-slate-300 text-xs rounded">{shot.camera_movement}</span>
+                            <span className="px-2 py-0.5 bg-secondary text-foreground/90 text-xs rounded">{shot.camera_movement}</span>
                             {shot.duration && (
-                                <span className="px-2 py-0.5 bg-slate-700 text-slate-300 text-xs rounded">{shot.duration}s</span>
+                                <span className="px-2 py-0.5 bg-secondary text-foreground/90 text-xs rounded">{shot.duration}s</span>
                             )}
                         </div>
 
@@ -112,7 +112,7 @@ export const StoryboardPhase: React.FC<StoryboardPhaseProps> = ({
                                 e.stopPropagation();
                                 onEditShot(shot);
                             }}
-                            className="w-full mt-2 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-medium rounded transition-all flex items-center justify-center gap-1"
+                            className="w-full mt-2 px-3 py-1.5 bg-secondary hover:bg-muted-foreground/20 text-foreground text-xs font-medium rounded transition-all flex items-center justify-center gap-1"
                         >
                             <span className="material-icons-round text-xs">edit</span>
                             Bearbeiten
@@ -124,13 +124,13 @@ export const StoryboardPhase: React.FC<StoryboardPhaseProps> = ({
             <div className="flex gap-4">
                 <button
                     onClick={onBack}
-                    className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-all"
+                    className="px-6 py-3 bg-secondary hover:bg-muted-foreground/20 text-foreground font-semibold rounded-lg transition-all"
                 >
                     ← Back to Story
                 </button>
                 <button
                     onClick={onNext}
-                    className="px-6 py-3 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-all"
+                    className="px-6 py-3 bg-primary hover:bg-primary-hover text-foreground font-semibold rounded-lg transition-all"
                 >
                     Continue to Review →
                 </button>

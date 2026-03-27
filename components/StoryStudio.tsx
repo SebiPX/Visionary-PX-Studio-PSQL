@@ -1033,11 +1033,11 @@ ${hasRefs
     };
 
     return (
-        <div className="h-full flex overflow-hidden bg-[#0a0f18]">
+        <div className="h-full flex overflow-hidden bg-card">
             {/* History Sidebar */}
-            <aside className="w-80 border-r border-white/10 p-4 overflow-y-auto hide-scrollbar">
+            <aside className="w-80 border-r border-border p-4 overflow-y-auto hide-scrollbar">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-bold text-white">Story Studio</h2>
+                    <h2 className="text-lg font-bold text-foreground">Story Studio</h2>
                     <button
                         onClick={() => {
                             // Reset ALL session state to blank defaults
@@ -1057,7 +1057,7 @@ ${hasRefs
                             setProduct({ id: 'prod-1', type: 'product', name: 'Product', description: '', image_url: '', source: 'upload', created_at: new Date().toISOString() });
                             setCurrentPhase('setup');
                         }}
-                        className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white text-sm font-semibold rounded-lg transition-all"
+                        className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-foreground text-sm font-semibold rounded-lg transition-all"
                     >
                         New
                     </button>
@@ -1069,10 +1069,10 @@ ${hasRefs
                             <button
                                 key={session.id}
                                 onClick={() => loadSession(session)}
-                                className="w-full text-left p-3 bg-slate-800/40 hover:bg-slate-700/40 border border-white/10 rounded-lg transition-all"
+                                className="w-full text-left p-3 bg-muted/40 hover:bg-secondary/40 border border-border rounded-lg transition-all"
                             >
-                                <p className="text-white text-sm font-medium truncate">{session.title}</p>
-                                <p className="text-slate-400 text-xs mt-1">{session.shots.length} shots</p>
+                                <p className="text-foreground text-sm font-medium truncate">{session.title}</p>
+                                <p className="text-muted-foreground text-xs mt-1">{session.shots.length} shots</p>
                             </button>
                         ))}
                     </div>
@@ -1088,7 +1088,7 @@ ${hasRefs
                             type="text"
                             value={sessionTitle}
                             onChange={(e) => setSessionTitle(e.target.value)}
-                            className="flex-1 text-3xl font-bold text-white bg-transparent border-none outline-none"
+                            className="flex-1 text-3xl font-bold text-foreground bg-transparent border-none outline-none"
                             placeholder="Untitled Storyboard"
                         />
                         {/* Persistent Save Button */}
@@ -1097,7 +1097,7 @@ ${hasRefs
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                                 savedFeedback
                                     ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                    : 'bg-slate-700 hover:bg-slate-600 text-white'
+                                    : 'bg-secondary hover:bg-muted-foreground/20 text-foreground'
                             }`}
                         >
                             <span className="material-icons-round text-sm">
@@ -1117,8 +1117,8 @@ ${hasRefs
                                 key={phase}
                                 onClick={() => setCurrentPhase(phase)}
                                 className={`px-4 py-2 rounded-lg font-medium transition-all ${currentPhase === phase
-                                    ? 'bg-primary text-white'
-                                    : 'bg-slate-800/40 text-slate-400 hover:text-white'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted/40 text-muted-foreground hover:text-foreground'
                                     }`}
                             >
                                 {phase.charAt(0).toUpperCase() + phase.slice(1)}
@@ -1172,7 +1172,7 @@ ${hasRefs
                 >
                     <button
                         onClick={() => setPreviewImageUrl(null)}
-                        className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all z-10"
+                        className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-foreground transition-all z-10"
                     >
                         <span className="material-icons-round">close</span>
                     </button>

@@ -142,19 +142,19 @@ export const ImageSourcePicker: React.FC<ImageSourcePickerProps> = ({
             onClick={onClose}
         >
             <div
-                className="bg-[#0f1520] border border-white/10 rounded-2xl overflow-hidden w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl"
+                className="bg-card border border-border rounded-2xl overflow-hidden w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                    <h3 className="text-white font-bold">{label}</h3>
-                    <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                    <h3 className="text-foreground font-bold">{label}</h3>
+                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
                         <span className="material-icons-round">close</span>
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-white/10">
+                <div className="flex border-b border-border">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
@@ -162,7 +162,7 @@ export const ImageSourcePicker: React.FC<ImageSourcePickerProps> = ({
                             className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-wider transition-all ${
                                 activeTab === tab.id
                                     ? 'text-primary border-b-2 border-primary bg-primary/5'
-                                    : 'text-slate-500 hover:text-slate-300'
+                                    : 'text-muted-foreground hover:text-foreground/90'
                             }`}
                         >
                             <span className="material-icons-round text-sm">{tab.icon}</span>
@@ -178,7 +178,7 @@ export const ImageSourcePicker: React.FC<ImageSourcePickerProps> = ({
                     {activeTab === 'upload' && (
                         <div
                             onClick={() => fileInputRef.current?.click()}
-                            className="border-2 border-dashed border-white/10 rounded-xl p-12 flex flex-col items-center justify-center bg-white/3 hover:bg-white/6 hover:border-primary/40 transition-all cursor-pointer group"
+                            className="border-2 border-dashed border-border rounded-xl p-12 flex flex-col items-center justify-center bg-white/3 hover:bg-white/6 hover:border-primary/40 transition-all cursor-pointer group"
                         >
                             <input
                                 ref={fileInputRef}
@@ -190,9 +190,9 @@ export const ImageSourcePicker: React.FC<ImageSourcePickerProps> = ({
                             <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <span className="material-icons-round text-3xl text-primary">upload_file</span>
                             </div>
-                            <p className="text-white font-semibold mb-1">Datei hochladen</p>
-                            <p className="text-slate-500 text-xs">Klicken oder Datei hierher ziehen</p>
-                            <p className="text-slate-600 text-xs mt-2">PNG, JPG, WEBP, AVIF</p>
+                            <p className="text-foreground font-semibold mb-1">Datei hochladen</p>
+                            <p className="text-muted-foreground text-xs">Klicken oder Datei hierher ziehen</p>
+                            <p className="text-muted-foreground/80 text-xs mt-2">PNG, JPG, WEBP, AVIF</p>
                         </div>
                     )}
 
@@ -205,14 +205,14 @@ export const ImageSourcePicker: React.FC<ImageSourcePickerProps> = ({
                                     <p className="text-red-300 text-sm">{webcamError}</p>
                                     <button
                                         onClick={startWebcam}
-                                        className="mt-4 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition-all"
+                                        className="mt-4 px-4 py-2 bg-primary hover:bg-primary-hover text-foreground text-xs font-bold rounded-lg transition-all"
                                     >
                                         Erneut versuchen
                                     </button>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-white/10">
+                                    <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border">
                                         <video
                                             ref={videoRef}
                                             autoPlay
@@ -234,7 +234,7 @@ export const ImageSourcePicker: React.FC<ImageSourcePickerProps> = ({
                                     >
                                         <span className="material-icons-round text-slate-800 text-2xl">photo_camera</span>
                                     </button>
-                                    <p className="text-slate-500 text-xs">Klicke den Auslöser um ein Foto aufzunehmen</p>
+                                    <p className="text-muted-foreground text-xs">Klicke den Auslöser um ein Foto aufzunehmen</p>
                                 </>
                             )}
                         </div>
@@ -250,19 +250,19 @@ export const ImageSourcePicker: React.FC<ImageSourcePickerProps> = ({
                             ) : assets.length === 0 ? (
                                 <div className="text-center py-16">
                                     <span className="material-icons-round text-slate-700 text-5xl mb-4">image_not_supported</span>
-                                    <p className="text-slate-500 text-sm">Noch keine eigenen Assets.</p>
-                                    <p className="text-slate-600 text-xs mt-1">Generiere erst Bilder oder Thumbnails.</p>
+                                    <p className="text-muted-foreground text-sm">Noch keine eigenen Assets.</p>
+                                    <p className="text-muted-foreground/80 text-xs mt-1">Generiere erst Bilder oder Thumbnails.</p>
                                 </div>
                             ) : (
                                 <>
-                                    <p className="text-slate-500 text-xs mb-4">{assets.length} Assets verfügbar — klicken zum Auswählen</p>
+                                    <p className="text-muted-foreground text-xs mb-4">{assets.length} Assets verfügbar — klicken zum Auswählen</p>
                                     <div className="grid grid-cols-3 gap-3">
                                         {assets.map(asset => (
                                             <button
                                                 key={asset.id}
                                                 onClick={() => selectAsset(asset.id, asset.url)}
                                                 disabled={!!loadingAssetId}
-                                                className="relative aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-primary/60 transition-all group disabled:opacity-50"
+                                                className="relative aspect-square rounded-xl overflow-hidden border border-border hover:border-primary/60 transition-all group disabled:opacity-50"
                                                 title={asset.label}
                                             >
                                                 <img
@@ -276,11 +276,11 @@ export const ImageSourcePicker: React.FC<ImageSourcePickerProps> = ({
                                                     </div>
                                                 ) : (
                                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                        <span className="material-icons-round text-white text-2xl">check_circle</span>
+                                                        <span className="material-icons-round text-foreground text-2xl">check_circle</span>
                                                     </div>
                                                 )}
                                                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <p className="text-[9px] text-white/80 truncate">{asset.label}</p>
+                                                    <p className="text-[9px] text-foreground/80 truncate">{asset.label}</p>
                                                 </div>
                                             </button>
                                         ))}

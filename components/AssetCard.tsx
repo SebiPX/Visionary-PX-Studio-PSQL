@@ -41,11 +41,11 @@ export const AssetCard: React.FC<AssetCardProps> = ({
     const placeholderLabel = asset.type === 'actor' ? 'Actor' : asset.type === 'environment' ? 'Environment' : 'Product';
 
     return (
-        <div className="bg-slate-800/40 border border-white/10 rounded-xl p-4 flex flex-col gap-3">
+        <div className="bg-muted/40 border border-border rounded-xl p-4 flex flex-col gap-3">
 
             {/* ── Generated Image Preview ── */}
             {hasGenerated ? (
-                <div className="relative group rounded-lg overflow-hidden border border-white/10 bg-slate-900/50"
+                <div className="relative group rounded-lg overflow-hidden border border-border bg-card/50"
                     style={{ aspectRatio: asset.type === 'environment' ? '16/9' : '4/3' }}>
                     <img
                         src={asset.image_url}
@@ -58,7 +58,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                         {onPreview && (
                             <button
                                 onClick={() => onPreview(asset.image_url)}
-                                className="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-all"
+                                className="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-foreground transition-all"
                                 title="Großes Vorschau"
                             >
                                 <span className="material-icons-round text-sm">open_in_full</span>
@@ -70,7 +70,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                                 asset.image_url,
                                 `${(asset.name || placeholderLabel).replace(/\s+/g, '-').toLowerCase()}-asset.png`
                             )}
-                            className="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-all"
+                            className="p-2 bg-white/20 hover:bg-white/30 rounded-lg text-foreground transition-all"
                             title="Herunterladen"
                         >
                             <span className="material-icons-round text-sm">download</span>
@@ -80,7 +80,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
             ) : (
                 /* Empty placeholder */
                 <div
-                    className="rounded-lg border-2 border-dashed border-white/10 bg-slate-900/30 flex flex-col items-center justify-center text-slate-600 gap-1"
+                    className="rounded-lg border-2 border-dashed border-border bg-card/30 flex flex-col items-center justify-center text-muted-foreground/80 gap-1"
                     style={{ aspectRatio: asset.type === 'environment' ? '16/9' : '4/3' }}
                 >
                     <span className="material-icons-round text-3xl">image</span>
@@ -92,11 +92,11 @@ export const AssetCard: React.FC<AssetCardProps> = ({
             {hasRef && (
                 <div className="flex items-center gap-2">
                     {/* Small ref thumb */}
-                    <div className="w-10 h-10 rounded overflow-hidden border border-white/20 flex-shrink-0">
+                    <div className="w-10 h-10 rounded overflow-hidden border border-border/80 flex-shrink-0">
                         <img src={asset.ref_image_url} alt="Referenz" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-400 truncate">Referenzfoto hochgeladen</p>
+                        <p className="text-xs text-muted-foreground truncate">Referenzfoto hochgeladen</p>
                         {isActor && (
                             <label className="flex items-center gap-1.5 mt-1 cursor-pointer">
                                 <input
@@ -105,7 +105,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                                     onChange={(e) => onUpdate({ ...asset, is_character_sheet: e.target.checked })}
                                     className="w-3 h-3 accent-primary"
                                 />
-                                <span className="text-xs text-slate-400">Ist bereits ein Character Sheet</span>
+                                <span className="text-xs text-muted-foreground">Ist bereits ein Character Sheet</span>
                             </label>
                         )}
                     </div>
@@ -113,7 +113,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                     <button
                         onClick={() => setShowPicker(true)}
                         disabled={isUploading || isGenerating}
-                        className="p-1.5 bg-slate-700 hover:bg-slate-600 rounded text-slate-300 transition-all disabled:opacity-40"
+                        className="p-1.5 bg-secondary hover:bg-muted-foreground/20 rounded text-foreground/90 transition-all disabled:opacity-40"
                         title="Referenzfoto ersetzen"
                     >
                         <span className="material-icons-round text-xs">photo_camera</span>
@@ -126,7 +126,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                 type="text"
                 value={asset.name}
                 onChange={(e) => onUpdate({ ...asset, name: e.target.value })}
-                className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+                className="w-full bg-card/50 border border-border rounded-lg px-3 py-2 text-foreground text-sm"
                 placeholder={`${placeholderLabel} name`}
             />
 
@@ -134,7 +134,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
             <textarea
                 value={asset.description}
                 onChange={(e) => onUpdate({ ...asset, description: e.target.value })}
-                className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm resize-none"
+                className="w-full bg-card/50 border border-border rounded-lg px-3 py-2 text-foreground text-sm resize-none"
                 rows={2}
                 placeholder={
                     asset.is_character_sheet
@@ -152,7 +152,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                     <button
                         onClick={() => setShowPicker(true)}
                         disabled={isUploading || isGenerating}
-                        className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:text-slate-600 text-white text-xs font-medium rounded transition-all flex items-center justify-center gap-1"
+                        className="flex-1 px-3 py-2 bg-secondary hover:bg-muted-foreground/20 disabled:bg-muted disabled:text-muted-foreground/80 text-foreground text-xs font-medium rounded transition-all flex items-center justify-center gap-1"
                     >
                         {isUploading ? (
                             <>
@@ -172,7 +172,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
                 <button
                     onClick={() => onGenerate(asset)}
                     disabled={isUploading || isGenerating || !asset.description}
-                    className="flex-1 px-3 py-2 bg-primary hover:bg-primary-hover disabled:bg-slate-800 disabled:text-slate-600 text-white text-xs font-medium rounded transition-all flex items-center justify-center gap-1"
+                    className="flex-1 px-3 py-2 bg-primary hover:bg-primary-hover disabled:bg-muted disabled:text-muted-foreground/80 text-foreground text-xs font-medium rounded transition-all flex items-center justify-center gap-1"
                     title={!asset.description ? 'Bitte erst eine Beschreibung eingeben' : ''}
                 >
                     {isGenerating ? (
@@ -191,7 +191,7 @@ export const AssetCard: React.FC<AssetCardProps> = ({
 
             {/* Source Badge */}
             {hasGenerated && (
-                <div className="text-xs text-slate-500 flex items-center gap-1">
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
                     <span className="material-icons-round text-xs">
                         {asset.source === 'ai-generated' ? 'auto_awesome' : 'upload'}
                     </span>

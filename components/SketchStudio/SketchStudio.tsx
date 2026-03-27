@@ -134,11 +134,11 @@ export const SketchStudio: React.FC<SketchStudioProps> = ({ isActive = true }) =
     // ========================================================================
 
     return (
-        <div className="flex h-screen w-full bg-[#101622] text-slate-200 overflow-hidden">
+        <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
             {/* Background Ambience */}
             <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#135bec]/20 rounded-full blur-[100px]"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#135bec]/10 rounded-full blur-[100px]"></div>
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-card/20 rounded-full blur-[100px]"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-card/10 rounded-full blur-[100px]"></div>
             </div>
 
             <div className="relative w-full h-full flex flex-col max-w-[1600px] mx-auto p-4 md:p-6 gap-6">
@@ -147,17 +147,17 @@ export const SketchStudio: React.FC<SketchStudioProps> = ({ isActive = true }) =
                 <header className="flex items-center justify-between shrink-0 mb-2">
                     <div className="flex items-center gap-3">
                         <div className="bg-gradient-to-br from-[#135bec] to-[#0d4bb8] p-2.5 rounded-lg shadow-lg shadow-[#135bec]/50">
-                            <span className="material-icons-round text-white text-2xl">brush</span>
+                            <span className="material-icons-round text-foreground text-2xl">brush</span>
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-white tracking-tight">Sketch Studio</h1>
-                            <p className="text-xs text-slate-400 font-medium">Sketch to Image AI</p>
+                            <h1 className="text-2xl font-bold text-foreground tracking-tight">Sketch Studio</h1>
+                            <p className="text-xs text-muted-foreground font-medium">Sketch to Image AI</p>
                         </div>
                     </div>
                     {appState !== AppState.DRAWING && (
                         <button
                             onClick={reset}
-                            className="text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                         >
                             Start New Sketch
                         </button>
@@ -169,7 +169,7 @@ export const SketchStudio: React.FC<SketchStudioProps> = ({ isActive = true }) =
                     <div className="bg-red-900/50 border border-red-800 text-red-200 px-4 py-3 rounded-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
                         <span className="material-icons-round text-lg">error</span>
                         <span>{error}</span>
-                        <button onClick={() => setError(null)} className="ml-auto hover:text-white">&times;</button>
+                        <button onClick={() => setError(null)} className="ml-auto hover:text-foreground">&times;</button>
                     </div>
                 )}
 
@@ -191,8 +191,8 @@ export const SketchStudio: React.FC<SketchStudioProps> = ({ isActive = true }) =
                     ) : (
                         <>
                             {/* Left Column: History */}
-                            <div className="w-64 shrink-0 flex flex-col h-full bg-slate-900/30 backdrop-blur-sm rounded-xl border border-slate-800/50 p-4">
-                                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                            <div className="w-64 shrink-0 flex flex-col h-full bg-card/30 backdrop-blur-sm rounded-xl border border-border/50 p-4">
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
                                     <span className="material-icons-round text-sm">history</span>
                                     Your Sketches ({history.length})
                                 </h3>
@@ -212,15 +212,15 @@ export const SketchStudio: React.FC<SketchStudioProps> = ({ isActive = true }) =
                                                     setStyle(item.style as StyleOption);
                                                     setAppState(AppState.RESULT);
                                                 }}
-                                                className="relative aspect-square rounded-lg overflow-hidden border border-white/10 group hover:border-[#135bec]/50 transition-all"
+                                                className="relative aspect-square rounded-lg overflow-hidden border border-border group hover:border-[#135bec]/50 transition-all"
                                                 title={`${item.context} - ${item.style}`}
                                             >
                                                 <img src={item.generated_image_url || item.sketch_data} alt="History" className="w-full h-full object-cover" />
                                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <span className="material-icons-round text-white text-sm">restore</span>
+                                                    <span className="material-icons-round text-foreground text-sm">restore</span>
                                                 </div>
                                                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <p className="text-[9px] text-white/80 truncate">{item.context}</p>
+                                                    <p className="text-[9px] text-foreground/80 truncate">{item.context}</p>
                                                 </div>
                                             </button>
                                         ))}
@@ -228,13 +228,13 @@ export const SketchStudio: React.FC<SketchStudioProps> = ({ isActive = true }) =
                                 ) : (
                                     <div className="text-center py-8">
                                         <span className="material-icons-round text-3xl text-slate-700 mb-2">brush</span>
-                                        <p className="text-xs text-slate-500">No sketches yet</p>
+                                        <p className="text-xs text-muted-foreground">No sketches yet</p>
                                     </div>
                                 )}
                             </div>
 
                             {/* Middle Column: Canvas */}
-                            <div className={`flex-1 flex flex-col bg-slate-900/30 backdrop-blur-sm rounded-xl border border-slate-800/50 p-1 relative overflow-hidden transition-all duration-500 ${appState === AppState.GENERATING ? 'opacity-50 grayscale pointer-events-none' : ''}`}>
+                            <div className={`flex-1 flex flex-col bg-card/30 backdrop-blur-sm rounded-xl border border-border/50 p-1 relative overflow-hidden transition-all duration-500 ${appState === AppState.GENERATING ? 'opacity-50 grayscale pointer-events-none' : ''}`}>
                                 <DrawingCanvas
                                     ref={canvasRef}
                                     onCanvasReady={() => { }}

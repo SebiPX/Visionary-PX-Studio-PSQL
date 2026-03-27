@@ -109,42 +109,42 @@ export default function MusicStudio({ isActive }: MusicStudioProps) {
     };
 
     return (
-        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#0A0F1C]">
+        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-card">
             {/* Sidebar Settings */}
-            <div className="w-[400px] border-r border-[#1E293B] bg-[#0F172A] flex flex-col p-6 overflow-y-auto">
+            <div className="w-[400px] border-r border-[#1E293B] bg-card flex flex-col p-6 overflow-y-auto">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <Sparkles className="w-6 h-6 text-white" />
+                        <Sparkles className="w-6 h-6 text-foreground" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-200">Music Studio</h2>
-                        <p className="text-sm text-slate-400">Fal.ai Yue Music Generation</p>
+                        <h2 className="text-xl font-bold text-foreground">Music Studio</h2>
+                        <p className="text-sm text-muted-foreground">Fal.ai Yue Music Generation</p>
                     </div>
                 </div>
 
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                             Genres & Modifiers
                         </label>
                         <input
                             type="text"
                             value={genres}
                             onChange={(e) => setGenres(e.target.value)}
-                            className="w-full bg-[#1E293B] border border-[#334155] rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            className="w-full bg-card border border-[#334155] rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                             placeholder="e.g. inspiring female uplifting pop"
                         />
-                        <p className="text-xs text-slate-500 mt-2">Space-separated genre tags.</p>
+                        <p className="text-xs text-muted-foreground mt-2">Space-separated genre tags.</p>
                     </div>
                 </div>
             </div>
 
             {/* Main Area */}
-            <div className="flex-1 flex flex-col relative bg-[#0A0F1C]">
+            <div className="flex-1 flex flex-col relative bg-card">
                 {/* Generation Area */}
                 <div className="flex-1 p-8 flex flex-col items-center justify-center overflow-y-auto">
                     <form onSubmit={handleGenerate} className="w-full max-w-3xl space-y-4">
-                        <label className="block text-sm font-medium text-slate-300">
+                        <label className="block text-sm font-medium text-foreground/90">
                             Song Lyrics (Use [verse] and [chorus] tags)
                         </label>
                         <div className="relative">
@@ -152,16 +152,16 @@ export default function MusicStudio({ isActive }: MusicStudioProps) {
                                 value={lyrics}
                                 onChange={(e) => setLyrics(e.target.value)}
                                 placeholder="[verse]\nYour lyrics here..."
-                                className="w-full h-48 bg-[#1E293B] border border-[#334155] rounded-xl pl-4 pr-32 py-4 text-slate-200 resize-none focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                className="w-full h-48 bg-card border border-[#334155] rounded-xl pl-4 pr-32 py-4 text-foreground resize-none focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                             />
                             <button
                                 type="submit"
                                 disabled={isGenerating || !lyrics.trim() || !genres.trim()}
-                                className="absolute bottom-4 right-4 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-all shadow-lg flex items-center gap-2"
+                                className="absolute bottom-4 right-4 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-secondary disabled:cursor-not-allowed text-foreground rounded-lg font-medium transition-all shadow-lg flex items-center gap-2"
                             >
                                 {isGenerating ? (
                                     <>
-                                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                        <div className="w-4 h-4 border-2 border-border/80 border-t-white rounded-full animate-spin"></div>
                                         Rendern...
                                     </>
                                 ) : (
@@ -176,9 +176,9 @@ export default function MusicStudio({ isActive }: MusicStudioProps) {
 
                     {/* Progress Logs */}
                     {isGenerating && logs.length > 0 && (
-                        <div className="mt-8 w-full max-w-3xl p-4 bg-[#1E293B]/50 rounded-xl border border-[#334155]">
-                            <p className="text-xs font-semibold text-slate-400 mb-2 uppercase">Status Logs</p>
-                            <div className="h-32 overflow-y-auto flex flex-col-reverse space-y-1 space-y-reverse text-xs text-slate-300 font-mono">
+                        <div className="mt-8 w-full max-w-3xl p-4 bg-card/50 rounded-xl border border-[#334155]">
+                            <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase">Status Logs</p>
+                            <div className="h-32 overflow-y-auto flex flex-col-reverse space-y-1 space-y-reverse text-xs text-foreground/90 font-mono">
                                 {logs.map((log, idx) => (
                                     <div key={idx} className="opacity-80">&gt; {log}</div>
                                 ))}
@@ -188,12 +188,12 @@ export default function MusicStudio({ isActive }: MusicStudioProps) {
 
                     {/* Current generated audio */}
                     {currentAudio && !isGenerating && (
-                        <div className="mt-8 w-full max-w-3xl p-6 bg-[#162032] rounded-2xl border border-white/5 shadow-2xl flex flex-col items-center gap-4 animate-fade-in-up">
-                            <h3 className="text-lg font-bold text-white">Generierter Song</h3>
+                        <div className="mt-8 w-full max-w-3xl p-6 bg-card rounded-2xl border border-border/50 shadow-2xl flex flex-col items-center gap-4 animate-fade-in-up">
+                            <h3 className="text-lg font-bold text-foreground">Generierter Song</h3>
                             <audio src={currentAudio} controls className="w-full" autoPlay />
                             <button
                                 onClick={(e) => handleDownload(e, currentAudio, 'music.mp3')}
-                                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg flex items-center gap-2 transition-colors"
+                                className="px-4 py-2 bg-secondary hover:bg-muted-foreground/20 text-foreground text-sm rounded-lg flex items-center gap-2 transition-colors"
                             >
                                 <Download className="w-4 h-4" />
                                 Herunterladen
@@ -203,24 +203,24 @@ export default function MusicStudio({ isActive }: MusicStudioProps) {
                 </div>
 
                 {/* History Bar */}
-                <div className="h-64 border-t border-[#1E293B] bg-[#0F172A] p-6 overflow-x-auto flex flex-col">
+                <div className="h-64 border-t border-[#1E293B] bg-card p-6 overflow-x-auto flex flex-col">
                     <div className="flex items-center gap-2 mb-4">
-                        <PlayCircle className="w-5 h-5 text-slate-400" />
-                        <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Deine Songs</h3>
+                        <PlayCircle className="w-5 h-5 text-muted-foreground" />
+                        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Deine Songs</h3>
                     </div>
 
                     {historyLoading ? (
                         <div className="flex-1 flex justify-center items-center">
-                            <div className="w-8 h-8 border-4 border-slate-700 border-t-indigo-500 rounded-full animate-spin"></div>
+                            <div className="w-8 h-8 border-4 border-border border-t-indigo-500 rounded-full animate-spin"></div>
                         </div>
                     ) : history.length === 0 ? (
-                        <div className="flex-1 flex justify-center items-center text-slate-500 text-sm">
+                        <div className="flex-1 flex justify-center items-center text-muted-foreground text-sm">
                             Noch keine Songs generiert.
                         </div>
                     ) : (
                         <div className="flex gap-4 pb-2">
                             {history.map((item: any) => (
-                                <div key={item.id} className="min-w-[300px] w-[300px] bg-[#1E293B] rounded-xl p-4 border border-[#334155] flex flex-col hover:border-indigo-500/50 transition-colors group">
+                                <div key={item.id} className="min-w-[300px] w-[300px] bg-card rounded-xl p-4 border border-[#334155] flex flex-col hover:border-indigo-500/50 transition-colors group">
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex items-center gap-2 text-indigo-400">
                                             <PlayCircle className="w-4 h-4" />
@@ -228,14 +228,14 @@ export default function MusicStudio({ isActive }: MusicStudioProps) {
                                         </div>
                                         <button
                                             onClick={(e) => handleDelete(item.id, e)}
-                                            className="p-1.5 rounded-lg text-slate-500 hover:bg-red-500 hover:text-white transition-opacity opacity-0 group-hover:opacity-100"
+                                            className="p-1.5 rounded-lg text-muted-foreground hover:bg-red-500 hover:text-foreground transition-opacity opacity-0 group-hover:opacity-100"
                                             title="Delete track"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
-                                    <p className="text-xs text-slate-300 line-clamp-2 italic flex-1 mb-3">"{item.prompt}"</p>
-                                    <div className="text-xs text-slate-500 mb-2 truncate">Genres: {item.config?.genres || 'N/A'}</div>
+                                    <p className="text-xs text-foreground/90 line-clamp-2 italic flex-1 mb-3">"{item.prompt}"</p>
+                                    <div className="text-xs text-muted-foreground mb-2 truncate">Genres: {item.config?.genres || 'N/A'}</div>
                                     <audio src={item.audio_url} controls className="w-full h-8" />
                                 </div>
                             ))}

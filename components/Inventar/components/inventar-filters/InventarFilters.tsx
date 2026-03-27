@@ -21,7 +21,7 @@ interface FiltersProps {
 
 const STATUS_OPTIONS = ['Alle Status', 'Vorhanden', 'Ausgeliehen', 'Fehlt', 'Defekt']
 
-const selectCls = 'px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-blue-500 cursor-pointer transition-colors hover:border-slate-600'
+const selectCls = 'px-3 py-2 bg-card border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-blue-500 cursor-pointer transition-colors hover:border-border/80'
 
 export function InventarFilters({
   search, setSearch, filterGeraet, setFilterGeraet,
@@ -39,12 +39,12 @@ export function InventarFilters({
     <div className="flex flex-wrap gap-2 items-center">
       {/* Search */}
       <div className="relative flex-1 min-w-52">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Suchen nach Name, PX-Nummer, Modell …"
-          className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+          className="w-full pl-9 pr-4 py-2 bg-card border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-blue-500 transition-colors"
         />
       </div>
 
@@ -70,7 +70,7 @@ export function InventarFilters({
       </select>
 
       {hasFilters && (
-        <button onClick={clearAll} className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl transition-colors border border-slate-700">
+        <button onClick={clearAll} className="flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors border border-border">
           <X size={14} /> Reset
         </button>
       )}

@@ -153,16 +153,16 @@ export function InventarPage({ items, isAdmin, profiles = [], onCreateItem, onUp
   return (
     <div className="p-8 space-y-6">
       {/* Sticky header: title + filters */}
-      <div className="sticky top-0 z-10 bg-slate-950 pb-4 space-y-4">
+      <div className="sticky top-0 z-10 bg-background pb-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Inventar</h1>
-            <p className="text-slate-400 text-sm mt-1">{filtered.length} von {items.length} Einträgen</p>
+            <h1 className="text-2xl font-bold text-foreground">Inventar</h1>
+            <p className="text-muted-foreground text-sm mt-1">{filtered.length} von {items.length} Einträgen</p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={exportCSV}
-              className="flex items-center gap-2 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold rounded-xl transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-muted hover:bg-muted-foreground/20 text-foreground text-sm font-semibold rounded-xl transition-colors"
               title="Aktuelle Ansicht als CSV exportieren"
             >
               <Download size={16} /> Export
@@ -170,7 +170,7 @@ export function InventarPage({ items, isAdmin, profiles = [], onCreateItem, onUp
             {isAdmin && (
               <button
                 onClick={() => setShowAdd(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-brand-900/40"
+                className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-foreground text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-primary-900/40"
               >
                 <Plus size={18} /> Neues Gerät
               </button>
@@ -189,21 +189,21 @@ export function InventarPage({ items, isAdmin, profiles = [], onCreateItem, onUp
         />
       </div>
 
-      <div className="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden">
+      <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
         {/* Bulk action bar */}
         {selectedIds.size > 0 && (
-          <div className="flex items-center gap-3 px-4 py-3 bg-brand-600/10 border-b border-brand-500/20">
-            <span className="text-sm text-brand-300 font-semibold">{selectedIds.size} ausgewählt</span>
-            <span className="text-slate-600">|</span>
-            <span className="text-xs text-slate-400">Status setzen:</span>
+          <div className="flex items-center gap-3 px-4 py-3 bg-primary-600/10 border-b border-primary-500/20">
+            <span className="text-sm text-primary-300 font-semibold">{selectedIds.size} ausgewählt</span>
+            <span className="text-muted-foreground/80">|</span>
+            <span className="text-xs text-muted-foreground">Status setzen:</span>
             {['Vorhanden', 'Ausgeliehen', 'Fehlt', 'Defekt'].map(s => (
               <button
                 key={s}
                 onClick={() => handleBulkStatus(s)}
-                className="px-3 py-1 rounded-lg text-xs font-medium bg-slate-700 hover:bg-slate-600 text-white transition-colors"
+                className="px-3 py-1 rounded-lg text-xs font-medium bg-muted hover:bg-muted-foreground/20 text-foreground transition-colors"
               >{s}</button>
             ))}
-            <button onClick={() => setSelectedIds(new Set())} className="ml-auto text-xs text-slate-500 hover:text-white transition-colors">Abwählen</button>
+            <button onClick={() => setSelectedIds(new Set())} className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors">Abwählen</button>
           </div>
         )}
         <InventarTable

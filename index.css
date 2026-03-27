@@ -8,7 +8,7 @@
       PIXELSCHICKERIA DESIGN SYSTEM 
       Light Mode
     */
-    --background: 0 0% 100%;          /* Weiß */
+    --background: 210 20% 98%;        /* Leichtes Grau/Off-White für den Hintergrund, damit Cards wirken */
     --foreground: 224 71% 4%;         /* Sehr dunkles Blau-Schwarz */
     
     /* CI Colors */
@@ -43,7 +43,7 @@
     
     /* CI Colors */
     --primary: 252 80% 65%;           /* Etwas helleres Blau für besseren Kontrast */
-    --primary-foreground: 224 71% 4%;
+    --primary-foreground: 210 40% 98%;/* Immer weiß für Text auf Primary */
     
     --accent: 330 90% 65%;
     --accent-foreground: 224 71% 4%;

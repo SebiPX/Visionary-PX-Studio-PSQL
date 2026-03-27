@@ -75,7 +75,7 @@ function InventarShell({ onBack, setView, navigateToItem, dashboardPath }: Inven
 
   if (!profile) {
     return (
-      <div className="flex h-full bg-slate-950 items-center justify-center">
+      <div className="flex h-full bg-background items-center justify-center">
         <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -117,7 +117,7 @@ function InventarShell({ onBack, setView, navigateToItem, dashboardPath }: Inven
   const currentUserId = user?.id ?? profile.id
 
   return (
-    <div className="flex h-full bg-slate-950 relative">
+    <div className="flex h-full bg-background relative">
 
       <main className="flex-1 overflow-y-auto relative">
         {selectedItem ? (

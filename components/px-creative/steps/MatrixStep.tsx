@@ -71,7 +71,7 @@ export const MatrixStep: React.FC = () => {
   const bothComplete = isConceptComplete(0) && isConceptComplete(1);
 
   if (!matrixData || categories.length === 0) {
-    return <div className="p-8 text-center text-slate-400">Waiting for Matrix data... Please hold on.</div>;
+    return <div className="p-8 text-center text-muted-foreground">Waiting for Matrix data... Please hold on.</div>;
   }
 
   return (
@@ -79,8 +79,8 @@ export const MatrixStep: React.FC = () => {
       
       <div className="mb-8 flex justify-between items-end">
         <div>
-          <h2 className="text-2xl font-bold font-display tracking-tight text-white mb-2">Step 2: The Morphological Matrix</h2>
-          <p className="text-slate-400">
+          <h2 className="text-2xl font-bold font-display tracking-tight text-foreground mb-2">Step 2: The Morphological Matrix</h2>
+          <p className="text-muted-foreground">
             Combine parameters to create your <b>2 favorite seed concepts</b>. The AI has mapped out standard options (Green) and radical ideas (Red).
           </p>
         </div>
@@ -94,25 +94,25 @@ export const MatrixStep: React.FC = () => {
             className={`flex-1 p-4 rounded-xl border transition-all ${
               activeConceptIndex === idx 
                 ? 'border-brand-500 bg-brand-500/10' 
-                : 'border-white/10 bg-[#161f30] hover:border-white/20'
+                : 'border-border bg-card hover:border-border/80'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`font-bold ${activeConceptIndex === idx ? 'text-brand-500' : 'text-slate-300'}`}>
+              <span className={`font-bold ${activeConceptIndex === idx ? 'text-brand-500' : 'text-foreground/90'}`}>
                 Concept {idx + 1}
               </span>
               {isConceptComplete(idx) && (
                 <span className="material-icons-round text-green-500 text-sm">check_circle</span>
               )}
             </div>
-            <p className="text-xs text-slate-500 mt-2 text-left">
+            <p className="text-xs text-muted-foreground mt-2 text-left">
               {Object.keys(concepts[idx]).length} / {categories.length} selected
             </p>
           </button>
         ))}
       </div>
 
-      <div className="bg-[#161f30] rounded-2xl border border-white/10 p-2 shadow-xl overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border p-2 shadow-xl overflow-hidden">
         <div className="overflow-x-auto p-6 hide-scrollbar">
           
           <table className="w-full border-collapse">
@@ -120,9 +120,9 @@ export const MatrixStep: React.FC = () => {
               {categories.map((cat: any, i: number) => {
                 const activeSelection = concepts[activeConceptIndex][cat.name];
                 return (
-                  <tr key={cat.name} className={`${i !== categories.length - 1 ? 'border-b border-white/5' : ''}`}>
+                  <tr key={cat.name} className={`${i !== categories.length - 1 ? 'border-b border-border/50' : ''}`}>
                     <td className="py-6 pr-6 w-48 align-middle whitespace-nowrap">
-                      <h4 className="font-bold text-slate-300 tracking-tight">{cat.name}</h4>
+                      <h4 className="font-bold text-foreground/90 tracking-tight">{cat.name}</h4>
                     </td>
                     <td className="py-6 align-middle">
                       <div className="flex flex-wrap gap-3">
@@ -131,7 +131,7 @@ export const MatrixStep: React.FC = () => {
                           const colorObj = 
                             opt.color === 'green' ? { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/30', glow: 'shadow-[0_0_10px_rgba(34,197,94,0.3)]' } :
                             opt.color === 'red' ? { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30', glow: 'shadow-[0_0_10px_rgba(239,68,68,0.3)]' } :
-                            { bg: 'bg-white/5', text: 'text-slate-300', border: 'border-white/10', glow: 'shadow-none' };
+                            { bg: 'bg-white/5', text: 'text-foreground/90', border: 'border-border', glow: 'shadow-none' };
                           
                           return (
                             <button
@@ -141,7 +141,7 @@ export const MatrixStep: React.FC = () => {
                               className={`px-4 py-2 rounded-lg text-sm transition-all border block whitespace-normal text-left
                                 ${isSelected 
                                   ? `${colorObj.bg} ${colorObj.border} ${colorObj.text} font-bold ${colorObj.glow} scale-105` 
-                                  : 'bg-[#0f1522] border-white/5 text-slate-400 hover:border-white/20'
+                                  : 'bg-card border-border/50 text-muted-foreground hover:border-border/80'
                                 }
                               `}
                             >
@@ -170,7 +170,7 @@ export const MatrixStep: React.FC = () => {
             if (token && currentProject) await updateProject(token, currentProject.id, { current_step: 'briefing' });
           }}
           disabled={isGenerating || loading}
-          className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+          className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-foreground font-bold border border-border transition-colors flex items-center gap-2"
         >
           <span className="material-icons-round text-sm">arrow_back</span> Back to Briefing
         </button>
@@ -180,7 +180,7 @@ export const MatrixStep: React.FC = () => {
             <button 
               onClick={handleContinue}
               disabled={isGenerating || loading}
-              className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold border border-white/10 transition-colors flex items-center gap-2"
+              className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-foreground font-bold border border-border transition-colors flex items-center gap-2"
             >
               Skip to SCAMPER <span className="material-icons-round text-sm">arrow_forward</span>
             </button>
@@ -189,7 +189,7 @@ export const MatrixStep: React.FC = () => {
           <button 
             onClick={handleGenerateScamper}
             disabled={!bothComplete || isGenerating || loading}
-            className="px-8 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)] flex items-center gap-2 text-lg"
+            className="px-8 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-foreground font-bold disabled:opacity-50 transition-all shadow-[0_0_20px_rgba(168,85,247,0.4)] flex items-center gap-2 text-lg"
           >
             {isGenerating || loading ? (
               <span className="flex items-center gap-2">

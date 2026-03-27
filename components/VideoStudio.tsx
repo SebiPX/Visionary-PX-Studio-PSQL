@@ -238,22 +238,22 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
     };
 
     return (
-        <div className="h-full flex flex-col md:flex-row bg-[#080c14] relative overflow-hidden">
+        <div className="h-full flex flex-col md:flex-row bg-background relative overflow-hidden">
             {/* Settings Sidebar */}
-            <aside className="w-full md:w-80 bg-glass border-b md:border-b-0 md:border-r border-white/5 z-20 flex flex-col order-2 md:order-1 h-full">
+            <aside className="w-full md:w-80 bg-card border-r border-border border-b md:border-b-0 md:border-r border-border/50 z-20 flex flex-col order-2 md:order-1 h-full">
                 <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-8">
 
                     {/* Input Mode Switcher */}
                     <div className="bg-white/5 p-1 rounded-xl flex">
                         <button
                             onClick={() => { setActiveMode('TEXT'); setUploadedImage(null); }}
-                            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${activeMode === 'TEXT' ? 'bg-primary text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${activeMode === 'TEXT' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Text to Video
                         </button>
                         <button
                             onClick={() => setActiveMode('IMAGE')}
-                            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${activeMode === 'IMAGE' ? 'bg-primary text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${activeMode === 'IMAGE' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Image to Video
                         </button>
@@ -261,16 +261,16 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
 
                     {/* Video Settings */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Settings</h3>
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Settings</h3>
 
                         <div className="space-y-2">
-                            <label className="text-xs text-slate-300">Duration</label>
+                            <label className="text-xs text-foreground/90">Duration</label>
                             <div className="grid grid-cols-3 gap-2">
                                 {['2s', '4s', '8s'].map(d => (
                                     <button
                                         key={d}
                                         onClick={() => setDuration(d as '2s' | '4s' | '8s')}
-                                        className={`py-2 rounded-lg border text-xs font-medium transition-colors ${duration === d ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'}`}
+                                        className={`py-2 rounded-lg border text-xs font-medium transition-colors ${duration === d ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                     >
                                         {d}
                                     </button>
@@ -279,17 +279,17 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs text-slate-300">Aspect Ratio</label>
+                            <label className="text-xs text-foreground/90">Aspect Ratio</label>
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     onClick={() => setAspectRatio('16:9')}
-                                    className={`py-2 px-3 rounded-lg border transition-all text-xs flex items-center justify-center gap-2 ${aspectRatio === '16:9' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'}`}
+                                    className={`py-2 px-3 rounded-lg border transition-all text-xs flex items-center justify-center gap-2 ${aspectRatio === '16:9' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
                                     <span className="material-icons text-sm">crop_16_9</span> 16:9
                                 </button>
                                 <button
                                     onClick={() => setAspectRatio('9:16')}
-                                    className={`py-2 px-3 rounded-lg border transition-all text-xs flex items-center justify-center gap-2 ${aspectRatio === '9:16' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10'}`}
+                                    className={`py-2 px-3 rounded-lg border transition-all text-xs flex items-center justify-center gap-2 ${aspectRatio === '9:16' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
                                     <span className="material-icons text-sm">crop_portrait</span> 9:16
                                 </button>
@@ -298,7 +298,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
 
                         <div className="space-y-2">
                             <div className="flex justify-between">
-                                <label className="text-xs text-slate-300">Motion Strength</label>
+                                <label className="text-xs text-foreground/90">Motion Strength</label>
                                 <span className="text-xs text-primary">High</span>
                             </div>
                             <input type="range" className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full" />
@@ -307,15 +307,15 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
 
                     {/* Camera Control */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Camera</h3>
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Camera</h3>
                         <div className="grid grid-cols-3 gap-2">
                             {['Pan', 'Zoom', 'Tilt', 'Roll', 'Static', 'Orbit'].map((cam) => (
                                 <button
                                     key={cam}
                                     onClick={() => setCameraMotion(cam)}
-                                    className={`aspect-square rounded-lg border flex flex-col items-center justify-center gap-1 transition-all ${cameraMotion === cam ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-white/10 hover:border-primary/50 hover:bg-white/10 text-slate-500'}`}
+                                    className={`aspect-square rounded-lg border flex flex-col items-center justify-center gap-1 transition-all ${cameraMotion === cam ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border hover:border-primary/50 hover:bg-white/10 text-muted-foreground'}`}
                                 >
-                                    <span className={`material-icons-round text-lg ${cameraMotion === cam ? 'text-primary' : 'text-slate-400'}`}>videocam</span>
+                                    <span className={`material-icons-round text-lg ${cameraMotion === cam ? 'text-primary' : 'text-muted-foreground'}`}>videocam</span>
                                     <span className="text-[9px] uppercase">{cam}</span>
                                 </button>
                             ))}
@@ -324,8 +324,8 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
 
                     {/* History Section */}
                     {history.length > 0 && (
-                        <div className="w-full pt-4 border-t border-white/10">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2">
+                        <div className="w-full pt-4 border-t border-border">
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
                                 <span className="material-icons-round text-sm">history</span> Recent Videos
                             </h3>
                             <div className="flex flex-col gap-3">
@@ -333,7 +333,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                                     <button
                                         key={item.id}
                                         onClick={() => { setVideoUri(item.video_url); setPrompt(item.prompt || ''); }}
-                                        className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl p-3 flex gap-3 group transition-all"
+                                        className="w-full text-left bg-white/5 hover:bg-white/10 border border-border/50 rounded-xl p-3 flex gap-3 group transition-all"
                                     >
                                         <div className="w-16 h-10 rounded bg-black flex-shrink-0 overflow-hidden relative">
                                             {item.video_url.includes('mp4') ? (
@@ -342,12 +342,12 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                                                 <img src={item.video_url} className="w-full h-full object-cover" />
                                             )}
                                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                                <span className="material-icons-round text-white text-xs">play_arrow</span>
+                                                <span className="material-icons-round text-foreground text-xs">play_arrow</span>
                                             </div>
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-[10px] text-slate-300 truncate">{item.prompt || 'Untitled'}</p>
-                                            <p className="text-[9px] text-slate-500 mt-1">{new Date(item.created_at).toLocaleTimeString()}</p>
+                                            <p className="text-[10px] text-foreground/90 truncate">{item.prompt || 'Untitled'}</p>
+                                            <p className="text-[9px] text-muted-foreground mt-1">{new Date(item.created_at).toLocaleTimeString()}</p>
                                         </div>
                                     </button>
                                 ))}
@@ -359,29 +359,14 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col relative order-1 md:order-2 overflow-hidden">
-                {/* Header Actions */}
-                <header className="absolute top-0 left-0 right-0 p-4 z-20 flex justify-between items-start pointer-events-none">
-                    <div className="pointer-events-auto">
-                        <div className="px-3 py-1.5 glass rounded-full flex items-center gap-2 border border-white/10">
-                            <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
-                            <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wider">Veo Model 3.1</span>
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleDownload}
-                        disabled={!videoUri.includes('mp4')}
-                        className="pointer-events-auto bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-xs font-bold backdrop-blur-md border border-white/10 transition-colors flex items-center gap-2"
-                    >
-                        <span className="material-icons text-sm">download</span> Export
-                    </button>
-                </header >
+
 
                 {/* Scrollable Content Wrapper */}
                 < div className="flex-1 overflow-y-auto hide-scrollbar flex flex-col" >
 
                     {/* Preview Stage */}
                     < div className="flex-1 min-h-[400px] flex items-center justify-center p-4 md:p-8 relative" >
-                        <div className={`relative w-full ${aspectRatio === '9:16' ? 'max-w-sm md:max-w-md aspect-[9/16]' : 'max-w-4xl aspect-video'} transition-all duration-500 bg-black rounded-2xl overflow-hidden shadow-2xl shadow-purple-900/20 border border-white/10 group`}>
+                        <div className={`relative w-full ${aspectRatio === '9:16' ? 'max-w-sm md:max-w-md aspect-[9/16]' : 'max-w-4xl aspect-video'} transition-all duration-500 bg-black rounded-2xl overflow-hidden shadow-2xl shadow-purple-900/20 border border-border group`}>
 
                             {(!isGenerating && videoUri && videoUri.includes('mp4')) ? (
                                 <video
@@ -394,12 +379,12 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                             ) : (
                                 // Empty / placeholder state
                                 <div className="w-full h-full flex flex-col items-center justify-center text-center gap-4">
-                                    <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                                        <span className="material-icons-round text-4xl text-slate-600">movie_creation</span>
+                                    <div className="w-20 h-20 rounded-full bg-white/5 border border-border flex items-center justify-center">
+                                        <span className="material-icons-round text-4xl text-muted-foreground/80">movie_creation</span>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400 font-semibold text-sm">Kein Video generiert</p>
-                                        <p className="text-slate-600 text-xs mt-1">Beschreibe ein Video und klicke GENERATE</p>
+                                        <p className="text-muted-foreground font-semibold text-sm">Kein Video generiert</p>
+                                        <p className="text-muted-foreground/80 text-xs mt-1">Beschreibe ein Video und klicke GENERATE</p>
                                     </div>
                                 </div>
                             )}
@@ -408,12 +393,12 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                             {isGenerating && (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
                                     <div className="w-16 h-16 relative">
-                                        <div className="absolute inset-0 border-4 border-white/20 rounded-full"></div>
+                                        <div className="absolute inset-0 border-4 border-border/80 rounded-full"></div>
                                         <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                                     </div>
                                     <div className="mt-4 text-center">
-                                        <p className="text-white font-bold tracking-widest text-sm animate-pulse">RENDERING FRAMES</p>
-                                        <p className="text-slate-400 text-xs mt-1">Estimating physics (Veo)...</p>
+                                        <p className="text-foreground font-bold tracking-widest text-sm animate-pulse">RENDERING FRAMES</p>
+                                        <p className="text-muted-foreground text-xs mt-1">Estimating physics (Veo)...</p>
                                     </div>
                                 </div>
                             )}
@@ -421,8 +406,8 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                             {/* Play Button Overlay */}
                             {!isGenerating && videoUri.includes('mp4') && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors cursor-pointer" onClick={togglePlayPause}>
-                                    <div className={`w-20 h-20 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-300 ${isPlaying ? 'scale-90 opacity-0 group-hover:opacity-100' : 'scale-100'}`}>
-                                        <span className="material-icons-round text-white text-4xl">{isPlaying ? 'pause' : 'play_arrow'}</span>
+                                    <div className={`w-20 h-20 rounded-full bg-white/10 backdrop-blur-md border border-border/80 flex items-center justify-center transition-all duration-300 ${isPlaying ? 'scale-90 opacity-0 group-hover:opacity-100' : 'scale-100'}`}>
+                                        <span className="material-icons-round text-foreground text-4xl">{isPlaying ? 'pause' : 'play_arrow'}</span>
                                     </div>
                                 </div>
                             )}
@@ -435,7 +420,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                                             e.stopPropagation();
                                             handlePreview();
                                         }}
-                                        className="p-2 glass rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                                        className="p-2 glass rounded-lg text-foreground/80 hover:bg-white/10 hover:text-foreground transition-colors"
                                         title="Fullscreen Preview"
                                     >
                                         <span className="material-icons-round">fullscreen</span>
@@ -445,7 +430,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                                             e.stopPropagation();
                                             handleDownload();
                                         }}
-                                        className="p-2 glass rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                                        className="p-2 glass rounded-lg text-foreground/80 hover:bg-white/10 hover:text-foreground transition-colors"
                                         title="Download Video"
                                     >
                                         <span className="material-icons-round">download</span>
@@ -463,30 +448,30 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                                     {!uploadedImage ? (
                                         <div
                                             onClick={() => setShowPicker(true)}
-                                            className="border-2 border-dashed border-white/10 rounded-xl p-4 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
+                                            className="border-2 border-dashed border-border rounded-xl p-4 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
                                         >
-                                            <span className="material-icons-round text-3xl text-slate-500 group-hover:text-primary mb-2 transition-colors">add_photo_alternate</span>
-                                            <p className="text-xs text-slate-400 font-medium">Quellbild wählen</p>
-                                            <p className="text-xs text-slate-600 mt-1">Upload · Webcam · Eigene Assets</p>
+                                            <span className="material-icons-round text-3xl text-muted-foreground group-hover:text-primary mb-2 transition-colors">add_photo_alternate</span>
+                                            <p className="text-xs text-muted-foreground font-medium">Quellbild wählen</p>
+                                            <p className="text-xs text-muted-foreground/80 mt-1">Upload · Webcam · Eigene Assets</p>
                                         </div>
                                     ) : (
-                                        <div className="relative border border-white/10 rounded-xl overflow-hidden bg-black/20">
+                                        <div className="relative border border-border rounded-xl overflow-hidden bg-black/20">
                                             <img src={uploadedImage} alt="Video Source" className="w-full h-32 object-cover opacity-60" />
                                             <div className="absolute inset-0 flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => setShowPicker(true)}
-                                                    className="px-3 py-1.5 bg-primary/80 hover:bg-primary text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-1"
+                                                    className="px-3 py-1.5 bg-primary/80 hover:bg-primary text-primary-foreground rounded-lg text-xs font-bold backdrop-blur flex items-center gap-1"
                                                 >
                                                     <span className="material-icons-round text-xs">swap_horiz</span> Ändern
                                                 </button>
                                                 <button
                                                     onClick={() => setUploadedImage(null)}
-                                                    className="px-3 py-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-xs font-bold backdrop-blur flex items-center gap-2"
+                                                    className="px-3 py-1.5 bg-red-500/80 hover:bg-red-500 text-foreground rounded-lg text-xs font-bold backdrop-blur flex items-center gap-2"
                                                 >
                                                     <span className="material-icons-round text-sm">delete</span> Remove
                                                 </button>
                                             </div>
-                                            <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 rounded text-[10px] text-white font-bold uppercase">
+                                            <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 rounded text-[10px] text-foreground font-bold uppercase">
                                                 Source Frame
                                             </div>
                                         </div>
@@ -504,14 +489,14 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                                             handleGenerate();
                                         }
                                     }}
-                                    className="w-full bg-[#1a1f2e] border border-white/10 rounded-2xl p-4 pr-32 text-sm text-slate-200 placeholder-slate-500 focus:ring-1 focus:ring-primary focus:border-primary resize-none shadow-xl min-h-[80px]"
+                                    className="w-full bg-card border border-border rounded-2xl p-4 pr-32 text-sm text-foreground placeholder-muted-foreground focus:ring-1 focus:ring-primary focus:border-primary resize-none shadow-xl min-h-[80px]"
                                     placeholder={activeMode === 'TEXT' ? "Describe the video you want to generate (e.g., A cyberpunk street in rain, neon lights reflection, cinematic 4k)..." : "Describe how the image should move..."}
                                 />
                                 <div className="absolute bottom-3 right-3 flex items-center gap-2">
                                     <button
                                         onClick={handleGenerate}
                                         disabled={isGenerating || (!prompt && activeMode === 'TEXT')}
-                                        className="px-6 py-2 rounded-xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold text-xs tracking-wide shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        className="px-6 py-2 rounded-xl bg-gradient-to-r from-primary to-purple-600 text-primary-foreground font-bold text-xs tracking-wide shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
                                         {isGenerating ? (
                                             <span className="material-icons-round animate-spin text-sm">autorenew</span>
@@ -537,7 +522,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                 >
                     <button
                         onClick={() => setShowPreview(false)}
-                        className="absolute top-4 right-4 p-3 glass rounded-lg text-white hover:bg-white/10 transition-colors z-10"
+                        className="absolute top-4 right-4 p-3 glass rounded-lg text-foreground hover:bg-white/10 transition-colors z-10"
                         title="Close Preview"
                     >
                         <span className="material-icons-round">close</span>
@@ -547,7 +532,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                             e.stopPropagation();
                             handleDownload();
                         }}
-                        className="absolute top-4 right-20 p-3 glass rounded-lg text-white hover:bg-white/10 transition-colors z-10"
+                        className="absolute top-4 right-20 p-3 glass rounded-lg text-foreground hover:bg-white/10 transition-colors z-10"
                         title="Download Video"
                     >
                         <span className="material-icons-round">download</span>

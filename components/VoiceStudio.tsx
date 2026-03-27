@@ -228,106 +228,99 @@ export const VoiceStudio: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full w-full bg-[#101622]">
+    <div className="h-full flex flex-col md:flex-row bg-background relative overflow-hidden">
       {/* Sidebar for Controls */}
-      <div className="w-96 border-r border-[#1e293b] flex flex-col hide-scrollbar overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-primary/20 text-primary rounded-xl flex items-center justify-center neon-glow">
-              <span className="material-icons-round">record_voice_over</span>
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Voice Studio</h2>
-              <p className="text-xs text-slate-400">Gemini 2.5 Text-to-Speech</p>
-            </div>
-          </div>
-
-          <div className="space-y-6">
+      <aside className="w-full md:w-80 bg-card border-r border-border z-20 flex flex-col order-2 md:order-1 h-full flex-shrink-0">
+        <div className="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-8">
+          
+          {/* Top Pill / Switcher Area - (Using it here just for consistency, maybe just the Settings block since there is no switcher for Mode) */}
+          
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Settings</h3>
+            
             {/* Model Selection */}
-            <div>
-              <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 block">KI Modell</label>
-              <div className="flex flex-col gap-2">
+            <div className="space-y-2">
+              <label className="text-xs text-foreground/90">AI Engine</label>
+              <div className="grid grid-cols-1 gap-2">
                 <button
                   onClick={() => setAiModel('gemini-2.5-flash-preview-tts')}
-                  className={`w-full py-3 px-4 rounded-xl text-left text-sm font-medium transition-all flex flex-col gap-1 ${aiModel === 'gemini-2.5-flash-preview-tts' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                  className={`w-full py-2 px-3 rounded-lg border text-left text-xs transition-all flex justify-between items-center ${aiModel === 'gemini-2.5-flash-preview-tts' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                 >
-                  <span className="flex items-center gap-2">
-                    <span className="material-icons-round text-sm">bolt</span> Gemini 2.5 Flash
+                  <span className="flex items-center gap-2 font-bold">
+                    <span className="material-icons-round text-sm">bolt</span> Flash
                   </span>
-                  <span className={`text-[10px] ${aiModel === 'gemini-2.5-flash-preview-tts' ? 'text-white/80' : 'text-slate-500'}`}>Schnell und günstig</span>
+                  <span className="text-[10px] opacity-70">Schnell</span>
                 </button>
                 <button
                   onClick={() => setAiModel('gemini-2.5-pro-preview-tts')}
-                  className={`w-full py-3 px-4 rounded-xl text-left text-sm font-medium transition-all flex flex-col gap-1 ${aiModel === 'gemini-2.5-pro-preview-tts' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                  className={`w-full py-2 px-3 rounded-lg border text-left text-xs transition-all flex justify-between items-center ${aiModel === 'gemini-2.5-pro-preview-tts' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                 >
-                  <span className="flex items-center gap-2">
-                    <span className="material-icons-round text-sm">star</span> Gemini 2.5 Pro
+                  <span className="flex items-center gap-2 font-bold">
+                    <span className="material-icons-round text-sm">star</span> Pro
                   </span>
-                  <span className={`text-[10px] ${aiModel === 'gemini-2.5-pro-preview-tts' ? 'text-white/80' : 'text-slate-500'}`}>Höchste Qualität</span>
+                  <span className="text-[10px] opacity-70">Qualität</span>
                 </button>
               </div>
             </div>
 
             {/* Voice Selection */}
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 block">Voice 1</label>
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs text-foreground/90">Voice 1</label>
                 <select
                   value={voice1}
                   onChange={(e) => setVoice1(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+                  className="w-full bg-background border border-border rounded-lg px-2 py-2 text-xs text-foreground focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', backgroundSize: '14px' }}
                 >
-                  {voiceOptions.map(v => <option key={v} value={v} className="bg-[#101622] text-white">{v}</option>)}
+                  {voiceOptions.map(v => <option key={v} value={v} className="bg-background text-foreground">{v}</option>)}
                 </select>
               </div>
-              <div className="flex-1">
-                <label className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3 block opacity-50">Voice 2 (Dialog)</label>
+              <div className="space-y-1.5">
+                <label className="text-xs text-foreground/90 opacity-80">Voice 2</label>
                 <select
                   value={voice2}
                   onChange={(e) => setVoice2(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
-                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+                  className="w-full bg-background border border-border rounded-lg px-2 py-2 text-xs text-foreground focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', backgroundSize: '14px' }}
                 >
-                  {voiceOptions.map(v => <option key={v} value={v} className="bg-[#101622] text-white">{v}</option>)}
+                  {voiceOptions.map(v => <option key={v} value={v} className="bg-background text-foreground">{v}</option>)}
                 </select>
               </div>
             </div>
 
-            <div className="w-full h-px bg-white/10 my-6"></div>
-
             {/* Hint Box for Dialogue */}
-            <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-slate-300">
+            <div className="bg-card border border-border rounded-xl p-4 text-xs text-muted-foreground mt-4 shadow-sm">
               <p className="flex items-start gap-2">
-                <span className="material-icons-round text-primary text-lg">lightbulb</span>
+                <span className="material-icons-round text-primary text-base">lightbulb</span>
                 <span>
-                  <strong>Tipp für Dialoge:</strong> Schreibe einfach <code className="bg-black/50 px-1 py-0.5 rounded text-xs">Speaker 1: Hallo!</code> und <code className="bg-black/50 px-1 py-0.5 rounded text-xs">Speaker 2: Hi!</code> in das Textfeld. Die KI weist den Sprechern automatisch verschiedene Stimmen zu.
+                  <strong>Tipp:</strong> Schreibe <code className="bg-muted px-1.5 py-0.5 rounded border border-border text-foreground">Speaker 1: Hi!</code> und <code className="bg-muted px-1.5 py-0.5 rounded border border-border text-foreground">Speaker 2: Hallo!</code> für automatische Dialoge.
                 </span>
               </p>
             </div>
 
           </div>
         </div>
-      </div>
+      </aside>
 
       {/* Main Canvas Area */}
-      <div className="flex-1 bg-[#0a0f18] relative flex flex-col h-full min-w-0">
+      <main className="flex-1 bg-background relative flex flex-col order-1 md:order-2 h-full min-w-0">
         
         {/* Top Area: Current Audio & Input */}
-        <div className="p-8 flex-shrink-0 flex flex-col items-center justify-center border-b border-white/10 bg-gradient-to-b from-transparent to-black/20" style={{ minHeight: '400px' }}>
+        <div className="p-8 flex-shrink-0 flex flex-col items-center justify-center border-b border-border bg-gradient-to-b from-transparent to-black/20" style={{ minHeight: '400px' }}>
           
           <div className="w-full max-w-3xl mb-8 relative">
-              <label className="text-sm font-medium text-slate-300 mb-2 block">Text oder Skript eingeben</label>
+              <label className="text-sm font-medium text-foreground/90 mb-2 block">Text oder Skript eingeben</label>
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Schreibe einen Dialog oder Text, der gesprochen werden soll..."
-                className="w-full h-40 bg-black/40 border border-white/10 rounded-2xl p-4 text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none shadow-inner"
+                className="w-full h-40 bg-background border border-border rounded-2xl p-4 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none shadow-sm"
               />
               <button
                 onClick={handleGenerate}
                 disabled={isGenerating || !prompt}
-                className="absolute bottom-4 right-4 bg-primary text-white px-6 py-2 rounded-xl font-bold hover:bg-primary-hover transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2"
+                className="absolute bottom-4 right-4 bg-primary text-primary-foreground px-6 py-2 rounded-xl font-bold hover:bg-primary-hover transition-colors shadow-lg disabled:opacity-50 flex items-center gap-2"
               >
                 {isGenerating ? (
                   <><span className="material-icons-round animate-spin">refresh</span> Generiere...</>
@@ -338,13 +331,13 @@ export const VoiceStudio: React.FC = () => {
           </div>
 
           {currentAudio && (
-            <div className="w-full max-w-2xl bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl backdrop-blur flex flex-col gap-4 animate-fade-in text-center">
-              <h3 className="text-lg font-bold text-white">Generiertes Audio</h3>
+            <div className="w-full max-w-2xl bg-white/5 border border-border rounded-2xl p-6 shadow-xl backdrop-blur flex flex-col gap-4 animate-fade-in text-center">
+              <h3 className="text-lg font-bold text-foreground">Generiertes Audio</h3>
               <audio controls src={currentAudio} className="w-full outline-none" autoPlay />
               <div className="flex justify-center gap-3 mt-2">
                 <button
                   onClick={() => window.open(currentAudio, '_blank')}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition flex items-center gap-2"
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-foreground rounded-lg text-sm font-medium transition flex items-center gap-2"
                 >
                   <span className="material-icons-round text-[18px]">download</span> Herunterladen
                 </button>
@@ -354,19 +347,19 @@ export const VoiceStudio: React.FC = () => {
         </div>
 
         {/* Bottom Area: History */}
-        <div className="flex-1 overflow-y-auto p-8 bg-[#0a0f18]">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
+        <div className="flex-1 overflow-y-auto p-8 bg-card">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
               <span className="material-icons-round">history</span> Deine Vocals
           </h3>
           
           {loading && history.length === 0 ? (
-            <div className="text-center text-slate-500 py-10">Lade Vocals...</div>
+            <div className="text-center text-muted-foreground py-10">Lade Vocals...</div>
           ) : history.length === 0 ? (
-            <div className="text-center text-slate-500 py-10 border border-dashed border-white/10 rounded-xl bg-white/5">Noch keine Sprachclips vorhanden.</div>
+            <div className="text-center text-muted-foreground py-10 border border-dashed border-border rounded-xl bg-white/5">Noch keine Sprachclips vorhanden.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {history.map((item) => (
-                <div key={item.id} className="bg-white/5 border border-white/10 hover:border-primary/50 transition-colors rounded-xl p-4 flex flex-col gap-3 group cursor-pointer" onClick={() => handleRestore(item)}>
+                <div key={item.id} className="bg-white/5 border border-border hover:border-primary/50 transition-colors rounded-xl p-4 flex flex-col gap-3 group cursor-pointer" onClick={() => handleRestore(item)}>
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2 text-primary">
                       <span className="material-icons-round bg-primary/20 p-1.5 rounded-lg text-sm">record_voice_over</span>
@@ -374,12 +367,12 @@ export const VoiceStudio: React.FC = () => {
                     </div>
                     <button 
                       onClick={(e) => handleDelete(item.id, e)}
-                      className="text-slate-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                      className="text-muted-foreground hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                     >
                       <span className="material-icons-round text-[18px]">delete</span>
                     </button>
                   </div>
-                  <p className="text-sm text-slate-300 line-clamp-2 italic">"{item.prompt}"</p>
+                  <p className="text-sm text-foreground/90 line-clamp-2 italic">"{item.prompt}"</p>
                   <audio controls src={item.audio_url} className="w-full h-8 mt-auto" onClick={e => e.stopPropagation()} />
                 </div>
               ))}
@@ -387,7 +380,7 @@ export const VoiceStudio: React.FC = () => {
           )}
         </div>
 
-      </div>
+      </main>
     </div>
   );
 };

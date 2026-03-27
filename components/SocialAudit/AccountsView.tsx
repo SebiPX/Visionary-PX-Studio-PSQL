@@ -87,10 +87,10 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold text-white">Verknüpfte Accounts</h3>
+        <h3 className="text-xl font-bold text-foreground">Verknüpfte Accounts</h3>
         <button 
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+          className="bg-indigo-600 hover:bg-indigo-700 text-foreground px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
         >
           <span className="material-icons-round text-sm">add</span>
           Account hinzufügen
@@ -98,33 +98,33 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
       </div>
 
       {showAddForm && (
-        <form onSubmit={handleAddAccount} className="glass-card p-6 rounded-xl border border-white/5 flex items-end gap-4 shadow-xl">
+        <form onSubmit={handleAddAccount} className="glass-card p-6 rounded-xl border border-border/50 flex items-end gap-4 shadow-xl">
           <div className="flex-1">
-            <label className="text-xs font-semibold text-slate-400 mb-1 block">Plattform</label>
+            <label className="text-xs font-semibold text-muted-foreground mb-1 block">Plattform</label>
             <select 
               value={platform}
               onChange={e => setPlatform(e.target.value)}
-              className="w-full bg-[#0a0f18] border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+              className="w-full bg-card border border-border rounded-lg px-4 py-2 text-foreground text-sm focus:outline-none focus:border-indigo-500"
             >
               <option value="instagram">Instagram</option>
               <option value="tiktok">TikTok</option>
             </select>
           </div>
           <div className="flex-2 min-w-[300px]">
-            <label className="text-xs font-semibold text-slate-400 mb-1 block">Username</label>
+            <label className="text-xs font-semibold text-muted-foreground mb-1 block">Username</label>
             <input 
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
               placeholder="z.B. @pixelschickeria"
-              className="w-full bg-[#0a0f18] border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+              className="w-full bg-card border border-border rounded-lg px-4 py-2 text-foreground text-sm focus:outline-none focus:border-indigo-500"
               required
             />
           </div>
           <button 
             type="submit"
             disabled={loading}
-            className="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-lg text-sm font-medium transition-all"
+            className="bg-primary hover:bg-primary-hover text-foreground px-6 py-2 rounded-lg text-sm font-medium transition-all"
           >
             Speichern
           </button>
@@ -132,9 +132,9 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
       )}
 
       {accounts.length === 0 && !loading && (
-        <div className="text-center py-12 border border-white/5 border-dashed rounded-xl bg-white/5">
-          <span className="material-icons-round text-slate-500 text-4xl mb-4">group_add</span>
-          <p className="text-slate-400">Noch keine Accounts verknüpft.</p>
+        <div className="text-center py-12 border border-border/50 border-dashed rounded-xl bg-white/5">
+          <span className="material-icons-round text-muted-foreground text-4xl mb-4">group_add</span>
+          <p className="text-muted-foreground">Noch keine Accounts verknüpft.</p>
         </div>
       )}
 
@@ -143,30 +143,30 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onAccountSelect }) =
           <div 
             key={acc.id}
             onClick={() => onAccountSelect(acc.id)}
-            className="glass-card p-5 rounded-xl border border-white/5 hover:border-indigo-500/50 cursor-pointer transition-all group relative overflow-hidden"
+            className="glass-card p-5 rounded-xl border border-border/50 hover:border-indigo-500/50 cursor-pointer transition-all group relative overflow-hidden"
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${acc.platform === 'instagram' ? 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500' : 'bg-black border border-white/20'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-foreground ${acc.platform === 'instagram' ? 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500' : 'bg-black border border-border/80'}`}>
                    {/* Simplified icon representation */}
                    <span className="font-bold text-xs">{acc.platform === 'instagram' ? 'IG' : 'TT'}</span>
                 </div>
                 <div>
-                  <h4 className="font-bold text-white text-lg">@{acc.username}</h4>
-                  <p className="text-xs text-slate-400 capitalize">{acc.platform}</p>
+                  <h4 className="font-bold text-foreground text-lg">@{acc.username}</h4>
+                  <p className="text-xs text-muted-foreground capitalize">{acc.platform}</p>
                 </div>
               </div>
               <button 
                 onClick={(e) => handleDelete(e, acc.id, acc.username)}
                 disabled={loading}
-                className="w-8 h-8 rounded-full bg-white/5 flex flex-shrink-0 items-center justify-center text-slate-500 hover:bg-red-500/20 hover:text-red-400 transition-all"
+                className="w-8 h-8 rounded-full bg-white/5 flex flex-shrink-0 items-center justify-center text-muted-foreground hover:bg-red-500/20 hover:text-red-400 transition-all"
                 title="Account löschen"
               >
                 <span className="material-icons-round text-sm">delete</span>
               </button>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-500 mt-4 border-t border-white/5 pt-4">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mt-4 border-t border-border/50 pt-4">
                <span>Letzter Sync: {acc.last_sync ? new Date(acc.last_sync).toLocaleString() : 'Nie'}</span>
                <button 
                   onClick={(e) => handleSync(e, acc.id, acc.username)}

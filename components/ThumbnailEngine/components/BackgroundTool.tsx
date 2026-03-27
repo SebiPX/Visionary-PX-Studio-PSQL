@@ -27,12 +27,12 @@ export const BackgroundTool: React.FC<BackgroundToolProps> = ({
         <div className="space-y-6 animate-[float_0.3s_ease-out]">
             {/* Background Prompt */}
             <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase">Background Scene</label>
+                <label className="text-xs font-bold text-muted-foreground uppercase">Background Scene</label>
                 <textarea
                     value={bgPrompt}
                     onChange={(e) => setBgPrompt(e.target.value)}
                     placeholder="Describe the background scene..."
-                    className="w-full h-24 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-primary/50 resize-none"
+                    className="w-full h-24 px-4 py-3 bg-white/5 border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 resize-none"
                 />
             </div>
 
@@ -41,7 +41,7 @@ export const BackgroundTool: React.FC<BackgroundToolProps> = ({
                 <button
                     onClick={onGenerateIdea}
                     disabled={isGeneratingIdea || !videoTopic}
-                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-primary flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-border rounded-lg text-xs font-bold text-primary flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                 >
                     <span className={`material-icons-round text-sm ${isGeneratingIdea ? 'animate-spin' : ''}`}>
                         {isGeneratingIdea ? 'autorenew' : 'auto_awesome'}
@@ -62,21 +62,21 @@ export const BackgroundTool: React.FC<BackgroundToolProps> = ({
                 {!bgImage ? (
                     <div
                         onClick={() => bgFileInputRef.current?.click()}
-                        className="p-4 rounded-xl border border-dashed border-white/10 bg-white/5 flex flex-col items-center text-center cursor-pointer hover:bg-white/10 transition-colors"
+                        className="p-4 rounded-xl border border-dashed border-border bg-white/5 flex flex-col items-center text-center cursor-pointer hover:bg-white/10 transition-colors"
                     >
-                        <span className="material-icons-round text-slate-500 mb-2">upload_file</span>
-                        <p className="text-xs text-slate-300 font-bold">Upload Reference</p>
-                        <p className="text-[10px] text-slate-500 mt-1">Use an image as inspiration</p>
+                        <span className="material-icons-round text-muted-foreground mb-2">upload_file</span>
+                        <p className="text-xs text-foreground/90 font-bold">Upload Reference</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">Use an image as inspiration</p>
                     </div>
                 ) : (
-                    <div className="relative rounded-xl overflow-hidden border border-white/10 group">
+                    <div className="relative rounded-xl overflow-hidden border border-border group">
                         <img src={bgImage} alt="Bg Ref" className="w-full h-32 object-cover opacity-60" />
                         <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40">
-                            <span className="text-xs font-bold text-white">Reference Loaded</span>
+                            <span className="text-xs font-bold text-foreground">Reference Loaded</span>
                         </div>
                         <button
                             onClick={() => setBgImage(null)}
-                            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500/80 text-white flex items-center justify-center hover:bg-red-500"
+                            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-500/80 text-foreground flex items-center justify-center hover:bg-red-500"
                         >
                             <span className="material-icons-round text-xs">close</span>
                         </button>

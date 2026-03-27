@@ -30,54 +30,56 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
 
   const navCategories: NavCategory[] = [
     {
-      label: 'Home',
-      icon: 'home',
+      label: 'PX Desk',
+      icon: 'grid_view',
       items: [
-        { view: AppView.DASHBOARD, path: '/dashboard', icon: 'grid_view', label: 'Dashboard' },
+        { view: AppView.DASHBOARD, path: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
         { view: AppView.DASHBOARD, path: '/inventar', icon: 'inventory_2', label: 'Inventar' },
         { view: AppView.DASHBOARD, path: '/verleih-formular', icon: 'calendar_month', label: 'Verleih' },
         { view: AppView.DASHBOARD, path: '/kalender', icon: 'event', label: 'Kalender' },
         { view: AppView.DASHBOARD, path: '/logins', icon: 'password', label: 'Logins' },
+        { view: AppView.DASHBOARD, path: '/links', icon: 'link', label: 'Links' },
         ...(userProfile.role === 'admin' ? [
           { view: AppView.DASHBOARD, path: '/news', icon: 'campaign', label: 'News' },
           { view: AppView.DASHBOARD, path: '/handyvertraege', icon: 'smartphone', label: 'Verträge' },
           { view: AppView.DASHBOARD, path: '/kreditkarten', icon: 'credit_card', label: 'Karten' },
           { view: AppView.DASHBOARD, path: '/firmendaten', icon: 'business', label: 'Firma' },
         ] : []),
-        { view: AppView.DASHBOARD, path: '/links', icon: 'link', label: 'Links' },
       ],
     },
     {
-      label: 'Studio',
+      label: 'AI Chat',
+      icon: 'forum',
+      items: [
+        { view: AppView.CHAT_BOT, icon: 'chat_bubble', label: 'Chat' },
+      ],
+    },
+    {
+      label: 'AI Studio',
       icon: 'auto_awesome',
       items: [
         { view: AppView.IMAGE_GEN, icon: 'image', label: 'Image' },
         { view: AppView.VIDEO_STUDIO, icon: 'videocam', label: 'Video' },
-        { view: AppView.TEXT_ENGINE, icon: 'description', label: 'Text' },
-        { view: AppView.THUMBNAIL_ENGINE, icon: 'dashboard_customize', label: 'Thumb' },
         { view: AppView.VOICE_STUDIO, icon: 'record_voice_over', label: 'Voice' },
-        { view: AppView.STUDIO_3D, icon: 'view_in_ar', label: '3D' },
+        { view: AppView.TEXT_ENGINE, icon: 'description', label: 'Text' },
         { view: AppView.STORY_STUDIO, icon: 'movie_creation', label: 'Story' },
         { view: AppView.SKETCH_STUDIO, icon: 'brush', label: 'Sketch' },
+        { view: AppView.STUDIO_3D, icon: 'view_in_ar', label: '3D' },
+        { view: AppView.THUMBNAIL_ENGINE, icon: 'dashboard_customize', label: 'Thumb' },
+        ...(userProfile.role === 'admin' ? [
+          { view: AppView.MUSIC_STUDIO, icon: 'music_note', label: 'Music' },
+          { view: AppView.I2AUDIO_STUDIO, icon: 'graphic_eq', label: 'i2Audio' },
+        ] : []),
       ],
     },
     {
-      label: 'Agents',
+      label: 'AI Agents',
       icon: 'smart_toy',
       items: [
         { view: AppView.PX_CREATIVE, icon: 'tips_and_updates', label: 'Event' },
         { view: AppView.SOCIAL_AUDIT, icon: 'troubleshoot', label: 'Audit' },
-        { view: AppView.CHAT_BOT, icon: 'chat_bubble', label: 'Chat' },
       ],
     },
-    ...(userProfile.role === 'admin' ? [{
-      label: 'Admin',
-      icon: 'admin_panel_settings',
-      items: [
-        { view: AppView.MUSIC_STUDIO, icon: 'music_note', label: 'Music' },
-        { view: AppView.I2AUDIO_STUDIO, icon: 'graphic_eq', label: 'i2Audio' },
-      ],
-    }] : []),
   ];
 
   const allNavItems = navCategories.flatMap(cat => cat.items);
@@ -94,13 +96,38 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
       {/* Top Bar: Logo, Categories & Profile */}
       <nav className="bg-background border-b border-border">
         <div className="max-w-[1920px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center neon-glow">
-              <span className="material-icons-round text-primary-foreground text-lg">auto_awesome</span>
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => setView(AppView.DASHBOARD)}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+              <div className="flex items-center justify-center pt-1.5 transition-all">
+                <img 
+                  src={theme === 'dark' ? '/logos/px-alpha.png' : '/logos/px-black.png'} 
+                  alt="PX Logo" 
+                  className="h-9 w-auto object-contain drop-shadow-sm"
+                />
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-foreground hidden xl:block mt-1">
+                Studio
+              </h1>
+            </button>
+
+            {/* External Links */}
+            <div className="hidden md:flex items-center pl-4 border-l border-border h-8">
+              <a
+                href={import.meta.env.VITE_PX_FLOW_URL || "https://px-flow.labs-schickeria.com/"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
+              >
+                <div className="w-5 h-5 rounded flex items-center justify-center bg-primary/10 text-primary">
+                  <span className="material-icons-round text-[14px]">account_tree</span>
+                </div>
+                PX-Flow
+                <span className="material-icons-round text-[12px] opacity-50 ml-0.5">open_in_new</span>
+              </a>
             </div>
-            <h1 className="text-lg font-bold tracking-tight text-foreground hidden md:block">
-              PX <span className="text-primary">Studio</span>
-            </h1>
           </div>
 
           {/* Desktop Categories */}
@@ -211,8 +238,13 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
           const isActive = currentView === item.view;
           return (
             <button
-              key={item.view}
-              onClick={() => setView(item.view)}
+              key={item.label}
+              onClick={() => {
+                setView(item.view);
+                if (item.path && setDashboardPath) {
+                  setDashboardPath(item.path);
+                }
+              }}
               className={`flex-1 flex flex-col items-center justify-center py-3 min-w-[70px] relative transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
             >
               <span className="material-icons-round text-xl mb-1">{item.icon}</span>
