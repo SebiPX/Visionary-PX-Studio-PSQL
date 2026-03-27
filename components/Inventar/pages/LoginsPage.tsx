@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { KeyRound, Plus, Pencil, Trash2, Check, X, Eye, EyeOff, ExternalLink } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Login } from '../types'
@@ -84,59 +84,61 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
   const td = 'px-3 py-2.5 text-sm text-foreground/90 align-top'
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-            <KeyRound size={24} className="text-primary-400" /> Logins & Passwörter
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">{logins.length} Einträge — Passwörter nur für eingeloggte User sichtbar</p>
-        </div>
-        {isAdmin && (
-          <button onClick={() => setAdding(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-foreground text-sm font-semibold rounded-xl transition-colors">
-            <Plus size={16} /> Neu
-          </button>
-        )}
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Suche nach Name, Website, Login …"
-          className="flex-1 min-w-56 px-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary-500" />
-        <div className="flex gap-1 bg-card p-1 rounded-xl border border-border">
-          {KATEGORIEN.map(k => (
-            <button key={k} onClick={() => setKat(k)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${kat === k ? 'bg-primary-600 text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
-              {k}
+    <div className="absolute inset-0 flex flex-col p-6 pb-2">
+      <div className="w-full max-w-[1400px] mx-auto flex flex-col h-full space-y-5">
+        
+        {/* Header */}
+        <div className="shrink-0 flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
+              <KeyRound size={24} className="text-primary-400" /> Logins & Passwörter
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">{logins.length} Einträge — Passwörter nur für eingeloggte User sichtbar</p>
+          </div>
+          {isAdmin && (
+            <button onClick={() => setAdding(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-foreground text-sm font-semibold rounded-xl transition-colors">
+              <Plus size={16} /> Neu
             </button>
-          ))}
+          )}
         </div>
-      </div>
 
-      {/* Table */}
-      <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-card/60 border-b border-border">
-              <tr>
-                <th className={th}>Name</th>
-                <th className={th}>Website</th>
-                <th className={th}>Login</th>
-                <th className={th}>Passwort</th>
-                <th className={th}>Anmerkung</th>
-                <th className={th}>Kategorie</th>
-                <th className={th}>Department</th>
-                {isAdmin && <th className={th + ' w-20'}></th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {/* Add row */}
-              {adding && (
-                <tr className="bg-primary-500/5">
-                  {(['name','website','login_name','passwort','anmerkung','kategorie','department'] as const).map(f => (
+        {/* Filters */}
+        <div className="shrink-0 flex flex-wrap gap-3">
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Suche nach Name, Website, Login …"
+            className="flex-1 min-w-56 px-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary-500" />
+          <div className="flex gap-1 bg-card p-1 rounded-xl border border-border overflow-x-auto">
+            {KATEGORIEN.map(k => (
+              <button key={k} onClick={() => setKat(k)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${kat === k ? 'bg-primary-600 text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                {k}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Table Container */}
+        <div className="flex-1 bg-card/60 border border-border rounded-2xl flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-auto relative">
+            <table className="w-full text-sm">
+              <thead className="bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 sticky top-0 z-10 shadow-sm">
+                <tr className="border-b border-border/80">
+                  <th className={th}>Name</th>
+                  <th className={th}>Website</th>
+                  <th className={th}>Login</th>
+                  <th className={th}>Passwort</th>
+                  <th className={th}>Anmerkung</th>
+                  <th className={th}>Kategorie</th>
+                  <th className={th}>Department</th>
+                  {isAdmin && <th className={th + ' w-20'}></th>}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {/* Add row */}
+                {adding && (
+                  <tr className="bg-primary-500/5">
+                    {(['name','website','login_name','passwort','anmerkung','kategorie','department'] as const).map(f => (
                     <td key={f} className="px-2 py-1.5">
                       <input value={(newData[f] as string) || ''} onChange={e => setNewData(p => ({ ...p, [f]: e.target.value }))}
                         placeholder={f} className={inputCls} />
@@ -217,6 +219,6 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
         </div>
       </div>
     </div>
+  </div>
   )
 }
-
