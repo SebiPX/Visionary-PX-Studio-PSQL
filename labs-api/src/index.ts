@@ -38,6 +38,10 @@ import newsRoutes from './routes/news';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+import { startMocoSyncCron } from './services/cron';
+// Start automated background MOCO sync
+startMocoSyncCron();
+
 // ── Middleware ───────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
 
