@@ -188,6 +188,13 @@ export const geminiProxy = (body: Record<string, unknown>) =>
         body: JSON.stringify(body),
     });
 
+// ── OpenRouter Proxy ──────────────────────────────────────────────
+export const openRouterProxy = (body: Record<string, unknown>) =>
+    request<unknown>('/api/openrouter', {
+        method: 'POST',
+        body: JSON.stringify(body),
+    });
+
 // ── Download helper (unchanged from supabaseClient) ───────────────
 export const downloadAsset = async (url: string, filename: string): Promise<void> => {
     try {

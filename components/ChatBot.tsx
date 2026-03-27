@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { ChatSession } from '../types';
-import { geminiProxy, getToken, chats, uploadFile } from '../lib/apiClient';
+import { geminiProxy, openRouterProxy, getToken, chats, uploadFile } from '../lib/apiClient';
 
 // ── Onboarding RAG helpers ─────────────────────────────────────────────────
 const EMBED_MODEL = 'gemini-embedding-001';
@@ -105,6 +105,20 @@ const PERSONAS: Persona[] = [
   }
 ];
 
+interface LlmModel {
+  id: string;
+  name: string;
+  provider: 'gemini' | 'openrouter';
+  icon: string;
+}
+
+const AVAILABLE_MODELS: LlmModel[] = [
+  { id: 'gemini-3-flash-preview', name: 'Gemini 3.1 Flash', provider: 'gemini', icon: 'auto_awesome' },
+  { id: 'anthropic/claude-sonnet-4.6', name: 'Claude Sonnet 4.6', provider: 'openrouter', icon: 'psychology' },
+  { id: 'openai/gpt-5-chat', name: 'GPT-5 Chat', provider: 'openrouter', icon: 'smart_toy' },
+  { id: 'nvidia/nemotron-3-super-120b-a12b', name: 'Nemotron 3 Super', provider: 'openrouter', icon: 'memory' }
+];
+
 // Builds a system instruction with current date/time + German language rule
 const buildSystemInstruction = (baseInstruction: string): string => {
   const now = new Date();
@@ -168,6 +182,8 @@ export const ChatBot: React.FC = () => {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isPersonaDropdownOpen, setIsPersonaDropdownOpen] = useState(false);
+  const [activeModel, setActiveModel] = useState<LlmModel>(AVAILABLE_MODELS[0]);
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   // Ref to always have the latest sessionId without stale closures
   const sessionIdRef = useRef<string | null>(null);
 
@@ -176,6 +192,7 @@ export const ChatBot: React.FC = () => {
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Close dropdown when clicking outside
@@ -183,6 +200,9 @@ export const ChatBot: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsPersonaDropdownOpen(false);
+      }
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
+        setIsModelDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -341,9 +361,10 @@ export const ChatBot: React.FC = () => {
         contents.push({ role: 'user', parts: [{ text: messageToSend }] });
       }
 
-      const response = await geminiProxy({
+      const proxyToUse = activeModel.provider === 'openrouter' ? openRouterProxy : geminiProxy;
+      const response = await proxyToUse({
         action: 'generateContent',
-        model: 'gemini-3-flash-preview',
+        model: activeModel.id,
         contents: contents,
         systemInstruction: buildSystemInstruction(activePersona.instruction),
       }) as any;
@@ -439,6 +460,55 @@ export const ChatBot: React.FC = () => {
                       <div className="min-w-0">
                         <p className={`text-[11px] font-bold ${activePersona.id === p.id ? 'text-foreground' : 'text-foreground/90'}`}>{p.name}</p>
                         <p className="text-[9px] text-muted-foreground mt-0.5 truncate">{p.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* AI Model Selector */}
+        <div className="p-6 pt-0 pb-2" ref={modelDropdownRef}>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">AI Model</h3>
+          <div className="relative">
+            <button
+              onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+              className="w-full text-left p-3 rounded-xl border bg-primary/5 border-primary/30 flex items-center justify-between transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/20 text-primary">
+                  <span className="material-icons-round text-sm">{activeModel.icon}</span>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-foreground">{activeModel.name}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{activeModel.provider === 'openrouter' ? 'OpenRouter' : 'Google Gemini'}</p>
+                </div>
+              </div>
+              <span className="material-icons-round text-muted-foreground text-sm">
+                {isModelDropdownOpen ? 'expand_less' : 'expand_more'}
+              </span>
+            </button>
+
+            {isModelDropdownOpen && (
+              <div className="absolute top-full left-0 w-full mt-2 bg-card border border-border rounded-xl shadow-2xl z-50 overflow-hidden">
+                <div className="max-h-64 overflow-y-auto hide-scrollbar p-2 space-y-1">
+                  {AVAILABLE_MODELS.map(m => (
+                    <button
+                      key={m.id}
+                      onClick={() => {
+                        setActiveModel(m);
+                        setIsModelDropdownOpen(false);
+                      }}
+                      className={`w-full text-left p-2.5 rounded-lg transition-colors flex items-start gap-3 ${activeModel.id === m.id ? 'bg-primary/20 bg-opacity-50' : 'hover:bg-white/5'}`}
+                    >
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${activeModel.id === m.id ? 'bg-primary text-primary-foreground' : 'bg-white/10 text-muted-foreground'}`}>
+                        <span className="material-icons-round text-xs">{m.icon}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className={`text-[11px] font-bold ${activeModel.id === m.id ? 'text-foreground' : 'text-foreground/90'}`}>{m.name}</p>
+                        <p className="text-[9px] text-muted-foreground mt-0.5">{m.provider === 'openrouter' ? 'OpenRouter' : 'Google Gemini'}</p>
                       </div>
                     </button>
                   ))}
