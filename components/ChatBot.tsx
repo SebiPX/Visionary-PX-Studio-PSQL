@@ -414,6 +414,21 @@ export const ChatBot: React.FC = () => {
     }]);
   };
 
+  const handleDeleteSession = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm('Möchtest du diesen Chat wirklich aus dem Verlauf löschen?')) return;
+    try {
+      await chats.delete(id);
+      if (currentSessionId === id) {
+        startNewChat();
+      }
+      loadSessions();
+    } catch (err) {
+      console.error('Fehler beim Löschen:', err);
+      alert('Fehler beim Löschen des Chats');
+    }
+  };
+
   return (
     <div className="h-full flex flex-col md:flex-row bg-background overflow-hidden">
 
@@ -537,25 +552,33 @@ export const ChatBot: React.FC = () => {
                 <div key={group.label} className="space-y-2">
                   <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest pl-1">{group.label}</h4>
                   {group.sessions.map((session) => (
-                    <button
-                      key={session.id}
-                      onClick={() => loadSession(session)}
-                      className={`w-full text-left p-3 rounded-lg border transition-all ${currentSessionId === session.id ? 'bg-primary/10 border-primary/50' : 'bg-white/5 border-border/50 hover:bg-white/10'}`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <span className="material-icons-round text-xs text-muted-foreground mt-0.5">
-                          {PERSONAS.find(p => p.id === session.bot_id)?.icon || 'chat'}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs text-foreground/90 font-medium truncate">
-                            {session.title || 'Untitled Chat'}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground mt-1">
-                            {new Date(session.created_at).toLocaleDateString()}
-                          </p>
+                    <div key={session.id} className="relative group">
+                      <button
+                        onClick={() => loadSession(session)}
+                        className={`w-full text-left p-3 pr-8 rounded-lg border transition-all ${currentSessionId === session.id ? 'bg-primary/10 border-primary/50' : 'bg-white/5 border-border/50 hover:bg-white/10'}`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="material-icons-round text-xs text-muted-foreground mt-0.5">
+                            {PERSONAS.find(p => p.id === session.bot_id)?.icon || 'chat'}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs text-foreground/90 font-medium truncate">
+                              {session.title || 'Untitled Chat'}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground mt-1">
+                              {new Date(session.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteSession(session.id, e)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground/50 hover:text-red-500 hover:bg-red-500/10 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                        title="Chat löschen"
+                      >
+                        <span className="material-icons-round text-sm">delete</span>
+                      </button>
+                    </div>
                   ))}
                 </div>
               ))}
