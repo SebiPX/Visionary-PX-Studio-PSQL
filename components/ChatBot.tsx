@@ -187,7 +187,8 @@ export const ChatBot: React.FC = () => {
   // Ref to always have the latest sessionId without stale closures
   const sessionIdRef = useRef<string | null>(null);
 
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  // Replace uploadedImage with a generic attached file object
+  const [attachedFile, setAttachedFile] = useState<{ name: string; type: string; base64?: string; text?: string; previewUrl?: string } | null>(null);
 
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -270,23 +271,53 @@ export const ChatBot: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const isImage = file.type.startsWith('image/');
+    
+    // Process simple text formats instantly
+    if (['txt', 'md', 'csv', 'json'].includes(ext)) {
+      const text = await file.text();
+      setAttachedFile({ name: file.name, type: file.type || 'text/plain', text, previewUrl: undefined });
+      return;
     }
+
+    // Process docx text content silently
+    if (ext === 'docx') {
+      try {
+        const mammoth = await import('mammoth');
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        setAttachedFile({ name: file.name, type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', text: result.value, previewUrl: undefined });
+        return;
+      } catch (err) {
+        console.error('Failed to parse docx:', err);
+      }
+    }
+
+    // Default: read as base64 (images, pdfs, remaining formats)
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      setAttachedFile({ 
+        name: file.name, 
+        type: file.type || 'application/octet-stream', 
+        base64, 
+        previewUrl: isImage ? base64 : undefined 
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSend = async () => {
-    if (!inputText.trim() && !uploadedImage || isTyping) return;
+    if ((!inputText.trim() && !attachedFile) || isTyping) return;
 
-    // Temporarily save attached image and clear state
-    const attachedImageBase64 = uploadedImage;
-    setUploadedImage(null);
+    // Temporarily save attached file and clear state
+    const fileToProcess = attachedFile;
+    setAttachedFile(null);
 
     // Initial message creation (will be updated if image is attached)
     let userMsg: Message = { id: Date.now().toString(), role: 'user', text: inputText };
@@ -319,43 +350,55 @@ export const ChatBot: React.FC = () => {
       }));
       let finalMessageForDb = userMsg.text;
 
-      // --- Process attached image if present ---
-      if (attachedImageBase64) {
-         try {
-           // 1. Upload to Cloudflare R2
-           const mimeType = attachedImageBase64.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/)?.[1] || 'image/png';
-           const ext = mimeType.split('/')[1] || 'png';
-           const base64Data = attachedImageBase64.split(',')[1];
-           const byteCharacters = atob(base64Data);
-           const byteArray = new Uint8Array(byteCharacters.length);
-           for (let i = 0; i < byteCharacters.length; i++) {
-             byteArray[i] = byteCharacters.charCodeAt(i);
-           }
-           const imageBlob = new Blob([byteArray], { type: mimeType });
-           const imageFile = new File([imageBlob], `chat-${Date.now()}.${ext}`, { type: mimeType });
-           
-           const imageUrl = await uploadFile(imageFile, 'chat-uploads');
-           
-           // 2. Append markdown image to the DB message text
-           const markdownImage = `\n\n![Angehängtes Bild](${imageUrl})`;
-           finalMessageForDb += markdownImage;
-           
-           // Update the UI message to show the image instantly
-           userMsg = { ...userMsg, text: finalMessageForDb };
-           setMessages(prev => prev.map(m => m.id === userMsg.id ? userMsg : m));
-           
-           // 3. Attach base64 as inline data to the Gemini prompt
-           const inlineData = {
-               mimeType,
-               data: base64Data
-           };
-           
-           // The contents array structure for the final user prompt
-           contents.push({ role: 'user', parts: [ { inlineData } as any, { text: messageToSend } ] });
-
-         } catch (uploadErr) {
-           console.error("Failed to upload image to chat", uploadErr);
-           contents.push({ role: 'user', parts: [{ text: messageToSend }] });
+      // --- Process attached file if present ---
+      if (fileToProcess) {
+         if (fileToProcess.text) {
+             // It's a parsed text document
+             const docContext = `\n\n--- DOKUMENT: ${fileToProcess.name} ---\n${fileToProcess.text}\n--- ENDE ---\n`;
+             messageToSend = messageToSend + docContext;
+             finalMessageForDb += `\n\n*(Dokument angehängt: \`${fileToProcess.name}\`)*`;
+             
+             userMsg = { ...userMsg, text: finalMessageForDb };
+             setMessages(prev => prev.map(m => m.id === userMsg.id ? userMsg : m));
+             contents.push({ role: 'user', parts: [{ text: messageToSend }] });
+         } else if (fileToProcess.base64) {
+             try {
+               // 1. Upload to Cloudflare R2
+               const mimeType = fileToProcess.type;
+               const extStr = fileToProcess.name.split('.').pop() || 'bin';
+               const base64Data = fileToProcess.base64.split(',')[1];
+               const byteCharacters = atob(base64Data);
+               const byteArray = new Uint8Array(byteCharacters.length);
+               for (let i = 0; i < byteCharacters.length; i++) {
+                 byteArray[i] = byteCharacters.charCodeAt(i);
+               }
+               const fileBlob = new Blob([byteArray], { type: mimeType });
+               const uploadObj = new File([fileBlob], `chat-${Date.now()}.${extStr}`, { type: mimeType });
+               
+               const fileUrl = await uploadFile(uploadObj, 'chat-uploads');
+               
+               // 2. Append markdown representing the file
+               const isImage = mimeType.startsWith('image/');
+               const markdownAttachment = isImage ? `\n\n![Angehängtes Bild](${fileUrl})` : `\n\n[Angehängtes Dokument: ${fileToProcess.name}](${fileUrl})`;
+               finalMessageForDb += markdownAttachment;
+               
+               // Update the UI message to show the attachment instantly
+               userMsg = { ...userMsg, text: finalMessageForDb };
+               setMessages(prev => prev.map(m => m.id === userMsg.id ? userMsg : m));
+               
+               // 3. Attach base64 as inline data to the Gemini prompt
+               const inlineData = {
+                   mimeType,
+                   data: base64Data
+               };
+               
+               // The contents array structure for the final user prompt
+               contents.push({ role: 'user', parts: [ { inlineData } as any, { text: messageToSend } ] });
+    
+             } catch (uploadErr) {
+               console.error("Failed to upload file to chat", uploadErr);
+               contents.push({ role: 'user', parts: [{ text: messageToSend }] });
+             }
          }
       } else {
         contents.push({ role: 'user', parts: [{ text: messageToSend }] });
@@ -647,7 +690,7 @@ export const ChatBot: React.FC = () => {
           <div className="max-w-4xl mx-auto relative flex items-end gap-2 bg-card border border-border rounded-2xl p-2 shadow-xl">
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.md"
               className="hidden"
               ref={fileInputRef}
               onChange={handleFileUpload}
@@ -659,14 +702,24 @@ export const ChatBot: React.FC = () => {
               <span className="material-icons-round">add_circle</span>
             </button>
             <div className="flex-1 flex flex-col justify-end">
-              {uploadedImage && (
-                <div className="mb-2 relative w-20 h-20 rounded-lg overflow-hidden border border-border/80 shadow-md">
-                  <img src={uploadedImage} alt="Upload preview" className="w-full h-full object-cover" />
+              {attachedFile && (
+                <div className="mb-2 relative w-auto max-w-[200px] h-16 rounded-lg bg-white/5 border border-border flex items-center gap-2 p-2 shadow-md">
+                  {attachedFile.previewUrl ? (
+                    <img src={attachedFile.previewUrl} alt="Preview" className="w-10 h-10 object-cover rounded-md flex-shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 bg-primary/20 text-primary flex items-center justify-center rounded-md flex-shrink-0">
+                      <span className="material-icons-round text-lg">description</span>
+                    </div>
+                  )}
+                  <div className="overflow-hidden min-w-0 pr-4">
+                    <p className="text-[10px] font-bold text-foreground truncate">{attachedFile.name}</p>
+                    <p className="text-[8px] text-muted-foreground uppercase">{attachedFile.name.split('.').pop()}</p>
+                  </div>
                   <button 
-                    onClick={() => setUploadedImage(null)}
-                    className="absolute top-1 right-1 bg-black/60 text-foreground rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-500/80 transition-colors"
+                    onClick={() => setAttachedFile(null)}
+                    className="absolute top-1 right-1 bg-black/60 text-foreground rounded-full w-4 h-4 flex items-center justify-center hover:bg-red-500/80 transition-colors"
                   >
-                    <span className="material-icons-round" style={{ fontSize: '14px' }}>close</span>
+                    <span className="material-icons-round" style={{ fontSize: '12px' }}>close</span>
                   </button>
                 </div>
               )}
@@ -686,7 +739,7 @@ export const ChatBot: React.FC = () => {
             </div>
             <button
               onClick={handleSend}
-              disabled={!inputText.trim() || isTyping}
+              disabled={(!inputText.trim() && !attachedFile) || isTyping}
               className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0 hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
             >
               <span className="material-icons-round text-sm">send</span>
