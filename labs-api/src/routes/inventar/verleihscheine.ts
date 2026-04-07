@@ -8,9 +8,11 @@ const router = Router();
 async function fetchByStatus(status: 'aktiv' | 'erledigt') {
   const scheine = await pool.query(
     `SELECT v.*,
-       json_build_object('id', p.id, 'full_name', p.full_name, 'email', p.email) AS profile
+       json_build_object('id', p.id, 'full_name', p.full_name, 'email', p.email) AS profile,
+       CASE WHEN c.id IS NOT NULL THEN json_build_object('id', c.id, 'company_name', c.company_name) ELSE NULL END AS client
      FROM verleihscheine v
      LEFT JOIN profiles p ON p.id = v.profile_id
+     LEFT JOIN clients c ON c.id = v.client_id
      WHERE v.status = $1
      ORDER BY v.erledigt_am DESC NULLS FIRST, v.created_at DESC`,
     [status]
@@ -61,14 +63,15 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
 
     const scheinRes = await client.query(
       `INSERT INTO verleihscheine
-         (borrower_type, profile_id, extern_name, extern_firma, extern_email,
+         (borrower_type, profile_id, client_id, extern_name, extern_firma, extern_email,
           extern_telefon, abholzeit, rueckgabezeit, prozentsatz,
-          gesamtkosten, zweck, notizen, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
-      [header.borrower_type, header.profile_id, header.extern_name,
+          gesamtkosten, zweck, notizen, created_by, zustand_vorher, fotos_vorher)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
+      [header.borrower_type, header.profile_id, header.client_id, header.extern_name,
        header.extern_firma, header.extern_email, header.extern_telefon,
        header.abholzeit, header.rueckgabezeit, header.prozentsatz,
-       header.gesamtkosten, header.zweck, header.notizen, header.created_by]
+       header.gesamtkosten, header.zweck, header.notizen, header.created_by,
+       header.zustand_vorher, header.fotos_vorher || []]
     );
     const schein = scheinRes.rows[0];
 
@@ -96,15 +99,19 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// PATCH /api/inventar/verleihscheine/:id/erledigt — mark done + restore item statuses
+// PATCH /api/inventar/verleihscheine/:id/erledigt — mark done + restore item statuses + store protocol
 router.patch('/:id/erledigt', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { itemIds } = req.body as { itemIds: string[] };
+  const { itemIds, zustand_nachher, fotos_nachher } = req.body as { itemIds: string[], zustand_nachher?: string, fotos_nachher?: string[] };
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     await client.query(
-      `UPDATE verleihscheine SET status = 'erledigt', erledigt_am = NOW() WHERE id = $1`,
-      [req.params.id]
+      `UPDATE verleihscheine 
+       SET status = 'erledigt', erledigt_am = NOW(), 
+           zustand_nachher = COALESCE($2, zustand_nachher),
+           fotos_nachher = COALESCE($3, fotos_nachher)
+       WHERE id = $1`,
+      [req.params.id, zustand_nachher || null, fotos_nachher || null]
     );
     for (const itemId of (itemIds || [])) {
       await client.query(
