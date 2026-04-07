@@ -224,28 +224,36 @@ export function VerleihFormularPage({
     const W = 210, margin = 20
     let y = margin
 
-    doc.setFillColor(15, 23, 42)
+    // Header Background (White instead of dark blue for print-friendly)
+    doc.setFillColor(255, 255, 255)
     doc.rect(0, 0, W, 35, 'F')
-    doc.setTextColor(255, 255, 255)
+    
+    // Bottom border for header
+    doc.setDrawColor(200, 200, 200)
+    doc.line(0, 35, W, 35)
+
+    doc.setTextColor(30, 41, 59) // Dark Slate for text
     
     try {
       doc.addImage(PX_LOGO_B64, 'PNG', W - 60, 8, 40, 19)
     } catch(e) {}
     
-    doc.setFontSize(18); doc.setFont('helvetica', 'bold')
-    doc.text('PX INVENTAR – VERLEIHSCHEIN', margin, 18)
+    doc.setFontSize(22); doc.setFont('helvetica', 'bold')
+    doc.text('VERLEIHSCHEIN', margin, 20)
     
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(180, 180, 180)
-    doc.text('Pixelschickeria GmbH', margin, 24)
-    doc.text('Fraunhoferstraße 23h, 80469 München', margin, 29)
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal')
+    doc.setTextColor(100, 116, 139)
+    doc.text('Pixelschickeria GmbH', margin, 27)
+    doc.text('Fraunhoferstraße 23h, 80469 München', margin, 32)
     y = 45
 
     doc.setTextColor(80, 90, 110); doc.setFontSize(9); doc.setFont('helvetica', 'normal')
     doc.text(`Erstellt: ${new Date().toLocaleString('de-DE')}`, margin, y); y += 10
 
     function sectionHeader(title: string) {
-      doc.setFillColor(30, 41, 59); doc.rect(margin, y - 4, W - 2 * margin, 8, 'F')
-      doc.setTextColor(148, 163, 184); doc.setFontSize(8); doc.setFont('helvetica', 'bold')
+      doc.setFillColor(241, 245, 249) // very light slate
+      doc.rect(margin, y - 4, W - 2 * margin, 8, 'F')
+      doc.setTextColor(51, 65, 85); doc.setFontSize(8); doc.setFont('helvetica', 'bold')
       doc.text(title.toUpperCase(), margin + 2, y + 1); y += 8
       doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 41, 59)
     }
@@ -273,8 +281,12 @@ export function VerleihFormularPage({
     if (zweck) row('Zweck:', zweck); y += 4
 
     sectionHeader('Verliehene Artikel'); y += 2
-    doc.setFillColor(51, 65, 85); doc.rect(margin, y - 4, W - 2 * margin, 7, 'F')
-    doc.setTextColor(255, 255, 255); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold')
+    doc.setFillColor(241, 245, 249); doc.rect(margin, y - 4, W - 2 * margin, 7, 'F')
+    // Border bottom for table header
+    doc.setDrawColor(203, 213, 225)
+    doc.line(margin, y + 3, W - margin, y + 3)
+    
+    doc.setTextColor(51, 65, 85); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold')
     doc.text('Gerät / Modell', margin + 2, y); doc.text('PX-Nr.', margin + 75, y)
     doc.text('Kaufpreis', margin + 103, y); doc.text(`Tagesrate (${percent}%)`, margin + 127, y)
     doc.text('Gesamt', margin + 158, y); y += 5
@@ -289,8 +301,8 @@ export function VerleihFormularPage({
       doc.text(r.gesamtpreis > 0 ? `€ ${r.gesamtpreis.toFixed(2)}` : '–', margin + 158, y); y += 7
     })
     y += 2
-    doc.setFillColor(15, 23, 42); doc.rect(margin, y - 4, W - 2 * margin, 8, 'F')
-    doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(10)
+    doc.setFillColor(241, 245, 249); doc.rect(margin, y - 4, W - 2 * margin, 8, 'F')
+    doc.setTextColor(15, 23, 42); doc.setFont('helvetica', 'bold'); doc.setFontSize(10)
     doc.text('GESAMTBETRAG:', margin + 2, y + 1)
     doc.text(gesamtkosten > 0 ? `€ ${gesamtkosten.toFixed(2)}` : '–', margin + 158, y + 1); y += 14
 
