@@ -103,7 +103,7 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
           <img src={item.bild_url} alt={item.geraet} className="w-28 h-28 object-cover rounded-2xl border border-border shrink-0" />
         ) : (
           <div className="w-28 h-28 rounded-2xl bg-card border border-border flex items-center justify-center shrink-0">
-            <Package size={36} className="text-muted-foreground/80" />
+            <Package size={36} className="text-slate-600" />
           </div>
         )}
         <div className="flex-1 min-w-0">
@@ -114,16 +114,16 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
               <div className="flex items-center gap-3 mt-3">
                 <StatusBadge status={item.status} size="md" />
                 {item.px_nummer && (
-                  <span className="font-mono text-xs text-foreground/90 bg-card px-3 py-1 rounded-lg border border-border">{item.px_nummer}</span>
+                  <span className="font-mono text-xs text-muted-foreground bg-card px-3 py-1 rounded-lg border border-border">{item.px_nummer}</span>
                 )}
                 {item.is_verleihartikel && (
-                  <span className="text-xs text-primary-300 bg-primary-500/10 border border-primary-500/20 px-2 py-1 rounded-full">Verleihartikel</span>
+                  <span className="text-xs text-brand-300 bg-brand-500/10 border border-brand-500/20 px-2 py-1 rounded-full">Verleihartikel</span>
                 )}
               </div>
             </div>
             {isAdmin && (
               <div className="flex gap-2 shrink-0">
-                <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted border border-border transition-colors">
+                <button onClick={() => setShowEdit(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-colors">
                   <Pencil size={14} /> Bearbeiten
                 </button>
                 <button onClick={() => setShowDeleteConfirm(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 transition-colors">
@@ -140,7 +140,7 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
         {[{ id: 'info', label: 'Gerätedaten', icon: Info }, { id: 'loans', label: `Ausleihen (${activeLoans.length})`, icon: RefreshCw }].map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id as 'info' | 'loans')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === tab.id ? 'bg-primary-600 text-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'
+              activeTab === tab.id ? 'bg-brand-600 text-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'
             }`}>
             <tab.icon size={15} />
             {tab.label}
@@ -163,9 +163,9 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
           <DetailRow icon={Clock} label="Angeschafft" value={item.anschaffungsdatum ? new Date(item.anschaffungsdatum).toLocaleDateString('de-DE') : undefined} />
           <DetailRow icon={Info} label="Preis" value={Number(item.anschaffungspreis) > 0 ? `€ ${Number(item.anschaffungspreis).toFixed(2)}` : undefined} />
           {item.notes && (
-            <div className="mt-4 p-3 bg-card rounded-xl">
+            <div className="mt-4 p-3 bg-background rounded-xl">
               <p className="text-xs text-muted-foreground mb-1">Notizen</p>
-              <p className="text-sm text-foreground/90 whitespace-pre-wrap">{item.notes}</p>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{item.notes}</p>
             </div>
           )}
 
@@ -181,7 +181,7 @@ export function ItemDetailPage({ item, isAdmin, profiles, currentUserId, onBack,
             <div>
               <p className="text-sm font-semibold text-foreground mb-0.5">QR-Code für dieses Gerät</p>
               <p className="text-xs text-muted-foreground">Ausdrucken und am Gerät befestigen</p>
-              <p className="text-xs text-muted-foreground/80 mt-1 font-mono">{item.px_nummer || item.id}</p>
+              <p className="text-xs text-slate-600 mt-1 font-mono">{item.px_nummer || item.id}</p>
             </div>
           </div>
         </div>

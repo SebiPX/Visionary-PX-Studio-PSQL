@@ -121,7 +121,7 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-            <Calendar size={24} className="text-primary-400" /> Kalender
+            <Calendar size={24} className="text-brand-400" /> Kalender
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Verfügbarkeit der Verleihartikel im Überblick</p>
         </div>
@@ -140,7 +140,7 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
       <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-emerald-500/40 border border-emerald-500/60" /> Frei</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-red-500/60 border border-red-500/40" /> Ausgeliehen</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-muted border border-border/80" /> Wochenende</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-muted border border-input" /> Wochenende</span>
       </div>
 
       {verleihItems.length === 0 ? (
@@ -156,21 +156,21 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
               <thead>
                 <tr className="border-b border-border">
                   {/* Item name column */}
-                  <th className="sticky left-0 z-10 bg-card text-left py-3 px-4 text-muted-foreground font-semibold w-48 min-w-48">Gerät</th>
+                  <th className="sticky left-0 z-10 bg-background text-left py-3 px-4 text-muted-foreground font-semibold w-48 min-w-48">Gerät</th>
                   {/* Day headers */}
                   {dayNumbers.map(d => (
                     <th key={d} className={`py-3 w-8 text-center font-medium select-none ${
-                      isToday(d) ? 'text-primary-400' : isWeekend(d) ? 'text-muted-foreground/80' : 'text-muted-foreground'
+                      isToday(d) ? 'text-brand-400' : isWeekend(d) ? 'text-slate-600' : 'text-muted-foreground'
                     }`}>
                       {d}
-                      <div className={`text-[9px] ${isWeekend(d) ? 'text-slate-700' : 'text-muted-foreground/80'}`}>
+                      <div className={`text-[9px] ${isWeekend(d) ? 'text-slate-700' : 'text-slate-600'}`}>
                         {new Date(year, month, d).toLocaleDateString('de-DE', { weekday: 'short' }).slice(0, 2)}
                       </div>
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-slate-800">
                 {Array.from(categoriesMap.entries()).map(([category, itemsInCategory]) => {
                   const isExpanded = expandedCategories.has(category);
                   return (
@@ -180,7 +180,7 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
                         className="bg-card/80 hover:bg-muted/80 transition-colors cursor-pointer group"
                         onClick={() => toggleCategory(category)}
                       >
-                        <td className="sticky left-0 z-20 bg-card/90 group-hover:bg-muted/90 py-2.5 px-3 font-semibold text-primary-300 whitespace-nowrap border-b border-border/50 flex items-center gap-2 transition-colors">
+                        <td className="sticky left-0 z-20 bg-card/90 group-hover:bg-muted/90 py-2.5 px-3 font-semibold text-brand-300 whitespace-nowrap border-b border-border/50 flex items-center gap-2 transition-colors">
                            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                            {category} 
                            <span className="text-xs font-normal opacity-60 ml-1">({itemsInCategory.length})</span>
@@ -195,7 +195,7 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
                         return (
                           <tr key={item.id} className="hover:bg-card/40 transition-colors">
                             {/* Item name */}
-                            <td className="sticky left-0 z-10 bg-card py-2 px-4 pl-10 font-medium text-foreground whitespace-nowrap">
+                            <td className="sticky left-0 z-10 bg-background py-2 px-4 pl-10 font-medium text-foreground whitespace-nowrap">
                               <p className="truncate max-w-44">{item.geraet}{item.modell ? ` – ${item.modell}` : ''}</p>
                               {item.px_nummer && <p className="text-muted-foreground font-mono text-[10px]">{item.px_nummer}</p>}
                             </td>
@@ -213,7 +213,7 @@ export function KalendarPage({ items, scheine }: KalendarPageProps) {
                                         : weekend
                                           ? 'bg-muted/30'
                                           : todayCell
-                                            ? 'bg-primary-500/20 border border-primary-500/30'
+                                            ? 'bg-brand-500/20 border border-brand-500/30'
                                             : 'bg-emerald-500/10 border border-emerald-500/10 hover:bg-emerald-500/20'
                                     }`}
                                     title={schein

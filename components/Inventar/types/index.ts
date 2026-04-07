@@ -78,23 +78,29 @@ export interface VerleihscheinItem {
 export interface Verleihschein {
   id: string
   created_at: string
-  borrower_type: 'team' | 'extern'
-  profile_id: string | null
-  extern_name: string | null
-  extern_firma: string | null
-  extern_email: string | null
-  extern_telefon: string | null
+  borrower_type: 'team' | 'extern' | 'client'
+  profile_id?: string | null
+  client_id?: string | null
+  extern_name?: string | null
+  extern_firma?: string | null
+  extern_email?: string | null
+  extern_telefon?: string | null
   abholzeit: string
   rueckgabezeit: string
   prozentsatz: number
   gesamtkosten: number | null
   zweck: string | null
   notizen: string | null
-  status: 'aktiv' | 'erledigt'
-  erledigt_am: string | null
-  created_by: string | null
+  zustand_vorher?: string | null
+  zustand_nachher?: string | null
+  fotos_vorher?: string[] | null
+  fotos_nachher?: string[] | null
+  status?: 'aktiv' | 'erledigt'
+  erledigt_am?: string | null
+  created_by?: string | null
   items?: VerleihscheinItem[]
   profile?: Profile | null
+  client?: { id: string; company_name: string } | null
 }
 
 export interface Login {

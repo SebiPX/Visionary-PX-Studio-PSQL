@@ -14,9 +14,22 @@ const API_URL = import.meta.env.VITE_API_URL as string || 'http://localhost:4000
 export const normalizeStorageUrl = (url: string): string => url;
 
 // ── Token helpers ────────────────────────────────────────────────
-export const getToken = (): string | null => localStorage.getItem('labs_token');
-export const setToken = (token: string) => localStorage.setItem('labs_token', token);
-export const clearToken = () => localStorage.removeItem('labs_token');
+export const getToken = (): string | null => {
+  const sessionStr = localStorage.getItem('agency_session');
+  if (!sessionStr) return null;
+  try {
+    const session = JSON.parse(sessionStr);
+    return session.access_token;
+  } catch (e) {
+    return null;
+  }
+};
+export const setToken = (token: string) => {
+  // Not used typically since ProjectFlow AuthContext handles setItem
+};
+export const clearToken = () => {
+  // Not used typically since ProjectFlow AuthContext handles removeItem
+};
 
 // ── Base fetch wrapper ───────────────────────────────────────────
 async function request<T>(
@@ -188,13 +201,6 @@ export const geminiProxy = (body: Record<string, unknown>) =>
         body: JSON.stringify(body),
     });
 
-// ── OpenRouter Proxy ──────────────────────────────────────────────
-export const openRouterProxy = (body: Record<string, unknown>) =>
-    request<unknown>('/api/openrouter', {
-        method: 'POST',
-        body: JSON.stringify(body),
-    });
-
 // ── Download helper (unchanged from supabaseClient) ───────────────
 export const downloadAsset = async (url: string, filename: string): Promise<void> => {
     try {
@@ -243,6 +249,62 @@ export interface ApiUser {
     role: 'user' | 'admin';
     created_at: string;
 }
+
+export interface ApiFreelancer {
+    id: string;
+    company?: string;
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    email?: string;
+    city?: string;
+    country?: string;
+    daily_rate?: number;
+    notes?: string;
+    website?: string;
+    category?: string;
+    created_at: string;
+}
+
+export interface ApiLocation {
+    id: string;
+    name?: string;
+    sqm?: number;
+    pax?: number;
+    cost?: number;
+    setup_cost?: number;
+    notes?: string;
+    address?: string;
+    phone?: string;
+    contact_person?: string;
+    email?: string;
+    website?: string;
+    city?: string;
+    country?: string;
+    category?: string;
+    created_at: string;
+}
+
+export const directory = {
+    freelancers: {
+        list: () => request<ApiFreelancer[]>('/api/directory-freelancers'),
+        create: (data: Partial<ApiFreelancer>) =>
+            request<ApiFreelancer>('/api/directory-freelancers', { method: 'POST', body: JSON.stringify(data) }),
+        update: (id: string, data: Partial<ApiFreelancer>) =>
+            request<ApiFreelancer>(`/api/directory-freelancers/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+        delete: (id: string) =>
+            request<void>(`/api/directory-freelancers/${id}`, { method: 'DELETE' })
+    },
+    locations: {
+        list: () => request<ApiLocation[]>('/api/directory-locations'),
+        create: (data: Partial<ApiLocation>) =>
+            request<ApiLocation>('/api/directory-locations', { method: 'POST', body: JSON.stringify(data) }),
+        update: (id: string, data: Partial<ApiLocation>) =>
+            request<ApiLocation>(`/api/directory-locations/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+        delete: (id: string) =>
+            request<void>(`/api/directory-locations/${id}`, { method: 'DELETE' })
+    }
+};
 
 export interface ApiImage {
     id: string;
@@ -362,14 +424,17 @@ export interface VerleihscheinItem {
     item?: { id: string; geraet: string; modell?: string; px_nummer?: string; status?: string } | null;
 }
 export interface Verleihschein {
-    id: string; created_at: string; borrower_type: 'team' | 'extern';
-    profile_id?: string; extern_name?: string; extern_firma?: string;
+    id: string; created_at: string; borrower_type: 'team' | 'extern' | 'client';
+    profile_id?: string; client_id?: string | null; extern_name?: string; extern_firma?: string;
     extern_email?: string; extern_telefon?: string;
     abholzeit: string; rueckgabezeit: string;
     prozentsatz?: number; gesamtkosten?: number;
-    zweck?: string; notizen?: string; status?: string; erledigt_am?: string;
+    zweck?: string; notizen?: string; zustand_vorher?: string | null;
+    zustand_nachher?: string | null; fotos_vorher?: string[] | null; fotos_nachher?: string[] | null;
+    status?: string; erledigt_am?: string;
     created_by?: string;
     profile?: { id: string; full_name: string; email: string } | null;
+    client?: { id: string; company_name: string } | null;
     items?: VerleihscheinItem[];
 }
 export interface InventarProfile {
@@ -402,9 +467,9 @@ export const inventar = {
             request<Verleihschein>('/api/inventar/verleihscheine', {
                 method: 'POST', body: JSON.stringify({ header, items }),
             }),
-        markErledigt: (id: string, itemIds: string[]) =>
+        markErledigt: (id: string, itemIds: string[], zustand_nachher?: string, fotos_nachher?: string[]) =>
             request<void>(`/api/inventar/verleihscheine/${id}/erledigt`, {
-                method: 'PATCH', body: JSON.stringify({ itemIds }),
+                method: 'PATCH', body: JSON.stringify({ itemIds, zustand_nachher, fotos_nachher }),
             }),
     },
     links: {

@@ -66,7 +66,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
          (borrower_type, profile_id, client_id, extern_name, extern_firma, extern_email,
           extern_telefon, abholzeit, rueckgabezeit, prozentsatz,
           gesamtkosten, zweck, notizen, created_by, zustand_vorher, fotos_vorher)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::text[]) RETURNING *`,
       [header.borrower_type, header.profile_id, header.client_id, header.extern_name,
        header.extern_firma, header.extern_email, header.extern_telefon,
        header.abholzeit, header.rueckgabezeit, header.prozentsatz,
@@ -109,7 +109,7 @@ router.patch('/:id/erledigt', requireAuth, async (req: AuthRequest, res: Respons
       `UPDATE verleihscheine 
        SET status = 'erledigt', erledigt_am = NOW(), 
            zustand_nachher = COALESCE($2, zustand_nachher),
-           fotos_nachher = COALESCE($3, fotos_nachher)
+           fotos_nachher = COALESCE($3::text[], fotos_nachher)
        WHERE id = $1`,
       [req.params.id, zustand_nachher || null, fotos_nachher || null]
     );

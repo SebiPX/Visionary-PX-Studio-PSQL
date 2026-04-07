@@ -34,7 +34,7 @@ export function LoanForm({ itemId, itemName, profiles, currentUserId, onSave, on
 
   const selectedProfile = profiles.find(p => p.id === profileId)
 
-  const inputCls = 'w-full px-3 py-2.5 bg-card border border-border/80 rounded-xl text-foreground placeholder-muted-foreground text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-brand-500/20 transition-all'
+  const inputCls = 'w-full px-3 py-2.5 bg-background border border-input rounded-xl text-foreground placeholder-slate-500 text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all'
   const labelCls = 'block text-xs font-medium text-muted-foreground mb-1'
 
   async function handleSubmit(e: React.FormEvent) {
@@ -56,8 +56,8 @@ export function LoanForm({ itemId, itemName, profiles, currentUserId, onSave, on
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="p-3 bg-primary-500/10 border border-primary-500/20 rounded-xl">
-        <p className="text-xs text-primary-300 font-medium">Gerät</p>
+      <div className="p-3 bg-brand-500/10 border border-brand-500/20 rounded-xl">
+        <p className="text-xs text-brand-300 font-medium">Gerät</p>
         <p className="text-foreground font-semibold mt-0.5">{itemName}</p>
       </div>
 
@@ -102,7 +102,7 @@ export function LoanForm({ itemId, itemName, profiles, currentUserId, onSave, on
       </div>
 
       <div className="flex gap-3 pt-2 border-t border-border">
-        <button type="button" onClick={onCancel} className="flex-1 py-2.5 rounded-xl border border-border/80 text-foreground/90 text-sm hover:bg-muted transition-colors">
+        <button type="button" onClick={onCancel} className="flex-1 py-2.5 rounded-xl border border-input text-muted-foreground text-sm hover:bg-muted transition-colors">
           Abbrechen
         </button>
         <button type="submit" disabled={loading || (!profileId && !customName)}

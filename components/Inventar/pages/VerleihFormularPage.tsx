@@ -1,17 +1,23 @@
-﻿import React from 'react'
+import React from 'react'
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { FileText, Plus, Minus, User, Building2, Download, Calculator, Clock, CheckCircle, List, AlertCircle, Archive } from 'lucide-react'
+import { FileText, Plus, Minus, User, Building2, Download, Calculator, Clock, CheckCircle, List, AlertCircle, Archive, Camera, X } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import toast from 'react-hot-toast'
+import { getClients } from '../../../services/api/clients'
+import { uploadFile } from '../../../lib/apiClient'
+import { PX_LOGO_B64 } from './logoB64'
 import type { InventarItem, Profile, Verleihschein } from '../types'
 
 interface HeaderInput {
-  borrower_type: 'team' | 'extern'
+  borrower_type: 'team' | 'extern' | 'client'
   profile_id?: string | null
+  client_id?: string | null
   extern_name?: string | null
   extern_firma?: string | null
   extern_email?: string | null
   extern_telefon?: string | null
+  zustand_vorher?: string | null
+  fotos_vorher?: string[] | null
   abholzeit: string
   rueckgabezeit: string
   prozentsatz: number
@@ -34,7 +40,7 @@ interface VerleihFormularPageProps {
   scheine: Verleihschein[]
   archivierte: Verleihschein[]
   onSaveVerleihschein: (header: HeaderInput, items: LineItemInput[]) => Promise<void>
-  onMarkErledigt: (id: string, itemIds: string[]) => Promise<void>
+  onMarkErledigt: (id: string, itemIds: string[], zustand_nachher?: string, fotos_nachher?: string[]) => Promise<void>
   onFetchArchive: () => Promise<void>
   currentUserId?: string
 }
@@ -44,14 +50,14 @@ interface ExternalContact {
   name: string; firma: string; email: string; telefon: string
 }
 
-const inputCls = 'w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary-500 transition-colors'
+const inputCls = 'w-full px-3 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-brand-500 transition-colors'
 const labelCls = 'block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5'
 
 function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
   return (
     <div className="bg-card/60 border border-border rounded-2xl p-6 space-y-4">
       <h2 className="font-semibold text-foreground flex items-center gap-2 text-base mb-2">
-        <Icon size={16} className="text-primary-400" /> {title}
+        <Icon size={16} className="text-brand-400" /> {title}
       </h2>
       {children}
     </div>
@@ -98,11 +104,27 @@ export function VerleihFormularPage({
   const [abholzeit, setAbholzeit] = useState(() => defaultDT(9))
   const [rueckgabezeit, setRueckgabezeit] = useState(() => defaultDT(18))
   const [prozentsatz, setProzentsatz] = useState('10')
-  const [borrowerType, setBorrowerType] = useState<'team' | 'extern'>('team')
+  const [borrowerType, setBorrowerType] = useState<'team' | 'extern' | 'client'>('team')
   const [profileId, setProfileId] = useState('')
+  const [clientId, setClientId] = useState('')
   const [extern, setExtern] = useState<ExternalContact>({ name: '', firma: '', email: '', telefon: '' })
   const [zweck, setZweck] = useState('')
   const [notizen, setNotizen] = useState('')
+
+  const [zustandVorher, setZustandVorher] = useState('')
+  const [fotosVorher, setFotosVorher] = useState<string[]>([])
+  const [uploadingVorher, setUploadingVorher] = useState(false)
+
+  // Rueckgabe Modal State
+  const [rueckgabeSchein, setRueckgabeSchein] = useState<Verleihschein | null>(null)
+  const [zustandNachher, setZustandNachher] = useState('')
+  const [fotosNachher, setFotosNachher] = useState<string[]>([])
+  const [uploadingNachher, setUploadingNachher] = useState(false)
+
+  const [clients, setClients] = useState<any[]>([])
+  useEffect(() => {
+    getClients().then(setClients).catch(console.error)
+  }, [])
 
   function toggleItem(id: string) {
     setSelectedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
@@ -125,7 +147,8 @@ export function VerleihFormularPage({
 
   const gesamtkosten = itemCosts.reduce((s, r) => s + r.gesamtpreis, 0)
   const borrower = borrowerType === 'team' ? profiles.find(p => p.id === profileId) : null
-  const borrowerName = borrowerType === 'team' ? (borrower?.full_name || '') : extern.name
+  const clientData = borrowerType === 'client' ? clients.find(c => c.id === clientId) : null
+  const borrowerName = borrowerType === 'team' ? (borrower?.full_name || '') : borrowerType === 'client' ? (clientData?.company_name || '') : extern.name
   const canSubmit = selectedIds.size > 0 && abholzeit && rueckgabezeit && borrowerName && !saving
 
   // ── Date-overlap availability ───────────────────────────────────
@@ -151,22 +174,25 @@ export function VerleihFormularPage({
 
   function resetForm() {
     setSelectedIds(new Set()); setAbholzeit(defaultDT(9)); setRueckgabezeit(defaultDT(18))
-    setProzentsatz('10'); setBorrowerType('team'); setProfileId('')
+    setProzentsatz('10'); setBorrowerType('team'); setProfileId(''); setClientId('')
     setExtern({ name: '', firma: '', email: '', telefon: '' })
-    setZweck(''); setNotizen('')
+    setZweck(''); setNotizen(''); setZustandVorher(''); setFotosVorher([])
   }
 
   async function handleSubmit() {
     if (!canSubmit) return
     setSaving(true)
     try {
-      const header = {
+      const header: HeaderInput = {
         borrower_type: borrowerType,
         profile_id: borrowerType === 'team' ? profileId || null : null,
+        client_id: borrowerType === 'client' ? clientId || null : null,
         extern_name: borrowerType === 'extern' ? extern.name || null : null,
         extern_firma: borrowerType === 'extern' ? extern.firma || null : null,
         extern_email: borrowerType === 'extern' ? extern.email || null : null,
         extern_telefon: borrowerType === 'extern' ? extern.telefon || null : null,
+        zustand_vorher: zustandVorher || null,
+        fotos_vorher: fotosVorher,
         abholzeit,
         rueckgabezeit,
         prozentsatz: percent,
@@ -182,7 +208,7 @@ export function VerleihFormularPage({
         gesamtpreis: r.gesamtpreis,
       }))
       await onSaveVerleihschein(header, lineItems)
-      generatePDF()
+      await generatePDF(borrowerName)
       toast.success('Verleihschein gespeichert! Geräte sind als Ausgeliehen markiert.')
       resetForm()
       setTab('aktiv')
@@ -193,17 +219,26 @@ export function VerleihFormularPage({
     }
   }
 
-  function generatePDF() {
+  async function generatePDF(bName: string) {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
     const W = 210, margin = 20
     let y = margin
 
     doc.setFillColor(15, 23, 42)
-    doc.rect(0, 0, W, 30, 'F')
+    doc.rect(0, 0, W, 35, 'F')
     doc.setTextColor(255, 255, 255)
+    
+    try {
+      doc.addImage(PX_LOGO_B64, 'PNG', W - 60, 8, 40, 19)
+    } catch(e) {}
+    
     doc.setFontSize(18); doc.setFont('helvetica', 'bold')
-    doc.text('PX INVENTAR – VERLEIHSCHEIN', margin, 20)
-    y = 40
+    doc.text('PX INVENTAR – VERLEIHSCHEIN', margin, 18)
+    
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(180, 180, 180)
+    doc.text('Pixelschickeria GmbH', margin, 24)
+    doc.text('Fraunhoferstraße 23h, 80469 München', margin, 29)
+    y = 45
 
     doc.setTextColor(80, 90, 110); doc.setFontSize(9); doc.setFont('helvetica', 'normal')
     doc.text(`Erstellt: ${new Date().toLocaleString('de-DE')}`, margin, y); y += 10
@@ -223,6 +258,9 @@ export function VerleihFormularPage({
     sectionHeader('Ausleiher'); y += 2
     if (borrowerType === 'team') {
       row('Name:', borrower?.full_name || '–'); row('E-Mail:', borrower?.email || '–')
+    } else if (borrowerType === 'client') {
+      const cli = clients.find(c => c.id === clientId)
+      row('Firma:', cli?.company_name || '–'); row('Ort:', cli?.city || '–')
     } else {
       row('Name:', extern.name || '–'); row('Firma:', extern.firma || '–')
       row('E-Mail:', extern.email || '–'); row('Telefon:', extern.telefon || '–')
@@ -256,6 +294,13 @@ export function VerleihFormularPage({
     doc.text('GESAMTBETRAG:', margin + 2, y + 1)
     doc.text(gesamtkosten > 0 ? `€ ${gesamtkosten.toFixed(2)}` : '–', margin + 158, y + 1); y += 14
 
+    if (zustandVorher) {
+      sectionHeader('Übergabeprotokoll (Abholung)'); y += 2
+      doc.setTextColor(60, 60, 60); doc.setFontSize(9); doc.setFont('helvetica', 'normal')
+      const lines = doc.splitTextToSize('Zustand vorher: ' + zustandVorher, W - 2 * margin - 4)
+      doc.text(lines, margin + 2, y); y += lines.length * 5 + 8
+    }
+
     if (notizen) {
       sectionHeader('Notizen'); y += 2
       doc.setTextColor(60, 60, 60); doc.setFontSize(9); doc.setFont('helvetica', 'normal')
@@ -268,22 +313,47 @@ export function VerleihFormularPage({
     doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.4)
     doc.line(margin, y, margin + 70, y)
     doc.setTextColor(100, 116, 139); doc.setFontSize(8)
-    doc.text('Unterschrift Ausleiher', margin, y + 5); doc.text(borrowerName || '_________________', margin, y + 10)
+    doc.text('Unterschrift Ausleiher', margin, y + 5); doc.text(bName || '_________________', margin, y + 10)
     doc.line(W - margin - 70, y, W - margin, y)
     doc.text('Unterschrift PX-Mitarbeiter', W - margin - 70, y + 5); doc.text('Pixelschickeria', W - margin - 70, y + 10)
     doc.setFontSize(7.5); doc.setTextColor(180, 180, 180)
     doc.text('Pixelschickeria GmbH · PX Inventar Management', margin, 290)
-    doc.save(`PX-Verleihschein_${borrowerName.replace(/\s+/g, '_') || 'Extern'}_${new Date().toISOString().slice(0, 10)}.pdf`)
+    doc.save(`PX-Verleihschein_${bName.replace(/\s+/g, '_') || 'Extern'}_${new Date().toISOString().slice(0, 10)}.pdf`)
   }
 
   // ── Erledigt handler ───────────────────────────────────────
-  async function handleErledigt(schein: Verleihschein) {
+  async function confirmErledigt() {
+    if (!rueckgabeSchein) return
+    setUploadingNachher(true)
     try {
-      const itemIds = schein.items?.map(i => i.item_id) || []
-      await onMarkErledigt(schein.id, itemIds)
+      const itemIds = rueckgabeSchein.items?.map(i => i.item_id) || []
+      await onMarkErledigt(rueckgabeSchein.id, itemIds, zustandNachher || undefined, fotosNachher.length ? fotosNachher : undefined)
       toast.success('Verleihschein abgeschlossen. Geräte wieder verfügbar.')
+      setRueckgabeSchein(null); setZustandNachher(''); setFotosNachher([])
     } catch (e: unknown) {
       toast.error('Fehler: ' + (e instanceof Error ? e.message : 'Unbekannt'))
+    } finally {
+      setUploadingNachher(false)
+    }
+  }
+
+  // File Upload Helper
+  async function handleFileUpload(files: FileList | null, isVorher: boolean) {
+    if (!files || files.length === 0) return;
+    const isLoader = isVorher ? setUploadingVorher : setUploadingNachher;
+    const setUrls = isVorher ? setFotosVorher : setFotosNachher;
+    isLoader(true);
+    try {
+      const newUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const url = await uploadFile(files[i], 'verleih_fotos');
+        newUrls.push(url);
+      }
+      setUrls(prev => [...prev, ...newUrls]);
+    } catch (err: any) {
+      toast.error('Fehler beim Upload: ' + err.message);
+    } finally {
+      isLoader(false);
     }
   }
 
@@ -294,7 +364,7 @@ export function VerleihFormularPage({
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-            <FileText size={24} className="text-primary-400" /> Verleih-Formular
+            <FileText size={24} className="text-brand-400" /> Verleih-Formular
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Verleihscheine erfassen und verwalten</p>
         </div>
@@ -305,7 +375,7 @@ export function VerleihFormularPage({
             ['archiv',`Archiv (${archivierte.length})`,         Archive],
           ] as const).map(([t, label, Icon]) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? 'bg-primary-600 text-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}>
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t ? 'bg-brand-600 text-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}>
               <Icon size={14} />{label}
             </button>
           ))}
@@ -317,7 +387,7 @@ export function VerleihFormularPage({
         <>
           {/* Artikel */}
           <div className="bg-card/60 border border-border rounded-2xl p-6 space-y-3">
-            <h2 className="font-semibold text-foreground flex items-center gap-2"><Plus size={16} className="text-primary-400" /> Artikel auswählen</h2>
+            <h2 className="font-semibold text-foreground flex items-center gap-2"><Plus size={16} className="text-brand-400" /> Artikel auswählen</h2>
             {verleihItems.length === 0 ? (
               <p className="text-muted-foreground text-sm">Keine Verleihartikel im Inventar markiert.</p>
             ) : (
@@ -337,9 +407,9 @@ export function VerleihFormularPage({
 
                   return (
                     <label key={item.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all
-                      ${ selected  ? 'border-primary-500/50 bg-primary-500/10 cursor-pointer'
+                      ${ selected  ? 'border-brand-500/50 bg-brand-500/10 cursor-pointer'
                        : blocked   ? 'border-red-800/40 bg-red-900/10 opacity-60 cursor-not-allowed'
-                       : 'border-border hover:border-border/80 bg-card/40 cursor-pointer'}`}>
+                       : 'border-border hover:border-input bg-background/40 cursor-pointer'}`}>
                       <input type="checkbox" checked={selected} disabled={blocked}
                         onChange={() => toggleItem(item.id)} className="w-4 h-4 accent-brand-500" />
                       <div className="flex-1 min-w-0">
@@ -381,7 +451,7 @@ export function VerleihFormularPage({
               <div><label className={labelCls}>Abholzeitpunkt</label><input type="datetime-local" value={abholzeit} onChange={e => setAbholzeit(e.target.value)} className={inputCls} /></div>
               <div><label className={labelCls}>Rückgabezeitpunkt</label><input type="datetime-local" value={rueckgabezeit} onChange={e => setRueckgabezeit(e.target.value)} className={inputCls} /></div>
             </div>
-            {dauer !== null && <p className="text-sm text-foreground/90">Dauer: <span className="font-semibold text-foreground">{dauer.toFixed(1)} Tag(e)</span></p>}
+            {dauer !== null && <p className="text-sm text-muted-foreground">Dauer: <span className="font-semibold text-foreground">{dauer.toFixed(1)} Tag(e)</span></p>}
             <div><label className={labelCls}>Verwendungszweck</label><input type="text" value={zweck} onChange={e => setZweck(e.target.value)} placeholder="z.B. Messe, Fotoshooting …" className={inputCls} /></div>
           </Section>
 
@@ -398,7 +468,7 @@ export function VerleihFormularPage({
               <p className="text-xs text-muted-foreground pb-2.5">Kaufpreis × % × Tage</p>
             </div>
             {selectedItems.length > 0 && (
-              <div className="bg-card rounded-xl overflow-hidden">
+              <div className="bg-background rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
                   <thead><tr className="border-b border-border">
                     <th className="text-left py-2.5 px-4 text-xs text-muted-foreground font-semibold">Artikel</th>
@@ -406,19 +476,19 @@ export function VerleihFormularPage({
                     <th className="text-right py-2.5 px-4 text-xs text-muted-foreground font-semibold">Tagesrate</th>
                     <th className="text-right py-2.5 px-4 text-xs text-muted-foreground font-semibold">Gesamt</th>
                   </tr></thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-slate-800">
                     {itemCosts.map(({ item, tagespreis, gesamtpreis }) => (
                       <tr key={item.id}>
                         <td className="py-2.5 px-4 text-foreground">{item.geraet}{item.modell ? ` – ${item.modell}` : ''}{item.px_nummer && <span className="text-muted-foreground font-mono text-xs ml-2">{item.px_nummer}</span>}</td>
-                        <td className="py-2.5 px-4 text-foreground/90 text-right">{toNum(item.anschaffungspreis) > 0 ? `€ ${toNum(item.anschaffungspreis).toFixed(2)}` : '–'}</td>
-                        <td className="py-2.5 px-4 text-foreground/90 text-right">{tagespreis > 0 ? `€ ${tagespreis.toFixed(2)}` : '–'}</td>
+                        <td className="py-2.5 px-4 text-muted-foreground text-right">{toNum(item.anschaffungspreis) > 0 ? `€ ${toNum(item.anschaffungspreis).toFixed(2)}` : '–'}</td>
+                        <td className="py-2.5 px-4 text-muted-foreground text-right">{tagespreis > 0 ? `€ ${tagespreis.toFixed(2)}` : '–'}</td>
                         <td className="py-2.5 px-4 text-right font-semibold text-foreground">{gesamtpreis > 0 ? `€ ${gesamtpreis.toFixed(2)}` : '–'}</td>
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot><tr className="border-t-2 border-border/80 bg-card/60">
+                  <tfoot><tr className="border-t-2 border-input bg-card/60">
                     <td colSpan={3} className="py-3 px-4 text-right font-bold text-foreground">Gesamtbetrag:</td>
-                    <td className="py-3 px-4 text-right font-bold text-primary-300 text-lg">{gesamtkosten > 0 ? `€ ${gesamtkosten.toFixed(2)}` : '–'}</td>
+                    <td className="py-3 px-4 text-right font-bold text-brand-300 text-lg">{gesamtkosten > 0 ? `€ ${gesamtkosten.toFixed(2)}` : '–'}</td>
                   </tr></tfoot>
                 </table>
               </div>
@@ -427,10 +497,10 @@ export function VerleihFormularPage({
 
           {/* Ausleiher */}
           <Section title="Ausleiher" icon={User}>
-            <div className="flex gap-1 bg-card p-1 rounded-xl w-fit border border-border mb-4">
-              {(['team', 'extern'] as const).map(t => (
-                <button key={t} onClick={() => setBorrowerType(t)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${borrowerType === t ? 'bg-primary-600 text-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}>
-                  {t === 'team' ? <><User size={14} /> Team-Mitglied</> : <><Building2 size={14} /> Externer Kontakt</>}
+            <div className="flex gap-1 bg-background p-1 rounded-xl w-fit border border-border mb-4">
+              {(['team', 'client', 'extern'] as const).map(t => (
+                <button key={t} onClick={() => setBorrowerType(t)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${borrowerType === t ? 'bg-brand-600 text-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}>
+                  {t === 'team' ? <><User size={14} /> Team</> : t === 'client' ? <><Building2 size={14} /> Client</> : <><User size={14} /> Extern</>}
                 </button>
               ))}
             </div>
@@ -439,6 +509,13 @@ export function VerleihFormularPage({
                 <select value={profileId} onChange={e => setProfileId(e.target.value)} className={inputCls}>
                   <option value="">– Bitte wählen –</option>
                   {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name || p.email}</option>)}
+                </select>
+              </div>
+            ) : borrowerType === 'client' ? (
+              <div><label className={labelCls}>Kunde (Client)</label>
+                <select value={clientId} onChange={e => setClientId(e.target.value)} className={inputCls}>
+                  <option value="">– Bitte wählen –</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.company_name}</option>)}
                 </select>
               </div>
             ) : (
@@ -451,9 +528,35 @@ export function VerleihFormularPage({
             )}
           </Section>
 
+          {/* Übergabeprotokoll */}
+          <Section title="Übergabeprotokoll (Abholung)" icon={FileText}>
+            <div>
+              <label className={labelCls}>Zustand der Geräte / Lieferumfang</label>
+              <textarea value={zustandVorher} onChange={e => setZustandVorher(e.target.value)} rows={3} placeholder="Zustand der Geräte (z.B. Kratzer, Vollständigkeit)..." className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Fotos hinzufügen</label>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 px-4 py-2 bg-card hover:bg-muted border border-border rounded-xl cursor-pointer transition-colors text-sm font-medium text-foreground">
+                  {uploadingVorher ? <span className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" /> : <Camera size={16} />}
+                  <span>{uploadingVorher ? 'Lädt hoch...' : 'Fotos hochladen'}</span>
+                  <input type="file" multiple accept="image/*" className="hidden" disabled={uploadingVorher} onChange={(e) => handleFileUpload(e.target.files, true)} />
+                </label>
+                <div className="flex gap-2 relative z-0">
+                  {fotosVorher.map((f, i) => (
+                    <div key={i} className="relative group w-12 h-12 rounded-lg overflow-hidden border border-border">
+                      <img src={f} className="w-full h-full object-cover" alt="Protokoll" />
+                      <button onClick={() => setFotosVorher(p => p.filter((_, idx) => idx !== i))} className="absolute top-0 right-0 bg-red-500/80 text-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"><X size={12} /></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Section>
+
           {/* Notizen */}
           <Section title="Interne Notizen" icon={Minus}>
-            <textarea value={notizen} onChange={e => setNotizen(e.target.value)} rows={3} placeholder="Besondere Vereinbarungen, Zubehör, Zustand …" className={inputCls} />
+            <textarea value={notizen} onChange={e => setNotizen(e.target.value)} rows={2} placeholder="Spezielle Rabatte, interne Infos..." className={inputCls} />
           </Section>
 
           {/* CTA */}
@@ -462,10 +565,10 @@ export function VerleihFormularPage({
               {!canSubmit && <p className="text-xs text-muted-foreground">
                 {selectedIds.size === 0 ? 'Artikel auswählen' : !abholzeit || !rueckgabezeit ? 'Zeitraum eingeben' : 'Ausleiher angeben'}
               </p>}
-              {canSubmit && gesamtkosten > 0 && <p className="text-sm text-foreground">Gesamt: <span className="font-bold text-primary-300 text-lg">€ {gesamtkosten.toFixed(2)}</span></p>}
+              {canSubmit && gesamtkosten > 0 && <p className="text-sm text-foreground">Gesamt: <span className="font-bold text-brand-300 text-lg">€ {gesamtkosten.toFixed(2)}</span></p>}
             </div>
             <button onClick={handleSubmit} disabled={!canSubmit}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${canSubmit ? 'bg-primary-600 hover:bg-primary-500 text-foreground shadow-lg shadow-primary-900/40' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${canSubmit ? 'bg-brand-600 hover:bg-brand-500 text-foreground shadow-lg shadow-brand-900/40' : 'bg-muted text-muted-foreground cursor-not-allowed'}`}>
               {saving ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Download size={18} />}
               {saving ? 'Wird gespeichert…' : 'Speichern & PDF herunterladen'}
             </button>
@@ -501,18 +604,18 @@ export function VerleihFormularPage({
                       {isOverdue && <span className="text-red-400 ml-2 font-semibold">Überfällig!</span>}
                     </p>
                     {schein.zweck && <p className="text-xs text-muted-foreground">Zweck: {schein.zweck}</p>}
-                    {schein.gesamtkosten != null && toNum(schein.gesamtkosten) > 0 && <p className="text-xs text-primary-300 font-semibold">€ {toNum(schein.gesamtkosten).toFixed(2)}</p>}
+                    {schein.gesamtkosten != null && toNum(schein.gesamtkosten) > 0 && <p className="text-xs text-brand-300 font-semibold">€ {toNum(schein.gesamtkosten).toFixed(2)}</p>}
                   </div>
-                  <button onClick={() => handleErledigt(schein)}
+                  <button onClick={() => setRueckgabeSchein(schein)}
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-foreground text-sm font-semibold rounded-xl transition-colors shrink-0">
-                    <CheckCircle size={15} /> Erledigt
+                    <CheckCircle size={15} /> Rückgabe
                   </button>
                 </div>
                 {schein.items && schein.items.length > 0 && (
-                  <div className="border-t border-border divide-y divide-border">
+                  <div className="border-t border-border divide-y divide-slate-800">
                     {schein.items.map(li => (
                       <div key={li.id} className="flex items-center justify-between px-5 py-2.5">
-                        <p className="text-sm text-foreground/90">{li.item?.geraet}{li.item?.modell ? ` – ${li.item.modell}` : ''}{li.item?.px_nummer && <span className="font-mono text-xs text-muted-foreground ml-2">{li.item.px_nummer}</span>}</p>
+                        <p className="text-sm text-muted-foreground">{li.item?.geraet}{li.item?.modell ? ` – ${li.item.modell}` : ''}{li.item?.px_nummer && <span className="font-mono text-xs text-muted-foreground ml-2">{li.item.px_nummer}</span>}</p>
                         {li.gesamtpreis != null && toNum(li.gesamtpreis) > 0 && <p className="text-xs text-muted-foreground">€ {toNum(li.gesamtpreis).toFixed(2)}</p>}
                       </div>
                     ))}
@@ -540,7 +643,7 @@ export function VerleihFormularPage({
               <div key={schein.id} className="border border-border/60 bg-card/30 rounded-2xl overflow-hidden">
                 <div className="flex items-start justify-between gap-4 px-5 py-4">
                   <div className="space-y-1">
-                    <p className="font-semibold text-foreground/90 flex items-center gap-2">
+                    <p className="font-semibold text-muted-foreground flex items-center gap-2">
                       <CheckCircle size={14} className="text-emerald-500 opacity-70" />
                       {name}
                       {schein.borrower_type === 'team' && (
@@ -552,7 +655,7 @@ export function VerleihFormularPage({
                       &nbsp;·&nbsp;
                       {formatDT(schein.abholzeit)} → {formatDT(schein.rueckgabezeit)}
                     </p>
-                    {schein.zweck && <p className="text-xs text-muted-foreground/80">Zweck: {schein.zweck}</p>}
+                    {schein.zweck && <p className="text-xs text-slate-600">Zweck: {schein.zweck}</p>}
                     <p className="text-xs text-slate-700">
                       Erledigt am: {schein.erledigt_am ? formatDT(schein.erledigt_am) : '–'}
                     </p>
@@ -560,22 +663,22 @@ export function VerleihFormularPage({
                       <p className="text-xs text-muted-foreground font-semibold">€ {toNum(schein.gesamtkosten).toFixed(2)}</p>
                     )}
                   </div>
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-border/80/40 shrink-0 mt-1">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground border border-input/40 shrink-0 mt-1">
                     Erledigt
                   </span>
                 </div>
                 {schein.items && schein.items.length > 0 && (
-                  <div className="border-t border-border/40 divide-y divide-border/60">
+                  <div className="border-t border-border/40 divide-y divide-slate-800/60">
                     {schein.items.map(li => (
                       <div key={li.id} className="flex items-center justify-between px-5 py-2">
                         <p className="text-sm text-muted-foreground">
                           {li.item?.geraet}{li.item?.modell ? ` – ${li.item.modell}` : ''}
                           {li.item?.px_nummer && (
-                            <span className="font-mono text-xs text-muted-foreground/80 ml-2">{li.item.px_nummer}</span>
+                            <span className="font-mono text-xs text-slate-600 ml-2">{li.item.px_nummer}</span>
                           )}
                         </p>
                         {li.gesamtpreis != null && toNum(li.gesamtpreis) > 0 && (
-                          <p className="text-xs text-muted-foreground/80">€ {toNum(li.gesamtpreis).toFixed(2)}</p>
+                          <p className="text-xs text-slate-600">€ {toNum(li.gesamtpreis).toFixed(2)}</p>
                         )}
                       </div>
                     ))}
@@ -584,6 +687,75 @@ export function VerleihFormularPage({
               </div>
             )
           })}
+        </div>
+      )}
+      {/* ── Rückgabe Modal ────────────────────────────────────── */}
+      {rueckgabeSchein && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="bg-card w-full max-w-lg border border-border rounded-2xl shadow-xl overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-border flex justify-between items-center bg-muted/30">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <CheckCircle className="text-emerald-500" size={18} /> Rückgabe-Protokoll
+              </h3>
+              <button onClick={() => { setRueckgabeSchein(null); setZustandNachher(''); setFotosNachher([]) }} className="text-muted-foreground hover:text-foreground">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
+              <div>
+                <p className="text-sm font-medium text-foreground mb-1">Artikel werden zurückgebucht:</p>
+                <div className="bg-background border border-border rounded-lg p-2 text-sm text-muted-foreground max-h-24 overflow-y-auto">
+                  {rueckgabeSchein.items?.map(li => <div key={li.id}>• {li.item?.geraet} {li.item?.px_nummer && `(${li.item.px_nummer})`}</div>)}
+                </div>
+              </div>
+
+              <div>
+                <label className={labelCls}>Zustand nach Rückgabe / Fehlendes</label>
+                <textarea 
+                  value={zustandNachher} onChange={e => setZustandNachher(e.target.value)} 
+                  rows={4} placeholder="Zustand (Kratzer? Alles da?)..." 
+                  className={inputCls} 
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Fotos bei Rückgabe (optional)</label>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 px-4 py-2 bg-background hover:bg-muted border border-border rounded-xl cursor-pointer transition-colors text-sm font-medium">
+                    {uploadingNachher ? <span className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" /> : <Camera size={16} />}
+                    <span>{uploadingNachher ? 'Lädt...' : 'Fotos hochladen'}</span>
+                    <input type="file" multiple accept="image/*" className="hidden" disabled={uploadingNachher} onChange={(e) => handleFileUpload(e.target.files, false)} />
+                  </label>
+                  <div className="flex gap-2 flex-wrap">
+                    {fotosNachher.map((f, i) => (
+                      <div key={i} className="relative group w-10 h-10 rounded-lg overflow-hidden border border-border">
+                        <img src={f} className="w-full h-full object-cover" alt="Rückgabe Protokoll" />
+                        <button onClick={() => setFotosNachher(p => p.filter((_, idx) => idx !== i))} className="absolute top-0 right-0 bg-red-500/80 text-white p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"><X size={10} /></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-border flex justify-end gap-3 bg-muted/20">
+              <button 
+                onClick={() => { setRueckgabeSchein(null); setZustandNachher(''); setFotosNachher([]) }}
+                className="px-4 py-2 text-sm font-medium hover:bg-muted text-muted-foreground rounded-lg transition-colors"
+                disabled={uploadingNachher}
+              >
+                Abbrechen
+              </button>
+              <button 
+                onClick={confirmErledigt}
+                disabled={uploadingNachher}
+                className="px-5 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+              >
+                <CheckCircle size={16} /> Bestätigen & Zurückbuchen
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

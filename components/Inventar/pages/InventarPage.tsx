@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 import { useState, useMemo, useCallback } from 'react'
 import { Plus, Download } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -162,7 +162,7 @@ export function InventarPage({ items, isAdmin, profiles = [], onCreateItem, onUp
           <div className="flex items-center gap-2">
             <button
               onClick={exportCSV}
-              className="flex items-center gap-2 px-4 py-2.5 bg-muted hover:bg-muted-foreground/20 text-foreground text-sm font-semibold rounded-xl transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-muted hover:bg-muted/80 text-foreground text-sm font-semibold rounded-xl transition-colors"
               title="Aktuelle Ansicht als CSV exportieren"
             >
               <Download size={16} /> Export
@@ -170,7 +170,7 @@ export function InventarPage({ items, isAdmin, profiles = [], onCreateItem, onUp
             {isAdmin && (
               <button
                 onClick={() => setShowAdd(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-foreground text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-primary-900/40"
+                className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-foreground text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-brand-900/40"
               >
                 <Plus size={18} /> Neues Gerät
               </button>
@@ -192,15 +192,15 @@ export function InventarPage({ items, isAdmin, profiles = [], onCreateItem, onUp
       <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
         {/* Bulk action bar */}
         {selectedIds.size > 0 && (
-          <div className="flex items-center gap-3 px-4 py-3 bg-primary-600/10 border-b border-primary-500/20">
-            <span className="text-sm text-primary-300 font-semibold">{selectedIds.size} ausgewählt</span>
-            <span className="text-muted-foreground/80">|</span>
+          <div className="flex items-center gap-3 px-4 py-3 bg-brand-600/10 border-b border-brand-500/20">
+            <span className="text-sm text-brand-300 font-semibold">{selectedIds.size} ausgewählt</span>
+            <span className="text-slate-600">|</span>
             <span className="text-xs text-muted-foreground">Status setzen:</span>
             {['Vorhanden', 'Ausgeliehen', 'Fehlt', 'Defekt'].map(s => (
               <button
                 key={s}
                 onClick={() => handleBulkStatus(s)}
-                className="px-3 py-1 rounded-lg text-xs font-medium bg-muted hover:bg-muted-foreground/20 text-foreground transition-colors"
+                className="px-3 py-1 rounded-lg text-xs font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors"
               >{s}</button>
             ))}
             <button onClick={() => setSelectedIds(new Set())} className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors">Abwählen</button>

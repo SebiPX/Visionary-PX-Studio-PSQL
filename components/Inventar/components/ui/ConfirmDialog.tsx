@@ -27,14 +27,14 @@ export function ConfirmDialog({ isOpen, onConfirm, onCancel, title, message, con
         <div className="flex gap-3 justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg text-sm font-medium text-foreground/90 hover:bg-muted transition-colors"
+            className="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
           >
             Abbrechen
           </button>
           <button
             onClick={onConfirm}
             className={`px-4 py-2 rounded-lg text-sm font-medium text-foreground transition-colors ${
-              danger ? 'bg-red-600 hover:bg-red-700' : 'bg-primary-600 hover:bg-primary-700'
+              danger ? 'bg-red-600 hover:bg-red-700' : 'bg-brand-600 hover:bg-brand-700'
             }`}
           >
             {confirmLabel}

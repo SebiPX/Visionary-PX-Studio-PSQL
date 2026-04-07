@@ -21,7 +21,7 @@ interface FiltersProps {
 
 const STATUS_OPTIONS = ['Alle Status', 'Vorhanden', 'Ausgeliehen', 'Fehlt', 'Defekt']
 
-const selectCls = 'px-3 py-2 bg-card border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-blue-500 cursor-pointer transition-colors hover:border-border/80'
+const selectCls = 'px-3 py-2 bg-card border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer transition-colors hover:border-input'
 
 export function InventarFilters({
   search, setSearch, filterGeraet, setFilterGeraet,
@@ -44,7 +44,7 @@ export function InventarFilters({
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Suchen nach Name, PX-Nummer, Modell …"
-          className="w-full pl-9 pr-4 py-2 bg-card border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-blue-500 transition-colors"
+          className="w-full pl-9 pr-4 py-2 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors"
         />
       </div>
 

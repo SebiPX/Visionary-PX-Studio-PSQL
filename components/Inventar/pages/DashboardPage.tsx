@@ -7,14 +7,11 @@ import { useNavigate } from 'react-router-dom'
 import type { InventarItem, InventarLoan, InternalLink, Verleihschein, Login } from '../types'
 import type { DashboardConfig } from '../hooks/useDashboardConfig'
 import { DashboardConfigDrawer } from '../components/DashboardConfigDrawer'
-import { AppView } from '../../../types'
-import { RecentGenerations } from '../../Dashboard'
-import { UserTasksWidget } from '../../UserTasksWidget'
-import { NewsWidget } from '../../NewsWidget'
+import { View as AppView } from '../../../App'
 
 // ─── Avatar colour helper ─────────────────────────────────────────────────────
 const AVATAR_COLORS = [
-  'bg-blue-600', 'bg-violet-600', 'bg-emerald-600', 'bg-orange-500',
+  'bg-primary', 'bg-violet-600', 'bg-emerald-600', 'bg-orange-500',
   'bg-rose-600', 'bg-cyan-600', 'bg-amber-500', 'bg-fuchsia-600',
 ]
 function avatarColor(label: string) {
@@ -45,7 +42,7 @@ function LinkCard({ link }: { link: InternalLink }) {
       rel="noopener noreferrer"
       className="flex items-center gap-3 bg-card/50 hover:bg-muted/60 border border-border hover:border-slate-500 rounded-xl p-3 transition-all group"
     >
-      <div className="w-8 h-8 shrink-0 rounded-lg bg-muted border border-border/80 flex items-center justify-center overflow-hidden">
+      <div className="w-8 h-8 shrink-0 rounded-lg bg-muted border border-input flex items-center justify-center overflow-hidden">
         {favicon && !imgError ? (
           <img src={favicon} alt="" className="w-4 h-4 object-contain" onError={() => setImgError(true)} />
         ) : (
@@ -58,7 +55,7 @@ function LinkCard({ link }: { link: InternalLink }) {
         <p className="text-sm font-medium text-foreground truncate group-hover:text-blue-300 transition-colors">{link.titel}</p>
         {link.beschreibung && <p className="text-xs text-muted-foreground truncate">{link.beschreibung}</p>}
       </div>
-      <ExternalLink size={12} className="shrink-0 text-muted-foreground/80 group-hover:text-muted-foreground transition-colors" />
+      <ExternalLink size={12} className="shrink-0 text-slate-600 group-hover:text-muted-foreground transition-colors" />
     </a>
   )
 }
@@ -74,7 +71,7 @@ function PinnedLoginCard({ login }: { login: Login }) {
         {login.login_name && <p className="text-xs text-muted-foreground truncate">{login.login_name}</p>}
       </div>
       {login.website && (
-        <a href={login.website} target="_blank" rel="noopener noreferrer" className="text-muted-foreground/80 hover:text-muted-foreground transition-colors shrink-0">
+        <a href={login.website} target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-muted-foreground transition-colors shrink-0">
           <ExternalLink size={12} />
         </a>
       )}
@@ -194,7 +191,7 @@ export function DashboardPage({
                 <Key size={16} className="text-violet-400" />
                 Meine Logins
               </h2>
-              <button onClick={() => navigate('/logins')} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
+              <button onClick={() => navigate('/logins')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
                 Alle <ArrowRight size={12} />
               </button>
             </div>
@@ -209,10 +206,10 @@ export function DashboardPage({
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-                <ExternalLink size={16} className="text-blue-400" />
+                <ExternalLink size={16} className="text-primary" />
                 Interne Links
               </h2>
-              <button onClick={() => navigate('/links')} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
+              <button onClick={() => navigate('/links')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
                 Alle verwalten <ArrowRight size={12} />
               </button>
             </div>
@@ -249,14 +246,14 @@ export function DashboardPage({
                       </span>
                     )}
                   </h2>
-                  <button onClick={() => navigate('/kalender')} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
+                  <button onClick={() => navigate('/kalender')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
                     Kalender <ArrowRight size={12} />
                   </button>
                 </div>
                 {upcomingScheine.length === 0 ? (
                   <p className="text-muted-foreground text-sm px-5 py-4">Keine Ausleihen in den nächsten 14 Tagen.</p>
                 ) : (
-                  <div className="divide-y divide-border/60">
+                  <div className="divide-y divide-slate-700/60">
                     {upcomingScheine.map(s => (
                       <div key={s.id} className="px-5 py-3 flex items-start gap-3">
                         <div className="w-9 h-9 rounded-xl bg-violet-500/15 border border-violet-500/20 flex items-center justify-center shrink-0 mt-0.5">
@@ -291,14 +288,14 @@ export function DashboardPage({
                       </span>
                     )}
                   </h2>
-                  <button onClick={() => navigate('/verleih')} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
+                  <button onClick={() => navigate('/verleih')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
                     Alle <ArrowRight size={12} />
                   </button>
                 </div>
                 {activeLoans.length === 0 ? (
                   <p className="text-muted-foreground text-sm px-5 py-4">Keine aktiven Ausleihen.</p>
                 ) : (
-                  <div className="divide-y divide-border/60">
+                  <div className="divide-y divide-slate-700/60">
                     {activeLoans.map(loan => {
                       const overdue = loan.zurueck_bis && new Date(loan.zurueck_bis) < new Date()
                       return (
@@ -328,7 +325,7 @@ export function DashboardPage({
               <h2 className="text-sm font-semibold text-muted-foreground flex items-center gap-2 uppercase tracking-widest">
                 <Package size={14} /> Inventar Übersicht
               </h2>
-              <button onClick={() => navigate('/inventar')} className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
+              <button onClick={() => navigate('/inventar')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
                 Inventar öffnen <ArrowRight size={12} />
               </button>
             </div>
@@ -343,16 +340,7 @@ export function DashboardPage({
 
       </div>
 
-      {/* ── News & Tasks Widgets ─────────────────────────────────────────────── */}
-      <div className="mt-8 max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <NewsWidget />
-        <UserTasksWidget />
-      </div>
-
-      {/* ── Recent Generations ─────────────────────────────────────────────── */}
-      <div className="mt-8 border-t border-border/50 pt-8 max-w-7xl mx-auto px-6">
-          <RecentGenerations setView={setView} navigateToItem={navigateToItem} isActive={true} />
-      </div>
+      {/* Removed PX-Studio specific UserTasksWidget and RecentGenerations */}
 
       {/* Config Drawer */}
       <DashboardConfigDrawer

@@ -23,8 +23,8 @@ interface InventarTableProps {
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
   if (col !== sortKey) return <ChevronsUpDown size={12} className="opacity-30 ml-1 inline" />
   return sortDir === 'asc'
-    ? <ChevronUp size={12} className="text-primary-400 ml-1 inline" />
-    : <ChevronDown size={12} className="text-primary-400 ml-1 inline" />
+    ? <ChevronUp size={12} className="text-brand-400 ml-1 inline" />
+    : <ChevronDown size={12} className="text-brand-400 ml-1 inline" />
 }
 
 function SortTh({ col, label, sortKey, sortDir, onSort }: { col: SortKey; label: string; sortKey: SortKey; sortDir: SortDir; onSort: (k: SortKey) => void }) {
@@ -82,13 +82,13 @@ export function InventarTable({
             {isAdmin && <th className="text-right py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-24">Aktionen</th>}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody className="divide-y divide-slate-800">
           {items.map(item => {
             const isSelected = selectedIds.has(item.id)
             return (
               <tr
                 key={item.id}
-                className={`hover:bg-card/50 transition-colors group cursor-pointer ${isSelected ? 'bg-primary-500/5' : ''}`}
+                className={`hover:bg-card/50 transition-colors group cursor-pointer ${isSelected ? 'bg-brand-500/5' : ''}`}
                 onClick={() => onSelect(item)}
               >
                 {/* Checkbox */}
@@ -107,7 +107,7 @@ export function InventarTable({
                     <img src={item.bild_url} alt={item.geraet} className="w-10 h-10 object-cover rounded-lg border border-border" />
                   ) : (
                     <div className="w-10 h-10 rounded-lg bg-card border border-border flex items-center justify-center">
-                      <Package size={16} className="text-muted-foreground/80" />
+                      <Package size={16} className="text-slate-600" />
                     </div>
                   )}
                 </td>
@@ -120,26 +120,26 @@ export function InventarTable({
 
                 {/* PX-Nr */}
                 <td className="py-3 px-4">
-                  <span className="font-mono text-xs text-foreground/90 bg-card px-2 py-1 rounded-lg border border-border">
+                  <span className="font-mono text-xs text-muted-foreground bg-card px-2 py-1 rounded-lg border border-border">
                     {item.px_nummer || '–'}
                   </span>
                 </td>
 
                 {/* Department */}
-                <td className="py-3 px-4 text-foreground/90 text-xs">{item.department || '–'}</td>
+                <td className="py-3 px-4 text-muted-foreground text-xs">{item.department || '–'}</td>
 
                 {/* Ort */}
-                <td className="py-3 px-4 text-foreground/90 text-xs">{item.ort || '–'}</td>
+                <td className="py-3 px-4 text-muted-foreground text-xs">{item.ort || '–'}</td>
 
                 {/* Zugewiesen */}
                 <td className="py-3 px-4">
                   {item.assigned_to_name ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs text-foreground/90 bg-card px-2 py-1 rounded-full border border-border">
-                      <User size={11} className="text-primary-400" />
+                    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground bg-card px-2 py-1 rounded-full border border-border">
+                      <User size={11} className="text-brand-400" />
                       {item.assigned_to_name}
                     </span>
                   ) : (
-                    <span className="text-xs text-muted-foreground/80">–</span>
+                    <span className="text-xs text-slate-600">–</span>
                   )}
                 </td>
 

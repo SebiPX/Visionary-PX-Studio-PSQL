@@ -10,7 +10,7 @@ interface Props {
   onDelete: (id: string) => Promise<void>
 }
 
-const inputCls = 'w-full px-2 py-1.5 bg-card border border-border/80 rounded-lg text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary-500'
+const inputCls = 'w-full px-2 py-1.5 bg-background border border-input rounded-lg text-xs text-foreground placeholder-slate-500 focus:outline-none focus:border-brand-500'
 
 type Kat = 'Bankverbindung' | 'Handelsregister'
 
@@ -27,17 +27,17 @@ function BankSection({ rows, onEdit, onDelete, onAdd }: {
 }) {
   return (
     <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card/40">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-background/40">
         <div className="flex items-center gap-2.5">
-          <Landmark size={18} className="text-primary-400" />
+          <Landmark size={18} className="text-brand-400" />
           <h2 className="font-semibold text-foreground">Bankverbindung</h2>
           <span className="text-xs text-muted-foreground">{rows.length} Einträge</span>
         </div>
-        <button onClick={onAdd} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-500 text-foreground text-xs font-semibold rounded-lg transition-colors">
+        <button onClick={onAdd} className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-foreground text-xs font-semibold rounded-lg transition-colors">
           <Plus size={13} /> Neu
         </button>
       </div>
-      <div className="divide-y divide-border/50">
+      <div className="divide-y divide-slate-700/50">
         {rows.map(f => (
           <div key={f.id} className="flex items-start gap-4 px-5 py-3 hover:bg-muted/20 transition-colors group">
             <span className="w-40 shrink-0 text-xs font-semibold text-muted-foreground uppercase tracking-wider pt-0.5">{f.bezeichner}</span>
@@ -48,7 +48,7 @@ function BankSection({ rows, onEdit, onDelete, onAdd }: {
               )}
             </div>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-              <button onClick={() => onEdit(f)} className="p-1.5 text-muted-foreground hover:text-primary-400 transition-colors"><Pencil size={13} /></button>
+              <button onClick={() => onEdit(f)} className="p-1.5 text-muted-foreground hover:text-brand-400 transition-colors"><Pencil size={13} /></button>
               <button onClick={() => onDelete(f.id, f.bezeichner)} className="p-1.5 text-muted-foreground hover:text-red-400 transition-colors"><Trash2 size={13} /></button>
             </div>
           </div>
@@ -67,31 +67,31 @@ function RegisterSection({ rows, onEdit, onDelete, onAdd }: {
 }) {
   return (
     <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card/40">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-background/40">
         <div className="flex items-center gap-2.5">
-          <FileText size={18} className="text-primary-400" />
+          <FileText size={18} className="text-brand-400" />
           <h2 className="font-semibold text-foreground">Handelsregister</h2>
           <span className="text-xs text-muted-foreground">{rows.length} Einträge</span>
         </div>
-        <button onClick={onAdd} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-500 text-foreground text-xs font-semibold rounded-lg transition-colors">
+        <button onClick={onAdd} className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-foreground text-xs font-semibold rounded-lg transition-colors">
           <Plus size={13} /> Neu
         </button>
       </div>
-      <div className="divide-y divide-border/50">
+      <div className="divide-y divide-slate-700/50">
         {rows.map(f => (
           <div key={f.id} className="flex items-start gap-4 px-5 py-3.5 hover:bg-muted/20 transition-colors group">
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-foreground text-sm">{f.bezeichner}</p>
               {f.anmerkung && <p className="text-xs text-muted-foreground mt-0.5">{f.anmerkung}</p>}
               {f.datei_name && (
-                <span className="inline-flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground bg-muted/50 border border-border/80 rounded-lg px-2.5 py-1">
+                <span className="inline-flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground bg-muted/50 border border-input rounded-lg px-2.5 py-1">
                   <FileText size={11} className="text-muted-foreground" />
                   {f.datei_name}
                 </span>
               )}
             </div>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-              <button onClick={() => onEdit(f)} className="p-1.5 text-muted-foreground hover:text-primary-400 transition-colors"><Pencil size={13} /></button>
+              <button onClick={() => onEdit(f)} className="p-1.5 text-muted-foreground hover:text-brand-400 transition-colors"><Pencil size={13} /></button>
               <button onClick={() => onDelete(f.id, f.bezeichner)} className="p-1.5 text-muted-foreground hover:text-red-400 transition-colors"><Trash2 size={13} /></button>
             </div>
           </div>
@@ -113,7 +113,7 @@ function EditModal({ entry, onSave, onClose, saving }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg mx-4">
+      <div className="bg-background border border-border rounded-2xl shadow-2xl w-full max-w-lg mx-4">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <h3 className="font-semibold text-foreground">
             {entry.bezeichner ? `Bearbeiten: ${entry.bezeichner}` : 'Neuer Eintrag'}
@@ -152,7 +152,7 @@ function EditModal({ entry, onSave, onClose, saving }: {
         <div className="flex justify-end gap-2 px-5 py-4 border-t border-border">
           <button onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg transition-colors">Abbrechen</button>
           <button onClick={() => onSave(data)} disabled={saving}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-500 text-foreground text-sm font-semibold rounded-xl transition-colors disabled:opacity-50">
+            className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-foreground text-sm font-semibold rounded-xl transition-colors disabled:opacity-50">
             <Check size={14} /> Speichern
           </button>
         </div>
@@ -209,7 +209,7 @@ export function FirmendatenPage({ firmendaten, onCreate, onUpdate, onDelete }: P
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-          <Building2 size={24} className="text-primary-400" /> Firmendaten
+          <Building2 size={24} className="text-brand-400" /> Firmendaten
         </h1>
         <p className="text-muted-foreground text-sm mt-1">Bankverbindung & Handelsregister — nur für Admins sichtbar</p>
       </div>

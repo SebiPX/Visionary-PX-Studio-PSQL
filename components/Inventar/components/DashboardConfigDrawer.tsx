@@ -28,8 +28,8 @@ function Toggle({ checked, onChange, label, sub }: {
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 transition-colors duration-200 focus:outline-none ${
-          checked ? 'bg-blue-600 border-blue-600' : 'bg-muted border-border/80'
-        }`}
+          checked ? 'bg-primary border-blue-600' : 'bg-muted border-input'
+        } text-primary-foreground`}
       >
         <span className={`inline-block h-4 w-4 mt-0.5 rounded-full bg-white shadow transition-transform duration-200 ${
           checked ? 'translate-x-5' : 'translate-x-0.5'
@@ -99,7 +99,7 @@ export function DashboardConfigDrawer({
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-card border-l border-border z-50 flex flex-col shadow-2xl">
+      <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-background border-l border-border z-50 flex flex-col shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="font-semibold text-foreground text-base">Dashboard anpassen</h2>
@@ -116,7 +116,7 @@ export function DashboardConfigDrawer({
             <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1 flex items-center gap-2">
               <BarChart2 size={12} /> Widgets
             </h3>
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-slate-800">
               <Toggle
                 label="Interne Links"
                 sub="Link-Kacheln im Dashboard"
@@ -153,7 +153,7 @@ export function DashboardConfigDrawer({
                 </h3>
                 <button
                   onClick={() => setDraft(d => ({ ...d, link_categories: null }))}
-                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                  className="text-xs text-primary hover:text-blue-300 transition-colors"
                 >
                   Alle
                 </button>
@@ -166,12 +166,12 @@ export function DashboardConfigDrawer({
                       key={cat}
                       onClick={() => toggleCategory(cat)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left ${
-                        active ? 'bg-blue-600/20 text-blue-300 border border-blue-500/20' : 'text-muted-foreground hover:bg-card'
+                        active ? 'bg-primary/20 text-blue-300 border border-primary/20' : 'text-primary-foreground hover:bg-card'
                       }`}
                     >
                       <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                        active ? 'bg-blue-600 border-blue-600' : 'border-border/80'
-                      }`}>
+                        active ? 'bg-primary border-blue-600' : 'border-input'
+                      } text-primary-foreground`}>
                         {active && <Check size={10} className="text-foreground" />}
                       </span>
                       {cat}
@@ -195,7 +195,7 @@ export function DashboardConfigDrawer({
                   value={loginSearch}
                   onChange={e => setLoginSearch(e.target.value)}
                   placeholder="Logins suchen…"
-                  className="w-full bg-card border border-border rounded-lg pl-8 pr-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-blue-500"
+                  className="w-full bg-card border border-border rounded-lg pl-8 pr-3 py-2 text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary"
                 />
               </div>
               <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
@@ -210,12 +210,12 @@ export function DashboardConfigDrawer({
                       }`}
                     >
                       <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
-                        pinned ? 'bg-violet-600 border-violet-600' : 'border-border/80'
+                        pinned ? 'bg-violet-600 border-violet-600' : 'border-input'
                       }`}>
                         {pinned && <Check size={10} className="text-foreground" />}
                       </span>
                       <span className="flex-1 truncate">{login.name || login.website || login.id}</span>
-                      {login.kategorie && <span className="text-xs text-muted-foreground/80 shrink-0">{login.kategorie}</span>}
+                      {login.kategorie && <span className="text-xs text-slate-600 shrink-0">{login.kategorie}</span>}
                     </button>
                   )
                 })}
@@ -228,14 +228,14 @@ export function DashboardConfigDrawer({
         <div className="px-5 py-4 border-t border-border shrink-0 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 rounded-xl border border-border text-sm text-foreground/90 hover:bg-card transition-colors"
+            className="flex-1 px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:bg-card transition-colors"
           >
             Abbrechen
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-foreground text-sm font-semibold transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 rounded-xl bg-primary hover:bg-primary text-primary-foreground text-sm font-semibold transition-colors disabled:opacity-50 hover:text-primary-foreground"
           >
             {saving ? 'Speichern…' : 'Speichern'}
           </button>

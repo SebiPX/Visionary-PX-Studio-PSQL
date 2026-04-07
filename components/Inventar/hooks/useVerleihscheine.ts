@@ -40,8 +40,8 @@ export function useVerleihscheine() {
     return schein
   }
 
-  async function markErledigt(id: string, itemIds: string[]) {
-    await inventar.verleihscheine.markErledigt(id, itemIds)
+  async function markErledigt(id: string, itemIds: string[], zustand_nachher?: string, fotos_nachher?: string[]) {
+    await inventar.verleihscheine.markErledigt(id, itemIds, zustand_nachher, fotos_nachher)
     setScheine(prev => prev.filter(s => s.id !== id))
   }
 

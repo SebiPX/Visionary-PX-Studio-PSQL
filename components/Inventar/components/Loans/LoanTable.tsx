@@ -55,7 +55,7 @@ export function LoanTable({ loans, isAdmin, showItem = false, onReturn, onDelete
             {isAdmin && <th className="w-24" />}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody className="divide-y divide-slate-800">
           {loans.map(loan => {
             const returned = !!loan.zurueck_am
             return (
@@ -67,7 +67,7 @@ export function LoanTable({ loans, isAdmin, showItem = false, onReturn, onDelete
                         <img src={loan.item.bild_url} alt="" className="w-8 h-8 rounded-lg object-cover border border-border" />
                       ) : (
                         <div className="w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center">
-                          <Package size={12} className="text-muted-foreground/80" />
+                          <Package size={12} className="text-slate-600" />
                         </div>
                       )}
                       <div>

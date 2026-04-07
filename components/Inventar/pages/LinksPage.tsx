@@ -19,7 +19,7 @@ function getFavicon(url: string) {
 
 // Color palette for letter-avatar fallback
 const AVATAR_COLORS = [
-  'bg-blue-600', 'bg-violet-600', 'bg-emerald-600', 'bg-orange-500',
+  'bg-primary', 'bg-violet-600', 'bg-emerald-600', 'bg-orange-500',
   'bg-rose-600', 'bg-cyan-600', 'bg-amber-500', 'bg-fuchsia-600',
 ]
 function avatarColor(label: string) {
@@ -60,7 +60,7 @@ function LinkForm({ link, onSave, onCancel }: LinkFormProps) {
     }
   }
 
-  const inputCls = 'w-full bg-card border border-border/80 text-foreground placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-primary-500 transition-colors'
+  const inputCls = 'w-full bg-card border border-input text-foreground placeholder-slate-400 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-brand-500 transition-colors'
   const labelCls = 'block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5'
 
   return (
@@ -104,7 +104,7 @@ function LinkForm({ link, onSave, onCancel }: LinkFormProps) {
         <button
           type="submit"
           disabled={saving}
-          className="px-5 py-2 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-foreground text-sm font-semibold rounded-xl transition-colors"
+          className="px-5 py-2 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 text-foreground text-sm font-semibold rounded-xl transition-colors"
         >
           {saving ? 'Speichern…' : link ? 'Speichern' : 'Hinzufügen'}
         </button>
@@ -128,9 +128,9 @@ function LinkCard({ link, isAdmin, onEdit, onDelete }: LinkCardProps) {
   const [imgError, setImgError] = useState(false)
 
   return (
-    <div className="group flex items-start gap-4 p-4 bg-card/60 border border-border rounded-2xl hover:border-border/80 hover:bg-card/80 transition-all">
+    <div className="group flex items-start gap-4 p-4 bg-card/60 border border-border rounded-2xl hover:border-input hover:bg-card/80 transition-all">
       {/* Favicon */}
-      <div className="w-10 h-10 shrink-0 rounded-xl bg-muted border border-border/80 flex items-center justify-center overflow-hidden">
+      <div className="w-10 h-10 shrink-0 rounded-xl bg-muted border border-input flex items-center justify-center overflow-hidden">
         {favicon && !imgError ? (
           <img
             src={favicon}
@@ -153,7 +153,7 @@ function LinkCard({ link, isAdmin, onEdit, onDelete }: LinkCardProps) {
             href={link.url}
             target="_blank"
             rel="noreferrer noopener"
-            className="font-semibold text-foreground hover:text-primary-400 transition-colors truncate text-sm flex items-center gap-1.5 group/link"
+            className="font-semibold text-foreground hover:text-brand-400 transition-colors truncate text-sm flex items-center gap-1.5 group/link"
           >
             {link.titel}
             <ExternalLink size={12} className="opacity-0 group-hover/link:opacity-100 transition-opacity shrink-0" />
@@ -275,7 +275,7 @@ export function LinksPage({ links, isAdmin, onCreate, onUpdate, onDelete }: Link
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <FolderOpen size={22} className="text-primary-400" />
+            <FolderOpen size={22} className="text-brand-400" />
             Interne Links
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
@@ -285,7 +285,7 @@ export function LinksPage({ links, isAdmin, onCreate, onUpdate, onDelete }: Link
         {isAdmin && (
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-foreground text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-primary-900/40"
+            className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-foreground text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-brand-900/40"
           >
             <Plus size={16} /> Link hinzufügen
           </button>
@@ -296,7 +296,7 @@ export function LinksPage({ links, isAdmin, onCreate, onUpdate, onDelete }: Link
       <div className="relative">
         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
         <input
-          className="w-full bg-card border border-border text-foreground placeholder-muted-foreground rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary-500 transition-colors"
+          className="w-full bg-card border border-border text-foreground placeholder-slate-500 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 transition-colors"
           placeholder="Links durchsuchen…"
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -309,7 +309,7 @@ export function LinksPage({ links, isAdmin, onCreate, onUpdate, onDelete }: Link
           <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-4">
             <Link2 size={28} className="text-muted-foreground" />
           </div>
-          <p className="text-foreground/90 font-semibold">Noch keine Links vorhanden</p>
+          <p className="text-muted-foreground font-semibold">Noch keine Links vorhanden</p>
           {isAdmin && (
             <p className="text-muted-foreground text-sm mt-1">Füge den ersten Link über den Button oben hinzu.</p>
           )}
@@ -333,11 +333,11 @@ export function LinksPage({ links, isAdmin, onCreate, onUpdate, onDelete }: Link
               className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 hover:text-foreground transition-colors group/kat"
             >
               {collapsed
-                ? <ChevronRight size={14} className="text-muted-foreground group-hover/kat:text-foreground/90 transition-colors" />
-                : <ChevronDown size={14} className="text-muted-foreground group-hover/kat:text-foreground/90 transition-colors" />
+                ? <ChevronRight size={14} className="text-muted-foreground group-hover/kat:text-muted-foreground transition-colors" />
+                : <ChevronDown size={14} className="text-muted-foreground group-hover/kat:text-muted-foreground transition-colors" />
               }
               {kat}
-              <span className="ml-1 text-muted-foreground/80 font-normal normal-case tracking-normal">({katLinks.length})</span>
+              <span className="ml-1 text-slate-600 font-normal normal-case tracking-normal">({katLinks.length})</span>
             </button>
 
             {!collapsed && (

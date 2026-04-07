@@ -11,7 +11,7 @@ interface Props {
   onDelete: (id: string) => Promise<void>
 }
 
-const inputCls = 'w-full px-2 py-1.5 bg-card border border-border/80 rounded-lg text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary-500'
+const inputCls = 'w-full px-2 py-1.5 bg-background border border-input rounded-lg text-xs text-foreground placeholder-slate-500 focus:outline-none focus:border-brand-500'
 
 function emptyVertrag(): Omit<Handyvertrag, 'id' | 'created_at' | 'updated_at'> {
   return { handynummer: '', kartennummer: '', pin: '', puk: '', pin2: '', puk2: '', anmerkung: '', it_bestandsliste: '' }
@@ -20,13 +20,13 @@ function emptyVertrag(): Omit<Handyvertrag, 'id' | 'created_at' | 'updated_at'> 
 // Reveal toggle for PIN/PUK cells
 function SecretCell({ value }: { value: string | null }) {
   const [show, setShow] = useState(false)
-  if (!value) return <span className="text-muted-foreground/80 text-xs">–</span>
+  if (!value) return <span className="text-slate-600 text-xs">–</span>
   return (
     <span className="flex items-center gap-1 font-mono text-xs">
       {show
         ? <span className="text-amber-300 select-all">{value}</span>
         : <span className="text-muted-foreground">{'•'.repeat(value.length)}</span>}
-      <button onClick={() => setShow(s => !s)} className="text-muted-foreground hover:text-foreground/90 transition-colors">
+      <button onClick={() => setShow(s => !s)} className="text-muted-foreground hover:text-muted-foreground transition-colors">
         {show ? <EyeOff size={11} /> : <Eye size={11} />}
       </button>
     </span>
@@ -92,13 +92,13 @@ export function HandyvertraegePage({ vertraege, isAdmin, onCreate, onUpdate, onD
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-            <Smartphone size={24} className="text-primary-400" /> Handyverträge
+            <Smartphone size={24} className="text-brand-400" /> Handyverträge
           </h1>
           <p className="text-muted-foreground text-sm mt-1">{vertraege.length} SIM-Karten / Einträge — PINs nur für eingeloggte User sichtbar</p>
         </div>
         {isAdmin && (
           <button onClick={() => setAdding(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-500 text-foreground text-sm font-semibold rounded-xl transition-colors">
+            className="flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-foreground text-sm font-semibold rounded-xl transition-colors">
             <Plus size={16} /> Neu
           </button>
         )}
@@ -107,15 +107,15 @@ export function HandyvertraegePage({ vertraege, isAdmin, onCreate, onUpdate, onD
       <div className="bg-card/60 border border-border rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-card/60 border-b border-border">
+            <thead className="bg-background/60 border-b border-border">
               <tr>
                 {FIELDS.map(f => <th key={f.key} className={th}>{f.label}</th>)}
                 {isAdmin && <th className={th + ' w-16'}></th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/50">
+            <tbody className="divide-y divide-slate-700/50">
               {adding && (
-                <tr className="bg-primary-500/5">
+                <tr className="bg-brand-500/5">
                   {FIELDS.map(f => (
                     <td key={f.key} className="px-2 py-1.5">
                       <input value={(newData[f.key] as string) || ''} placeholder={f.label}
@@ -126,7 +126,7 @@ export function HandyvertraegePage({ vertraege, isAdmin, onCreate, onUpdate, onD
                   <td className="px-2 py-1.5">
                     <div className="flex gap-1">
                       <button onClick={handleAdd} disabled={saving} className="p-1.5 text-emerald-400 hover:text-emerald-300"><Check size={14} /></button>
-                      <button onClick={() => setAdding(false)} className="p-1.5 text-muted-foreground hover:text-foreground/90"><X size={14} /></button>
+                      <button onClick={() => setAdding(false)} className="p-1.5 text-muted-foreground hover:text-muted-foreground"><X size={14} /></button>
                     </div>
                   </td>
                 </tr>
@@ -146,7 +146,7 @@ export function HandyvertraegePage({ vertraege, isAdmin, onCreate, onUpdate, onD
                         <td className="px-2 py-1.5">
                           <div className="flex gap-1">
                             <button onClick={saveEdit} disabled={saving} className="p-1.5 text-emerald-400 hover:text-emerald-300"><Check size={14} /></button>
-                            <button onClick={cancelEdit} className="p-1.5 text-muted-foreground hover:text-foreground/90"><X size={14} /></button>
+                            <button onClick={cancelEdit} className="p-1.5 text-muted-foreground hover:text-muted-foreground"><X size={14} /></button>
                           </div>
                         </td>
                       </>
@@ -175,7 +175,7 @@ export function HandyvertraegePage({ vertraege, isAdmin, onCreate, onUpdate, onD
                         {isAdmin && (
                           <td className={td}>
                             <div className="flex gap-1">
-                              <button onClick={() => startEdit(v)} className="p-1.5 text-muted-foreground hover:text-primary-400 transition-colors"><Pencil size={12} /></button>
+                              <button onClick={() => startEdit(v)} className="p-1.5 text-muted-foreground hover:text-brand-400 transition-colors"><Pencil size={12} /></button>
                               <button onClick={() => handleDelete(v.id, v.handynummer)} className="p-1.5 text-muted-foreground hover:text-red-400 transition-colors"><Trash2 size={12} /></button>
                             </div>
                           </td>

@@ -26,7 +26,7 @@ export function Sidebar({ profile, isAdmin, onSignOut }: SidebarProps) {
     : profile.email.slice(0, 2).toUpperCase()
 
   return (
-    <aside className="w-64 shrink-0 bg-card border-r border-border flex flex-col h-screen sticky top-0">
+    <aside className="w-64 shrink-0 bg-background border-r border-border flex flex-col h-screen sticky top-0">
       {/* Logo */}
       <div className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
@@ -50,7 +50,7 @@ export function Sidebar({ profile, isAdmin, onSignOut }: SidebarProps) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-primary-600 text-foreground shadow-lg shadow-primary-900/40'
+                  ? 'bg-brand-600 text-foreground shadow-lg shadow-brand-900/40'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card'
               }`
             }
