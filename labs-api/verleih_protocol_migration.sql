@@ -9,7 +9,7 @@ ALTER TABLE public.verleihscheine DROP CONSTRAINT IF EXISTS verleihscheine_borro
 ALTER TABLE public.verleihscheine ADD CONSTRAINT verleihscheine_borrower_type_check CHECK (borrower_type IN ('team', 'extern', 'client'));
 
 -- 3. Add client_id column to map directly to existing clients table
-ALTER TABLE public.verleihscheine ADD COLUMN IF NOT EXISTS client_id UUID REFERENCES public.clients(id) ON DELETE SET NULL;
+ALTER TABLE public.verleihscheine ADD COLUMN IF NOT EXISTS client_id UUID REFERENCES public.agency_clients(id) ON DELETE SET NULL;
 
 -- 4. Add protocol text columns
 ALTER TABLE public.verleihscheine ADD COLUMN IF NOT EXISTS zustand_vorher TEXT;

@@ -12,7 +12,7 @@ async function fetchByStatus(status: 'aktiv' | 'erledigt') {
        CASE WHEN c.id IS NOT NULL THEN json_build_object('id', c.id, 'company_name', c.company_name) ELSE NULL END AS client
      FROM verleihscheine v
      LEFT JOIN profiles p ON p.id = v.profile_id
-     LEFT JOIN clients c ON c.id = v.client_id
+     LEFT JOIN agency_clients c ON c.id = v.client_id
      WHERE v.status = $1
      ORDER BY v.erledigt_am DESC NULLS FIRST, v.created_at DESC`,
     [status]
