@@ -99,8 +99,8 @@ export const profileSettings = {
             body: JSON.stringify({ path: storagePath })
         }),
     getAvatarSignedUrl: (storagePath: string) => 
-        request<{ signedUrl: string }>(`/api/storage/signed-url?path=${encodeURIComponent(storagePath)}`)
-            .then(res => res.signedUrl)
+        request<{ url: string }>(`/api/storage/signed-url?path=${encodeURIComponent(storagePath)}`)
+            .then(res => res.url)
 };
 
 // ── Images ───────────────────────────────────────────────────────

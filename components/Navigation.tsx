@@ -29,7 +29,9 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
   const { signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   
-  const [avatarDisplayUrl, setAvatarDisplayUrl] = useState<string | undefined>(userProfile.avatarUrl);
+  const [avatarDisplayUrl, setAvatarDisplayUrl] = useState<string | undefined>(
+    userProfile?.avatarUrl && userProfile.avatarUrl.startsWith('http') ? userProfile.avatarUrl : undefined
+  );
 
   useEffect(() => {
     if (userProfile?.avatarUrl && !userProfile.avatarUrl.startsWith('http')) {
