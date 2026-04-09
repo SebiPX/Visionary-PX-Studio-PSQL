@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppView, UserProfile } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { profileSettings } from '../lib/apiClient';
 
 interface NavigationProps {
   currentView: AppView;
@@ -27,6 +28,18 @@ interface NavCategory {
 export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, userProfile, dashboardPath = '/dashboard', setDashboardPath }) => {
   const { signOut } = useAuth();
   const { theme, setTheme } = useTheme();
+  
+  const [avatarDisplayUrl, setAvatarDisplayUrl] = useState<string | undefined>(userProfile.avatarUrl);
+
+  useEffect(() => {
+    if (userProfile?.avatarUrl && !userProfile.avatarUrl.startsWith('http')) {
+      profileSettings.getAvatarSignedUrl(userProfile.avatarUrl)
+        .then(url => setAvatarDisplayUrl(url))
+        .catch(() => setAvatarDisplayUrl(userProfile.avatarUrl));
+    } else {
+      setAvatarDisplayUrl(userProfile?.avatarUrl);
+    }
+  }, [userProfile?.avatarUrl]);
 
   const navCategories: NavCategory[] = [
     {
@@ -184,7 +197,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
               </div>
               <div className="w-8 h-8 rounded-full border border-border p-0.5 overflow-hidden relative group">
                 <img
-                  src={userProfile.avatarUrl}
+                  src={avatarDisplayUrl || 'https://picsum.photos/seed/default/200/200'}
                   alt="Profile"
                   className="w-full h-full rounded-full object-cover"
                 />
