@@ -78,7 +78,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
   const { 
     project_id, title, description, status, priority, 
     assignee_ids, assigned_to,
-    start_date, due_date, planned_minutes,
+    start_date, review_date, revision_date, due_date, planned_minutes,
     estimated_hours, estimated_rate,
     service_module_id, seniority_level_id, is_visible_to_client
   } = req.body;
@@ -95,6 +95,8 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
       primaryAssignee,
       actualAssigneeIds,
       start_date ?? null,
+      review_date ?? null,
+      revision_date ?? null,
       due_date ?? null,
       planned_minutes ?? null,
       estimated_hours ?? null,
@@ -107,11 +109,11 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
     const result = await pool.query(
       `INSERT INTO agency_tasks (
         project_id, title, description, status, priority, 
-        assignee_id, assignee_ids, start_date, due_date, planned_minutes,
+        assignee_id, assignee_ids, start_date, review_date, revision_date, due_date, planned_minutes,
         estimated_hours, estimated_rate,
         service_module_id, seniority_level_id, is_visible_to_client
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
        RETURNING *`,
       args
     );
@@ -127,7 +129,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
     const updates = req.body;
     const allowedFields = [
       'title', 'description', 'status', 'priority', 
-      'assignee_ids', 'start_date', 'due_date', 
+      'assignee_ids', 'start_date', 'review_date', 'revision_date', 'due_date', 
       'planned_minutes', 'estimated_hours', 'estimated_rate', 
       'service_module_id', 'seniority_level_id', 'is_visible_to_client'
     ];

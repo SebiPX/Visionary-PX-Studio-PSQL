@@ -74,6 +74,8 @@ CREATE TABLE IF NOT EXISTS public.agency_tasks (
     priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
     assignee_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     start_date DATE,
+    review_date DATE,
+    revision_date DATE,
     due_date DATE,
     planned_minutes INTEGER,
     estimated_hours NUMERIC(10, 2),

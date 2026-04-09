@@ -58,7 +58,18 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+
+// Quick db patch
+import pool from './db';
+pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS review_date DATE;')
+  .then(() => console.log('DB: checked review_date'))
+  .catch(e => console.error('DB patch err:', e.message));
+pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS revision_date DATE;')
+  .then(() => console.log('DB: checked revision_date'))
+  .catch(e => console.error('DB patch err:', e.message));
+
+// Add robust endpoint tracking
 app.use(express.urlencoded({ extended: true }));
 
 // ── Health Check ─────────────────────────────────────────────
