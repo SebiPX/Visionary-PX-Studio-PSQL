@@ -74,6 +74,35 @@ export const auth = {
         }),
 };
 
+// ── Profile Settings (Avatars) ───────────────────────────────────
+export const profileSettings = {
+    uploadAvatar: async (file: File) => {
+        const token = getToken();
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const res = await fetch(`${API_URL}/api/storage/avatars`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+        if (!res.ok) throw new Error('Failed to upload avatar');
+        const data = await res.json() as any;
+        return data.path || data.url || '';
+    },
+    deleteOldAvatar: (storagePath: string) => 
+        request<{ success: boolean; data: any }>('/api/storage/delete', {
+            method: 'POST',
+            body: JSON.stringify({ path: storagePath })
+        }),
+    getAvatarSignedUrl: (storagePath: string) => 
+        request<{ signedUrl: string }>(`/api/storage/signed-url?path=${encodeURIComponent(storagePath)}`)
+            .then(res => res.signedUrl)
+};
+
 // ── Images ───────────────────────────────────────────────────────
 export const images = {
     list: () => request<ApiImage[]>('/api/images'),

@@ -1,24 +1,21 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import { uploadFile, auth as apiAuth, inventar } from '../lib/apiClient';
+import { uploadFile, auth as apiAuth, inventar, profileSettings } from '../lib/apiClient';
 
 interface SettingsProps {
   userProfile: UserProfile;
 }
 
-const PRESET_AVATARS = [
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuBNsFqWF5iQVNoUnwyaSNFSunX3-x1P3ttQm5pyya4GFxDRald1TQRNJ-pm7yRDH_DXIbLa7Gf1SXid866fs9ZRN-8knroGfTH_N_G-SlVwrSyBjqHgpQ-PrQw3wmDociqLcHIV5exvR0KDaFwS86J5lOIJxU8ccJZei2AWW0WnK0tUea-eXfEy3fa3GETpPANrkA7ipZp1c2bEWI1YyoMaea-hPMGkJnYM3lreBtaTxfJVmW5CDhlRaQ-XVzLDSlB-vtrPmzzrtLUI',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuBCq-OX_ftzyJeveBb5umMg9V7eJxPvIg3MSmcvx0tb1K7k_EPMGVNzdrqsElA3mV6tPwcrS9qmja8QRML_JEbjsXFKeR7fcRzyH_4onr7EpCgV1z1FKsEav4HOPoRSU37uLJbk4AocKgiln-4odJ6qYwLaQI4NDOAdqA9Afs0pIa11mp--glasl1uvFPgCmAroVdEPW9Zrt5gPwT_ZD6XWZbX193F9278i-0UsB1leuDZz0iZhdm-rwtSL-AsDsBrHhHZj9tAFtTxC',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuARKp7un_J6viDTzhW62zcaIX54n_gduphy8RFH1nb5LrOpPsFRtd3uFEWCD1AnQrvArVRpdsoDPdspjUMk2IMXcBWI-3mu8TpCO2o_4B71YZJVTZcOLHNPt8cyFXUNfAO4W6aTM9PgtX9BOOe9lQXTqdRyd-SmNOjI4Knd2Rtqpn4QXicuxXkfYFzplomomOUFkfiP6j-PSRevX9SzXraWGKTBqUVOfCuy_CYr9xbxbRY_wmpJ2vLGJMMK3mdJ5yDD4PiaKKN_ueJ6NZ',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuDEpHeiSrrPHbvB2-uuBcgp-foKKgcTrOYuVNZWOXTYk6N3Zd2GPPgMwAnM3h36g3iQ6_ZEVI6vzCY_DXhWQsUns2Tdoj0Y90c6VW7K6j6TY2bs9AaDC7ZPZwMaUectRIiSwothZyI7AAr0qSflM1C4wuko6THJvSvC6unydYDuHCz3YqFPD0QHgtjZnXpCL-yT8BmMYM-s3Pypd-EsvqgmmltjKG-3Si8_LwEFFGBd-tH-1ExCMTNDHMFNQDTHtoAoWXTEA_Cat37B',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuDnZ2XAj7F7L6r95sxqCYV64WIdofvv1YjiKKKUBGOhUlJaVXMix4l24TKjK9CxhQynwGFyMHJPIJYoh6Y7d-nnLuFg915We6hRpy7yeDYivVbc1tdMJhTo0JfYWpDJIqign0WKCFo0H6mkHj1k94JcMR8RwfuAGjdv1Bn3839sZfeASz2jivDsuLSUghxaF-5NBvhRpM0F7Z0uZv9363906RQg4iTVQk0vq8R9T55Ceb3TgU3TSAekvvyd6K1zJnwoSj-rncgFbnNB'
-];
-
 export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
   const { user, profile, signOut, refreshProfile, updatePassword } = useAuth();
   const [name, setName] = useState(userProfile.name);
-  const [selectedAvatar, setSelectedAvatar] = useState(userProfile.avatarUrl);
+  
+  // Avatar state
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarDisplayUrl, setAvatarDisplayUrl] = useState<string | null>(null);
+  
   const [isSaved, setIsSaved] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,9 +42,24 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
   useEffect(() => {
     if (profile) {
       setName(profile.full_name || 'Creator');
-      setSelectedAvatar(profile.avatar_url || PRESET_AVATARS[0]);
     }
   }, [profile]);
+
+  // Load avatar signed URL when profile changes
+  useEffect(() => {
+    if (profile?.avatar_url && !avatarPreview) {
+      if (profile.avatar_url.startsWith('http')) {
+        setAvatarDisplayUrl(profile.avatar_url);
+      } else {
+        profileSettings.getAvatarSignedUrl(profile.avatar_url)
+          .then(url => setAvatarDisplayUrl(url))
+          .catch(err => {
+            console.error('Error loading avatar URL:', err);
+            setAvatarDisplayUrl(profile.avatar_url); // Fallback to raw URL
+          });
+      }
+    }
+  }, [profile?.avatar_url, avatarPreview]);
 
   // Load user list for admins
   useEffect(() => {
@@ -94,7 +106,6 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
     try {
       await apiAuth.updateProfile({
         full_name: name,
-        avatar_url: selectedAvatar,
       });
 
       // Refresh profile in context
@@ -103,26 +114,52 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to save profile');
+      setError(err.message || 'Failed to save profile name');
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
+  const handleAvatarUpload = async () => {
+    if (!avatarFile || !user) return;
     setIsUploading(true);
     setError(null);
 
     try {
-      // Upload to Cloudflare R2
-      const avatarUrl = await uploadFile(file, 'avatars');
-      setSelectedAvatar(avatarUrl);
+      // Upload avatar to Cloudflare R2 via new endpoint
+      const storagePath = await profileSettings.uploadAvatar(avatarFile);
+      
+      // Delete old avatar if exists and isn't external
+      if (profile?.avatar_url && profile.avatar_url !== storagePath && !profile.avatar_url.startsWith('http')) {
+        await profileSettings.deleteOldAvatar(profile.avatar_url);
+      }
+
+      // Update backend profile
+      await apiAuth.updateProfile({ avatar_url: storagePath });
+      
+      // Refresh context
+      await refreshProfile();
+      
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      setIsUploading(false);
+      
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to upload avatar');
-    } finally {
+      setError(err.message || 'Failed to upload custom avatar');
       setIsUploading(false);
     }
   };
@@ -182,44 +219,49 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
           {/* Avatar Section */}
           <div className="space-y-4">
             <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Profile Avatar</label>
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              {/* Current Preview */}
+            <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="relative group shrink-0">
-                <div className="w-24 h-24 rounded-full p-1 border-2 border-primary shadow-[0_0_20px_rgba(19,91,236,0.3)]">
-                  <img src={selectedAvatar} alt="Current Avatar" className="w-full h-full rounded-full object-cover" />
+                <div className="w-24 h-24 rounded-full p-1 border-2 border-primary shadow-[0_0_20px_rgba(19,91,236,0.3)] bg-muted overflow-hidden">
+                  <img src={avatarPreview || avatarDisplayUrl || 'https://picsum.photos/seed/default/200/200'} alt="Current Avatar" className="w-full h-full rounded-full object-cover" />
                 </div>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="absolute bottom-0 right-0 w-8 h-8 bg-card border border-border rounded-full flex items-center justify-center text-foreground hover:bg-white/10 transition-colors shadow-lg disabled:opacity-50"
-                >
-                  <span className="material-icons-round text-sm">{isUploading ? 'hourglass_empty' : 'upload'}</span>
-                </button>
+                {isUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full mt-1 ml-1 mb-1 mr-1">
+                    <span className="material-icons-round text-foreground animate-spin">hourglass_empty</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="flex items-center gap-2 px-4 py-2 bg-muted/80 hover:bg-muted border border-border text-foreground rounded-lg transition-colors shadow-sm disabled:opacity-50 text-sm font-medium"
+                  >
+                    <span className="material-icons-round text-[18px]">imagesmode</span>
+                    Choose Image
+                  </button>
+                  {avatarFile && (
+                    <button
+                      onClick={handleAvatarUpload}
+                      disabled={isUploading}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors shadow-lg disabled:opacity-50 text-sm font-medium border border-primary/20"
+                    >
+                      <span className="material-icons-round text-[18px]">{isUploading ? 'hourglass_empty' : 'cloud_upload'}</span>
+                      {isUploading ? 'Uploading...' : 'Save Avatar'}
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground opacity-80">
+                  JPG, PNG or GIF. Max size 5MB. Uploading a custom avatar will automatically save it.
+                </p>
                 <input
                   type="file"
                   ref={fileInputRef}
                   className="hidden"
                   accept="image/*"
-                  onChange={handleFileUpload}
+                  onChange={handleAvatarChange}
                   disabled={isUploading}
                 />
-              </div>
-
-              {/* Presets */}
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground mb-3">Choose a preset or upload your own:</p>
-                <div className="flex flex-wrap gap-3">
-                  {PRESET_AVATARS.map((avatar, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedAvatar(avatar)}
-                      disabled={isUploading}
-                      className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all duration-300 ${selectedAvatar === avatar ? 'border-primary scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100 hover:border-border/80'} disabled:opacity-30`}
-                    >
-                      <img src={avatar} alt={`Preset ${index}`} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
