@@ -69,6 +69,22 @@ pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS revision_date DATE
   .then(() => console.log('DB: checked revision_date'))
   .catch(e => console.error('DB patch err:', e.message));
 
+// Verleihscheine Migration Patch
+const verleihQueries = [
+  "ALTER TABLE public.verleihscheine DROP CONSTRAINT IF EXISTS verleihscheine_borrower_type_check;",
+  "ALTER TABLE public.verleihscheine ADD CONSTRAINT verleihscheine_borrower_type_check CHECK (borrower_type IN ('team', 'extern', 'client'));",
+  "ALTER TABLE public.verleihscheine ADD COLUMN IF NOT EXISTS client_id UUID REFERENCES public.agency_clients(id) ON DELETE SET NULL;",
+  "ALTER TABLE public.verleihscheine ADD COLUMN IF NOT EXISTS zustand_vorher TEXT;",
+  "ALTER TABLE public.verleihscheine ADD COLUMN IF NOT EXISTS zustand_nachher TEXT;",
+  "ALTER TABLE public.verleihscheine ADD COLUMN IF NOT EXISTS fotos_vorher TEXT[];",
+  "ALTER TABLE public.verleihscheine ADD COLUMN IF NOT EXISTS fotos_nachher TEXT[];",
+  "CREATE INDEX IF NOT EXISTS idx_verleihscheine_client ON public.verleihscheine(client_id);"
+];
+
+for (const q of verleihQueries) {
+  pool.query(q).catch(e => console.error('DB Verleih patch err (may be benign if exists):', e.message));
+}
+
 // Add robust endpoint tracking
 app.use(express.urlencoded({ extended: true }));
 
