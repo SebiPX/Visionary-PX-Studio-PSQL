@@ -34,16 +34,10 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
       icon: 'grid_view',
       items: [
         { view: AppView.DASHBOARD, path: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
-        { view: AppView.DASHBOARD, path: '/inventar', icon: 'inventory_2', label: 'Inventar' },
-        { view: AppView.DASHBOARD, path: '/verleih-formular', icon: 'calendar_month', label: 'Verleih' },
-        { view: AppView.DASHBOARD, path: '/kalender', icon: 'event', label: 'Kalender' },
         { view: AppView.DASHBOARD, path: '/logins', icon: 'password', label: 'Logins' },
         { view: AppView.DASHBOARD, path: '/links', icon: 'link', label: 'Links' },
         ...(userProfile.role === 'admin' ? [
           { view: AppView.DASHBOARD, path: '/news', icon: 'campaign', label: 'News' },
-          { view: AppView.DASHBOARD, path: '/handyvertraege', icon: 'smartphone', label: 'Verträge' },
-          { view: AppView.DASHBOARD, path: '/kreditkarten', icon: 'credit_card', label: 'Karten' },
-          { view: AppView.DASHBOARD, path: '/firmendaten', icon: 'business', label: 'Firma' },
         ] : []),
       ],
     },
