@@ -101,7 +101,10 @@ export const BriefingStep: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <div>
-              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Budget (€)</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs text-muted-foreground uppercase tracking-wider font-semibold">Budget (€)</label>
+                <span className="text-[10px] text-muted-foreground">{budget.length}/20</span>
+              </div>
               <input 
                 type="text" 
                 value={budget} 
@@ -113,7 +116,10 @@ export const BriefingStep: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Season / Date</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs text-muted-foreground uppercase tracking-wider font-semibold">Season / Date</label>
+                <span className="text-[10px] text-muted-foreground">{season.length}/50</span>
+              </div>
               <input 
                 type="text" 
                 value={season} 
@@ -125,7 +131,10 @@ export const BriefingStep: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Industry</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs text-muted-foreground uppercase tracking-wider font-semibold">Industry</label>
+                <span className="text-[10px] text-muted-foreground">{industry.length}/100</span>
+              </div>
               <input 
                 type="text" 
                 value={industry} 
@@ -137,7 +146,10 @@ export const BriefingStep: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Target Audience</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs text-muted-foreground uppercase tracking-wider font-semibold">Target Audience</label>
+                <span className="text-[10px] text-muted-foreground">{targetAudience.length}/255</span>
+              </div>
               <input 
                 type="text" 
                 value={targetAudience} 
@@ -149,7 +161,10 @@ export const BriefingStep: React.FC = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Location Preference</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs text-muted-foreground uppercase tracking-wider font-semibold">Location Preference</label>
+                <span className="text-[10px] text-muted-foreground">{locationPreference.length}/255</span>
+              </div>
               <input 
                 type="text" 
                 value={locationPreference} 

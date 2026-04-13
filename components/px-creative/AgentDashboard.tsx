@@ -67,7 +67,10 @@ export const AgentDashboard: React.FC = () => {
           <h3 className="text-lg font-bold mb-4">Start a new Event Agent</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Internal Title</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs text-muted-foreground uppercase tracking-wider font-semibold">Internal Title</label>
+                <span className="text-[10px] text-muted-foreground">{newTitle.length}/255</span>
+              </div>
               <input 
                 type="text" 
                 value={newTitle} 
