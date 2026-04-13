@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.px_creative_projects (
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
     title VARCHAR(255) NOT NULL,
     current_step VARCHAR(50) DEFAULT 'briefing', 
-    occasion VARCHAR(255) NOT NULL,
+    occasion TEXT NOT NULL,
     guest_count INT NOT NULL,
     budget DECIMAL(12,2),
     season VARCHAR(50),

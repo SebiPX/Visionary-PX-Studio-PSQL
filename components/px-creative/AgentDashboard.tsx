@@ -74,6 +74,7 @@ export const AgentDashboard: React.FC = () => {
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="e.g. Acme Corp Launch 2026"
                 className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
+                maxLength={255}
                 autoFocus
               />
             </div>

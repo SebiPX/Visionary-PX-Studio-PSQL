@@ -77,11 +77,10 @@ export const BriefingStep: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Occasion</label>
-              <input 
-                type="text" 
+              <textarea 
                 value={occasion} 
                 onChange={(e) => setOccasion(e.target.value)}
-                className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:border-brand-500 transition-colors min-h-[100px]"
               />
             </div>
             <div>
@@ -109,6 +108,7 @@ export const BriefingStep: React.FC = () => {
                 onChange={(e) => setBudget(e.target.value)}
                 placeholder="e.g. 50000"
                 className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
+                maxLength={20}
               />
             </div>
 
@@ -120,6 +120,7 @@ export const BriefingStep: React.FC = () => {
                 onChange={(e) => setSeason(e.target.value)}
                 placeholder="e.g. Summer, Q3 2026"
                 className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
+                maxLength={50}
               />
             </div>
 
@@ -131,6 +132,7 @@ export const BriefingStep: React.FC = () => {
                 onChange={(e) => setIndustry(e.target.value)}
                 placeholder="e.g. Automotive, Finance"
                 className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
+                maxLength={100}
               />
             </div>
 
@@ -142,6 +144,7 @@ export const BriefingStep: React.FC = () => {
                 onChange={(e) => setTargetAudience(e.target.value)}
                 placeholder="e.g. C-Level Executives, Employees"
                 className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
+                maxLength={255}
               />
             </div>
 
@@ -153,6 +156,7 @@ export const BriefingStep: React.FC = () => {
                 onChange={(e) => setLocationPreference(e.target.value)}
                 placeholder="e.g. Southern Europe, Mountains, Urban"
                 className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
+                maxLength={255}
               />
             </div>
 
