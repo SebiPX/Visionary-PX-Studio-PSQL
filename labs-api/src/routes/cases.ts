@@ -131,13 +131,13 @@ router.patch('/:id', requireAuth, async (req, res) => {
     }
 
     const setClause = Object.keys(updates)
-      .map((key, index) => \`\${key} = \$\${index + 1}\`)
+      .map((key, index) => `${key} = $${index + 1}`)
       .join(', ');
     
     const values = Object.values(updates);
     values.push(id); // for the WHERE id = $n
 
-    const query = \`UPDATE agency_cases SET \${setClause}, updated_at = NOW() WHERE id = \$\${values.length} RETURNING *\`;
+    const query = `UPDATE agency_cases SET ${setClause}, updated_at = NOW() WHERE id = $${values.length} RETURNING *`;
     
     const result = await pool.query(query, values);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Case not found' });
