@@ -64,6 +64,21 @@ CREATE TABLE IF NOT EXISTS public.agency_project_members (
     UNIQUE(project_id, user_id)
 );
 
+-- 4.5. agency_project_services
+CREATE TABLE IF NOT EXISTS public.agency_project_services (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id UUID NOT NULL REFERENCES public.agency_projects(id) ON DELETE CASCADE,
+    moco_task_id INTEGER UNIQUE,
+    name TEXT NOT NULL,
+    description TEXT,
+    hourly_rate NUMERIC(10, 2),
+    budget NUMERIC(15, 2),
+    billable BOOLEAN DEFAULT true,
+    active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- 5. agency_tasks
 CREATE TABLE IF NOT EXISTS public.agency_tasks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -81,6 +96,7 @@ CREATE TABLE IF NOT EXISTS public.agency_tasks (
     estimated_hours NUMERIC(10, 2),
     estimated_rate NUMERIC(10, 2),
     service_module_id UUID REFERENCES public.agency_service_modules(id) ON DELETE SET NULL,
+    project_service_id UUID REFERENCES public.agency_project_services(id) ON DELETE SET NULL,
     seniority_level_id UUID REFERENCES public.agency_seniority_levels(id) ON DELETE SET NULL,
     is_visible_to_client BOOLEAN DEFAULT false,
     position NUMERIC DEFAULT 0,

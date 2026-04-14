@@ -298,41 +298,55 @@ router.get('/:id/billable-value', requireAuth, async (req: AuthRequest, res) => 
     res.status(500).json({ error: err.message });
   }
 });
+
+// GET /api/agency/projects/:id/services
+router.get('/:id/services', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM agency_project_services 
+       WHERE project_id = $1 
+       ORDER BY name ASC`,
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // GET /api/agency/projects/:id/service-breakdown
 router.get('/:id/service-breakdown', requireAuth, async (req: AuthRequest, res) => {
   try {
     const result = await pool.query(`
       WITH task_estimates AS (
         SELECT
-          t.service_module_id,
-          sm.name as service_module_name,
-          t.seniority_level_id,
-          sl.name as seniority_level_name,
+          t.project_service_id,
+          ps.name as service_module_name,
+          NULL as seniority_level_id,
+          '' as seniority_level_name,
           COUNT(t.id) as task_count,
           COALESCE(SUM(t.estimated_hours), 0) as total_estimated_hours,
-          COALESCE(SUM(t.estimated_hours * COALESCE(t.estimated_rate, 0)), 0) as total_planned_value
+          COALESCE(SUM(t.estimated_hours * COALESCE(ps.hourly_rate, 0)), 0) as total_planned_value
         FROM agency_tasks t
-        LEFT JOIN agency_service_modules sm ON t.service_module_id = sm.id
-        LEFT JOIN agency_seniority_levels sl ON t.seniority_level_id = sl.id
-        WHERE t.project_id = $1 AND t.service_module_id IS NOT NULL
-        GROUP BY t.service_module_id, sm.name, t.seniority_level_id, sl.name
+        LEFT JOIN agency_project_services ps ON t.project_service_id = ps.id
+        WHERE t.project_id = $1 AND t.project_service_id IS NOT NULL
+        GROUP BY t.project_service_id, ps.name
       ),
       task_actuals AS (
         SELECT
-          t.service_module_id,
-          t.seniority_level_id,
+          t.project_service_id,
           COALESCE(SUM(te.duration_minutes/60.0), 0) as total_actual_hours,
-          COALESCE(SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, p.hourly_rate, pr.billable_hourly_rate, 0)), 0) as total_actual_value
+          COALESCE(SUM((te.duration_minutes/60.0) * COALESCE(pm.hourly_rate, ps.hourly_rate, p.hourly_rate, pr.billable_hourly_rate, 0)), 0) as total_actual_value
         FROM agency_time_entries te
         JOIN agency_tasks t ON te.task_id = t.id
+        LEFT JOIN agency_project_services ps ON t.project_service_id = ps.id
         LEFT JOIN profiles pr ON te.user_id = pr.id
         LEFT JOIN agency_projects p ON t.project_id = p.id
         LEFT JOIN agency_project_members pm ON t.project_id = pm.project_id AND te.user_id = pm.user_id
-        WHERE t.project_id = $1 AND t.service_module_id IS NOT NULL AND te.billable = true
-        GROUP BY t.service_module_id, t.seniority_level_id
+        WHERE t.project_id = $1 AND t.project_service_id IS NOT NULL AND te.billable = true
+        GROUP BY t.project_service_id
       )
       SELECT 
-        e.service_module_id, 
+        e.project_service_id as service_module_id, 
         e.service_module_name, 
         e.seniority_level_id, 
         e.seniority_level_name,
@@ -343,8 +357,7 @@ router.get('/:id/service-breakdown', requireAuth, async (req: AuthRequest, res) 
         COALESCE(a.total_actual_value, 0) as total_actual_value
       FROM task_estimates e
       LEFT JOIN task_actuals a 
-        ON e.service_module_id = a.service_module_id 
-        AND (e.seniority_level_id = a.seniority_level_id OR (e.seniority_level_id IS NULL AND a.seniority_level_id IS NULL))
+        ON e.project_service_id = a.project_service_id
     `, [req.params.id]);
     
     const breakdown = result.rows.map(row => {

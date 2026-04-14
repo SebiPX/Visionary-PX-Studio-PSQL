@@ -114,6 +114,42 @@ export async function performProjectSync() {
           }
         }
       }
+
+      if (Array.isArray(p.tasks)) {
+        for (const task of p.tasks) {
+          const serviceRes = await pool.query('SELECT id FROM agency_project_services WHERE moco_task_id = $1 AND project_id = $2', [task.id, projectId]);
+          
+          const rate = task.hourly_rate || null;
+          const budget = task.budget || null;
+          
+          // Helper for cleaning description if available
+          let cleanDesc = '';
+          if (task.description) {
+            cleanDesc = task.description
+              .replace(/<br\s*\/?>/gi, '\n')
+              .replace(/<\/p>/gi, '\n\n')
+              .replace(/<li>/gi, '- ')
+              .replace(/<\/li>/gi, '\n')
+              .replace(/<[^>]*>?/gm, '')
+              .replace(/<!--.*?-->/g, '')
+              .trim();
+          }
+
+          if (serviceRes.rows.length === 0) {
+            await pool.query(`
+              INSERT INTO agency_project_services (project_id, moco_task_id, name, description, hourly_rate, budget, billable, active)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            `, [projectId, task.id, task.name, cleanDesc, rate, budget, task.billable !== false, task.active !== false]);
+          } else {
+            await pool.query(`
+              UPDATE agency_project_services 
+              SET name = $1, description = $2, hourly_rate = $3, budget = $4, billable = $5, active = $6, updated_at = NOW()
+              WHERE moco_task_id = $7 AND project_id = $8
+            `, [task.name, cleanDesc, rate, budget, task.billable !== false, task.active !== false, task.id, projectId]);
+          }
+        }
+      }
+
     }
     console.log(`[MOCO Cron] Project Sync complete. Imported/Updated: ${importedCount}`);
     return importedCount;

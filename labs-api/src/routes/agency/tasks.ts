@@ -80,7 +80,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
     assignee_ids, assigned_to,
     start_date, review_date, revision_date, due_date, planned_minutes,
     estimated_hours, estimated_rate,
-    service_module_id, seniority_level_id, is_visible_to_client
+    service_module_id, project_service_id, seniority_level_id, is_visible_to_client
   } = req.body;
   const actualAssigneeIds = Array.isArray(assignee_ids) ? assignee_ids : (assigned_to ? [assigned_to] : []);
   const primaryAssignee = actualAssigneeIds.length > 0 ? actualAssigneeIds[0] : null;
@@ -102,6 +102,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
       estimated_hours ?? null,
       estimated_rate ?? null,
       service_module_id ?? null,
+      project_service_id ?? null,
       seniority_level_id ?? null,
       is_visible_to_client ?? null
     ];
@@ -111,9 +112,9 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
         project_id, title, description, status, priority, 
         assignee_id, assignee_ids, start_date, review_date, revision_date, due_date, planned_minutes,
         estimated_hours, estimated_rate,
-        service_module_id, seniority_level_id, is_visible_to_client
+        service_module_id, project_service_id, seniority_level_id, is_visible_to_client
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
        RETURNING *`,
       args
     );
@@ -131,7 +132,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
       'title', 'description', 'status', 'priority', 
       'assignee_ids', 'start_date', 'review_date', 'revision_date', 'due_date', 
       'planned_minutes', 'estimated_hours', 'estimated_rate', 
-      'service_module_id', 'seniority_level_id', 'is_visible_to_client'
+      'service_module_id', 'project_service_id', 'seniority_level_id', 'is_visible_to_client'
     ];
 
     const setClauses: string[] = [];

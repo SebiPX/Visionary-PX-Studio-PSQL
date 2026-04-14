@@ -57,11 +57,13 @@ export async function syncTimeEntryToMoco(timeEntryId: number) {
   // 1. Fetch time entry details
   const result = await pool.query(`
     SELECT te.*, 
-           t.moco_task_id, t.project_id, t.title as task_title, t.description as task_desc,
+           t.moco_task_id as legacy_moco_task_id, t.project_id, t.title as task_title, t.description as task_desc,
+           ps.moco_task_id as service_moco_task_id,
            p.moco_project_id,
            u.moco_user_id
     FROM agency_time_entries te
     JOIN agency_tasks t ON t.id = te.task_id
+    LEFT JOIN agency_project_services ps ON ps.id = t.project_service_id
     JOIN agency_projects p ON p.id = t.project_id
     JOIN profiles u ON u.id = te.user_id
     WHERE te.id = $1
@@ -74,16 +76,14 @@ export async function syncTimeEntryToMoco(timeEntryId: number) {
   if (entry.status === 'draft' || !entry.duration_minutes) return null;
   if (!entry.moco_project_id || !entry.moco_user_id) return null;
 
-  let finalMocoTaskId = entry.moco_task_id;
+  let finalMocoTaskId = entry.service_moco_task_id || entry.legacy_moco_task_id;
 
   // 2. Fallback to fetch tasks if no task ID explicitly mapped
   if (!finalMocoTaskId) {
     const mocoProject = await mocoFetch(`/projects/${entry.moco_project_id}`);
     if (mocoProject && mocoProject.tasks && mocoProject.tasks.length > 0) {
-      // Just pick the first billing task the user can book to
+      // Just pick the first task as a fallback
       finalMocoTaskId = mocoProject.tasks[0].id;
-      // Map it for future
-      await pool.query('UPDATE agency_tasks SET moco_task_id = $1 WHERE id = $2', [finalMocoTaskId, entry.task_id]);
     } else {
       console.error('MOCO project has no assignable tasks:', entry.moco_project_id);
       return null;

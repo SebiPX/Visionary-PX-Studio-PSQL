@@ -43,6 +43,14 @@ router.get('/projects/:id', requireAuth, async (req: AuthRequest, res: Response)
 // POST /api/creative/projects - Create new project
 router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) => {
   const { title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference } = req.body;
+  
+  if (!req.userId) {
+    return res.status(401).json({ error: 'Missing user ID - Please log out and back in.' });
+  }
+
+  const safeGuestCount = parseInt(guest_count, 10);
+  const finalGuestCount = isNaN(safeGuestCount) ? 0 : safeGuestCount;
+
   try {
     const result = await pool.query(
       `INSERT INTO px_creative_projects 
@@ -53,7 +61,7 @@ router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) =>
         req.userId, 
         title ?? null, 
         occasion ?? null, 
-        guest_count ?? null, 
+        finalGuestCount, 
         budget ?? null, 
         season ?? null, 
         industry ?? null, 
@@ -64,8 +72,8 @@ router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) =>
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    console.error('[creative projects POST] Error:', err.message);
-    res.status(500).json({ error: err.message });
+    console.error('[creative projects POST] Error for user', req.userId, ':', err.message, err.stack);
+    res.status(500).json({ error: err.message, stack: err.stack, details: 'Database error storing project' });
   }
 });
 
