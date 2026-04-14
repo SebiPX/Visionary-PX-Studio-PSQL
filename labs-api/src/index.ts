@@ -71,6 +71,15 @@ pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS revision_date DATE
 pool.query('ALTER TABLE public.agency_client_contacts ADD COLUMN IF NOT EXISTS moco_contact_id INTEGER UNIQUE;')
   .then(() => console.log('DB: checked moco_contact_id'))
   .catch(e => console.error('DB patch err:', e.message));
+  
+pool.query('ALTER TABLE public.agency_clients ADD COLUMN IF NOT EXISTS brands TEXT[] DEFAULT \'{}\';')
+  .then(() => {
+    console.log('DB: checked brands on agency_clients, seeding Warner...');
+    return pool.query(`UPDATE public.agency_clients SET brands = ARRAY['DMAX', 'TLC', 'discovery+'] WHERE company_name ILIKE '%warner%' AND (brands IS NULL OR array_length(brands, 1) IS NULL);`);
+  })
+  .then(() => console.log('DB: Warner brands seeded'))
+  .catch(e => console.error('DB patch brands err:', e.message));
+
 
 // Verleihscheine Migration Patch
 const verleihQueries = [

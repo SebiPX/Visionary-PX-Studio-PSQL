@@ -31,17 +31,17 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
 router.post('/', requireAuth, async (req: AuthRequest, res) => {
   const { 
     company_name, address_line1, zip_code, city, country, 
-    vat_id, payment_terms_days, website, logo_url, status 
+    vat_id, payment_terms_days, website, logo_url, status, brands 
   } = req.body;
   try {
     const result = await pool.query(
       `INSERT INTO agency_clients (
         company_name, address_line1, zip_code, city, country, 
-        vat_id, payment_terms_days, website, logo_url, status
+        vat_id, payment_terms_days, website, logo_url, status, brands
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, COALESCE($11, '{}'::TEXT[]))
        RETURNING *`,
-      [company_name, address_line1, zip_code, city, country, vat_id, payment_terms_days, website, logo_url, status]
+      [company_name, address_line1, zip_code, city, country, vat_id, payment_terms_days, website, logo_url, status, brands]
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
@@ -53,7 +53,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
 router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
   const { 
     company_name, address_line1, zip_code, city, country, 
-    vat_id, payment_terms_days, website, logo_url, status 
+    vat_id, payment_terms_days, website, logo_url, status, brands 
   } = req.body;
   try {
     const result = await pool.query(
@@ -67,10 +67,11 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
            payment_terms_days = COALESCE($7, payment_terms_days),
            website = COALESCE($8, website),
            logo_url = COALESCE($9, logo_url),
-           status = COALESCE($10, status)
-       WHERE id = $11
+           status = COALESCE($10, status),
+           brands = COALESCE($11, brands)
+       WHERE id = $12
        RETURNING *`,
-      [company_name, address_line1, zip_code, city, country, vat_id, payment_terms_days, website, logo_url, status, req.params.id]
+      [company_name, address_line1, zip_code, city, country, vat_id, payment_terms_days, website, logo_url, status, brands, req.params.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Client not found' });

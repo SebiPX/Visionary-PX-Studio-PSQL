@@ -17,7 +17,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
     // 2. Build the query conditionally
     let query = `
       SELECT p.*,
-        json_build_object('id', c.id, 'company_name', c.company_name, 'logo_url', c.logo_url) as client,
+        json_build_object('id', c.id, 'company_name', c.company_name, 'logo_url', c.logo_url, 'brands', c.brands) as client,
         (SELECT COALESCE(json_agg(json_build_object('user_id', pm.user_id, 'profile_id', pm.user_id)), '[]'::json) 
          FROM agency_project_members pm WHERE pm.project_id = p.id) as project_members
        FROM agency_projects p
@@ -157,7 +157,7 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
 
     let query = `
       SELECT p.*,
-        json_build_object('id', c.id, 'company_name', c.company_name, 'logo_url', c.logo_url) as client
+        json_build_object('id', c.id, 'company_name', c.company_name, 'logo_url', c.logo_url, 'brands', c.brands) as client
        FROM agency_projects p
        LEFT JOIN agency_clients c ON p.client_id = c.id
        WHERE p.id = $1
