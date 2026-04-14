@@ -7,15 +7,36 @@ const router = Router();
 // GET /api/agency/projects
 router.get('/', requireAuth, async (req: AuthRequest, res) => {
   try {
-    const result = await pool.query(
-      `SELECT p.*,
+    // 1. Get user profile to check role and client_id
+    const userResult = await pool.query(`SELECT role, client_id FROM profiles WHERE id = $1`, [req.userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(403).json({ error: 'User profile not found' });
+    }
+    const user = userResult.rows[0];
+
+    // 2. Build the query conditionally
+    let query = `
+      SELECT p.*,
         json_build_object('id', c.id, 'company_name', c.company_name, 'logo_url', c.logo_url) as client,
         (SELECT COALESCE(json_agg(json_build_object('user_id', pm.user_id, 'profile_id', pm.user_id)), '[]'::json) 
          FROM agency_project_members pm WHERE pm.project_id = p.id) as project_members
        FROM agency_projects p
        LEFT JOIN agency_clients c ON p.client_id = c.id
-       ORDER BY p.updated_at DESC`
-    );
+    `;
+    const queryParams: any[] = [];
+
+    if (user.role === 'client') {
+      if (!user.client_id) {
+         // Client without an assigned client_id should see no projects
+         return res.json([]);
+      }
+      query += ` WHERE p.client_id = $1`;
+      queryParams.push(user.client_id);
+    }
+    
+    query += ` ORDER BY p.updated_at DESC`;
+
+    const result = await pool.query(query, queryParams);
     res.json(result.rows);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -130,16 +151,29 @@ router.post('/margins-batch', requireAuth, async (req: AuthRequest, res) => {
 // GET /api/agency/projects/:id
 router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
-    const result = await pool.query(
-      `SELECT p.*,
+    // Check user profile for client restrictions
+    const userResult = await pool.query(`SELECT role, client_id FROM profiles WHERE id = $1`, [req.userId]);
+    const user = userResult.rows[0];
+
+    let query = `
+      SELECT p.*,
         json_build_object('id', c.id, 'company_name', c.company_name, 'logo_url', c.logo_url) as client
        FROM agency_projects p
        LEFT JOIN agency_clients c ON p.client_id = c.id
-       WHERE p.id = $1`,
-      [req.params.id]
-    );
+       WHERE p.id = $1
+    `;
+    const queryParams: any[] = [req.params.id];
+
+    if (user && user.role === 'client') {
+      if (!user.client_id) return res.status(403).json({ error: 'Access denied' });
+      query += ` AND p.client_id = $2`;
+      queryParams.push(user.client_id);
+    }
+
+    const result = await pool.query(query, queryParams);
+    
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Project not found' });
+      return res.status(404).json({ error: 'Project not found or access denied' });
     }
     res.json(result.rows[0]);
   } catch (err: any) {
