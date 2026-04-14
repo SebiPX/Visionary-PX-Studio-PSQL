@@ -26,7 +26,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
 router.patch('/:id', requireAuth, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const fields = req.body;
-  const keys = Object.keys(fields).filter(k => k !== 'id' && k !== 'created_at');
+  const keys = Object.keys(fields).filter(k => k !== 'id' && k !== 'created_at' && k !== 'updated_at');
   if (keys.length === 0) return res.status(400).json({ error: 'No fields to update' });
   const setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ');
   const values = [...keys.map(k => fields[k]), id];
