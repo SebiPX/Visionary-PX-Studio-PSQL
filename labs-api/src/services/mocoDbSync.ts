@@ -88,6 +88,31 @@ export async function performProjectSync() {
           }
         }
       }
+      
+      if (Array.isArray(p.contracts)) {
+        for (const contract of p.contracts) {
+          if (contract.user_id && contract.active) {
+            const userRes = await pool.query('SELECT id FROM profiles WHERE moco_user_id = $1', [contract.user_id]);
+            if (userRes.rows.length > 0) {
+              const profileId = userRes.rows[0].id;
+              const rate = contract.hourly_rate || 0;
+              
+              const memberRes = await pool.query('SELECT role FROM agency_project_members WHERE project_id = $1 AND user_id = $2', [projectId, profileId]);
+              
+              if (memberRes.rows.length === 0) {
+                await pool.query(`
+                  INSERT INTO agency_project_members (project_id, user_id, role, hourly_rate)
+                  VALUES ($1, $2, $3, $4)
+                `, [projectId, profileId, 'member', rate]);
+              } else {
+                await pool.query(`
+                  UPDATE agency_project_members SET hourly_rate = $1 WHERE project_id = $2 AND user_id = $3
+                `, [rate, projectId, profileId]);
+              }
+            }
+          }
+        }
+      }
     }
     console.log(`[MOCO Cron] Project Sync complete. Imported/Updated: ${importedCount}`);
     return importedCount;
