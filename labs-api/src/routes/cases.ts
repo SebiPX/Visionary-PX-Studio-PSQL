@@ -17,7 +17,7 @@ const router = Router();
         notes TEXT,
         category VARCHAR(100),
         material_status VARCHAR(100),
-        material_link TEXT,
+        material_link TEXT, -- legacy
         editor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
         website_editor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
         date_posting DATE,
@@ -29,6 +29,13 @@ const router = Router();
         status_tiktok VARCHAR(100) DEFAULT 'Nicht auf dieser Plattform'
       );
     `);
+    
+    // Add v2 columns
+    await pool.query(`
+      ALTER TABLE agency_cases ADD COLUMN IF NOT EXISTS asset_ids UUID[] DEFAULT '{}';
+      ALTER TABLE agency_cases ADD COLUMN IF NOT EXISTS external_links TEXT[] DEFAULT '{}';
+    `);
+
     console.log("Verified agency_cases table.");
   } catch (err) {
     console.error("Error creating agency_cases table:", err);
@@ -89,16 +96,18 @@ router.post('/', requireAuth, async (req, res) => {
     const {
       project_id, title, notes, category, material_status, material_link,
       editor_id, website_editor_id, date_posting,
-      status_instagram, status_facebook, status_linkedin, status_website, status_youtube, status_tiktok
+      status_instagram, status_facebook, status_linkedin, status_website, status_youtube, status_tiktok,
+      asset_ids, external_links
     } = req.body;
 
     const query = `
       INSERT INTO agency_cases (
         project_id, title, notes, category, material_status, material_link,
         editor_id, website_editor_id, date_posting,
-        status_instagram, status_facebook, status_linkedin, status_website, status_youtube, status_tiktok
+        status_instagram, status_facebook, status_linkedin, status_website, status_youtube, status_tiktok,
+        asset_ids, external_links
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING *
     `;
     const values = [
@@ -109,7 +118,9 @@ router.post('/', requireAuth, async (req, res) => {
       status_linkedin || 'Nicht auf dieser Plattform',
       status_website || 'Nicht auf dieser Plattform',
       status_youtube || 'Nicht auf dieser Plattform',
-      status_tiktok || 'Nicht auf dieser Plattform'
+      status_tiktok || 'Nicht auf dieser Plattform',
+      asset_ids || [],
+      external_links || []
     ];
     
     const result = await pool.query(query, values);
