@@ -135,5 +135,5 @@ export async function syncProjects() {
 }
 
 export async function syncContacts() {
-  return await mocoFetch('/contacts');
+  return await mocoFetch('/contacts/people');
 }

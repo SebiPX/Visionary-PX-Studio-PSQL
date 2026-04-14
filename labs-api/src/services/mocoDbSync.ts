@@ -227,9 +227,9 @@ export async function performContactSync() {
 
             // 2. Insert or update contact
             const fullName = `${contact.firstname || ''} ${contact.lastname || ''}`.trim() || 'Unknown';
-            const email = contact.email || null;
+            const email = contact.work_email || contact.home_email || null;
             const phone = contact.work_phone || contact.mobile_phone || null;
-            const position = contact.title || null;
+            const position = contact.job_position || contact.title || null;
             
             await pool.query(`
               INSERT INTO agency_client_contacts (client_id, moco_contact_id, full_name, position, email, phone)
