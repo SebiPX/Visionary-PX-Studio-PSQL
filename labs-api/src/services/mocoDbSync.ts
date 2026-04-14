@@ -114,48 +114,6 @@ export async function performProjectSync() {
           }
         }
       }
-
-function cleanMocoHtml(html: string): string {
-  if (!html) return '';
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<li>/gi, '- ')
-    .replace(/<\/li>/gi, '\n')
-    .replace(/<[^>]*>?/gm, '') // Remove all HTML tags including ul, ol
-    .replace(/<!--.*?-->/g, '') // Remove HTML comments
-    .trim();
-}
-
-      if (Array.isArray(p.tasks)) {
-        for (const task of p.tasks) {
-          const taskRes = await pool.query('SELECT id FROM agency_tasks WHERE moco_task_id = $1 AND project_id = $2', [task.id, projectId]);
-          
-          let estHours = null;
-          const rate = task.hourly_rate || null;
-          if (task.budget && rate && rate > 0) {
-             estHours = task.budget / rate;
-          }
-
-          const mocoStatus = task.active ? 'todo' : 'completed';
-          const cleanDesc = cleanMocoHtml(task.description);
-          
-          if (taskRes.rows.length === 0) {
-            await pool.query(`
-              INSERT INTO agency_tasks (project_id, title, description, status, estimated_rate, estimated_hours, is_visible_to_client, moco_task_id)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            `, [projectId, task.name, cleanDesc, mocoStatus, rate, estHours, task.billable, task.id]);
-          } else {
-            await pool.query(`
-              UPDATE agency_tasks 
-              SET title = $1, description = $2, 
-                  status = CASE WHEN $3 = 'completed' THEN 'completed' ELSE status END, 
-                  estimated_rate = $4, estimated_hours = $5, is_visible_to_client = $6, updated_at = NOW()
-              WHERE moco_task_id = $7 AND project_id = $8
-            `, [task.name, cleanDesc, mocoStatus, rate, estHours, task.billable, task.id, projectId]);
-          }
-        }
-      }
     }
     console.log(`[MOCO Cron] Project Sync complete. Imported/Updated: ${importedCount}`);
     return importedCount;
