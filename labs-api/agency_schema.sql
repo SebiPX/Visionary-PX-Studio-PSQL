@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS public.agency_tasks (
     estimated_rate NUMERIC(10, 2),
     materials TEXT[] DEFAULT ARRAY[]::TEXT[],
     custom_dates JSONB DEFAULT '[]'::jsonb,
+    depends_on_task_ids UUID[] DEFAULT '{}'::uuid[],
     service_module_id UUID REFERENCES public.agency_service_modules(id) ON DELETE SET NULL,
     project_service_id UUID REFERENCES public.agency_project_services(id) ON DELETE SET NULL,
     seniority_level_id UUID REFERENCES public.agency_seniority_levels(id) ON DELETE SET NULL,
