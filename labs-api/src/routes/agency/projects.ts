@@ -18,7 +18,17 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
     let query = `
       SELECT p.*,
         json_build_object('id', c.id, 'company_name', c.company_name, 'logo_url', c.logo_url, 'brands', c.brands) as client,
-        (SELECT COALESCE(json_agg(json_build_object('user_id', pm.user_id, 'profile_id', pm.user_id)), '[]'::json) 
+        (SELECT COALESCE(json_agg(
+           json_build_object(
+             'user_id', pm.user_id,
+             'role', pm.role,
+             'profile', (SELECT json_build_object(
+                          'full_name', pr.full_name,
+                          'avatar_url', pr.avatar_url,
+                          'email', pr.email
+                         ) FROM profiles pr WHERE pr.id = pm.user_id)
+           )
+         ), '[]'::json) 
          FROM agency_project_members pm WHERE pm.project_id = p.id) as project_members
        FROM agency_projects p
        LEFT JOIN agency_clients c ON p.client_id = c.id
