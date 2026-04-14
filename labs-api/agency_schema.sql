@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS public.agency_clients (
 CREATE TABLE IF NOT EXISTS public.agency_client_contacts (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     client_id UUID NOT NULL REFERENCES public.agency_clients(id) ON DELETE CASCADE,
+    moco_contact_id INTEGER UNIQUE,
     full_name TEXT NOT NULL,
     position TEXT,
     email TEXT,

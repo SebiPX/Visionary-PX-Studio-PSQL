@@ -68,6 +68,9 @@ pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS review_date DATE;'
 pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS revision_date DATE;')
   .then(() => console.log('DB: checked revision_date'))
   .catch(e => console.error('DB patch err:', e.message));
+pool.query('ALTER TABLE public.agency_client_contacts ADD COLUMN IF NOT EXISTS moco_contact_id INTEGER UNIQUE;')
+  .then(() => console.log('DB: checked moco_contact_id'))
+  .catch(e => console.error('DB patch err:', e.message));
 
 // Verleihscheine Migration Patch
 const verleihQueries = [

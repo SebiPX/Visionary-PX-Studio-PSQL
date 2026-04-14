@@ -1,5 +1,5 @@
 import pool from '../db';
-import { syncProjects, syncUsers, syncSchedules } from './mocoService';
+import { syncProjects, syncUsers, syncSchedules, syncContacts } from './mocoService';
 
 export async function performProjectSync() {
   console.log('[MOCO Cron] Starting Project Sync...');
@@ -206,6 +206,51 @@ export async function performResourceSync() {
     return { usersMapped, absencesImported };
   } catch (err) {
     console.error('[MOCO Cron] Error syncing MOCO resources:', err);
+    throw err;
+  }
+}
+
+export async function performContactSync() {
+  console.log('[MOCO Cron] Starting Contacts Sync...');
+  try {
+    const mocoContacts = await syncContacts();
+    let importedCount = 0;
+
+    if (Array.isArray(mocoContacts)) {
+      for (const contact of mocoContacts) {
+        // A contact MUST belong to a company to be meaningful for client mappings
+        if (contact.company && contact.company.id) {
+          // 1. Find our internal client_id from moco_company_id
+          const clientRes = await pool.query('SELECT id FROM agency_clients WHERE moco_company_id = $1', [contact.company.id]);
+          if (clientRes.rows.length > 0) {
+            const clientId = clientRes.rows[0].id;
+
+            // 2. Insert or update contact
+            const fullName = `${contact.firstname || ''} ${contact.lastname || ''}`.trim() || 'Unknown';
+            const email = contact.email || null;
+            const phone = contact.work_phone || contact.mobile_phone || null;
+            const position = contact.title || null;
+            
+            await pool.query(`
+              INSERT INTO agency_client_contacts (client_id, moco_contact_id, full_name, position, email, phone)
+              VALUES ($1, $2, $3, $4, $5, $6)
+              ON CONFLICT (moco_contact_id) 
+              DO UPDATE SET 
+                 full_name = EXCLUDED.full_name,
+                 position = EXCLUDED.position,
+                 email = EXCLUDED.email,
+                 phone = EXCLUDED.phone
+            `, [clientId, contact.id, fullName, position, email, phone]);
+            importedCount++;
+          }
+        }
+      }
+    }
+    
+    console.log(`[MOCO Cron] Contacts Sync complete. Imported/Updated: ${importedCount}`);
+    return importedCount;
+  } catch (err) {
+    console.error('[MOCO Cron] Error syncing MOCO contacts:', err);
     throw err;
   }
 }

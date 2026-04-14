@@ -1,4 +1,4 @@
-import { performProjectSync, performResourceSync } from './mocoDbSync';
+import { performProjectSync, performResourceSync, performContactSync } from './mocoDbSync';
 
 // Run every 15 minutes (15 * 60 * 1000)
 const SYNC_INTERVAL_MS = 15 * 60 * 1000;
@@ -32,6 +32,7 @@ async function runSyncJobs() {
         console.log('[MOCO Cron] --- Executing Scheduled Sync Jobs ---');
         await performProjectSync();
         await performResourceSync();
+        await performContactSync();
         console.log('[MOCO Cron] --- Scheduled Sync Jobs Finished ---');
     } catch (err) {
         console.error('[MOCO Cron] Execution failed during scheduled run:', err);

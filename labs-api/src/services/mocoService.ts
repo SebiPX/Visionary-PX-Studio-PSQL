@@ -133,3 +133,7 @@ export async function syncSchedules() {
 export async function syncProjects() {
   return await mocoFetch('/projects');
 }
+
+export async function syncContacts() {
+  return await mocoFetch('/contacts');
+}

@@ -120,4 +120,62 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// POST /api/agency/client-contacts/:id/create-login
+// Generates a client login (profile) for a given contact
+import bcrypt from 'bcryptjs';
+
+router.post('/:id/create-login', requireAuth, async (req: AuthRequest, res) => {
+  // Only admins can create logins
+  try {
+    const adminCheck = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
+    if (!adminCheck.rows[0] || adminCheck.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required to generate client logins' });
+    }
+
+    // Get contact info
+    const contactRes = await pool.query('SELECT * FROM agency_client_contacts WHERE id = $1', [req.params.id]);
+    if (contactRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Contact not found' });
+    }
+    const contact = contactRes.rows[0];
+
+    if (!contact.email) {
+      return res.status(400).json({ error: 'Contact has no email address assigned. Please update the contact in MOCO or PX-Flow first.' });
+    }
+
+    // Check if profile exists already
+    const existingRes = await pool.query('SELECT id FROM profiles WHERE email = $1', [contact.email.toLowerCase()]);
+    if (existingRes.rows.length > 0) {
+      return res.status(400).json({ error: 'A user login with this email already exists.' });
+    }
+
+    // Generate random secure password (e.g., PX-Flow-Client-8A2x!)
+    const randomSuffix = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const rawPassword = `PX-${randomSuffix}!`;
+    const passwordHash = await bcrypt.hash(rawPassword, 12);
+
+    // Create the user profile
+    const result = await pool.query(
+      `INSERT INTO profiles (email, full_name, password_hash, role, client_id, weekly_hours, billable_hourly_rate, internal_cost_per_hour)
+       VALUES ($1, $2, $3, 'client', $4, 0, 0, 0)
+       RETURNING id, email, full_name, role`,
+      [contact.email.toLowerCase(), contact.full_name, passwordHash, contact.client_id]
+    );
+
+    // Return the generated credentials so the Admin can view and copy them
+    res.status(201).json({
+      success: true,
+      message: 'Client login generated successfully',
+      user: result.rows[0],
+      credentials: {
+        email: contact.email.toLowerCase(),
+        password: rawPassword
+      }
+    });
+
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
