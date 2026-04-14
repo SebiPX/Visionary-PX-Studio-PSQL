@@ -34,6 +34,7 @@ import proxyRoutes from './routes/proxy';
 import creativeAgentRoutes from './routes/creativeAgent';
 import socialAuditRoutes from './routes/socialAudit';
 import agencyRoutes from './routes/agency';
+import casesRoutes from './routes/cases';
 import newsRoutes from './routes/news';
 
 const app = express();
@@ -128,6 +129,7 @@ app.use('/api/social-audit', socialAuditRoutes);
 
 // Agency App (ProjectFlow) Routes
 app.use('/api', agencyRoutes); // Mounts /api/clients, /api/projects, etc. to match frontend exactly
+app.use('/api/agency/cases', casesRoutes);
 app.use('/api/news', newsRoutes); // News of the Day
 
 // Inventar

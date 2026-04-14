@@ -1,0 +1,53 @@
+const { Pool } = require('pg');
+require('dotenv').config();
+
+const pool = new Pool({
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'labs_db',
+  password: process.env.DB_PASSWORD || 'postgres',
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+});
+
+async function runMigration() {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // Create agency_cases table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS agency_cases (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        project_id UUID REFERENCES agency_projects(id) ON DELETE SET NULL,
+        title VARCHAR(255),
+        notes TEXT,
+        category VARCHAR(100),
+        material_status VARCHAR(100),
+        material_link TEXT,
+        editor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+        website_editor_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+        date_posting DATE,
+        status_instagram VARCHAR(100) DEFAULT 'Nicht auf dieser Plattform',
+        status_facebook VARCHAR(100) DEFAULT 'Nicht auf dieser Plattform',
+        status_linkedin VARCHAR(100) DEFAULT 'Nicht auf dieser Plattform',
+        status_website VARCHAR(100) DEFAULT 'Nicht auf dieser Plattform',
+        status_youtube VARCHAR(100) DEFAULT 'Nicht auf dieser Plattform',
+        status_tiktok VARCHAR(100) DEFAULT 'Nicht auf dieser Plattform'
+      );
+    `);
+    
+    console.log("Successfully created agency_cases table.");
+
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK');
+    console.error('Migration failed:', e);
+  } finally {
+    client.release();
+    pool.end();
+  }
+}
+
+runMigration();
