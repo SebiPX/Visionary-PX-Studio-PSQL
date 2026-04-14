@@ -57,6 +57,29 @@ const AppContent: React.FC = () => {
     return <AuthPage />;
   }
 
+  // Prevent clients from accessing PX-Studio
+  if (userProfile.role === 'client') {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen w-full bg-background text-foreground p-8">
+        <div className="max-w-md text-center space-y-6 bg-card p-10 rounded-2xl border border-border mt-[-10vh]">
+          <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="material-icons-round text-4xl text-red-500">block</span>
+          </div>
+          <h1 className="text-3xl font-bold">Access Restricted</h1>
+          <p className="text-muted-foreground">
+            PX-Studio is an internal creative tool. Please use PX-Flow to manage your projects and approvals.
+          </p>
+          <a
+            href="https://flow.labs-schickeria.com"
+            className="inline-block mt-4 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors"
+          >
+            Go to PX-Flow
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   // Show main app if authenticated
   return (
     <div className="flex flex-col h-screen w-full bg-background text-foreground font-display overflow-hidden transition-colors duration-200">
