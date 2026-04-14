@@ -239,3 +239,226 @@ ALTER TABLE public.agency_service_modules DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_seniority_levels DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_service_pricing DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agency_notifications DISABLE ROW LEVEL SECURITY;
+
+-- 14. Client Portal & Airtable Replacement Extensions
+
+-- Add client_id to generic profiles for external clients
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS client_id UUID REFERENCES public.agency_clients(id) ON DELETE SET NULL;
+
+-- Extend agency_tasks with Airtable CSV fields
+ALTER TABLE public.agency_tasks 
+  ADD COLUMN IF NOT EXISTS brand TEXT,
+  ADD COLUMN IF NOT EXISTS show TEXT,
+  ADD COLUMN IF NOT EXISTS formats TEXT[],
+    project_id UUID NOT NULL REFERENCES public.agency_projects(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    allocation_percent INTEGER DEFAULT 100 CHECK (allocation_percent >= 0 AND allocation_percent <= 100),
+    hourly_rate NUMERIC(10, 2) DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(project_id, user_id)
+);
+
+-- 4.5. agency_project_services
+CREATE TABLE IF NOT EXISTS public.agency_project_services (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id UUID NOT NULL REFERENCES public.agency_projects(id) ON DELETE CASCADE,
+    moco_task_id INTEGER UNIQUE,
+    name TEXT NOT NULL,
+    description TEXT,
+    hourly_rate NUMERIC(10, 2),
+    budget NUMERIC(15, 2),
+    billable BOOLEAN DEFAULT true,
+    active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 5. agency_tasks
+CREATE TABLE IF NOT EXISTS public.agency_tasks (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id UUID NOT NULL REFERENCES public.agency_projects(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    status TEXT DEFAULT 'todo' CHECK (status IN ('todo', 'in_progress', 'review', 'done')),
+    priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+    assignee_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    start_date DATE,
+    review_date DATE,
+    revision_date DATE,
+    due_date DATE,
+    planned_minutes INTEGER,
+    estimated_hours NUMERIC(10, 2),
+    estimated_rate NUMERIC(10, 2),
+    materials TEXT[] DEFAULT ARRAY[]::TEXT[],
+    custom_dates JSONB DEFAULT '[]'::jsonb,
+    depends_on_task_ids UUID[] DEFAULT '{}'::uuid[],
+    service_module_id UUID REFERENCES public.agency_service_modules(id) ON DELETE SET NULL,
+    project_service_id UUID REFERENCES public.agency_project_services(id) ON DELETE SET NULL,
+    seniority_level_id UUID REFERENCES public.agency_seniority_levels(id) ON DELETE SET NULL,
+    is_visible_to_client BOOLEAN DEFAULT false,
+    position NUMERIC DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 6. agency_time_entries
+CREATE TABLE IF NOT EXISTS public.agency_time_entries (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id UUID REFERENCES public.agency_projects(id) ON DELETE CASCADE,
+    task_id UUID NOT NULL REFERENCES public.agency_tasks(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE,
+    duration_minutes INTEGER,
+    description TEXT,
+    billable BOOLEAN DEFAULT true,
+    status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'pending', 'submitted', 'approved', 'rejected')),
+    rejection_reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 7. agency_assets
+CREATE TABLE IF NOT EXISTS public.agency_assets (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id UUID NOT NULL REFERENCES public.agency_projects(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    description TEXT,
+    category TEXT,
+    status TEXT,
+    feedback_note TEXT,
+    storage_path TEXT,
+    file_type TEXT,
+    file_size BIGINT,
+    is_physical BOOLEAN DEFAULT false,
+    location TEXT,
+    uploaded_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    is_visible_to_client BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 8. agency_costs
+CREATE TABLE IF NOT EXISTS public.agency_costs (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id UUID NOT NULL REFERENCES public.agency_projects(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    amount NUMERIC(15, 2) NOT NULL CHECK (amount > 0),
+    date DATE NOT NULL,
+    category TEXT CHECK (category IN ('software', 'hardware', 'travel', 'external_service', 'other')),
+    invoice_document_path TEXT,
+    is_estimated BOOLEAN DEFAULT false,
+    created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 9. agency_financial_documents
+CREATE TABLE IF NOT EXISTS public.agency_financial_documents (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id UUID NOT NULL REFERENCES public.agency_projects(id) ON DELETE CASCADE,
+    type TEXT NOT NULL CHECK (type IN ('quote', 'invoice')),
+    title TEXT NOT NULL,
+    document_url TEXT NOT NULL,
+    document_number TEXT,
+    amount NUMERIC(15, 2) NOT NULL,
+    total_net NUMERIC(15, 2),
+    vat_percent NUMERIC(5, 2),
+    total_gross NUMERIC(15, 2),
+    status TEXT NOT NULL CHECK (status IN ('draft', 'sent', 'paid', 'overdue', 'cancelled')),
+    date_issued DATE,
+    due_date DATE,
+    created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 10. agency_service_modules
+CREATE TABLE IF NOT EXISTS public.agency_service_modules (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    category TEXT NOT NULL,
+    base_price NUMERIC(10, 2) NOT NULL DEFAULT 0,
+    estimated_days INTEGER NOT NULL DEFAULT 1,
+    default_unit TEXT DEFAULT 'hour',
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 11. agency_seniority_levels
+CREATE TABLE IF NOT EXISTS public.agency_seniority_levels (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    level INTEGER NOT NULL,
+    multiplier NUMERIC(4, 2) NOT NULL DEFAULT 1.0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 12. agency_service_pricing
+CREATE TABLE IF NOT EXISTS public.agency_service_pricing (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    service_id UUID NOT NULL REFERENCES public.agency_service_modules(id) ON DELETE CASCADE,
+    seniority_id UUID NOT NULL REFERENCES public.agency_seniority_levels(id) ON DELETE CASCADE,
+    hourly_rate NUMERIC(10, 2) NOT NULL,
+    internal_cost NUMERIC(10, 2) DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(service_id, seniority_id)
+);
+
+-- 13. agency_notifications
+CREATE TABLE IF NOT EXISTS public.agency_notifications (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    type TEXT NOT NULL CHECK (type IN ('info', 'success', 'warning', 'error')),
+    title TEXT NOT NULL,
+    message TEXT,
+    link TEXT,
+    is_read BOOLEAN DEFAULT false,
+    related_entity_id UUID,
+    related_entity_type TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Disable Row Level Security (RLS) since backend handles authorization
+ALTER TABLE public.agency_clients DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_client_contacts DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_projects DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_project_members DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_tasks DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_time_entries DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_assets DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_costs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_financial_documents DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_service_modules DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_seniority_levels DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_service_pricing DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agency_notifications DISABLE ROW LEVEL SECURITY;
+
+-- 14. Client Portal & Airtable Replacement Extensions
+
+-- Add client_id to generic profiles for external clients
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS client_id UUID REFERENCES public.agency_clients(id) ON DELETE SET NULL;
+
+-- Extend agency_tasks with Airtable CSV fields
+ALTER TABLE public.agency_tasks 
+  ADD COLUMN IF NOT EXISTS brand TEXT,
+  ADD COLUMN IF NOT EXISTS show TEXT,
+  ADD COLUMN IF NOT EXISTS formats TEXT[],
+  ADD COLUMN IF NOT EXISTS legal_line TEXT,
+  ADD COLUMN IF NOT EXISTS freigabelink TEXT,
+  ADD COLUMN IF NOT EXISTS rights_expiration_date TIMESTAMP WITH TIME ZONE,
+  ADD COLUMN IF NOT EXISTS status_influencerclips BOOLEAN DEFAULT false;
+
+-- Extend existing agency_assets table
+ALTER TABLE public.agency_assets 
+    ADD COLUMN IF NOT EXISTS task_id UUID REFERENCES public.agency_tasks(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS client_id UUID REFERENCES public.agency_clients(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS brand TEXT,
+    ADD COLUMN IF NOT EXISTS show TEXT,
+    ADD COLUMN IF NOT EXISTS freigabelink TEXT,
+    ADD COLUMN IF NOT EXISTS legal_line TEXT,
+    ADD COLUMN IF NOT EXISTS formats TEXT[],
+    ADD COLUMN IF NOT EXISTS rights_expiration_date TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE public.agency_assets DISABLE ROW LEVEL SECURITY;
