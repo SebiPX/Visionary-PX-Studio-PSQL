@@ -340,17 +340,17 @@ export function DashboardPage({
           </section>
         )}
 
-        {/* ── News ───────────────────────────────────────────────────────── */}
-        {config.show_news && (
-          <section>
-            <NewsWidget />
-          </section>
-        )}
-
         {/* ── User Tasks (PX-Flow) ────────────────────────────────────────── */}
         {config.show_user_tasks && (
           <section>
             <UserTasksWidget />
+          </section>
+        )}
+
+        {/* ── News ───────────────────────────────────────────────────────── */}
+        {config.show_news && (
+          <section>
+            <NewsWidget />
           </section>
         )}
 
