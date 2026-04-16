@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getToken } from '../lib/apiClient';
+import { tasks as apiTasks } from '../lib/apiClient';
 import { Clock, LayoutList, PlayCircle, ChevronDown, AlignLeft, ChevronUp } from 'lucide-react';
 import { TimeTrackingModal } from './TimeTrackingModal';
 
@@ -43,18 +43,9 @@ export const UserTasksWidget: React.FC = () => {
     };
 
     const fetchTasks = async () => {
-        const token = getToken();
-        if (!profile?.id || !token) return;
+        if (!profile?.id) return;
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-            const res = await fetch(`${apiUrl}/api/tasks?assignee_id=${profile.id}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (!res.ok) throw new Error('Failed to fetch tasks');
-            const data = await res.json();
-            
+            const data = await apiTasks.list(profile.id);
             // Filter out completed tasks to only show active ones
             const activeTasks = data.filter((t: Task) => t.status !== 'completed' && t.status !== 'done');
             setTasks(activeTasks);
@@ -75,29 +66,15 @@ export const UserTasksWidget: React.FC = () => {
         setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
 
         try {
-            const token = getToken();
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-            const res = await fetch(`${apiUrl}/api/tasks/${taskId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ status: newStatus })
-            });
-
-            if (!res.ok) {
-                console.error('Failed to update task status');
-                // Re-fetch to revert on error
-                fetchTasks();
-            } else {
-                // Remove task if it's now completed or done
-                if (newStatus === 'completed' || newStatus === 'done') {
-                    setTasks(prev => prev.filter(t => t.id !== taskId));
-                }
+            await apiTasks.update(taskId, { status: newStatus });
+            
+            // Remove task if it's now completed or done
+            if (newStatus === 'completed' || newStatus === 'done') {
+                setTasks(prev => prev.filter(t => t.id !== taskId));
             }
         } catch (error) {
             console.error("Error updating status:", error);
+            // Re-fetch to revert on error
             fetchTasks();
         }
     };

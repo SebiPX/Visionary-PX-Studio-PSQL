@@ -263,6 +263,12 @@ export const downloadAsset = async (url: string, filename: string): Promise<void
     }
 };
 
+// ── Tasks ──────────────────────────────────────────────────────────
+export const tasks = {
+    list: (assigneeId?: string) => request<any[]>(`/api/tasks${assigneeId ? `?assignee_id=${assigneeId}` : ''}`),
+    update: (id: string, updates: any) => request<any>(`/api/tasks/${id}`, { method: 'PUT', body: JSON.stringify(updates) }),
+};
+
 // ── Types ──────────────────────────────────────────────────────────
 export interface ApiUser {
     id: string;
