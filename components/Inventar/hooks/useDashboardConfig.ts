@@ -10,6 +10,7 @@ export interface DashboardConfig {
   show_loans: boolean
   show_inventory_stats: boolean
   show_user_tasks: boolean
+  show_news: boolean
   pinned_login_ids: string[]
 }
 
@@ -20,6 +21,7 @@ export const DEFAULT_CONFIG: DashboardConfig = {
   show_loans: true,
   show_inventory_stats: true,
   show_user_tasks: true,
+  show_news: true,
   pinned_login_ids: [],
 }
 

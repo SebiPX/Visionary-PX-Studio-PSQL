@@ -147,6 +147,12 @@ export function DashboardConfigDrawer({
                 checked={draft.show_user_tasks}
                 onChange={v => setDraft(d => ({ ...d, show_user_tasks: v }))}
               />
+              <Toggle
+                label="News of the Day"
+                sub="Aktuelle Agentur-Nachrichten und KI-Updates"
+                checked={draft.show_news}
+                onChange={v => setDraft(d => ({ ...d, show_news: v }))}
+              />
             </div>
           </section>
 

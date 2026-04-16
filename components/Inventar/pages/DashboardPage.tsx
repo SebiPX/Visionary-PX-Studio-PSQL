@@ -9,6 +9,7 @@ import type { DashboardConfig } from '../hooks/useDashboardConfig'
 import { DashboardConfigDrawer } from '../components/DashboardConfigDrawer'
 import { View as AppView } from '../../../App'
 import { UserTasksWidget } from '../../UserTasksWidget'
+import { NewsWidget } from '../../NewsWidget'
 
 // ─── Avatar colour helper ─────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -336,6 +337,13 @@ export function DashboardPage({
               <StatPill label="Ausgeliehen" value={stats.loaned} />
               <StatPill label="Defekt / Fehlt" value={stats.defective} alert={stats.defective > 0} />
             </div>
+          </section>
+        )}
+
+        {/* ── News ───────────────────────────────────────────────────────── */}
+        {config.show_news && (
+          <section>
+            <NewsWidget />
           </section>
         )}
 
