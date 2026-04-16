@@ -182,6 +182,7 @@ export interface GeneratedVoice {
 
 export enum AppView {
   DASHBOARD = 'DASHBOARD',
+  MY_ASSETS = 'MY_ASSETS',
   IMAGE_GEN = 'IMAGE_GEN',
   VIDEO_STUDIO = 'VIDEO_STUDIO',
   TEXT_ENGINE = 'TEXT_ENGINE',

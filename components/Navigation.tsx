@@ -49,6 +49,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
       icon: 'grid_view',
       items: [
         { view: AppView.DASHBOARD, path: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
+        { view: AppView.MY_ASSETS, icon: 'photo_library', label: 'My Assets' },
         { view: AppView.DASHBOARD, path: '/logins', icon: 'password', label: 'Logins' },
         { view: AppView.DASHBOARD, path: '/links', icon: 'link', label: 'Links' },
         ...(userProfile.role === 'admin' ? [
