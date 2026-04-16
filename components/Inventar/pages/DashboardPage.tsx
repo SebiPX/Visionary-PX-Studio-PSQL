@@ -8,6 +8,7 @@ import type { InventarItem, InventarLoan, InternalLink, Verleihschein, Login } f
 import type { DashboardConfig } from '../hooks/useDashboardConfig'
 import { DashboardConfigDrawer } from '../components/DashboardConfigDrawer'
 import { View as AppView } from '../../../App'
+import { UserTasksWidget } from '../../UserTasksWidget'
 
 // ─── Avatar colour helper ─────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -338,9 +339,14 @@ export function DashboardPage({
           </section>
         )}
 
-      </div>
+        {/* ── User Tasks (PX-Flow) ────────────────────────────────────────── */}
+        {config.show_user_tasks && (
+          <section>
+            <UserTasksWidget />
+          </section>
+        )}
 
-      {/* Removed PX-Studio specific UserTasksWidget and RecentGenerations */}
+      </div>
 
       {/* Config Drawer */}
       <DashboardConfigDrawer

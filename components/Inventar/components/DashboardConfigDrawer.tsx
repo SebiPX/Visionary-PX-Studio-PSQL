@@ -141,6 +141,12 @@ export function DashboardConfigDrawer({
                 checked={draft.show_inventory_stats}
                 onChange={v => setDraft(d => ({ ...d, show_inventory_stats: v }))}
               />
+              <Toggle
+                label="Meine Aufgaben (PX-Flow)"
+                sub="Zugewiesene ProjectFlow Tasks & Zeiterfassung"
+                checked={draft.show_user_tasks}
+                onChange={v => setDraft(d => ({ ...d, show_user_tasks: v }))}
+              />
             </div>
           </section>
 
