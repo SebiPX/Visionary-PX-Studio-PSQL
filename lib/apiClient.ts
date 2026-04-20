@@ -176,6 +176,14 @@ export const texts = {
     delete: (id: string) => request<void>(`/api/texts/${id}`, { method: 'DELETE' }),
 };
 
+// ── Notes ────────────────────────────────────────────────────────
+export const notes = {
+    list: () => request<ApiNote[]>('/api/notes'),
+    create: (data: Partial<ApiNote>) => request<ApiNote>('/api/notes', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: Partial<ApiNote>) => request<ApiNote>(`/api/notes/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    delete: (id: string) => request<void>(`/api/notes/${id}`, { method: 'DELETE' }),
+};
+
 // ── Sketches ─────────────────────────────────────────────────────
 export const sketches = {
     list: () => request<ApiSketch[]>('/api/sketches'),
@@ -318,6 +326,15 @@ export interface ApiText {
     type?: string;
     config?: Record<string, unknown>;
     created_at: string;
+}
+
+export interface ApiNote {
+    id: string;
+    user_id: string;
+    title?: string;
+    content?: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface ApiSketch {

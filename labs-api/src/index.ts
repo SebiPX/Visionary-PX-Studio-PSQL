@@ -36,6 +36,7 @@ import socialAuditRoutes from './routes/socialAudit';
 import agencyRoutes from './routes/agency';
 import casesRoutes from './routes/cases';
 import newsRoutes from './routes/news';
+import notesRoutes from './routes/notes';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -98,6 +99,19 @@ for (const q of verleihQueries) {
   pool.query(q).catch(e => console.error('DB Verleih patch err (may be benign if exists):', e.message));
 }
 
+pool.query(`
+  CREATE TABLE IF NOT EXISTS public.notes (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+      title TEXT,
+      content TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+  );
+  CREATE INDEX IF NOT EXISTS idx_notes_user_id ON public.notes(user_id);
+`).then(() => console.log('DB: checked notes table'))
+  .catch(e => console.error('DB notes patch err:', e.message));
+
 // Add robust endpoint tracking
 app.use(express.urlencoded({ extended: true }));
 
@@ -131,6 +145,7 @@ app.use('/api/social-audit', socialAuditRoutes);
 app.use('/api', agencyRoutes); // Mounts /api/clients, /api/projects, etc. to match frontend exactly
 app.use('/api/agency/cases', casesRoutes);
 app.use('/api/news', newsRoutes); // News of the Day
+app.use('/api/notes', notesRoutes);
 
 // Inventar
 app.use('/api/inventar/items',            inventarItemRoutes);

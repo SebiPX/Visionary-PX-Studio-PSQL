@@ -50,6 +50,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
       items: [
         { view: AppView.DASHBOARD, path: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
         { view: AppView.MY_ASSETS, icon: 'photo_library', label: 'My Assets' },
+        { view: AppView.NOTES, icon: 'edit_note', label: 'Notes' },
         { view: AppView.DASHBOARD, path: '/logins', icon: 'password', label: 'Logins' },
         { view: AppView.DASHBOARD, path: '/links', icon: 'link', label: 'Links' },
         ...(userProfile.role === 'admin' ? [

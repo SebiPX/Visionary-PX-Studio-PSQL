@@ -6,6 +6,7 @@ import { AuthPage } from './components/auth/AuthPage';
 import { Navigation } from './components/Navigation';
 import { RecentGenerations } from './components/Dashboard';
 import { MyAssets } from './components/MyAssets';
+import { Notes } from './components/Notes';
 import { ImageGen } from './components/ImageGen';
 import { VideoStudio } from './components/VideoStudio';
 import { TextEngine } from './components/TextEngine';
@@ -100,6 +101,10 @@ const AppContent: React.FC = () => {
 
         <div className={`w-full h-full overflow-y-auto ${currentView === AppView.MY_ASSETS ? 'block' : 'hidden'}`}>
           <MyAssets setView={setCurrentView} navigateToItem={navigateToItem} isActive={currentView === AppView.MY_ASSETS} />
+        </div>
+
+        <div className={`w-full h-full ${currentView === AppView.NOTES ? 'block' : 'hidden'}`}>
+          <Notes />
         </div>
 
         <div className={`w-full h-full ${currentView === AppView.IMAGE_GEN ? 'block' : 'hidden'}`}>
