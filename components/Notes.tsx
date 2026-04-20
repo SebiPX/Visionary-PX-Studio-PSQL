@@ -339,7 +339,7 @@ export const Notes: React.FC = () => {
                 <div className="flex-1 flex overflow-hidden">
                   <div className="flex-1 border-r border-border p-4 overflow-y-auto bg-muted/10 opacity-70">
                     <h3 className="text-xs font-bold text-muted-foreground uppercase mb-3">Original</h3>
-                    <div className="prose prose-sm prose-invert max-w-none">
+                    <div className="prose prose-sm prose-invert max-w-none whitespace-pre-wrap">
                       <ReactMarkdown>{activeNote.content || ''}</ReactMarkdown>
                     </div>
                   </div>
@@ -352,7 +352,7 @@ export const Notes: React.FC = () => {
                         <span className="material-icons-round text-4xl text-primary animate-spin opacity-50">autorenew</span>
                       </div>
                     ) : (
-                      <div className="prose prose-sm prose-invert max-w-none text-green-100">
+                      <div className="prose prose-sm prose-invert max-w-none text-green-100 whitespace-pre-wrap">
                         <ReactMarkdown>{aiSuggestion || ''}</ReactMarkdown>
                       </div>
                     )}
@@ -436,7 +436,7 @@ export const Notes: React.FC = () => {
                           h1: ({ children }) => <h1 className="text-2xl font-bold text-foreground mb-4 mt-2">{children}</h1>,
                           h2: ({ children }) => <h2 className="text-xl font-bold text-foreground mb-3 mt-6">{children}</h2>,
                           h3: ({ children }) => <h3 className="text-lg font-semibold text-foreground mb-2 mt-4">{children}</h3>,
-                          p: ({ children }) => <p className="mb-4 last:mb-0 text-foreground/90 leading-relaxed">{children}</p>,
+                          p: ({ children }) => <p className="mb-4 last:mb-0 text-foreground/90 leading-relaxed whitespace-pre-wrap break-words">{children}</p>,
                           ul: ({ children }) => <ul className="list-disc list-inside space-y-2 mb-4 text-foreground/90">{children}</ul>,
                           ol: ({ children }) => <ol className="list-decimal list-inside space-y-2 mb-4 text-foreground/90">{children}</ol>,
                           li: ({ children }) => <li className="leading-relaxed">{children}</li>,
