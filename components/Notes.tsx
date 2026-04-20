@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import { format } from 'date-fns';
 import { notes as notesApi, ApiNote, geminiProxy } from '../lib/apiClient';
 
@@ -340,7 +341,7 @@ export const Notes: React.FC = () => {
                   <div className="flex-1 border-r border-border p-4 overflow-y-auto bg-muted/10 opacity-70">
                     <h3 className="text-xs font-bold text-muted-foreground uppercase mb-3">Original</h3>
                     <div className="prose prose-sm prose-invert max-w-none whitespace-pre-wrap">
-                      <ReactMarkdown>{activeNote.content || ''}</ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkBreaks]}>{activeNote.content || ''}</ReactMarkdown>
                     </div>
                   </div>
                   <div className="flex-1 p-4 overflow-y-auto relative">
@@ -353,7 +354,7 @@ export const Notes: React.FC = () => {
                       </div>
                     ) : (
                       <div className="prose prose-sm prose-invert max-w-none text-green-100 whitespace-pre-wrap">
-                        <ReactMarkdown>{aiSuggestion || ''}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkBreaks]}>{aiSuggestion || ''}</ReactMarkdown>
                       </div>
                     )}
                   </div>
@@ -432,6 +433,7 @@ export const Notes: React.FC = () => {
                   <div className="flex-1 overflow-y-auto p-4 bg-card/30 prose prose-invert max-w-none">
                     {activeNote.content ? (
                       <ReactMarkdown
+                        remarkPlugins={[remarkBreaks]}
                         components={{
                           h1: ({ children }) => <h1 className="text-2xl font-bold text-foreground mb-4 mt-2">{children}</h1>,
                           h2: ({ children }) => <h2 className="text-xl font-bold text-foreground mb-3 mt-6">{children}</h2>,
