@@ -4,6 +4,63 @@ import remarkBreaks from 'remark-breaks';
 import { format } from 'date-fns';
 import { notes as notesApi, ApiNote, geminiProxy } from '../lib/apiClient';
 
+const FountainRenderer: React.FC<{ content: string }> = ({ content }) => {
+  const lines = content.split('\n');
+  const renderedLines = [];
+  let inDialogueBlock = false;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const prevLine = i > 0 ? lines[i - 1] : '';
+    
+    if (line.trim() === '') {
+      renderedLines.push(<div key={i} className="h-4"></div>);
+      inDialogueBlock = false;
+      continue;
+    }
+
+    if (line.startsWith('<!-- type: script -->')) continue;
+
+    if (line.startsWith('INT.') || line.startsWith('EXT.') || line.startsWith('INT/EXT.')) {
+      renderedLines.push(<div key={i} className="font-bold uppercase mt-6 mb-2">{line}</div>);
+      inDialogueBlock = false;
+      continue;
+    }
+
+    if (line.endsWith('TO:')) {
+      renderedLines.push(<div key={i} className="uppercase text-right mr-[10%] mt-4 mb-4">{line}</div>);
+      inDialogueBlock = false;
+      continue;
+    }
+
+    const isAllCaps = line === line.toUpperCase() && /[A-Z]/.test(line);
+    if (isAllCaps && prevLine.trim() === '' && !line.startsWith('INT.') && !line.startsWith('EXT.')) {
+      renderedLines.push(<div key={i} className="ml-[30%] max-w-[40%] mt-4 font-bold">{line}</div>);
+      inDialogueBlock = true;
+      continue;
+    }
+
+    if (line.trim().startsWith('(') && line.trim().endsWith(')') && inDialogueBlock) {
+      renderedLines.push(<div key={i} className="ml-[20%] max-w-[30%] italic">{line}</div>);
+      continue;
+    }
+
+    if (inDialogueBlock) {
+      renderedLines.push(<div key={i} className="ml-[15%] max-w-[50%] mb-1">{line}</div>);
+      continue;
+    }
+
+    renderedLines.push(<div key={i} className="mb-2">{line}</div>);
+    inDialogueBlock = false;
+  }
+
+  return (
+    <div className="font-mono text-[14px] leading-relaxed text-foreground max-w-3xl mx-auto bg-card/30 p-8 rounded shadow-sm border border-border">
+      {renderedLines}
+    </div>
+  );
+};
+
 export const Notes: React.FC = () => {
   const [notes, setNotes] = useState<ApiNote[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
@@ -19,6 +76,7 @@ export const Notes: React.FC = () => {
   const [seoKeyword, setSeoKeyword] = useState<string>('');
   const [seoLocation, setSeoLocation] = useState<string>('');
   const [showAiSettings, setShowAiSettings] = useState<'improve' | 'seo' | null>(null);
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -43,11 +101,14 @@ export const Notes: React.FC = () => {
 
   const activeNote = notes.find(n => n.id === activeNoteId);
 
-  const handleCreateNote = async () => {
+  const handleCreateNote = async (type: 'note' | 'script' = 'note') => {
+    setShowCreateMenu(false);
+    const initialContent = type === 'script' ? '<!-- type: script -->\nINT. BÜRO - TAG\n\n' : '';
+    const initialTitle = type === 'script' ? 'New Script' : 'New Note';
     try {
       const newNote = await notesApi.create({
-        title: 'New Note',
-        content: '',
+        title: initialTitle,
+        content: initialContent,
       });
       setNotes([newNote, ...notes]);
       setActiveNoteId(newNote.id);
@@ -221,13 +282,26 @@ export const Notes: React.FC = () => {
               <span className="material-icons-round text-primary">edit_note</span>
               Notes
             </h2>
-            <button 
-              onClick={handleCreateNote}
-              className="p-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-              title="New Note"
-            >
-              <span className="material-icons-round text-sm">add</span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowCreateMenu(!showCreateMenu)}
+                className="p-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                title="New Note"
+              >
+                <span className="material-icons-round text-sm">add</span>
+              </button>
+              
+              {showCreateMenu && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-xl z-20 py-1">
+                  <button onClick={() => handleCreateNote('note')} className="w-full text-left px-4 py-2 text-sm hover:bg-muted flex items-center gap-2">
+                    <span className="material-icons-round text-[16px]">description</span> Blank Note
+                  </button>
+                  <button onClick={() => handleCreateNote('script')} className="w-full text-left px-4 py-2 text-sm hover:bg-muted flex items-center gap-2">
+                    <span className="material-icons-round text-[16px]">movie</span> Film Script
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           
           <div className="relative">
@@ -341,7 +415,11 @@ export const Notes: React.FC = () => {
                   <div className="flex-1 border-r border-border p-4 overflow-y-auto bg-muted/10 opacity-70">
                     <h3 className="text-xs font-bold text-muted-foreground uppercase mb-3">Original</h3>
                     <div className="prose prose-sm prose-invert max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkBreaks]}>{activeNote.content || ''}</ReactMarkdown>
+                      {activeNote.content?.startsWith('<!-- type: script -->') ? (
+                        <FountainRenderer content={activeNote.content || ''} />
+                      ) : (
+                        <ReactMarkdown remarkPlugins={[remarkBreaks]}>{activeNote.content || ''}</ReactMarkdown>
+                      )}
                     </div>
                   </div>
                   <div className="flex-1 p-4 overflow-y-auto relative">
@@ -354,7 +432,11 @@ export const Notes: React.FC = () => {
                       </div>
                     ) : (
                       <div className="prose prose-sm prose-invert max-w-none text-green-100">
-                        <ReactMarkdown remarkPlugins={[remarkBreaks]}>{aiSuggestion || ''}</ReactMarkdown>
+                        {activeNote.content?.startsWith('<!-- type: script -->') ? (
+                          <FountainRenderer content={aiSuggestion || ''} />
+                        ) : (
+                          <ReactMarkdown remarkPlugins={[remarkBreaks]}>{aiSuggestion || ''}</ReactMarkdown>
+                        )}
                       </div>
                     )}
                   </div>
@@ -430,28 +512,34 @@ export const Notes: React.FC = () => {
                     />
                   </>
                 ) : (
-                  <div className="flex-1 overflow-y-auto p-4 bg-card/30 prose prose-invert max-w-none">
+                  <div className="flex-1 overflow-y-auto p-4 bg-card/30">
                     {activeNote.content ? (
-                      <ReactMarkdown
-                        remarkPlugins={[remarkBreaks]}
-                        components={{
-                          h1: ({ children }) => <h1 className="text-2xl font-bold text-foreground mb-4 mt-2">{children}</h1>,
-                          h2: ({ children }) => <h2 className="text-xl font-bold text-foreground mb-3 mt-6">{children}</h2>,
-                          h3: ({ children }) => <h3 className="text-lg font-semibold text-foreground mb-2 mt-4">{children}</h3>,
-                          p: ({ children }) => <p className="mb-4 last:mb-0 text-foreground/90 leading-relaxed break-words">{children}</p>,
-                          ul: ({ children }) => <ul className="list-disc list-inside space-y-2 mb-4 text-foreground/90">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal list-inside space-y-2 mb-4 text-foreground/90">{children}</ol>,
-                          li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                          strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
-                          em: ({ children }) => <em className="italic text-foreground/90">{children}</em>,
-                          code: ({ children }) => <code className="bg-muted text-primary px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>,
-                          blockquote: ({ children }) => <blockquote className="border-l-4 border-primary/50 pl-4 my-4 text-muted-foreground italic bg-muted/20 py-2 rounded-r-lg">{children}</blockquote>,
-                          hr: () => <hr className="border-border my-6" />,
-                          a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{children}</a>,
-                        }}
-                      >
-                        {activeNote.content}
-                      </ReactMarkdown>
+                      activeNote.content.startsWith('<!-- type: script -->') ? (
+                        <FountainRenderer content={activeNote.content} />
+                      ) : (
+                        <div className="prose prose-invert max-w-none">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkBreaks]}
+                            components={{
+                              h1: ({ children }) => <h1 className="text-2xl font-bold text-foreground mb-4 mt-2">{children}</h1>,
+                              h2: ({ children }) => <h2 className="text-xl font-bold text-foreground mb-3 mt-6">{children}</h2>,
+                              h3: ({ children }) => <h3 className="text-lg font-semibold text-foreground mb-2 mt-4">{children}</h3>,
+                              p: ({ children }) => <p className="mb-4 last:mb-0 text-foreground/90 leading-relaxed break-words">{children}</p>,
+                              ul: ({ children }) => <ul className="list-disc list-inside space-y-2 mb-4 text-foreground/90">{children}</ul>,
+                              ol: ({ children }) => <ol className="list-decimal list-inside space-y-2 mb-4 text-foreground/90">{children}</ol>,
+                              li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                              strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+                              em: ({ children }) => <em className="italic text-foreground/90">{children}</em>,
+                              code: ({ children }) => <code className="bg-muted text-primary px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>,
+                              blockquote: ({ children }) => <blockquote className="border-l-4 border-primary/50 pl-4 my-4 text-muted-foreground italic bg-muted/20 py-2 rounded-r-lg">{children}</blockquote>,
+                              hr: () => <hr className="border-border my-6" />,
+                              a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{children}</a>,
+                            }}
+                          >
+                            {activeNote.content}
+                          </ReactMarkdown>
+                        </div>
+                      )
                     ) : (
                       <div className="text-muted-foreground italic">Nothing to preview.</div>
                     )}
@@ -465,7 +553,7 @@ export const Notes: React.FC = () => {
             <span className="material-icons-round text-4xl opacity-20">edit_note</span>
             <p>Select a note or create a new one.</p>
             <button 
-              onClick={handleCreateNote}
+              onClick={() => handleCreateNote('note')}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
             >
               Create Note
