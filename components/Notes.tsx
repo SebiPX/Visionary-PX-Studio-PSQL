@@ -146,11 +146,11 @@ export const Notes: React.FC = () => {
 
     let prompt = "";
     if (action === 'improve') {
-      prompt = `Rewrite the following text to improve its flow, clarity, and professionalism. \nTone of voice: ${tone}\n\nExisting text:\n${activeNote?.content || ''}\n\nIMPORTANT: Output only the rewritten text. Do not include any introductions or meta-commentary. Keep the EXACT SAME LANGUAGE as the original text.`;
+      prompt = `Rewrite the following text to improve its flow, clarity, and professionalism. \nTone of voice: ${tone}\n\nExisting text:\n${activeNote?.content || ''}\n\nIMPORTANT: Output only the rewritten text. Do not include any introductions or meta-commentary. The primary language must be GERMAN. Keep any English technical terms or anglicisms as they are, but the sentence structure and main language must be German.`;
     } else if (action === 'seo') {
-      prompt = `Optimize the following text for Search Engine Optimization (SEO). \n${seoKeyword ? `Target Keyword: ${seoKeyword}\n` : ''}${seoLocation ? `Target Location: ${seoLocation}\n` : ''}\nImprove the structure, readability, and natural keyword integration. \n\nExisting text:\n${activeNote?.content || ''}\n\nIMPORTANT: Output only the optimized text. Do not include any introductions or meta-commentary. Keep the EXACT SAME LANGUAGE as the original text.`;
+      prompt = `Optimize the following text for Search Engine Optimization (SEO). \n${seoKeyword ? `Target Keyword: ${seoKeyword}\n` : ''}${seoLocation ? `Target Location: ${seoLocation}\n` : ''}\nImprove the structure, readability, and natural keyword integration. \n\nExisting text:\n${activeNote?.content || ''}\n\nIMPORTANT: Output only the optimized text. Do not include any introductions or meta-commentary. The primary language must be GERMAN. Keep any English technical terms or anglicisms as they are, but the sentence structure and main language must be German.`;
     } else if (action === 'continue') {
-      prompt = `Continue the following text organically. Keep the same style, tone, and context. \n\nExisting text:\n${activeNote?.content || ''}\n\nIMPORTANT: Output only the continuation text. Do not repeat what was already written. Do not include any introductions or meta-commentary. Keep the EXACT SAME LANGUAGE as the original text.`;
+      prompt = `Continue the following text organically. Keep the same style, tone, and context. \n\nExisting text:\n${activeNote?.content || ''}\n\nIMPORTANT: Output only the continuation text. Do not repeat what was already written. Do not include any introductions or meta-commentary. The primary language must be GERMAN. Keep any English technical terms or anglicisms as they are, but the sentence structure and main language must be German.`;
     }
 
     try {
@@ -158,7 +158,7 @@ export const Notes: React.FC = () => {
         action: 'generateContent',
         model: 'gemini-3-flash-preview',
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        systemInstruction: "You are an expert copywriter and SEO specialist. Always respond in the exact same language as the user's input text.",
+        systemInstruction: "You are an expert copywriter and SEO specialist. Your primary language is German. Always respond in German, but feel free to retain any English technical jargon or anglicisms from the user's input.",
       }) as any;
 
       if (response?.error) throw new Error(JSON.stringify(response.error));
