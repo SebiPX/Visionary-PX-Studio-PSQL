@@ -37,7 +37,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
 
     // Mode and settings
     const [activeMode, setActiveMode] = useState<'TEXT' | 'IMG2IMG' | 'EDIT' | 'UPSCALE'>('TEXT');
-    const [aspectRatio, setAspectRatio] = useState<'1:1' | '16:9' | '9:16'>('16:9');
+    const [aspectRatio, setAspectRatio] = useState<'1:1' | '16:9' | '9:16' | '4:5' | 'none'>('16:9');
     const [aiModel, setAiModel] = useState<'GEMINI' | 'FAL_QWEN'>('GEMINI');
 
     // History
@@ -85,7 +85,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
         setPrompt(item.prompt || '');
         // Restore the aspect ratio that was used when this image was generated
         if (item.config?.aspectRatio) {
-            setAspectRatio(item.config.aspectRatio as '1:1' | '16:9' | '9:16');
+            setAspectRatio(item.config.aspectRatio as '1:1' | '16:9' | '9:16' | '4:5' | 'none');
         }
     };
 
@@ -256,6 +256,15 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                     let imgSize = { width: 2048, height: 1152 }; // defaults to 16:9 roughly
                     if (aspectRatio === '1:1') imgSize = { width: 2048, height: 2048 };
                     else if (aspectRatio === '9:16') imgSize = { width: 1152, height: 2048 };
+                    else if (aspectRatio === '4:5') imgSize = { width: 1638, height: 2048 };
+                    else if (aspectRatio === 'none') {
+                        const effRatio = getEffectiveAspectRatio();
+                        const parts = effRatio.split(':').map(Number);
+                        if (parts.length === 2 && parts[0] && parts[1]) {
+                            const scale = 2048 / Math.max(parts[0], parts[1]);
+                            imgSize = { width: Math.round(parts[0] * scale), height: Math.round(parts[1] * scale) };
+                        }
+                    }
 
                     result = await fal.subscribe("fal-ai/qwen-image-2/text-to-image", {
                         input: {
@@ -340,7 +349,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         contents: [{ role: 'user', parts: parts }],
                         config: {
                             imageConfig: {
-                                aspectRatio: aspectRatio,
+                                aspectRatio: getEffectiveAspectRatio(),
                             }
                         }
                     }) as any;
@@ -393,7 +402,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         prompt: prompt,
                         style: activeMode,
                         image_url: url,
-                        config: { aspectRatio, mode: activeMode, model: aiModel }
+                        config: { aspectRatio, effectiveAspectRatio: getEffectiveAspectRatio(), mode: activeMode, model: aiModel }
                     });
                 }
                 
@@ -424,8 +433,28 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
         switch (aspectRatio) {
             case '1:1': return 'aspect-square max-w-[500px]';
             case '9:16': return 'aspect-[9/16] max-w-[350px]';
+            case '4:5': return 'aspect-[4/5] max-w-[420px]';
+            case 'none': {
+                // Derive display ratio from prompt if possible
+                const match = prompt.match(/(\d+):(\d+)/);
+                if (match) {
+                    const w = parseInt(match[1]);
+                    const h = parseInt(match[2]);
+                    if (w > h) return 'aspect-video max-w-5xl';
+                    if (w === h) return 'aspect-square max-w-[500px]';
+                    return 'aspect-[9/16] max-w-[350px]';
+                }
+                return 'aspect-video max-w-5xl';
+            }
             case '16:9': default: return 'aspect-video max-w-5xl';
         }
+    };
+
+    /** Extracts the aspect ratio to send to the API. For 'none', reads it from the prompt. */
+    const getEffectiveAspectRatio = (): string => {
+        if (aspectRatio !== 'none') return aspectRatio;
+        const match = prompt.match(/(\d+):(\d+)/);
+        return match ? `${match[1]}:${match[2]}` : '16:9';
     };
 
     return (
@@ -486,29 +515,49 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
 
                         <div className="space-y-2">
                             <label className="text-xs text-foreground/90">Aspect Ratio</label>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-5 gap-1">
                                 <button
                                     onClick={() => setAspectRatio('1:1')}
-                                    className={`py-2 px-2 rounded-lg border transition-all text-xs flex flex-col items-center justify-center gap-1 ${aspectRatio === '1:1' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                    className={`py-1.5 px-1 rounded-lg border transition-all flex flex-col items-center justify-center gap-0.5 ${aspectRatio === '1:1' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
-                                    <span className="material-icons-round text-sm">crop_square</span>
-                                    <span className="text-[9px]">1:1</span>
+                                    <span className="material-icons-round text-xs">crop_square</span>
+                                    <span className="text-[8px] font-semibold">1:1</span>
                                 </button>
                                 <button
                                     onClick={() => setAspectRatio('16:9')}
-                                    className={`py-2 px-2 rounded-lg border transition-all text-xs flex flex-col items-center justify-center gap-1 ${aspectRatio === '16:9' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                    className={`py-1.5 px-1 rounded-lg border transition-all flex flex-col items-center justify-center gap-0.5 ${aspectRatio === '16:9' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
-                                    <span className="material-icons-round text-sm">crop_16_9</span>
-                                    <span className="text-[9px]">16:9</span>
+                                    <span className="material-icons-round text-xs">crop_16_9</span>
+                                    <span className="text-[8px] font-semibold">16:9</span>
                                 </button>
                                 <button
                                     onClick={() => setAspectRatio('9:16')}
-                                    className={`py-2 px-2 rounded-lg border transition-all text-xs flex flex-col items-center justify-center gap-1 ${aspectRatio === '9:16' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                    className={`py-1.5 px-1 rounded-lg border transition-all flex flex-col items-center justify-center gap-0.5 ${aspectRatio === '9:16' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
-                                    <span className="material-icons-round text-sm">crop_portrait</span>
-                                    <span className="text-[9px]">9:16</span>
+                                    <span className="material-icons-round text-xs">crop_portrait</span>
+                                    <span className="text-[8px] font-semibold">9:16</span>
+                                </button>
+                                <button
+                                    onClick={() => setAspectRatio('4:5')}
+                                    className={`py-1.5 px-1 rounded-lg border transition-all flex flex-col items-center justify-center gap-0.5 ${aspectRatio === '4:5' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                >
+                                    <span className="material-icons-round text-xs">crop_5_4</span>
+                                    <span className="text-[8px] font-semibold">4:5</span>
+                                </button>
+                                <button
+                                    onClick={() => setAspectRatio('none')}
+                                    className={`py-1.5 px-1 rounded-lg border transition-all flex flex-col items-center justify-center gap-0.5 ${aspectRatio === 'none' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                    title="Aspect Ratio wird aus dem Prompt gelesen (z.B. '9:16')"
+                                >
+                                    <span className="material-icons-round text-xs">text_fields</span>
+                                    <span className="text-[8px] font-semibold">none</span>
                                 </button>
                             </div>
+                            {aspectRatio === 'none' && (
+                                <p className="text-[9px] text-muted-foreground/70 leading-tight">
+                                    Ratio aus Prompt lesen (z.B. <span className="text-primary/80">9:16</span> im Text)
+                                </p>
+                            )}
                         </div>
                     </div>
 
