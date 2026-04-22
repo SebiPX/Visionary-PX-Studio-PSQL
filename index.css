@@ -73,4 +73,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  textarea {
+    field-sizing: content;
+    min-height: 2.5rem;
+  }
 }

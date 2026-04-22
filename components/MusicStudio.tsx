@@ -152,7 +152,7 @@ export default function MusicStudio({ isActive }: MusicStudioProps) {
                                 value={lyrics}
                                 onChange={(e) => setLyrics(e.target.value)}
                                 placeholder="[verse]\nYour lyrics here..."
-                                className="w-full h-48 bg-card border border-[#334155] rounded-xl pl-4 pr-32 py-4 text-foreground resize-none focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                className="w-full min-h-48 max-h-[60vh] bg-card border border-[#334155] rounded-xl pl-4 pr-32 py-4 text-foreground resize-none focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                             />
                             <button
                                 type="submit"

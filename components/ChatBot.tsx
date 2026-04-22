@@ -733,7 +733,7 @@ export const ChatBot: React.FC = () => {
                 }
               }}
               placeholder={`Message ${activePersona.name}...`}
-              className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground py-3 resize-none max-h-32 hide-scrollbar"
+              className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground py-3 resize-none max-h-[60vh] hide-scrollbar"
               rows={1}
               />
             </div>

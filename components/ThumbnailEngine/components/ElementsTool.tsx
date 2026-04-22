@@ -32,7 +32,7 @@ export const ElementsTool: React.FC<ElementsToolProps> = ({
                     value={elementPrompt}
                     onChange={(e) => setElementPrompt(e.target.value)}
                     placeholder="Describe the main element/character..."
-                    className="w-full h-24 px-4 py-3 bg-white/5 border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 resize-none"
+                    className="w-full min-h-24 max-h-[60vh] px-4 py-3 bg-white/5 border border-border rounded-xl text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 resize-none"
                 />
             </div>
 

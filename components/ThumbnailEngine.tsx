@@ -353,7 +353,7 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-muted-foreground uppercase">Description</label>
                                 <textarea
-                                    className="w-full h-32 bg-card border border-border rounded-xl p-3 text-sm text-foreground placeholder-muted-foreground/80 focus:ring-1 focus:ring-primary resize-none"
+                                    className="w-full min-h-32 max-h-[60vh] bg-card border border-border rounded-xl p-3 text-sm text-foreground placeholder-muted-foreground/80 focus:ring-1 focus:ring-primary resize-none"
                                     placeholder="e.g., A futuristic cyberpunk city street at night with neon signs and rain..."
                                     value={bgPrompt}
                                     onChange={(e) => setBgPrompt(e.target.value)}
@@ -406,7 +406,7 @@ export const ThumbnailEngine: React.FC<ThumbnailEngineProps> = ({ selectedItemId
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-muted-foreground uppercase">Main Subject</label>
                                 <textarea
-                                    className="w-full h-32 bg-card border border-border rounded-xl p-3 text-sm text-foreground placeholder-muted-foreground/80 focus:ring-1 focus:ring-primary resize-none"
+                                    className="w-full min-h-32 max-h-[60vh] bg-card border border-border rounded-xl p-3 text-sm text-foreground placeholder-muted-foreground/80 focus:ring-1 focus:ring-primary resize-none"
                                     placeholder="e.g., A surprised young man holding a glowing smartphone looking at the camera..."
                                     value={elementPrompt}
                                     onChange={(e) => setElementPrompt(e.target.value)}

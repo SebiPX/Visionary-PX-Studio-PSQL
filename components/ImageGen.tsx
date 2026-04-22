@@ -756,7 +756,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                                             handleGenerate();
                                         }
                                     }}
-                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground py-3 resize-none max-h-32 disabled:opacity-50"
+                                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-foreground placeholder-muted-foreground py-3 resize-none max-h-[60vh] disabled:opacity-50"
                                     placeholder={
                                         activeMode === 'TEXT' ? "Describe a futuristic city with neon lights..." :
                                             activeMode === 'IMG2IMG' ? "Describe how to transform the reference image..." :

@@ -209,7 +209,7 @@ const I2AudioStudio: React.FC<I2AudioStudioProps> = ({ isActive = true }) => {
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                             placeholder="Describe how the speaker should act..."
-                            className="w-full h-40 bg-card border border-[#334155] rounded-xl px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors resize-none"
+                            className="w-full min-h-40 max-h-[60vh] bg-card border border-[#334155] rounded-xl px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors resize-none"
                         />
                     </div>
 

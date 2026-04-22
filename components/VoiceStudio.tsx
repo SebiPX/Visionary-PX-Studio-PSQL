@@ -315,7 +315,7 @@ export const VoiceStudio: React.FC = () => {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Schreibe einen Dialog oder Text, der gesprochen werden soll..."
-                className="w-full h-40 bg-background border border-border rounded-2xl p-4 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none shadow-sm"
+                className="w-full min-h-40 max-h-[60vh] bg-background border border-border rounded-2xl p-4 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none shadow-sm"
               />
               <button
                 onClick={handleGenerate}
