@@ -28,7 +28,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
     const [isGenerating, setIsGenerating] = useState(false);
     const [activeMode, setActiveMode] = useState<'TEXT' | 'IMAGE'>('TEXT');
     const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9');
-    const [duration, setDuration] = useState<'2s' | '4s' | '8s'>('4s');
+    const [duration, setDuration] = useState<'4s' | '6s' | '8s'>('4s');
     const [cameraMotion, setCameraMotion] = useState('Pan');
     const [videoUri, setVideoUri] = useState('');
     const [history, setHistory] = useState<GeneratedVideo[]>([]);
@@ -269,10 +269,10 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                         <div className="space-y-2">
                             <label className="text-xs text-foreground/90">Duration</label>
                             <div className="grid grid-cols-3 gap-2">
-                                {['2s', '4s', '8s'].map(d => (
+                                {['4s', '6s', '8s'].map(d => (
                                     <button
                                         key={d}
-                                        onClick={() => setDuration(d as '2s' | '4s' | '8s')}
+                                        onClick={() => setDuration(d as '4s' | '6s' | '8s')}
                                         className={`py-2 rounded-lg border text-xs font-medium transition-colors ${duration === d ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                     >
                                         {d}
