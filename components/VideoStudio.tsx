@@ -162,17 +162,20 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
         setIsPlaying(false);
 
         try {
+            const cameraPrompt = cameraMotion !== 'Static' ? ` Camera movement: ${cameraMotion}.` : ' Static camera.';
             const response = await geminiProxy({
                 action: 'generateVideos',
                 model: 'veo-3.1-fast-generate-preview',
-                prompt: `${prompt} (Camera Motion: ${cameraMotion})`,
+                prompt: `${prompt}.${cameraPrompt}`,
                 image: (activeMode === 'IMAGE' && uploadedImage) ? {
                     bytesBase64Encoded: uploadedImage.split(',')[1],
                     mimeType: uploadedImage.split(';')[0].split(':')[1] || 'image/png'
                 } : undefined,
                 config: {
                     resolution: (activeMode === 'IMAGE' && uploadedImage) ? '720p' : '1080p',
-                    aspectRatio: aspectRatio
+                    aspectRatio: aspectRatio,
+                    durationSeconds: parseInt(duration.replace('s', ''), 10),
+                    personGeneration: 'allow_adult'
                 }
             }) as any;
 
