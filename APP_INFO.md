@@ -31,7 +31,7 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 - **Zweizeilige Desktop-Navigation**: Aufgeräumtes Layout mit Hauptkategorien (PX Desk, AI Chat, AI Studio, AI Agents) und kontextbezogener zweiter Tool-Leiste plus externem Link zu PX-Flow.
 - **PX Intern als Haupt-Dashboard**: Internes Agentur-Portal (Verleih, Logins, Kalender) direkt unter 'PX Desk' integriert. Sidebar wurde zugunsten der Top-Navbar komplett entfernt.
 - **Einheitliches Design-System**: Alle Module im AI Studio (Video, Voice, Image, Text) teilen sich nun ein einheitliches Sidebar-Layout mit pill-basierten Segment-Controls und präzisen Labeling-Regeln für maximales "Premium Feeling" im Light & Dark Mode.
-- **News Of The Day**: Zentraler Feed auf dem Dashboard mit internen Ankündigungen und einem **AI Curator Agent**, der täglich im Hintergrund über Google Search die aktuellsten KI-News zusammenfasst (Gemini 2.5 Flash).
+- **News Of The Day**: Zentraler Feed auf dem Dashboard mit internen Ankündigungen und einer automatischen Anbindung an die externe `ai_news` Datenbank für aktuelle KI-News.
 - **Recent Generations Widget**: Letzte KI-Generierungen (Bilder, Videos) nahtlos in das PX Intern Dashboard (Masonry-Grid) integriert.
 - **ProjectFlow Aufgaben:** Zugewiesene Tasks inklusive Time-Tracking (Stoppuhr/manuell) und nahtloser 2-Wege-Synchronisation (robuste dynamische Status-Updates erhalten Datenbank-Zuweisungen konsistent) direkt im Studio-Dashboard ausführen.
 - Echtzeit-Daten aus `labs_db` via `apiClient`
@@ -140,7 +140,7 @@ Zugänglich über **Dashboard → „PX INTERN"**. Läuft als eigenständige Rea
 | **Kreditkarten**     | Kreditkarten-Verwaltung                                                                         | Admin              |
 | **Firmendaten**      | Bankverbindung & Handelsregisterdaten                                                           | Admin              |
 | **Interne Links**    | Team-Links mit Kategorien, Google Favicon CDN, Buchstaben-Fallback                              | Alle / Admin: CRUD |
-| **News Admin**       | Verwaltung des News-Widgets und manueller Trigger für den KI-News-Curator                       | Admin              |
+| **News Admin**       | Verwaltung der internen Ankündigungen im News-Widget                                            | Admin              |
 
 ### Dashboard-Konfiguration (pro User)
 
