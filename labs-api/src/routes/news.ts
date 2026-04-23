@@ -32,19 +32,27 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
     // 2. Fetch External AI News
     if (fetchExternal) {
       // For external we just take the latest 50
-      let query = `SELECT * FROM ai_news ORDER BY published_at DESC NULLS LAST, discovered_at DESC LIMIT 50`;
+      let query = `SELECT id, title, summary, significance, source_name, source_url, published_at, discovered_at, category, title_original, thumbnail_url FROM ai_news_public ORDER BY published_at DESC NULLS LAST, discovered_at DESC LIMIT 50`;
       const { rows } = await aiNewsPool.query(query);
       
-      const mappedExternalNews = rows.map((row: any) => ({
-        id: `ext-${row.id}`, // prefix to avoid id collision
-        title: row.title,
-        content: `**Kategorie:** ${row.category} | **Quelle:** [${row.source_name}](${row.source_url})\n\n**Zusammenfassung:**\n${row.summary}\n\n**Bedeutung:**\n${row.significance}`,
-        type: 'external',
-        publish_date: row.published_at || row.discovered_at,
-        is_active: true,
-        created_at: row.discovered_at,
-        updated_at: row.discovered_at,
-      }));
+      const mappedExternalNews = rows.map((row: any) => {
+        let contentMarkdown = '';
+        if (row.thumbnail_url) {
+          contentMarkdown += `![Thumbnail](${row.thumbnail_url})\n\n`;
+        }
+        contentMarkdown += `**Kategorie:** ${row.category} | **Quelle:** [${row.source_name}](${row.source_url})\n\n**Zusammenfassung:**\n${row.summary}\n\n**Bedeutung:**\n${row.significance}`;
+
+        return {
+          id: `ext-${row.id}`, // prefix to avoid id collision
+          title: row.title,
+          content: contentMarkdown,
+          type: 'external',
+          publish_date: row.published_at || row.discovered_at,
+          is_active: true,
+          created_at: row.discovered_at,
+          updated_at: row.discovered_at,
+        };
+      });
       
       combinedNews = combinedNews.concat(mappedExternalNews);
     }
