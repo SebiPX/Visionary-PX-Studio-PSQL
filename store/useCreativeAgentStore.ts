@@ -250,6 +250,7 @@ export const useCreativeAgentStore = create<CreativeAgentState>((set, get) => ({
     } catch (err: any) {
       set({ error: err.message, loading: false });
       throw err;
+    }
   },
 
   fetchComments: async (token, projectId) => {
