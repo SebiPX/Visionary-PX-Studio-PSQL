@@ -62,27 +62,29 @@ export const NewsWidget: React.FC = () => {
                     <div className="text-center text-muted-foreground text-sm py-4">Keine aktuellen Nachrichten vorhanden.</div>
                 ) : (
                     news.map(item => (
-                        <div key={item.id} className="bg-card/40 p-4 rounded-xl border border-border/50 hover:border-border/80 transition-colors">
+                        <div key={item.id} className="bg-card/40 p-4 rounded-xl border border-border/50 hover:border-border/80 transition-colors flex flex-col-reverse sm:flex-row gap-4 justify-between">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-2">
+                                    {item.type === 'internal' ? (
+                                        <MessageCircle size={16} className="text-green-400 shrink-0" />
+                                    ) : (
+                                        <Sparkles size={16} className="text-purple-400 shrink-0" />
+                                    )}
+                                    <h3 className="font-medium text-foreground text-base">{item.title}</h3>
+                                </div>
+                                <div className="text-xs text-muted-foreground mb-3 flex justify-between">
+                                    <span>{item.type === 'internal' ? 'Team Info' : 'AI Daily Update'}</span>
+                                    <span>{new Date(item.publish_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                                <div className="text-sm text-foreground/90 prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-a:text-blue-400 hover:prose-a:text-blue-300 prose-ul:pl-4">
+                                    <ReactMarkdown>{item.content}</ReactMarkdown>
+                                </div>
+                            </div>
                             {item.thumbnail && (
-                                <div className="mb-4 rounded-lg overflow-hidden w-full aspect-video bg-muted/20 relative">
+                                <div className="shrink-0 w-full aspect-video sm:aspect-square sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted/20 relative mb-2 sm:mb-0">
                                     <img src={item.thumbnail} alt={item.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                                 </div>
                             )}
-                            <div className="flex items-center gap-2 mb-2">
-                                {item.type === 'internal' ? (
-                                    <MessageCircle size={16} className="text-green-400 shrink-0" />
-                                ) : (
-                                    <Sparkles size={16} className="text-purple-400 shrink-0" />
-                                )}
-                                <h3 className="font-medium text-foreground text-base">{item.title}</h3>
-                            </div>
-                            <div className="text-xs text-muted-foreground mb-3 flex justify-between">
-                                <span>{item.type === 'internal' ? 'Team Info' : 'AI Daily Update'}</span>
-                                <span>{new Date(item.publish_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                            </div>
-                            <div className="text-sm text-foreground/90 prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-a:text-blue-400 hover:prose-a:text-blue-300 prose-ul:pl-4">
-                                <ReactMarkdown>{item.content}</ReactMarkdown>
-                            </div>
                         </div>
                     ))
                 )}
