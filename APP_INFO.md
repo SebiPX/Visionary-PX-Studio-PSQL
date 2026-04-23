@@ -31,7 +31,7 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 - **Zweizeilige Desktop-Navigation**: Aufgeräumtes Layout mit Hauptkategorien (PX Desk, AI Chat, AI Studio, AI Agents) und kontextbezogener zweiter Tool-Leiste plus externem Link zu PX-Flow.
 - **PX Intern als Haupt-Dashboard**: Internes Agentur-Portal (Verleih, Logins, Kalender) direkt unter 'PX Desk' integriert. Sidebar wurde zugunsten der Top-Navbar komplett entfernt.
 - **Einheitliches Design-System**: Alle Module im AI Studio (Video, Voice, Image, Text) teilen sich nun ein einheitliches Sidebar-Layout mit pill-basierten Segment-Controls und präzisen Labeling-Regeln für maximales "Premium Feeling" im Light & Dark Mode.
-- **News Of The Day**: Zentraler Feed auf dem Dashboard mit internen Ankündigungen und einer automatischen Anbindung an die externe `ai_news` Datenbank für aktuelle KI-News.
+- **News Of The Day**: Zentraler Feed auf dem Dashboard mit internen Ankündigungen und einer direkten Anbindung an die externe `ai_news` PostgreSQL-Datenbank (via `ai_news_public_high_quality` View) für tagesaktuelle, KI-kuratierte Tech-News inkl. Thumbnail-Rendering und modernem Side-by-Side Layout.
 - **Recent Generations Widget**: Letzte KI-Generierungen (Bilder, Videos) nahtlos in das PX Intern Dashboard (Masonry-Grid) integriert.
 - **ProjectFlow Aufgaben:** Zugewiesene Tasks inklusive Time-Tracking (Stoppuhr/manuell) und nahtloser 2-Wege-Synchronisation (robuste dynamische Status-Updates erhalten Datenbank-Zuweisungen konsistent) direkt im Studio-Dashboard ausführen.
 - Echtzeit-Daten aus `labs_db` via `apiClient`
@@ -96,13 +96,14 @@ React Frontend  →  labs-api (Express.js)  →  PostgreSQL labs_db
 - **Chat-History:** Gespeichert in `chat_sessions`, wiederherstellbar und einzeln löschbar
 - **Markdown-Rendering:** Alle Bot-Antworten als formatiertes Markdown
 
-### 9. 🎤 PX Event Agent
+### 9. 🎤 PX Creative Agent (Agency Workflow)
 
-- **Mehrstufiger Ideation-Workflow:** Briefing → Morphological Box → SCAMPER Refinement → Pitch Export
-- **Einheitliches CI-Design:** Konsequente Nutzung der primären Brand-Farbe (Blau) für alle UI-Elemente
-- **Google Search Integration:** Agent liest Location-Präferenzen, sucht reale Veranstaltungsorte & Vendors via Google (Website, Adresse, Telefonnummer)
-- **Osbourne Checklist:** Erweitertes SCAMPER-Prompting mit Adjektiven zur Ideen-Herausforderung (visuell als Tags dargestellt)
-- **HTML Pitch Export:** Dynamisch generiertes, eigenständiges HTML-Pitchbook mit Tailwind CSS
+- **Produktionsreifer Status-Lifecycle**: Statusmodell (`briefing`, `drafting`, `review`, `approved`, `delivered`).
+- **Kollaboratives Arbeiten**: Rollensystem (`owner_id`, `reviewer_id`) und Live-Kommentar-Thread (`px_creative_comments`) für asynchrones Agentur-Feedback.
+- **Projektstruktur**: Organisation via `client_name`, `tags` und globaler Dashbord-Echtzeitsuche.
+- **Freigabe- & Export-Pipeline**: Rollenbasierte Approval-Buttons (Wechsel von Review zu Approved) sowie nativer PDF- und HTML-Pitchbook Export.
+- **Mehrstufiger KI-Workflow:** Briefing → Morphological Box → SCAMPER Refinement → Pitch
+- **Osbourne Checklist:** Erweitertes SCAMPER-Prompting mit Adjektiven zur Ideen-Herausforderung.
 
 ### 10. 📊 Social Media Audit Agent
 
