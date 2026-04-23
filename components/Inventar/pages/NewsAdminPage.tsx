@@ -15,7 +15,6 @@ export const NewsAdminPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [type, setType] = useState<'internal' | 'external'>('internal');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchNews = async () => {
@@ -47,7 +46,7 @@ export const NewsAdminPage: React.FC = () => {
       const res = await fetch(`${apiUrl}/api/news`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, type })
+        body: JSON.stringify({ title, content, type: 'internal' })
       });
       if (res.ok) {
         setTitle('');
@@ -91,15 +90,8 @@ export const NewsAdminPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* FORM */}
         <div className="bg-card/60 border border-border p-5 rounded-2xl lg:col-span-1">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Neue News Posten</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Neue interne News posten</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">Typ</label>
-              <select value={type} onChange={(e) => setType(e.target.value as any)} className="w-full bg-card border border-border text-foreground rounded-lg px-3 py-2 outline-none focus:border-blue-500 text-sm">
-                <option value="internal">Intern (Team News)</option>
-                <option value="external">Extern (AI News)</option>
-              </select>
-            </div>
             <div>
               <label className="block text-xs font-medium text-muted-foreground mb-1">Titel</label>
               <input required value={title} onChange={(e) => setTitle(e.target.value)} type="text" className="w-full bg-card border border-border text-foreground rounded-lg px-3 py-2 outline-none focus:border-blue-500 text-sm" placeholder="z.B. Heute ist Pizza-Tag!" />
@@ -141,9 +133,11 @@ export const NewsAdminPage: React.FC = () => {
                     <td className="px-5 py-3 font-medium text-foreground">{item.title}</td>
                     <td className="px-5 py-3 whitespace-nowrap text-muted-foreground">{new Date(item.publish_date).toLocaleDateString()}</td>
                     <td className="px-5 py-3 text-right">
-                      <button onClick={() => handleDelete(item.id)} className="text-red-400 hover:text-red-300 p-1 bg-red-400/10 rounded">
-                        <Trash2 size={14} />
-                      </button>
+                      {item.type === 'internal' && (
+                        <button onClick={() => handleDelete(item.id)} className="text-red-400 hover:text-red-300 p-1 bg-red-400/10 rounded">
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

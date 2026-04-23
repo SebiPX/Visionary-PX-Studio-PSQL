@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import pool from '../db';
+import aiNewsPool from '../aiNewsDb';
 import { AuthRequest, requireAuth } from '../middleware/requireAuth';
-import { curateAiNews } from '../services/aiNewsCurator';
 
 const router = Router();
 
@@ -10,41 +10,57 @@ const router = Router();
 router.get('/', requireAuth, async (req: AuthRequest, res) => {
   const { type, all } = req.query;
   try {
-    let query = `SELECT * FROM agency_news WHERE 1=1`;
-    const params: any[] = [];
+    const fetchInternal = type === 'internal' || !type;
+    const fetchExternal = type === 'external' || !type;
     
-    // Default to only active news unless specifically requested
+    let combinedNews: any[] = [];
+
+    // 1. Fetch Internal News
+    if (fetchInternal) {
+      let query = `SELECT * FROM agency_news WHERE type = 'internal'`;
+      if (all !== 'true') {
+        query += ` AND is_active = true AND publish_date <= NOW()`;
+      }
+      query += ` ORDER BY publish_date DESC`;
+      if (all !== 'true') {
+         query += ` LIMIT 50`;
+      }
+      const { rows } = await pool.query(query);
+      combinedNews = combinedNews.concat(rows);
+    }
+
+    // 2. Fetch External AI News
+    if (fetchExternal) {
+      // For external we just take the latest 50
+      let query = `SELECT * FROM ai_news ORDER BY published_at DESC NULLS LAST, discovered_at DESC LIMIT 50`;
+      const { rows } = await aiNewsPool.query(query);
+      
+      const mappedExternalNews = rows.map((row: any) => ({
+        id: `ext-${row.id}`, // prefix to avoid id collision
+        title: row.title,
+        content: `**Kategorie:** ${row.category} | **Quelle:** [${row.source_name}](${row.source_url})\n\n**Zusammenfassung:**\n${row.summary}\n\n**Bedeutung:**\n${row.significance}`,
+        type: 'external',
+        publish_date: row.published_at || row.discovered_at,
+        is_active: true,
+        created_at: row.discovered_at,
+        updated_at: row.discovered_at,
+      }));
+      
+      combinedNews = combinedNews.concat(mappedExternalNews);
+    }
+
+    // Sort combined by publish_date DESC
+    combinedNews.sort((a, b) => {
+      const dateA = new Date(a.publish_date || a.created_at).getTime();
+      const dateB = new Date(b.publish_date || b.created_at).getTime();
+      return dateB - dateA;
+    });
+
     if (all !== 'true') {
-      query += ` AND is_active = true AND publish_date <= NOW()`;
+      combinedNews = combinedNews.slice(0, 50); // Keep overall limit
     }
 
-    if (type === 'internal' || type === 'external') {
-      params.push(type);
-      query += ` AND type = $${params.length}`;
-    }
-
-    query += ` ORDER BY publish_date DESC`;
-    if (all !== 'true') {
-       query += ` LIMIT 50`; // Limit to latest 50 for regular feed
-    }
-
-    const { rows } = await pool.query(query, params);
-
-    // Auto-Curate Background Task
-    // If we're fetching the standard dashboard feed, check if we lack today's AI news.
-    if (all !== 'true' && (!type || type === 'external')) {
-       const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
-       const hasRecentAiNews = rows.some((r: any) => 
-          r.type === 'external' && new Date(r.publish_date).getTime() > twentyFourHoursAgo
-       );
-       if (!hasRecentAiNews) {
-          // Trigger curation in the background so we don't block the dashboard loading!
-          console.log('[News] No recent AI news found. Triggering background curation...');
-          curateAiNews().catch(err => console.error('[News] Auto-curation failed:', err));
-       }
-    }
-
-    res.json(rows);
+    res.json(combinedNews);
   } catch (err: any) {
     console.error('Error fetching news:', err);
     res.status(500).json({ error: 'Failed to fetch news' });
@@ -59,12 +75,15 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  // We only allow creating internal news now, as external comes from ai_news db.
+  const actualType = type === 'external' ? 'internal' : type;
+
   try {
     const { rows } = await pool.query(
       `INSERT INTO agency_news (title, content, type, publish_date, is_active)
        VALUES ($1, $2, $3, COALESCE($4, NOW()), COALESCE($5, TRUE))
        RETURNING *`,
-      [title, content, type, publish_date || null, is_active ?? true]
+      [title, content, actualType, publish_date || null, is_active ?? true]
     );
     res.status(201).json(rows[0]);
   } catch (err: any) {
@@ -73,21 +92,15 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-// POST /api/news/curate (Trigger AI Curated News)
-router.post('/curate', requireAuth, async (req: AuthRequest, res) => {
-  try {
-    const news = await curateAiNews();
-    res.status(200).json({ message: 'News curated successfully', news });
-  } catch (err: any) {
-    console.error('Error curating news:', err);
-    res.status(500).json({ error: 'Failed to curate news: ' + err.message });
-  }
-});
-
 // PUT /api/news/:id
 router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
   const { id } = req.params;
   const { title, content, type, publish_date, is_active } = req.body;
+
+  // External news can't be edited here
+  if (typeof id === 'string' && id.startsWith('ext-')) {
+    return res.status(403).json({ error: 'External news cannot be edited from this interface.' });
+  }
 
   try {
     const { rows } = await pool.query(
@@ -114,6 +127,11 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
 // DELETE /api/news/:id
 router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
   const { id } = req.params;
+  
+  if (typeof id === 'string' && id.startsWith('ext-')) {
+    return res.status(403).json({ error: 'External news cannot be deleted from this interface.' });
+  }
+
   try {
     const { rowCount } = await pool.query(`DELETE FROM agency_news WHERE id = $1`, [id]);
     if (rowCount === 0) return res.status(404).json({ error: 'News not found' });

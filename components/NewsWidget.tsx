@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getToken } from '../lib/apiClient';
-import { Newspaper, Sparkles, MessageCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { Newspaper, Sparkles, MessageCircle, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 interface NewsItem {
@@ -14,7 +14,6 @@ interface NewsItem {
 export const NewsWidget: React.FC = () => {
     const [news, setNews] = useState<NewsItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [curating, setCurating] = useState(false);
 
     const fetchNews = async () => {
         setLoading(true);
@@ -40,28 +39,6 @@ export const NewsWidget: React.FC = () => {
         fetchNews();
     }, []);
 
-    const handleCurateNews = async () => {
-        setCurating(true);
-        const token = getToken();
-        if (!token) return;
-        try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-            const res = await fetch(`${apiUrl}/api/news/curate`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                await fetchNews();
-            } else {
-                alert('Fehler beim Abrufen der KI-News.');
-            }
-        } catch (error) {
-            console.error("Error curating news:", error);
-        } finally {
-            setCurating(false);
-        }
-    };
-
     if (loading) {
         return (
             <div className="bg-card/60 border border-border rounded-2xl p-5 flex items-center justify-center h-48">
@@ -77,14 +54,6 @@ export const NewsWidget: React.FC = () => {
                     <Newspaper size={18} className="text-[#135bec]" />
                     News of the Day
                 </h2>
-                <button 
-                    onClick={handleCurateNews}
-                    disabled={curating}
-                    className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-[#135bec] disabled:opacity-50"
-                    title="Neue KI-News per Gemini suchen lassen"
-                >
-                    <RefreshCw size={16} className={curating ? 'animate-spin' : ''} />
-                </button>
             </div>
 
             <div className="overflow-y-auto flex-1 p-5 space-y-4">
