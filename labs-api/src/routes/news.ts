@@ -31,8 +31,8 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
 
     // 2. Fetch External AI News
     if (fetchExternal) {
-      // For external we just take the latest 50, filtered by quality score >= 0.5
-      let query = `SELECT id, title, summary, significance, source_name, source_url, published_at, discovered_at, category, title_original, thumbnail_url, quality_score FROM ai_news_public WHERE quality_score >= 0.5 ORDER BY published_at DESC NULLS LAST, discovered_at DESC LIMIT 50`;
+      // For external we just take the latest 50 from the high quality view
+      let query = `SELECT id, title, summary, significance, source_name, source_url, published_at, discovered_at, category, title_original, thumbnail_url, quality_score FROM ai_news_public_high_quality ORDER BY published_at DESC NULLS LAST, discovered_at DESC LIMIT 50`;
       const { rows } = await aiNewsPool.query(query);
       
       const mappedExternalNews = rows.map((row: any) => {
