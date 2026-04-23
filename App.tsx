@@ -48,7 +48,7 @@ const AppContent: React.FC = () => {
       <div className="flex items-center justify-center h-screen w-full bg-background text-foreground">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Wird geladen...</p>
         </div>
       </div>
     );
@@ -67,15 +67,15 @@ const AppContent: React.FC = () => {
           <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="material-icons-round text-4xl text-red-500">block</span>
           </div>
-          <h1 className="text-3xl font-bold">Access Restricted</h1>
+          <h1 className="text-3xl font-bold">Zugriff verweigert</h1>
           <p className="text-muted-foreground">
-            PX-Studio is an internal creative tool. Please use PX-Flow to manage your projects and approvals.
+            PX-Studio ist ein internes Kreativ-Tool. Bitte nutze PX-Flow, um deine Projekte und Freigaben zu verwalten.
           </p>
           <a
             href="https://flow.labs-schickeria.com"
             className="inline-block mt-4 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors"
           >
-            Go to PX-Flow
+            Zu PX-Flow
           </a>
         </div>
       </div>

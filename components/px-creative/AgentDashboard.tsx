@@ -8,6 +8,8 @@ export const AgentDashboard: React.FC = () => {
   const [newTitle, setNewTitle] = useState('');
   const [newOccasion, setNewOccasion] = useState('');
   const [newGuestCount, setNewGuestCount] = useState('');
+  const [newClientName, setNewClientName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleStartProject = async () => {
     const token = getToken();
@@ -17,11 +19,13 @@ export const AgentDashboard: React.FC = () => {
         title: newTitle,
         occasion: newOccasion,
         guest_count: parseInt(newGuestCount) || 0,
+        client_name: newClientName,
       });
       setIsCreating(false);
       setNewTitle('');
       setNewOccasion('');
       setNewGuestCount('');
+      setNewClientName('');
     } catch (err) {
       console.error(err);
       alert('Error creating project');
@@ -52,13 +56,25 @@ export const AgentDashboard: React.FC = () => {
           <p className="text-muted-foreground">Gen-AI powered concept generation and SCAMPER refinement.</p>
         </div>
         {!isCreating && (
-          <button 
-            onClick={() => setIsCreating(true)}
-            className="px-6 py-2 rounded-full bg-brand-600 hover:bg-brand-500 text-foreground font-medium flex items-center gap-2 transition-colors shadow-lg shadow-brand-500/20"
-          >
-            <span className="material-icons-round">add</span>
-            New Concept
-          </button>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">search</span>
+              <input 
+                type="text"
+                placeholder="Projekt oder Kunde suchen..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-64 bg-card/60 border border-border rounded-full pl-9 pr-4 py-2 text-sm text-foreground focus:outline-none focus:border-brand-500 transition-colors"
+              />
+            </div>
+            <button 
+              onClick={() => setIsCreating(true)}
+              className="px-6 py-2 rounded-full bg-brand-600 hover:bg-brand-500 text-foreground font-medium flex items-center gap-2 transition-colors shadow-lg shadow-brand-500/20"
+            >
+              <span className="material-icons-round">add</span>
+              New Concept
+            </button>
+          </div>
         )}
       </div>
 
@@ -101,6 +117,16 @@ export const AgentDashboard: React.FC = () => {
                 className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
               />
             </div>
+            <div>
+              <label className="block text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Client Name</label>
+              <input 
+                type="text" 
+                value={newClientName} 
+                onChange={(e) => setNewClientName(e.target.value)}
+                placeholder="e.g. BMW, Nike"
+                className="w-full bg-black/30 border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:border-brand-500 transition-colors"
+              />
+            </div>
           </div>
           <div className="flex gap-3 justify-end">
             <button 
@@ -132,16 +158,23 @@ export const AgentDashboard: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((p) => (
+          {projects
+            .filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()) || (p.client_name && p.client_name.toLowerCase().includes(searchQuery.toLowerCase())))
+            .map((p) => (
             <div 
               key={p.id}
               onClick={() => handleOpenProject(p.id)}
               className="group bg-card rounded-2xl border border-border/50 cursor-pointer hover:border-brand-500/50 hover:-translate-y-1 transition-all overflow-hidden p-6 relative"
             >
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-bold text-foreground group-hover:text-brand-400 transition-colors">{p.title}</h3>
-                <button 
-                  onClick={(e) => handleDeleteProject(p.id, e)}
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <span className="text-xs font-bold uppercase text-muted-foreground mb-1 block">
+                      {p.client_name || 'Intern'}
+                    </span>
+                    <h3 className="text-lg font-bold text-foreground group-hover:text-brand-400 transition-colors">{p.title}</h3>
+                  </div>
+                  <button 
+                    onClick={(e) => handleDeleteProject(p.id, e)}
                   className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition-all"
                 >
                   <span className="material-icons-round text-sm">delete</span>
@@ -166,12 +199,12 @@ export const AgentDashboard: React.FC = () => {
               <div className="flex items-center justify-between border-t border-border/50 pt-4">
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${
-                    p.current_step === 'finished' ? 'bg-green-500' :
-                    p.current_step === 'scamper' ? 'bg-purple-500' :
-                    p.current_step === 'matrix' ? 'bg-blue-500' : 'bg-brand-500'
+                    p.status === 'approved' || p.status === 'delivered' ? 'bg-green-500' :
+                    p.status === 'review' ? 'bg-purple-500' :
+                    p.status === 'drafting' ? 'bg-blue-500' : 'bg-brand-500'
                   } shadow-[0_0_8px_currentColor]`} />
                   <span className="text-xs uppercase tracking-wider font-bold text-foreground/90">
-                    Step: {p.current_step}
+                    Status: {p.status}
                   </span>
                 </div>
                 <span className="material-icons-round text-muted-foreground group-hover:text-brand-500 group-hover:translate-x-1 transition-all">

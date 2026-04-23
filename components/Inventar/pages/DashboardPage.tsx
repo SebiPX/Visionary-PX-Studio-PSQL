@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import {
   Package, AlertCircle, CheckCircle, RefreshCw,
-  ExternalLink, Calendar, ArrowRight, Clock, Settings, Key
+  ExternalLink, Calendar, ArrowRight, Clock, Settings, Key, Sparkles, ChevronDown
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import type { InventarItem, InventarLoan, InternalLink, Verleihschein, Login } from '../types'
@@ -100,6 +100,7 @@ export function DashboardPage({
 }: DashboardPageProps) {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [secondaryOpen, setSecondaryOpen] = useState(true)
 
   // Stats
   const stats = useMemo(() => ({
@@ -185,174 +186,212 @@ export function DashboardPage({
           </button>
         </div>
 
-        {/* ── Pinned Logins (if any) ─────────────────────────────────────── */}
-        {pinnedLogins.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-                <Key size={16} className="text-violet-400" />
-                Meine Logins
-              </h2>
-              <button onClick={() => navigate('/logins')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
-                Alle <ArrowRight size={12} />
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-              {pinnedLogins.map(login => <PinnedLoginCard key={login.id} login={login} />)}
-            </div>
-          </section>
-        )}
-
-        {/* ── Internal Links ─────────────────────────────────────────────── */}
-        {config.show_links && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-                <ExternalLink size={16} className="text-primary" />
-                Interne Links
-              </h2>
-              <button onClick={() => navigate('/links')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
-                Alle verwalten <ArrowRight size={12} />
-              </button>
-            </div>
-            {filteredLinks.length === 0 ? (
-              <p className="text-muted-foreground text-sm">Keine Links für die gewählten Kategorien.</p>
-            ) : (
-              <div className="space-y-5">
-                {linksByCategory.map(([category, categoryLinks]) => (
-                  <div key={category}>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">{category}</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                      {categoryLinks.map(link => <LinkCard key={link.id} link={link} />)}
-                    </div>
-                  </div>
-                ))}
+        {/* ── Heute wichtig (Top Level) ──────────────────────────────────── */}
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Sparkles size={20} className="text-primary" />
+            Heute wichtig
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Card 1: Top Tasks */}
+            {config.show_user_tasks && (
+              <div className="flex flex-col h-full">
+                <UserTasksWidget />
               </div>
             )}
-          </section>
-        )}
 
-        {/* ── Calendar + Active Loans ─────────────────────────────────────── */}
-        {showMiddleRow && (
-          <div className={`grid grid-cols-1 gap-6 ${config.show_calendar && config.show_loans ? 'lg:grid-cols-2' : ''}`}>
-
-            {config.show_calendar && (
-              <section className="bg-card/60 border border-border rounded-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-                  <h2 className="font-semibold text-foreground flex items-center gap-2">
-                    <Calendar size={16} className="text-violet-400" />
-                    Kommende Ausleihen
-                    {upcomingScheine.length > 0 && (
-                      <span className="text-xs bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full border border-violet-500/20">
-                        {upcomingScheine.length}
-                      </span>
-                    )}
-                  </h2>
-                  <button onClick={() => navigate('/kalender')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
-                    Kalender <ArrowRight size={12} />
-                  </button>
-                </div>
-                {upcomingScheine.length === 0 ? (
-                  <p className="text-muted-foreground text-sm px-5 py-4">Keine Ausleihen in den nächsten 14 Tagen.</p>
-                ) : (
-                  <div className="divide-y divide-slate-700/60">
-                    {upcomingScheine.map(s => (
-                      <div key={s.id} className="px-5 py-3 flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-violet-500/15 border border-violet-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                          <Calendar size={15} className="text-violet-300" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm text-foreground font-medium truncate">
-                            {s.borrower_type === 'extern'
-                              ? (s.extern_name || s.extern_firma || 'Extern')
-                              : (s.profile?.full_name || 'Intern')}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{formatDate(s.abholzeit)}</p>
-                          {s.zweck && <p className="text-xs text-muted-foreground truncate">{s.zweck}</p>}
-                        </div>
-                        <span className="text-xs text-violet-400 shrink-0 font-medium">{daysUntil(s.abholzeit)}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </section>
+            {/* Card 2: Top News */}
+            {config.show_news && (
+              <div className="flex flex-col h-full">
+                <NewsWidget />
+              </div>
             )}
 
-            {config.show_loans && (
-              <section className="bg-card/60 border border-border rounded-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-                  <h2 className="font-semibold text-foreground flex items-center gap-2">
-                    <Clock size={16} className="text-amber-400" />
-                    Aktive Ausleihen
-                    {activeLoans.length > 0 && (
-                      <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/20">
-                        {loans.filter(l => !l.zurueck_am).length}
-                      </span>
-                    )}
-                  </h2>
-                  <button onClick={() => navigate('/verleih')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
+            {/* Card 3: Top Links */}
+            {config.show_links && (
+              <div className="bg-card/60 border border-border rounded-2xl flex flex-col max-h-[500px]">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-card/80">
+                  <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <ExternalLink size={18} className="text-[#135bec]" />
+                    Top Links
+                  </h3>
+                  <button onClick={() => navigate('/links')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
                     Alle <ArrowRight size={12} />
                   </button>
                 </div>
-                {activeLoans.length === 0 ? (
-                  <p className="text-muted-foreground text-sm px-5 py-4">Keine aktiven Ausleihen.</p>
-                ) : (
-                  <div className="divide-y divide-slate-700/60">
-                    {activeLoans.map(loan => {
-                      const overdue = loan.zurueck_bis && new Date(loan.zurueck_bis) < new Date()
-                      return (
-                        <div key={loan.id} className="px-5 py-3 flex items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="text-sm text-foreground font-medium truncate">
-                              {loan.item?.geraet}
-                              <span className="text-muted-foreground font-normal"> → {loan.profile?.full_name || loan.mitarbeiter_name}</span>
-                            </p>
-                            <p className="text-xs text-muted-foreground">{loan.item?.px_nummer}{loan.zweck ? ` · ${loan.zweck}` : ''}</p>
-                          </div>
-                          {overdue && <span className="text-xs text-red-400 shrink-0 font-semibold">Überfällig</span>}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
+                <div className="overflow-y-auto p-4 space-y-3">
+                   {filteredLinks.slice(0, 6).map(link => <LinkCard key={link.id} link={link} />)}
+                   {filteredLinks.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Keine Links gefunden.</p>}
+                </div>
+              </div>
+            )}
+            
+          </div>
+        </section>
+
+        {/* ── Sekundäre Bereiche (Einklappbar) ───────────────────────────── */}
+        <details className="group bg-card/30 border border-border rounded-2xl overflow-hidden" open={secondaryOpen} onToggle={(e) => setSecondaryOpen((e.target as HTMLDetailsElement).open)}>
+          <summary className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/30 transition-colors list-none font-semibold text-foreground">
+            Sekundäre Bereiche
+            <ChevronDown size={18} className="text-muted-foreground group-open:rotate-180 transition-transform" />
+          </summary>
+          
+          <div className="p-5 space-y-8 border-t border-border">
+            
+            {/* ── Pinned Logins (if any) ─────────────────────────────────────── */}
+            {pinnedLogins.length > 0 && (
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                    <Key size={16} className="text-violet-400" />
+                    Meine Logins
+                  </h2>
+                  <button onClick={() => navigate('/logins')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
+                    Alle <ArrowRight size={12} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                  {pinnedLogins.map(login => <PinnedLoginCard key={login.id} login={login} />)}
+                </div>
               </section>
             )}
+
+            {/* ── Calendar + Active Loans ─────────────────────────────────────── */}
+            {showMiddleRow && (
+              <div className={`grid grid-cols-1 gap-6 ${config.show_calendar && config.show_loans ? 'lg:grid-cols-2' : ''}`}>
+
+                {config.show_calendar && (
+                  <section className="bg-card/60 border border-border rounded-2xl overflow-hidden">
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+                      <h2 className="font-semibold text-foreground flex items-center gap-2">
+                        <Calendar size={16} className="text-violet-400" />
+                        Kommende Ausleihen
+                        {upcomingScheine.length > 0 && (
+                          <span className="text-xs bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full border border-violet-500/20">
+                            {upcomingScheine.length}
+                          </span>
+                        )}
+                      </h2>
+                      <button onClick={() => navigate('/kalender')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
+                        Kalender <ArrowRight size={12} />
+                      </button>
+                    </div>
+                    {upcomingScheine.length === 0 ? (
+                      <p className="text-muted-foreground text-sm px-5 py-4">Keine Ausleihen in den nächsten 14 Tagen.</p>
+                    ) : (
+                      <div className="divide-y divide-border/60">
+                        {upcomingScheine.map(s => (
+                          <div key={s.id} className="px-5 py-3 flex items-start gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-violet-500/15 border border-violet-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                              <Calendar size={15} className="text-violet-300" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm text-foreground font-medium truncate">
+                                {s.borrower_type === 'extern'
+                                  ? (s.extern_name || s.extern_firma || 'Extern')
+                                  : (s.profile?.full_name || 'Intern')}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{formatDate(s.abholzeit)}</p>
+                              {s.zweck && <p className="text-xs text-muted-foreground truncate">{s.zweck}</p>}
+                            </div>
+                            <span className="text-xs text-violet-400 shrink-0 font-medium">{daysUntil(s.abholzeit)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                {config.show_loans && (
+                  <section className="bg-card/60 border border-border rounded-2xl overflow-hidden">
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+                      <h2 className="font-semibold text-foreground flex items-center gap-2">
+                        <Clock size={16} className="text-amber-400" />
+                        Aktive Ausleihen
+                        {activeLoans.length > 0 && (
+                          <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/20">
+                            {loans.filter(l => !l.zurueck_am).length}
+                          </span>
+                        )}
+                      </h2>
+                      <button onClick={() => navigate('/verleih')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
+                        Alle <ArrowRight size={12} />
+                      </button>
+                    </div>
+                    {activeLoans.length === 0 ? (
+                      <p className="text-muted-foreground text-sm px-5 py-4">Keine aktiven Ausleihen.</p>
+                    ) : (
+                      <div className="divide-y divide-border/60">
+                        {activeLoans.map(loan => {
+                          const overdue = loan.zurueck_bis && new Date(loan.zurueck_bis) < new Date()
+                          return (
+                            <div key={loan.id} className="px-5 py-3 flex items-center justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-sm text-foreground font-medium truncate">
+                                  {loan.item?.geraet}
+                                  <span className="text-muted-foreground font-normal"> → {loan.profile?.full_name || loan.mitarbeiter_name}</span>
+                                </p>
+                                <p className="text-xs text-muted-foreground">{loan.item?.px_nummer}{loan.zweck ? ` · ${loan.zweck}` : ''}</p>
+                              </div>
+                              {overdue && <span className="text-xs text-red-400 shrink-0 font-semibold">Überfällig</span>}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </section>
+                )}
+              </div>
+            )}
+
+            {/* ── Inventar Stats ─────────────────────────────────────────────── */}
+            {config.show_inventory_stats && (
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-sm font-semibold text-muted-foreground flex items-center gap-2 uppercase tracking-widest">
+                    <Package size={14} /> Inventar Übersicht
+                  </h2>
+                  <button onClick={() => navigate('/inventar')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
+                    Inventar öffnen <ArrowRight size={12} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <StatPill label="Gesamt Artikel" value={stats.total} />
+                  <StatPill label="Verfügbar" value={stats.available} />
+                  <StatPill label="Ausgeliehen" value={stats.loaned} />
+                  <StatPill label="Defekt / Fehlt" value={stats.defective} alert={stats.defective > 0} />
+                </div>
+              </section>
+            )}
+
+            {/* ── Alle Links (Sekundär) ─────────────────────────────────────────────── */}
+            {config.show_links && filteredLinks.length > 6 && (
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                    <ExternalLink size={16} className="text-primary" />
+                    Alle internen Links
+                  </h2>
+                  <button onClick={() => navigate('/links')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
+                    Alle verwalten <ArrowRight size={12} />
+                  </button>
+                </div>
+                <div className="space-y-5">
+                  {linksByCategory.map(([category, categoryLinks]) => (
+                    <div key={category}>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">{category}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                        {categoryLinks.map(link => <LinkCard key={link.id} link={link} />)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
           </div>
-        )}
-
-        {/* ── Inventar Stats ─────────────────────────────────────────────── */}
-        {config.show_inventory_stats && (
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-muted-foreground flex items-center gap-2 uppercase tracking-widest">
-                <Package size={14} /> Inventar Übersicht
-              </h2>
-              <button onClick={() => navigate('/inventar')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
-                Inventar öffnen <ArrowRight size={12} />
-              </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatPill label="Gesamt Artikel" value={stats.total} />
-              <StatPill label="Verfügbar" value={stats.available} />
-              <StatPill label="Ausgeliehen" value={stats.loaned} />
-              <StatPill label="Defekt / Fehlt" value={stats.defective} alert={stats.defective > 0} />
-            </div>
-          </section>
-        )}
-
-        {/* ── User Tasks (PX-Flow) ────────────────────────────────────────── */}
-        {config.show_user_tasks && (
-          <section>
-            <UserTasksWidget />
-          </section>
-        )}
-
-        {/* ── News ───────────────────────────────────────────────────────── */}
-        {config.show_news && (
-          <section>
-            <NewsWidget />
-          </section>
-        )}
+        </details>
 
       </div>
 
@@ -369,3 +408,4 @@ export function DashboardPage({
     </>
   )
 }
+

@@ -47,7 +47,8 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
           is_active: true,
           created_at: row.discovered_at,
           updated_at: row.discovered_at,
-          thumbnail: row.thumbnail_url
+          thumbnail: row.thumbnail_url,
+          quality_score: row.quality_score
         };
       });
       

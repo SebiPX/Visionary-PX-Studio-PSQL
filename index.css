@@ -5,33 +5,46 @@
 @layer base {
   :root {
     /* 
-      PIXELSCHICKERIA DESIGN SYSTEM 
+      PIXELSCHICKERIA DESIGN SYSTEM - TOKENS
       Light Mode
     */
-    --background: 210 20% 98%;        /* Leichtes Grau/Off-White für den Hintergrund, damit Cards wirken */
-    --foreground: 224 71% 4%;         /* Sehr dunkles Blau-Schwarz */
+    --background: 210 20% 98%;        /* Surface Level 0 (Base Background) */
+    --foreground: 224 71% 4%;         
     
     /* CI Colors */
     --primary: 252 75% 51%;           /* Knalliges 3D PX Blau/Lila */
-    --primary-foreground: 210 40% 98%;/* Weiß für Text auf Primary */
+    --primary-foreground: 210 40% 98%;
     
     --accent: 330 100% 50%;           /* Lebendiges Pink/Magenta */
     --accent-foreground: 210 40% 98%;
     
-    /* Layout & Surface Colors */
-    --card: 0 0% 100%;
+    /* Secondary Accent for Gradients/Hover */
+    --secondary-accent: 280 80% 60%;
+    
+    /* Layout & Surface Colors (Elevations) */
+    --card: 0 0% 100%;                /* Surface Level 1 */
+    --card-hover: 210 20% 96%;        /* Surface Level 1 Hover */
     --card-foreground: 224 71% 4%;
-    --popover: 0 0% 100%;
+    
+    --popover: 0 0% 100%;             /* Surface Level 2 (Elevated) */
     --popover-foreground: 224 71% 4%;
     
-    --muted: 220 14% 96%;             /* Leichtes Grau für Backgrounds */
-    --muted-foreground: 220 9% 46%;   /* Gedämpfter Text */
+    --muted: 220 14% 96%;             
+    --muted-foreground: 220 9% 46%;   
     
+    /* Borders & Dividers */
     --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 252 75% 51%;
+    --divider: 220 13% 85%;           /* Etwas präsenterer Divider */
     
-    --radius: 0.75rem;                /* Weichere, moderne Ecken */
+    /* Inputs & Forms */
+    --input: 220 13% 91%;
+    --ring: 252 75% 51%;              /* Primary color for focus rings */
+    --ring-offset: 210 20% 98%;       /* Background color for offset */
+    
+    /* Spacing & Shapes */
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
   }
  
   .dark {
@@ -42,24 +55,33 @@
     --foreground: 210 40% 98%;
     
     /* CI Colors */
-    --primary: 252 80% 65%;           /* Etwas helleres Blau für besseren Kontrast */
-    --primary-foreground: 210 40% 98%;/* Immer weiß für Text auf Primary */
+    --primary: 252 80% 65%;           /* Helles Neon-Blau */
+    --primary-foreground: 210 40% 98%;
     
-    --accent: 330 90% 65%;
+    --accent: 330 90% 65%;            /* Neon Pink */
     --accent-foreground: 224 71% 4%;
     
-    /* Layout & Surface Colors */
-    --card: 225 25% 12%;              /* Leicht abgehobener Dark-Background */
+    --secondary-accent: 280 80% 70%;
+    
+    /* Layout & Surface Colors (Elevations) */
+    --card: 225 25% 12%;              /* Surface Level 1 */
+    --card-hover: 225 25% 15%;        /* Surface Level 1 Hover */
     --card-foreground: 210 40% 98%;
-    --popover: 225 25% 12%;
+    
+    --popover: 225 25% 16%;           /* Surface Level 2 */
     --popover-foreground: 210 40% 98%;
     
     --muted: 225 25% 15%;
     --muted-foreground: 215 20% 65%;
     
+    /* Borders & Dividers */
     --border: 225 25% 18%;
+    --divider: 225 25% 25%;
+    
+    /* Inputs & Forms */
     --input: 225 25% 18%;
     --ring: 252 80% 65%;
+    --ring-offset: 225 30% 8%;
   }
 }
 
@@ -73,8 +95,36 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  
+  /* Auto-growing Textareas globally */
   textarea {
     field-sizing: content;
     min-height: 2.5rem;
+  }
+  
+  /* Global Divider Style */
+  hr {
+    @apply border-divider border-t-2 opacity-50;
+  }
+}
+
+@layer components {
+  /* Pixelschickeria Glass Card (Dark/Light friendly) */
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-md border border-border shadow-sm transition-all duration-300;
+  }
+  
+  .glass-card:hover {
+    @apply bg-card-hover/80 border-primary/40 shadow-md shadow-primary/5 transform -translate-y-[1px];
+  }
+
+  /* Global Focus Ring (Accessibility + CI) */
+  .focus-ring {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-[var(--ring-offset)] transition-all duration-200;
+  }
+  
+  /* Button Hover Utilities */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 }

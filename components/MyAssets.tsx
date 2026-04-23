@@ -22,13 +22,13 @@ interface MyAssetsProps {
     isActive: boolean;
 }
 
-const TABS = ['All', 'Images', 'Videos', 'Audio', 'Thumbnails', 'Sketches', '3D', 'Texts'];
+const TABS = ['Alle', 'Bilder', 'Videos', 'Audio', 'Thumbnails', 'Skizzen', '3D', 'Texte'];
 
 export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isActive }) => {
     const { profile } = useAuth();
     const { loadHistory, deleteContent, loading } = useGeneratedContent();
     const [items, setItems] = useState<ContentItem[]>([]);
-    const [activeTab, setActiveTab] = useState('All');
+    const [activeTab, setActiveTab] = useState('Alle');
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     const [previewItem, setPreviewItem] = useState<ContentItem | null>(null);
@@ -115,19 +115,19 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
 
     // Derived states
     const filteredItems = useMemo(() => {
-        if (activeTab === 'All') return items;
-        if (activeTab === 'Images') return items.filter(i => i.type === 'IMAGE');
+        if (activeTab === 'Alle') return items;
+        if (activeTab === 'Bilder') return items.filter(i => i.type === 'IMAGE');
         if (activeTab === 'Videos') return items.filter(i => i.type === 'VIDEO');
         if (activeTab === 'Audio') return items.filter(i => ['VOICE', 'MUSIC', 'I2AUDIO'].includes(i.type));
         if (activeTab === 'Thumbnails') return items.filter(i => i.type === 'THUMBNAIL');
-        if (activeTab === 'Sketches') return items.filter(i => i.type === 'SKETCH');
+        if (activeTab === 'Skizzen') return items.filter(i => i.type === 'SKETCH');
         if (activeTab === '3D') return items.filter(i => i.type === '3D');
-        if (activeTab === 'Texts') return items.filter(i => i.type === 'TEXT');
+        if (activeTab === 'Texte') return items.filter(i => i.type === 'TEXT');
         return items;
     }, [items, activeTab]);
 
     const handleDelete = async (item: ContentItem) => {
-        if (!confirm('Are you sure you want to delete this item?')) return;
+        if (!confirm('Möchtest du dieses Asset wirklich löschen?')) return;
         
         let typeParam = item.type.toLowerCase();
         if (['VOICE', 'MUSIC', 'I2AUDIO'].includes(item.type)) {
@@ -136,17 +136,17 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
         
         const res = await deleteContent(item.id, typeParam as any);
         if (res.success) {
-            toast.success('Asset deleted successfully');
+            toast.success('Asset erfolgreich gelöscht');
             if (previewItem?.id === item.id) setPreviewItem(null);
             setRefreshTrigger(prev => prev + 1);
         } else {
-            toast.error('Failed to delete asset');
+            toast.error('Fehler beim Löschen des Assets');
         }
     };
 
     const handleDownload = async (url: string, filename: string) => {
         try {
-            const toastId = toast.loading('Downloading...');
+            const toastId = toast.loading('Wird heruntergeladen...');
             const response = await fetch(url);
             const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
@@ -158,9 +158,9 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
             document.body.removeChild(a);
             URL.revokeObjectURL(blobUrl);
             toast.dismiss(toastId);
-            toast.success('Download complete');
+            toast.success('Download abgeschlossen');
         } catch (error) {
-            toast.error('Failed to download file');
+            toast.error('Fehler beim Herunterladen');
             console.error(error);
         }
     };
@@ -186,7 +186,7 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
                 <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0 bg-black">
                     <div className="flex items-center gap-3">
                         <span className="text-white/60 text-sm font-medium uppercase tracking-widest">{previewItem.type}</span>
-                        <h3 className="text-white font-medium max-w-xl truncate">{previewItem.title || 'Untitled Generation'}</h3>
+                        <h3 className="text-white font-medium max-w-xl truncate">{previewItem.title || 'Unbenannte Generierung'}</h3>
                     </div>
                     <div className="flex items-center gap-2">
                         {previewItem.type !== 'TEXT' && (
@@ -220,7 +220,7 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
                             <img src={previewItem.url} alt={previewItem.title} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" />
                             {previewItem.type === '3D' && previewItem.model_url && (
                                 <a href={previewItem.model_url} target="_blank" rel="noopener noreferrer" className="mt-4 px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors flex items-center gap-2">
-                                    <span className="material-icons-round">open_in_new</span> Provide 3D Model source
+                                    <span className="material-icons-round">open_in_new</span> 3D Modell Quelle öffnen
                                 </a>
                             )}
                         </div>
@@ -259,10 +259,10 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
                         <div>
                             <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                                 <span className="material-icons-round text-primary text-3xl">photo_library</span>
-                                My Assets
+                                Meine Assets
                             </h1>
                             <p className="text-muted-foreground mt-1 text-sm">
-                                Manage, preview, and download all your AI-generated content.
+                                Verwalte, betrachte und lade deine generierten Inhalte herunter.
                             </p>
                         </div>
                         <button 
@@ -270,7 +270,7 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
                             className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 text-foreground text-sm font-medium rounded-lg transition-colors"
                         >
                             <span className="material-icons-round text-[18px]">refresh</span>
-                            Refresh
+                            Aktualisieren
                         </button>
                     </div>
 
@@ -300,7 +300,7 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
                         <div className="flex items-center justify-center py-20 w-full h-64">
                             <div className="text-center">
                                 <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                <p className="text-muted-foreground font-medium">Loading your galaxy of creations...</p>
+                                <p className="text-muted-foreground font-medium">Deine Generierungen werden geladen...</p>
                             </div>
                         </div>
                     ) : filteredItems.length === 0 ? (
@@ -309,11 +309,11 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
                                 <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-border">
                                     <span className="material-icons-round text-4xl text-muted-foreground/50">sentiment_dissatisfied</span>
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground mb-2">No assets found</h3>
+                                <h3 className="text-xl font-bold text-foreground mb-2">Keine Assets gefunden</h3>
                                 <p className="text-muted-foreground/80">
-                                    {activeTab === 'All' 
-                                        ? 'You have not created any assets yet. Head over to the AI Studio tools to start generating!' 
-                                        : `You don't have any ${activeTab.toLowerCase()} yet.`}
+                                    {activeTab === 'Alle' 
+                                        ? 'Du hast noch keine Assets erstellt. Nutze das KI Studio, um etwas Neues zu erschaffen!' 
+                                        : `Du hast noch keine Inhalte in der Kategorie ${activeTab} erstellt.`}
                                 </p>
                             </div>
                         </div>
@@ -368,7 +368,7 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
                                                     }}
                                                 >
                                                     <span className="material-icons-round text-[16px]">visibility</span>
-                                                    Preview
+                                                    Vorschau
                                                 </button>
                                             </div>
                                         </div>
@@ -392,7 +392,7 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
                                                 </span>
                                                 <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{item.timestamp}</span>
                                             </div>
-                                            <p className="text-xs font-medium text-foreground line-clamp-2 leading-tight" title={item.title}>{item.title || 'Untitled'}</p>
+                                            <p className="text-xs font-medium text-foreground line-clamp-2 leading-tight" title={item.title}>{item.title || 'Ohne Titel'}</p>
                                         </div>
                                         
                                         {/* Actions Footer */}

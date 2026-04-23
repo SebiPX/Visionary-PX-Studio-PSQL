@@ -92,9 +92,9 @@ export const UserTasksWidget: React.FC = () => {
             <div className="bg-card/60 border border-border rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-4">
                     <LayoutList size={18} className="text-blue-400" />
-                    <h2 className="font-semibold text-foreground">Meine ProjectFlow Tasks</h2>
+                    <h2 className="font-semibold text-foreground">Meine Aufgaben</h2>
                 </div>
-                <p className="text-sm text-muted-foreground text-center py-4">Keine offenen Tasks zugewiesen. Gut gemacht!</p>
+                <p className="text-sm text-muted-foreground text-center py-4">Keine offenen Aufgaben zugewiesen. Gut gemacht!</p>
             </div>
         );
     }
@@ -105,7 +105,7 @@ export const UserTasksWidget: React.FC = () => {
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                     <h2 className="font-semibold text-foreground flex items-center gap-2">
                         <LayoutList size={18} className="text-blue-400" />
-                        Meine ProjectFlow Tasks
+                        Meine Aufgaben
                         <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/20">
                             {tasks.length}
                         </span>
@@ -139,7 +139,7 @@ export const UserTasksWidget: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                        <span className="truncate max-w-[150px]">{task.project?.title || 'Unknown Project'}</span>
+                                        <span className="truncate max-w-[150px]">{task.project?.title || 'Unbekanntes Projekt'}</span>
                                         {task.due_date && (
                                             <div className={`flex items-center gap-1 font-medium ${isOverdue ? 'text-red-400' : 'text-muted-foreground'}`}>
                                                 <Clock size={12} />
@@ -156,10 +156,10 @@ export const UserTasksWidget: React.FC = () => {
                                             onChange={(e) => handleStatusChange(task.id, e.target.value)}
                                             className={`appearance-none text-xs font-semibold px-2.5 py-1 pr-6 rounded-md border cursor-pointer outline-none transition-all ${colorClass}`}
                                         >
-                                            <option value="todo">To Do</option>
-                                            <option value="in_progress">In Progress</option>
-                                            <option value="review">Review</option>
-                                            <option value="done">Done</option>
+                                            <option value="todo">Offen</option>
+                                            <option value="in_progress">In Bearbeitung</option>
+                                            <option value="review">Freigabe</option>
+                                            <option value="done">Abgeschlossen</option>
                                         </select>
                                         <ChevronDown size={12} className={`absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-70 ${colorClass.split(' ')[0]}`} />
                                     </div>

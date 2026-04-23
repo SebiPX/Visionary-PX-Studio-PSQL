@@ -173,6 +173,15 @@ const groupChatHistory = (sessions: ChatSession[]): GroupedSessions => {
   return result;
 };
 
+const QUICK_PROMPTS = [
+  { icon: 'edit_document', title: 'Case-Text', prompt: 'Schreibe einen kurzen Case-Study-Text über ein erfolgreiches Social-Media-Projekt. Zielgruppe: B2B-Kunden.' },
+  { icon: 'campaign', title: 'Pitch-Hook', prompt: 'Formuliere 3 knackige Hook-Lines für einen Pitch bei einem neuen Fashion-Kunden. Fokus auf Gen Z.' },
+  { icon: 'event', title: 'Event-Konzept', prompt: 'Erstelle eine kreative Outline für ein exklusives Influencer-Event (Sommer, Outdoor, Rooftop).' },
+  { icon: 'article', title: 'Blog-Artikel', prompt: 'Entwirf eine Gliederung für einen Blog-Artikel zum Thema "Die Zukunft von KI im Agentur-Alltag".' },
+  { icon: 'alternate_email', title: 'Newsletter', prompt: 'Verfasse einen kurzen, sympathischen Newsletter-Teaser für unser neues Agentur-Update.' },
+  { icon: 'psychology', title: 'Ideen-Brainstorming', prompt: 'Gib mir 5 kreative Content-Ideen für eine Kampagne zum Thema "Nachhaltigkeit im Alltag".' }
+];
+
 export const ChatBot: React.FC = () => {
   const { loadChatSessions } = useGeneratedContent();
   const [activePersona, setActivePersona] = useState<Persona>(PERSONAS[0]);
@@ -312,15 +321,16 @@ export const ChatBot: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSend = async () => {
-    if ((!inputText.trim() && !attachedFile) || isTyping) return;
+  const handleSend = async (overrideText?: string | React.MouseEvent) => {
+    const textToSend = typeof overrideText === 'string' ? overrideText : inputText;
+    if ((!textToSend.trim() && !attachedFile) || isTyping) return;
 
     // Temporarily save attached file and clear state
     const fileToProcess = attachedFile;
     setAttachedFile(null);
 
     // Initial message creation (will be updated if image is attached)
-    let userMsg: Message = { id: Date.now().toString(), role: 'user', text: inputText };
+    let userMsg: Message = { id: Date.now().toString(), role: 'user', text: textToSend };
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
     setIsTyping(true);
@@ -670,6 +680,28 @@ export const ChatBot: React.FC = () => {
               </div>
             </div>
           ))}
+          
+          {messages.length === 1 && !currentSessionId && (
+            <div className="mt-8 mb-4 animate-in fade-in duration-500">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 px-2">Quick-Start Prompts</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {QUICK_PROMPTS.map((qp, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSend(qp.prompt)}
+                    className="glass-card p-4 rounded-2xl text-left flex flex-col gap-2 hover:bg-primary/5 border border-border/50 hover:border-primary/30 transition-all group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                      <span className="material-icons-round text-sm">{qp.icon}</span>
+                    </div>
+                    <p className="text-sm font-bold text-foreground">{qp.title}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{qp.prompt}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {isTyping && (
             <div className="flex gap-4">
               <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-2 bg-primary text-primary-foreground">

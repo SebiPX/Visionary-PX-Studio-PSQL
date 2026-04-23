@@ -49,8 +49,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
       icon: 'grid_view',
       items: [
         { view: AppView.DASHBOARD, path: '/dashboard', icon: 'dashboard', label: 'Dashboard' },
-        { view: AppView.MY_ASSETS, icon: 'photo_library', label: 'My Assets' },
-        { view: AppView.NOTES, icon: 'edit_note', label: 'Notes' },
+        { view: AppView.MY_ASSETS, icon: 'photo_library', label: 'Meine Assets' },
+        { view: AppView.NOTES, icon: 'edit_note', label: 'Notizen' },
         { view: AppView.DASHBOARD, path: '/logins', icon: 'password', label: 'Logins' },
         { view: AppView.DASHBOARD, path: '/links', icon: 'link', label: 'Links' },
         ...(userProfile.role === 'admin' ? [
@@ -59,32 +59,32 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
       ],
     },
     {
-      label: 'AI Chat',
+      label: 'KI Chat',
       icon: 'forum',
       items: [
         { view: AppView.CHAT_BOT, icon: 'chat_bubble', label: 'Chat' },
       ],
     },
     {
-      label: 'AI Studio',
+      label: 'KI Studio',
       icon: 'auto_awesome',
       items: [
-        { view: AppView.IMAGE_GEN, icon: 'image', label: 'Image' },
+        { view: AppView.IMAGE_GEN, icon: 'image', label: 'Bilder' },
         { view: AppView.VIDEO_STUDIO, icon: 'videocam', label: 'Video' },
-        { view: AppView.VOICE_STUDIO, icon: 'record_voice_over', label: 'Voice' },
+        { view: AppView.VOICE_STUDIO, icon: 'record_voice_over', label: 'Sprache' },
         { view: AppView.TEXT_ENGINE, icon: 'description', label: 'Text' },
         { view: AppView.STORY_STUDIO, icon: 'movie_creation', label: 'Story' },
-        { view: AppView.SKETCH_STUDIO, icon: 'brush', label: 'Sketch' },
+        { view: AppView.SKETCH_STUDIO, icon: 'brush', label: 'Skizze' },
         { view: AppView.STUDIO_3D, icon: 'view_in_ar', label: '3D' },
-        { view: AppView.THUMBNAIL_ENGINE, icon: 'dashboard_customize', label: 'Thumb' },
+        { view: AppView.THUMBNAIL_ENGINE, icon: 'dashboard_customize', label: 'Thumbnails' },
         ...(userProfile.role === 'admin' ? [
-          { view: AppView.MUSIC_STUDIO, icon: 'music_note', label: 'Music' },
+          { view: AppView.MUSIC_STUDIO, icon: 'music_note', label: 'Musik' },
           { view: AppView.I2AUDIO_STUDIO, icon: 'graphic_eq', label: 'i2Audio' },
         ] : []),
       ],
     },
     {
-      label: 'AI Agents',
+      label: 'KI Agenten',
       icon: 'smart_toy',
       items: [
         { view: AppView.PX_CREATIVE, icon: 'tips_and_updates', label: 'Event' },
@@ -97,7 +97,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
   const activeCategory = navCategories.find(cat => cat.items.some(i => i.view === currentView)) || navCategories[0];
 
   const handleLogout = async () => {
-    if (confirm('Are you sure you want to logout?')) {
+    if (confirm('Möchtest du dich wirklich abmelden?')) {
       await signOut();
     }
   };
@@ -169,7 +169,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-              title="Toggle Theme"
+              title="Design umschalten"
             >
               <span className="material-icons-round text-lg">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
             </button>
@@ -181,7 +181,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
             <button
               onClick={handleLogout}
               className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-              title="Logout"
+              title="Abmelden"
             >
               <span className="material-icons-round text-lg">logout</span>
             </button>
@@ -189,7 +189,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
             <button
               onClick={() => setView(AppView.SETTINGS)}
               className={`flex items-center gap-3 pl-1 pr-1 py-1 rounded-full border transition-all ${currentView === AppView.SETTINGS ? 'bg-muted/80 border-primary/50' : 'border-transparent hover:bg-muted/50'}`}
-              title="User Settings"
+              title="Einstellungen"
             >
               <div className="hidden md:block text-right">
                 <p className="text-xs font-bold text-foreground leading-none">{userProfile.name}</p>

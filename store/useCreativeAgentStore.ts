@@ -5,7 +5,7 @@ export interface CreativeProject {
   id: string;
   user_id: string;
   title: string;
-  current_step: 'briefing' | 'matrix' | 'scamper' | 'finished';
+  status: 'briefing' | 'drafting' | 'review' | 'approved' | 'delivered';
   occasion: string;
   guest_count: number;
   budget?: string;
@@ -14,10 +14,22 @@ export interface CreativeProject {
   emotional_goals?: string;
   target_audience?: string;
   location_preference?: string;
+  owner_id?: string;
+  reviewer_id?: string;
+  client_name?: string;
+  tags?: string[];
   created_at: string;
   updated_at: string;
   matrices?: CreativeMatrix[];
   concepts?: CreativeConcept[];
+}
+
+export interface CreativeComment {
+  id: string;
+  project_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
 }
 
 export interface CreativeMatrix {
@@ -64,6 +76,7 @@ export interface CreativeConcept {
 interface CreativeAgentState {
   projects: CreativeProject[];
   currentProject: CreativeProject | null;
+  comments: CreativeComment[];
   loading: boolean;
   error: string | null;
 
@@ -77,6 +90,9 @@ interface CreativeAgentState {
   generateConcepts: (token: string, id: string, userConcepts: any[]) => Promise<void>;
   selectFinalConcept: (token: string, projectId: string, conceptId: string) => Promise<void>;
 
+  fetchComments: (token: string, projectId: string) => Promise<void>;
+  postComment: (token: string, projectId: string, content: string) => Promise<void>;
+
   setCurrentProject: (project: CreativeProject | null) => void;
   clearError: () => void;
 }
@@ -86,10 +102,11 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 export const useCreativeAgentStore = create<CreativeAgentState>((set, get) => ({
   projects: [],
   currentProject: null,
+  comments: [],
   loading: false,
   error: null,
 
-  setCurrentProject: (project) => set({ currentProject: project }),
+  setCurrentProject: (project) => set({ currentProject: project, comments: [] }),
   clearError: () => set({ error: null }),
 
   fetchProjects: async (token) => {
@@ -232,6 +249,37 @@ export const useCreativeAgentStore = create<CreativeAgentState>((set, get) => ({
       await get().fetchProject(token, projectId); // Refresh data
     } catch (err: any) {
       set({ error: err.message, loading: false });
+      throw err;
+  },
+
+  fetchComments: async (token, projectId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/creative/projects/${projectId}/comments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch comments');
+      const data = await res.json();
+      set({ comments: data });
+    } catch (err: any) {
+      console.error(err);
+    }
+  },
+
+  postComment: async (token, projectId, content) => {
+    try {
+      const res = await fetch(`${API_URL}/api/creative/projects/${projectId}/comments`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ content })
+      });
+      if (!res.ok) throw new Error('Failed to post comment');
+      const newComment = await res.json();
+      set((state) => ({ comments: [...state.comments, newComment] }));
+    } catch (err: any) {
+      console.error(err);
       throw err;
     }
   }

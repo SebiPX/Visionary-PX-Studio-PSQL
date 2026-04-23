@@ -42,7 +42,7 @@ router.get('/projects/:id', requireAuth, async (req: AuthRequest, res: Response)
 
 // POST /api/creative/projects - Create new project
 router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference } = req.body;
+  const { title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, client_name, tags } = req.body;
   
   if (!req.userId) {
     return res.status(401).json({ error: 'Missing user ID - Please log out and back in.' });
@@ -54,11 +54,12 @@ router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) =>
   try {
     const result = await pool.query(
       `INSERT INTO px_creative_projects 
-        (user_id, title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, current_step)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'briefing') 
+        (user_id, owner_id, title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, client_name, tags, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'briefing') 
        RETURNING *`,
       [
         req.userId, 
+        req.userId, // owner_id is the creator
         title ?? null, 
         occasion ?? null, 
         finalGuestCount, 
@@ -67,7 +68,9 @@ router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) =>
         industry ?? null, 
         emotional_goals ?? null, 
         target_audience ?? null, 
-        location_preference ?? null
+        location_preference ?? null,
+        client_name ?? null,
+        tags ?? []
       ]
     );
     res.status(201).json(result.rows[0]);
@@ -79,7 +82,7 @@ router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) =>
 
 // PATCH /api/creative/projects/:id - Update existing project (Auto-save)
 router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, current_step } = req.body;
+  const { title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, status, reviewer_id, client_name, tags } = req.body;
   try {
     const result = await pool.query(
       `UPDATE px_creative_projects
@@ -92,9 +95,12 @@ router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Respons
            emotional_goals = COALESCE($7, emotional_goals),
            target_audience = COALESCE($8, target_audience),
            location_preference = COALESCE($9, location_preference),
-           current_step = COALESCE($10, current_step),
+           status = COALESCE($10, status),
+           reviewer_id = COALESCE($11, reviewer_id),
+           client_name = COALESCE($12, client_name),
+           tags = COALESCE($13, tags),
            updated_at = NOW()
-       WHERE id = $11 AND user_id = $12
+       WHERE id = $14 AND (user_id = $15 OR owner_id = $15 OR reviewer_id = $15)
        RETURNING *`,
       [
         title ?? null,
@@ -106,12 +112,15 @@ router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Respons
         emotional_goals ?? null,
         target_audience ?? null,
         location_preference ?? null,
-        current_step ?? null,
+        status ?? null,
+        reviewer_id ?? null,
+        client_name ?? null,
+        tags ?? null,
         req.params.id,
         req.userId
       ]
     );
-    if (result.rows.length === 0) return res.status(404).json({ error: 'Project not found' });
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Project not found or permission denied' });
     res.json(result.rows[0]);
   } catch (err: any) {
     console.error('[creative projects PATCH] Error:', err.message);
@@ -197,8 +206,8 @@ Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
       [project.id, JSON.stringify(matrixData)]
     );
 
-    // Update current_step
-    await pool.query('UPDATE px_creative_projects SET current_step = $1 WHERE id = $2', ['matrix', project.id]);
+    // Update status to drafting
+    await pool.query('UPDATE px_creative_projects SET status = $1 WHERE id = $2', ['drafting', project.id]);
     res.json(matrixInsertRes.rows[0]);
   } catch (err: any) {
     console.error('[Generate Matrix] Error:', err.message);
@@ -322,8 +331,8 @@ Antworte AUSSCHLIESSLICH im folgenden validen JSON-Format:
         );
     }
 
-    // Update current_step
-    await pool.query('UPDATE px_creative_projects SET current_step = $1 WHERE id = $2', ['scamper', project.id]);
+    // Update status to review
+    await pool.query('UPDATE px_creative_projects SET status = $1 WHERE id = $2', ['review', project.id]);
 
     const finalConcepts = await pool.query('SELECT * FROM px_creative_concepts WHERE project_id = $1', [project.id]);
     res.json(finalConcepts.rows);
@@ -340,12 +349,42 @@ router.patch('/projects/:id/concepts/:conceptId/select', requireAuth, async (req
     await pool.query('UPDATE px_creative_concepts SET is_final_choice = FALSE WHERE project_id = $1', [req.params.id]);
     // Set selected to true
     await pool.query('UPDATE px_creative_concepts SET is_final_choice = TRUE WHERE id = $1 AND project_id = $2', [req.params.conceptId, req.params.id]);
-    // Update project step
-    await pool.query('UPDATE px_creative_projects SET current_step = $1 WHERE id = $2', ['finished', req.params.id]);
+    // Update project status to approved
+    await pool.query('UPDATE px_creative_projects SET status = $1 WHERE id = $2', ['approved', req.params.id]);
     
     res.json({ success: true });
   } catch (err: any) {
     console.error('[Select Concept] Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/creative/projects/:id/comments
+router.get('/projects/:id/comments', requireAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM px_creative_comments WHERE project_id = $1 ORDER BY created_at ASC',
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/creative/projects/:id/comments
+router.post('/projects/:id/comments', requireAuth, async (req: AuthRequest, res: Response) => {
+  const { content } = req.body;
+  if (!content) return res.status(400).json({ error: 'Content is required' });
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO px_creative_comments (project_id, user_id, content) 
+       VALUES ($1, $2, $3) RETURNING *`,
+      [req.params.id, req.userId, content]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });

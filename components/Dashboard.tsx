@@ -122,10 +122,10 @@ export const RecentGenerations: React.FC<DashboardProps> = ({ setView, navigateT
             {/* Content */}
 
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-foreground">Recent Generations</h2>
+                <h2 className="text-lg font-bold text-foreground">Letzte Generierungen</h2>
                 {contentItems.length > 0 && (
                     <span className="text-muted-foreground text-sm">
-                        {contentItems.length} {contentItems.length === 1 ? 'item' : 'items'}
+                        {contentItems.length} {contentItems.length === 1 ? 'Eintrag' : 'Einträge'}
                     </span>
                 )}
             </div>
@@ -135,7 +135,7 @@ export const RecentGenerations: React.FC<DashboardProps> = ({ setView, navigateT
                 <div className="flex items-center justify-center py-20">
                     <div className="text-center">
                         <div className="w-12 h-12 border-4 border-[#135bec] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-muted-foreground">Loading your creations...</p>
+                        <p className="text-muted-foreground">Generierungen werden geladen...</p>
                     </div>
                 </div>
             )}
@@ -147,18 +147,18 @@ export const RecentGenerations: React.FC<DashboardProps> = ({ setView, navigateT
                         <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
                             <span className="material-icons-round text-4xl text-muted-foreground/80">auto_awesome</span>
                         </div>
-                        <h3 className="text-xl font-bold text-foreground mb-2">No creations yet</h3>
+                        <h3 className="text-xl font-bold text-foreground mb-2">Noch keine Generierungen</h3>
                         <p className="text-muted-foreground mb-6">
-                            Start creating amazing content with our AI tools. Your generated images, videos, and thumbnails will appear here.
+                            Starte jetzt mit unseren KI-Tools. Deine generierten Bilder, Videos und Thumbnails werden hier erscheinen.
                         </p>
                         <div className="flex gap-3 justify-center">
                             <div className="px-4 py-2 bg-white/5 rounded-lg text-sm text-foreground/90">
                                 <span className="material-icons-round text-xs align-middle mr-1">image</span>
-                                Image Gen
+                                Bilder
                             </div>
                             <div className="px-4 py-2 bg-white/5 rounded-lg text-sm text-foreground/90">
                                 <span className="material-icons-round text-xs align-middle mr-1">videocam</span>
-                                Video Studio
+                                Video
                             </div>
                             <div className="px-4 py-2 bg-white/5 rounded-lg text-sm text-foreground/90">
                                 <span className="material-icons-round text-xs align-middle mr-1">dashboard_customize</span>

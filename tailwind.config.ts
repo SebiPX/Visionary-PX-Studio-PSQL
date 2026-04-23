@@ -47,6 +47,8 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        'card-hover': "hsl(var(--card-hover))",
+        divider: "hsl(var(--divider))",
         // Kept for backward compatibility while migrating modules in Step 3
         'primary-hover': '#1d64f2',
         'background-light': '#f6f6f8',

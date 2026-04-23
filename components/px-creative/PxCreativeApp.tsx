@@ -6,6 +6,7 @@ import { BriefingStep } from './steps/BriefingStep';
 import { MatrixStep } from './steps/MatrixStep';
 import { ScamperStep } from './steps/ScamperStep';
 import { OutputStep } from './steps/OutputStep';
+import { ProjectSidebar } from './ProjectSidebar';
 
 export const PxCreativeApp: React.FC = () => {
   const { fetchProjects, currentProject, setCurrentProject } = useCreativeAgentStore();
@@ -45,11 +46,14 @@ export const PxCreativeApp: React.FC = () => {
         {!currentProject ? (
           <AgentDashboard />
         ) : (
-          <div className="w-full h-full p-6">
-            {currentProject.current_step === 'briefing' && <BriefingStep />}
-            {currentProject.current_step === 'matrix' && <MatrixStep />}
-            {currentProject.current_step === 'scamper' && <ScamperStep />}
-            {currentProject.current_step === 'finished' && <OutputStep />}
+          <div className="w-full h-full flex">
+            <div className="flex-1 overflow-y-auto p-6">
+              {currentProject.status === 'briefing' && <BriefingStep />}
+              {currentProject.status === 'drafting' && <MatrixStep />}
+              {currentProject.status === 'review' && <ScamperStep />}
+              {currentProject.status === 'approved' && <OutputStep />}
+            </div>
+            <ProjectSidebar />
           </div>
         )}
       </div>

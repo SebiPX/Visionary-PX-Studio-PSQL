@@ -208,6 +208,12 @@ export const OutputStep: React.FC = () => {
              </>
           )}
         </button>
+        <button 
+          className="px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center gap-2"
+          onClick={() => window.print()}
+        >
+          <span className="material-icons-round text-sm">print</span> PDF / Print
+        </button>
       </div>
 
     </div>
