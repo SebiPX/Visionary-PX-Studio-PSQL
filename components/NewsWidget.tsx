@@ -9,6 +9,7 @@ interface NewsItem {
   content: string;
   type: 'internal' | 'external';
   publish_date: string;
+  thumbnail?: string;
 }
 
 export const NewsWidget: React.FC = () => {
@@ -62,6 +63,11 @@ export const NewsWidget: React.FC = () => {
                 ) : (
                     news.map(item => (
                         <div key={item.id} className="bg-card/40 p-4 rounded-xl border border-border/50 hover:border-border/80 transition-colors">
+                            {item.thumbnail && (
+                                <div className="mb-4 rounded-lg overflow-hidden h-40 w-full bg-muted/20 relative">
+                                    <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
+                                </div>
+                            )}
                             <div className="flex items-center gap-2 mb-2">
                                 {item.type === 'internal' ? (
                                     <MessageCircle size={16} className="text-green-400 shrink-0" />

@@ -36,11 +36,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
       const { rows } = await aiNewsPool.query(query);
       
       const mappedExternalNews = rows.map((row: any) => {
-        let contentMarkdown = '';
-        if (row.thumbnail_url) {
-          contentMarkdown += `![Thumbnail](${row.thumbnail_url})\n\n`;
-        }
-        contentMarkdown += `**Kategorie:** ${row.category} | **Quelle:** [${row.source_name}](${row.source_url})\n\n**Zusammenfassung:**\n${row.summary}\n\n**Bedeutung:**\n${row.significance}`;
+        let contentMarkdown = `**Kategorie:** ${row.category} | **Quelle:** [${row.source_name}](${row.source_url})\n\n**Zusammenfassung:**\n${row.summary}\n\n**Bedeutung:**\n${row.significance}`;
 
         return {
           id: `ext-${row.id}`, // prefix to avoid id collision
@@ -51,6 +47,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
           is_active: true,
           created_at: row.discovered_at,
           updated_at: row.discovered_at,
+          thumbnail: row.thumbnail_url
         };
       });
       
