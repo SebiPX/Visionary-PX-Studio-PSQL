@@ -1,12 +1,7 @@
 import { Pool } from 'pg';
 
 const aiNewsPool = new Pool({
-  host: '72.62.52.75',
-  port: 5432,
-  database: 'ai_news',
-  user: 'ai_news_user',
-  password: 'Unsere-Schickeria-2025',
-  ssl: { rejectUnauthorized: false },
+  connectionString: 'postgresql://ai_news_user:Unsere-Schickeria-2025@72.62.52.75:5432/ai_news?sslmode=require',
   max: 5,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
