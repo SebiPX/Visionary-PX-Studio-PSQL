@@ -71,7 +71,7 @@ export const NewsWidget: React.FC = () => {
             <div className="overflow-y-auto flex-1 p-5 space-y-4">
                 {(() => {
                     const filteredNews = highQualityOnly 
-                        ? news.filter(n => n.type === 'internal' || (n.quality_score !== undefined && n.quality_score >= 0.5))
+                        ? news.filter(n => n.type === 'internal' || n.quality_score === undefined || n.quality_score >= 0.5)
                         : news;
                     
                     if (filteredNews.length === 0) {

@@ -32,7 +32,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
     // 2. Fetch External AI News
     if (fetchExternal) {
       // For external we just take the latest 50 from the high quality view
-      let query = `SELECT id, title, summary, significance, source_name, source_url, published_at, discovered_at, category, title_original, thumbnail_url, quality_score FROM ai_news_public_high_quality ORDER BY published_at DESC NULLS LAST, discovered_at DESC LIMIT 50`;
+      let query = `SELECT * FROM ai_news_public_high_quality ORDER BY published_at DESC NULLS LAST, discovered_at DESC LIMIT 50`;
       const { rows } = await aiNewsPool.query(query);
       
       const mappedExternalNews = rows.map((row: any) => {
@@ -48,7 +48,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
           created_at: row.discovered_at,
           updated_at: row.discovered_at,
           thumbnail: row.thumbnail_url,
-          quality_score: row.quality_score
+          quality_score: row.quality_score !== undefined ? row.quality_score : 1.0
         };
       });
       
