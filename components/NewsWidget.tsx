@@ -64,8 +64,8 @@ export const NewsWidget: React.FC = () => {
                     news.map(item => (
                         <div key={item.id} className="bg-card/40 p-4 rounded-xl border border-border/50 hover:border-border/80 transition-colors">
                             {item.thumbnail && (
-                                <div className="mb-4 rounded-lg overflow-hidden w-full bg-muted/10 relative flex justify-center">
-                                    <img src={item.thumbnail} alt={item.title} className="w-full h-auto max-h-64 object-contain rounded-lg" loading="lazy" />
+                                <div className="mb-4 rounded-lg overflow-hidden w-full aspect-video bg-muted/20 relative">
+                                    <img src={item.thumbnail} alt={item.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                                 </div>
                             )}
                             <div className="flex items-center gap-2 mb-2">
