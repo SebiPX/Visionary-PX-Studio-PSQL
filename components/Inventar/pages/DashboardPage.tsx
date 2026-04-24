@@ -220,25 +220,6 @@ export function DashboardPage({
           
           <div className="p-5 space-y-8 border-t border-border">
 
-            {/* ── Top Links ─────────────────────────────────────── */}
-            {config.show_links && (
-              <section>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-                    <ExternalLink size={16} className="text-[#135bec]" />
-                    Top Links
-                  </h2>
-                  <button onClick={() => navigate('/links')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
-                    Alle <ArrowRight size={12} />
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                   {filteredLinks.slice(0, 8).map(link => <LinkCard key={link.id} link={link} />)}
-                   {filteredLinks.length === 0 && <p className="text-xs text-muted-foreground py-4 col-span-full">Keine Links gefunden.</p>}
-                </div>
-              </section>
-            )}
-            
             {/* ── Pinned Logins (if any) ─────────────────────────────────────── */}
             {pinnedLogins.length > 0 && (
               <section>
@@ -366,7 +347,7 @@ export function DashboardPage({
             )}
 
             {/* ── Alle Links (Sekundär) ─────────────────────────────────────────────── */}
-            {config.show_links && filteredLinks.length > 6 && (
+            {config.show_links && filteredLinks.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
