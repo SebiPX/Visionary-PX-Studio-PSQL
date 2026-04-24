@@ -31,8 +31,12 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
 
     // 2. Fetch External AI News
     if (fetchExternal) {
-      // For external we just take the latest 50 from the high quality view
-      let query = `SELECT * FROM ai_news_public_high_quality ORDER BY published_at DESC NULLS LAST, discovered_at DESC LIMIT 50`;
+      const feed = req.query.feed as string;
+      let viewName = 'ai_news_daily_priority'; // default
+      if (feed === 'client') viewName = 'ai_news_client_relevant';
+      if (feed === 'risk') viewName = 'ai_news_risk_watch';
+
+      let query = `SELECT * FROM ${viewName} ORDER BY published_at DESC NULLS LAST, discovered_at DESC LIMIT 50`;
       const { rows } = await aiNewsPool.query(query);
       
       const mappedExternalNews = rows.map((row: any) => {
@@ -48,7 +52,13 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
           created_at: row.discovered_at,
           updated_at: row.discovered_at,
           thumbnail: row.thumbnail_url,
-          quality_score: row.quality_score !== undefined ? row.quality_score : 1.0
+          quality_score: row.impact_score || row.quality_score || 1.0,
+          topic: row.topic,
+          impact_score: row.impact_score,
+          business_relevance: row.business_relevance,
+          region: row.region,
+          audience: row.audience,
+          action_hint: row.action_hint
         };
       });
       

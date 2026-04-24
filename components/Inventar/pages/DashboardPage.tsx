@@ -192,38 +192,19 @@ export function DashboardPage({
             <Sparkles size={20} className="text-primary" />
             Heute wichtig
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
             {/* Card 1: Top Tasks */}
             {config.show_user_tasks && (
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col h-full w-full">
                 <UserTasksWidget />
               </div>
             )}
 
             {/* Card 2: Top News */}
             {config.show_news && (
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col h-full w-full">
                 <NewsWidget />
-              </div>
-            )}
-
-            {/* Card 3: Top Links */}
-            {config.show_links && (
-              <div className="bg-card/60 border border-border rounded-2xl flex flex-col max-h-[500px]">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-card/80">
-                  <h3 className="font-semibold text-foreground flex items-center gap-2">
-                    <ExternalLink size={18} className="text-[#135bec]" />
-                    Top Links
-                  </h3>
-                  <button onClick={() => navigate('/links')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
-                    Alle <ArrowRight size={12} />
-                  </button>
-                </div>
-                <div className="overflow-y-auto p-4 space-y-3">
-                   {filteredLinks.slice(0, 6).map(link => <LinkCard key={link.id} link={link} />)}
-                   {filteredLinks.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Keine Links gefunden.</p>}
-                </div>
               </div>
             )}
             
@@ -238,6 +219,25 @@ export function DashboardPage({
           </summary>
           
           <div className="p-5 space-y-8 border-t border-border">
+
+            {/* ── Top Links ─────────────────────────────────────── */}
+            {config.show_links && (
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                    <ExternalLink size={16} className="text-[#135bec]" />
+                    Top Links
+                  </h2>
+                  <button onClick={() => navigate('/links')} className="text-xs text-primary hover:text-blue-300 flex items-center gap-1 transition-colors">
+                    Alle <ArrowRight size={12} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                   {filteredLinks.slice(0, 8).map(link => <LinkCard key={link.id} link={link} />)}
+                   {filteredLinks.length === 0 && <p className="text-xs text-muted-foreground py-4 col-span-full">Keine Links gefunden.</p>}
+                </div>
+              </section>
+            )}
             
             {/* ── Pinned Logins (if any) ─────────────────────────────────────── */}
             {pinnedLogins.length > 0 && (
