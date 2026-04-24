@@ -107,7 +107,24 @@ router.post('/', requireAuth, upload.single('file'), async (req: AuthRequest, re
       ]
     );
 
-    res.status(201).json(result.rows[0]);
+    const newAsset = result.rows[0];
+
+    // Trigger notification
+    import('../../services/notificationService').then(({ notifyProjectMembers }) => {
+      notifyProjectMembers(
+        project_id,
+        {
+          type: 'info',
+          title: `Neues Asset hinzugefügt`,
+          message: `Das Asset "${newAsset.name}" wurde zum Projekt hinzugefügt.`,
+          related_entity_id: project_id,
+          related_entity_type: 'asset'
+        },
+        req.userId
+      );
+    }).catch(err => console.error('Error importing notificationService:', err));
+
+    res.status(201).json(newAsset);
   } catch (err: any) {
     console.error('[Asset Upload Error]', err);
     res.status(500).json({ error: err.message });
@@ -122,6 +139,12 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
   } = req.body;
 
   try {
+    const existingResult = await pool.query('SELECT project_id, name FROM agency_assets WHERE id = $1', [req.params.id]);
+    if (existingResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Asset not found' });
+    }
+    const existingAsset = existingResult.rows[0];
+
     const result = await pool.query(
       `UPDATE agency_assets 
        SET name = COALESCE($1, name),
@@ -140,10 +163,24 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
       ]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Asset not found' });
-    }
-    res.json(result.rows[0]);
+    const updatedAsset = result.rows[0];
+
+    // Trigger notification
+    import('../../services/notificationService').then(({ notifyProjectMembers }) => {
+      notifyProjectMembers(
+        existingAsset.project_id,
+        {
+          type: 'info',
+          title: `Asset aktualisiert`,
+          message: `Das Asset "${updatedAsset.name}" wurde aktualisiert.`,
+          related_entity_id: existingAsset.project_id,
+          related_entity_type: 'asset'
+        },
+        req.userId
+      );
+    }).catch(err => console.error('Error importing notificationService:', err));
+
+    res.json(updatedAsset);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

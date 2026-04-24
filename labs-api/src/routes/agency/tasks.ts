@@ -131,7 +131,26 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
        RETURNING *`,
       args
     );
-    res.status(201).json(result.rows[0]);
+    
+    const newTask = result.rows[0];
+    
+    if (actualAssigneeIds.length > 0) {
+      import('../../services/notificationService').then(({ notifyTaskAssignees }) => {
+        notifyTaskAssignees(
+          actualAssigneeIds,
+          {
+            type: 'info',
+            title: `Neuer Task zugewiesen`,
+            message: `Dir wurde der Task "${newTask.title}" zugewiesen.`,
+            related_entity_id: newTask.project_id,
+            related_entity_type: 'task'
+          },
+          req.userId
+        );
+      }).catch(err => console.error('Error importing notificationService:', err));
+    }
+
+    res.status(201).json(newTask);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -140,6 +159,10 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
 // PUT /api/agency/tasks/:id
 router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
+    const existingResult = await pool.query('SELECT * FROM agency_tasks WHERE id = $1', [req.params.id]);
+    if (existingResult.rows.length === 0) return res.status(404).json({ error: 'Task not found' });
+    const existingTask = existingResult.rows[0];
+
     const updates = req.body;
     const allowedFields = [
       'title', 'description', 'status', 'priority', 
@@ -181,10 +204,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
     }
 
     if (setClauses.length === 0) {
-      // If nothing is provided, just return the task
-      const existing = await pool.query('SELECT * FROM agency_tasks WHERE id = $1', [req.params.id]);
-      if (existing.rows.length === 0) return res.status(404).json({ error: 'Task not found' });
-      return res.json(existing.rows[0]);
+      return res.json(existingTask);
     }
 
     setClauses.push('updated_at = NOW()');
@@ -202,7 +222,26 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Task not found' });
     }
-    res.json(result.rows[0]);
+    
+    const updatedTask = result.rows[0];
+
+    if (updates.status && updates.status !== existingTask.status) {
+      import('../../services/notificationService').then(({ notifyProjectMembers }) => {
+        notifyProjectMembers(
+          updatedTask.project_id,
+          {
+            type: 'info',
+            title: `Task-Status geändert`,
+            message: `Der Status von "${updatedTask.title}" wurde auf "${updatedTask.status}" geändert.`,
+            related_entity_id: updatedTask.project_id,
+            related_entity_type: 'task'
+          },
+          req.userId
+        );
+      }).catch(err => console.error('Error importing notificationService:', err));
+    }
+
+    res.json(updatedTask);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

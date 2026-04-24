@@ -244,6 +244,19 @@ router.post('/:id/members', requireAuth, async (req: AuthRequest, res) => {
        RETURNING *`,
       [req.params.id, finalUserId, role ?? 'member', rate ?? 0]
     );
+    
+    // Trigger notification
+    import('../../services/notificationService').then(({ createNotification }) => {
+      createNotification({
+        user_id: finalUserId,
+        type: 'info',
+        title: `Neuem Projekt zugewiesen`,
+        message: `Du wurdest einem Projekt zugewiesen (Rolle: ${role || 'member'}).`,
+        related_entity_id: req.params.id,
+        related_entity_type: 'project'
+      });
+    }).catch(err => console.error('Error importing notificationService:', err));
+
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

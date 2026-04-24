@@ -553,3 +553,23 @@ export const timeEntries = {
         request<ApiTimeEntry>(`/api/time-entries/${id}`, { method: 'PUT', body: JSON.stringify(updates) }),
     delete: (id: string) => request<void>(`/api/time-entries/${id}`, { method: 'DELETE' }),
 };
+
+// ── Notifications ──────────────────────────────────────────────────
+export interface ApiNotification {
+    id: string;
+    user_id: string;
+    type: 'success' | 'warning' | 'error' | 'info';
+    title: string;
+    message?: string;
+    link?: string;
+    related_entity_id?: string;
+    related_entity_type?: string;
+    is_read: boolean;
+    created_at: string;
+}
+
+export const notifications = {
+    list: () => request<ApiNotification[]>('/api/agency/notifications/my'),
+    markRead: (id: string) => request<ApiNotification>(`/api/agency/notifications/${id}/read`, { method: 'PUT' }),
+    markAllRead: () => request<{ success: boolean }>('/api/agency/notifications/my/read-all', { method: 'PUT' }),
+};

@@ -3,6 +3,8 @@ import { AppView, UserProfile } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { profileSettings } from '../lib/apiClient';
+import { useNotifications } from '../hooks/useNotifications';
+import { NotificationsDropdown } from './NotificationsDropdown';
 
 interface NavigationProps {
   currentView: AppView;
@@ -32,6 +34,9 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
   const [avatarDisplayUrl, setAvatarDisplayUrl] = useState<string | undefined>(
     userProfile?.avatarUrl && userProfile.avatarUrl.startsWith('http') ? userProfile.avatarUrl : undefined
   );
+  
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { unreadCount } = useNotifications();
 
   useEffect(() => {
     if (userProfile?.avatarUrl && !userProfile.avatarUrl.startsWith('http')) {
@@ -174,9 +179,23 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, us
               <span className="material-icons-round text-lg">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
             </button>
 
-            <button className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors">
-              <span className="material-icons-round text-lg">notifications</span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors relative"
+              >
+                <span className="material-icons-round text-lg">notifications</span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-2 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                )}
+              </button>
+              {showNotifications && (
+                <NotificationsDropdown onClose={() => setShowNotifications(false)} />
+              )}
+            </div>
 
             <button
               onClick={handleLogout}

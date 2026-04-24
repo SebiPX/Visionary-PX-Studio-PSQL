@@ -89,10 +89,27 @@ router.post('/:channelId', requireAuth, async (req: AuthRequest, res: Response):
       `SELECT * FROM profiles WHERE id = $1`,
       [req.userId]
     );
+    
+    const profile = profileRes.rows[0];
+
+    // Trigger notification
+    import('../../services/notificationService').then(({ notifyProjectMembers }) => {
+      notifyProjectMembers(
+        channelId, 
+        {
+          type: 'info',
+          title: `Neue Nachricht in Chat`,
+          message: `${profile.full_name || 'Jemand'}: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
+          related_entity_id: channelId,
+          related_entity_type: 'chat'
+        },
+        req.userId
+      );
+    }).catch(err => console.error('Error importing notificationService:', err));
 
     res.status(201).json({
       ...newMessage,
-      profile: profileRes.rows[0]
+      profile
     });
   } catch (err: any) {
     console.error(`[POST /api/chat/${channelId}]`, err.message);
