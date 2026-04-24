@@ -32,9 +32,9 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
     // 2. Fetch External AI News
     if (fetchExternal) {
       const feed = req.query.feed as string;
-      let viewName = 'ai_news_daily_priority'; // default
-      if (feed === 'client') viewName = 'ai_news_client_relevant';
-      if (feed === 'risk') viewName = 'ai_news_risk_watch';
+      let viewName = 'ai_news_daily_priority_safe'; // default
+      if (feed === 'client') viewName = 'ai_news_client_relevant_safe';
+      if (feed === 'risk') viewName = 'ai_news_risk_watch_safe';
 
       let query = '';
       if (feed === 'daily' || !feed) {
