@@ -5,15 +5,29 @@ import { AuthRequest, requireAuth } from '../../middleware/requireAuth';
 const router = Router();
 
 // GET /api/agency/profiles/internal
-// Return all internal active employees (not external clients/vendors if any),
-// but since the schema is shared, we'll return everyone except client roles (if role is handled)
-// Looking at AuthContext, role is "admin", "employee", "freelancer", "client"
+// Return all internal active employees and freelancers
 router.get('/internal', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const result = await pool.query(
       `SELECT id, email, full_name as name, full_name, avatar_url, role, weekly_hours, billable_hourly_rate, internal_cost_per_hour
        FROM profiles 
-       WHERE role IN ('admin', 'pjm', 'creative', 'guest')
+       WHERE role IN ('admin', 'pjm', 'creative', 'guest', 'employee', 'freelancer')
+       
+       UNION ALL
+       
+       SELECT 
+         id, 
+         email, 
+         COALESCE(first_name || ' ' || last_name, company, 'Unknown') as name, 
+         COALESCE(first_name || ' ' || last_name, company, 'Unknown') as full_name, 
+         NULL as avatar_url, 
+         'freelancer' as role, 
+         40 as weekly_hours, 
+         (daily_rate / 8) * 1.5 as billable_hourly_rate, 
+         (daily_rate / 8) as internal_cost_per_hour
+       FROM directory_freelancers
+       WHERE id NOT IN (SELECT id FROM profiles)
+       
        ORDER BY full_name ASC`
     );
     res.json(result.rows);

@@ -238,6 +238,29 @@ router.post('/:id/members', requireAuth, async (req: AuthRequest, res) => {
   }
 
   try {
+    // Lazy Sync: Check if user exists in profiles. If not, try to copy from directory_freelancers.
+    const profileCheck = await pool.query(`SELECT id FROM profiles WHERE id = $1`, [finalUserId]);
+    if (profileCheck.rows.length === 0) {
+      const freelancerCheck = await pool.query(`SELECT * FROM directory_freelancers WHERE id = $1`, [finalUserId]);
+      if (freelancerCheck.rows.length > 0) {
+        const f = freelancerCheck.rows[0];
+        const fullName = [f.first_name, f.last_name].filter(Boolean).join(' ') || f.company || 'Unknown';
+        const email = f.email || \`freelancer_\${f.id.substring(0,8)}@example.com\`;
+        
+        await pool.query(
+          \`INSERT INTO profiles (id, full_name, email, role, internal_cost_per_hour, billable_hourly_rate, password_hash)
+           VALUES ($1, $2, $3, 'freelancer', $4, $5, 'nopassword')\`,
+          [
+            f.id, 
+            fullName, 
+            email, 
+            (f.daily_rate || 0) / 8, 
+            ((f.daily_rate || 0) / 8) * 1.5
+          ]
+        );
+      }
+    }
+
     const result = await pool.query(
       `INSERT INTO agency_project_members (project_id, user_id, role, hourly_rate)
        VALUES ($1, $2, LOWER($3), $4)
