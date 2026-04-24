@@ -3,7 +3,7 @@ import { getToken } from '../lib/apiClient';
 import { Newspaper, Sparkles, MessageCircle, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-iinterface NewsItem {
+interface NewsItem {
   id: string;
   title: string;
   content: string;
