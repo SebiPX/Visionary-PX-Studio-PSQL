@@ -116,7 +116,8 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
       legal_line ?? null,
       freigabelink ?? null,
       rights_expiration_date ?? null,
-      status_influencerclips ?? false
+      status_influencerclips ?? false,
+      req.userId // created_by
     ];
 
     const result = await pool.query(
@@ -125,9 +126,10 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
         assignee_id, assignee_ids, start_date, review_date, revision_date, due_date, planned_minutes,
         estimated_hours, estimated_rate, materials, custom_dates, depends_on_task_ids,
         service_module_id, project_service_id, seniority_level_id, is_visible_to_client,
-        brand, show, formats, legal_line, freigabelink, rights_expiration_date, status_influencerclips
+        brand, show, formats, legal_line, freigabelink, rights_expiration_date, status_influencerclips,
+        created_by
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
        RETURNING *`,
       args
     );
@@ -163,6 +165,11 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
     if (existingResult.rows.length === 0) return res.status(404).json({ error: 'Task not found' });
     const existingTask = existingResult.rows[0];
 
+    const userResult = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
+    const userRole = userResult.rows[0]?.role || 'user';
+    const isCreator = existingTask.created_by === req.userId;
+    const canEdit = userRole === 'admin' || userRole === 'pjm' || isCreator;
+
     const updates = req.body;
     const allowedFields = [
       'title', 'description', 'status', 'priority', 
@@ -172,6 +179,14 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
       'service_module_id', 'project_service_id', 'seniority_level_id', 'is_visible_to_client',
       'brand', 'show', 'formats', 'legal_line', 'freigabelink', 'rights_expiration_date', 'status_influencerclips'
     ];
+
+    if (!canEdit) {
+      const restrictedFields = allowedFields.filter(f => f !== 'status');
+      const hasRestrictedUpdates = restrictedFields.some(f => updates[f] !== undefined);
+      if (hasRestrictedUpdates) {
+        return res.status(403).json({ error: 'You do not have permission to edit this task.' });
+      }
+    }
 
     const setClauses: string[] = [];
     const args: any[] = [];
@@ -250,6 +265,19 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
 // DELETE /api/agency/tasks/:id
 router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
+    const existingResult = await pool.query('SELECT * FROM agency_tasks WHERE id = $1', [req.params.id]);
+    if (existingResult.rows.length === 0) return res.status(404).json({ error: 'Task not found' });
+    const existingTask = existingResult.rows[0];
+
+    const userResult = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
+    const userRole = userResult.rows[0]?.role || 'user';
+    const isCreator = existingTask.created_by === req.userId;
+    const canDelete = userRole === 'admin' || userRole === 'pjm' || isCreator;
+
+    if (!canDelete) {
+      return res.status(403).json({ error: 'You do not have permission to delete this task.' });
+    }
+
     await pool.query('DELETE FROM agency_tasks WHERE id = $1', [req.params.id]);
     res.status(204).send();
   } catch (err: any) {

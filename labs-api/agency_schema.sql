@@ -299,6 +299,7 @@ CREATE TABLE IF NOT EXISTS public.agency_tasks (
     seniority_level_id UUID REFERENCES public.agency_seniority_levels(id) ON DELETE SET NULL,
     is_visible_to_client BOOLEAN DEFAULT false,
     position NUMERIC DEFAULT 0,
+    created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
