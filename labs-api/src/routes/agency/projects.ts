@@ -245,11 +245,11 @@ router.post('/:id/members', requireAuth, async (req: AuthRequest, res) => {
       if (freelancerCheck.rows.length > 0) {
         const f = freelancerCheck.rows[0];
         const fullName = [f.first_name, f.last_name].filter(Boolean).join(' ') || f.company || 'Unknown';
-        const email = f.email || \`freelancer_\${f.id.substring(0,8)}@example.com\`;
+        const email = f.email || `freelancer_${f.id.substring(0,8)}@example.com`;
         
         await pool.query(
-          \`INSERT INTO profiles (id, full_name, email, role, internal_cost_per_hour, billable_hourly_rate, password_hash)
-           VALUES ($1, $2, $3, 'freelancer', $4, $5, 'nopassword')\`,
+          `INSERT INTO profiles (id, full_name, email, role, internal_cost_per_hour, billable_hourly_rate, password_hash)
+           VALUES ($1, $2, $3, 'freelancer', $4, $5, 'nopassword')`,
           [
             f.id, 
             fullName, 
