@@ -73,6 +73,10 @@ pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS revision_date DATE
 pool.query('ALTER TABLE public.agency_client_contacts ADD COLUMN IF NOT EXISTS moco_contact_id INTEGER UNIQUE;')
   .then(() => console.log('DB: checked moco_contact_id'))
   .catch(e => console.error('DB patch err:', e.message));
+
+pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;')
+  .then(() => console.log('DB: checked created_by on agency_tasks'))
+  .catch(e => console.error('DB patch err:', e.message));
   
 pool.query('ALTER TABLE public.agency_clients ADD COLUMN IF NOT EXISTS brands TEXT[] DEFAULT \'{}\';')
   .then(() => {
