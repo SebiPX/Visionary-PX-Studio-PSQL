@@ -77,6 +77,18 @@ pool.query('ALTER TABLE public.agency_client_contacts ADD COLUMN IF NOT EXISTS m
 pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;')
   .then(() => console.log('DB: checked created_by on agency_tasks'))
   .catch(e => console.error('DB patch err:', e.message));
+
+pool.query(`
+  ALTER TABLE agency_tasks 
+  ADD COLUMN IF NOT EXISTS brand TEXT,
+  ADD COLUMN IF NOT EXISTS show TEXT,
+  ADD COLUMN IF NOT EXISTS formats TEXT[],
+  ADD COLUMN IF NOT EXISTS legal_line TEXT,
+  ADD COLUMN IF NOT EXISTS freigabelink TEXT,
+  ADD COLUMN IF NOT EXISTS rights_expiration_date DATE,
+  ADD COLUMN IF NOT EXISTS status_influencerclips BOOLEAN DEFAULT false;
+`).then(() => console.log('DB: checked additional agency_tasks columns'))
+  .catch(e => console.error('DB patch err:', e.message));
   
 pool.query('ALTER TABLE public.agency_clients ADD COLUMN IF NOT EXISTS brands TEXT[] DEFAULT \'{}\';')
   .then(() => {
