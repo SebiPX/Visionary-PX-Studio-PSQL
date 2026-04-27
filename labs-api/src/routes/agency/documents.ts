@@ -123,6 +123,29 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
         'INSERT INTO agency_call_sheet_data (document_id) VALUES ($1)',
         [newDoc.id]
       );
+
+      // Pre-fill contacts with the project team
+      try {
+        const teamRes = await pool.query(`
+          SELECT pm.role, p.full_name, p.email
+          FROM agency_project_members pm
+          JOIN profiles p ON pm.user_id = p.id
+          WHERE pm.project_id = $1
+        `, [project_id]);
+
+        for (const member of teamRes.rows) {
+          const name = member.full_name || 'Unknown';
+          const role = member.role || 'Team Member';
+          const email = member.email || '';
+          
+          await pool.query(`
+            INSERT INTO agency_call_sheet_contacts (document_id, name, role, phone, email)
+            VALUES ($1, $2, $3, $4, $5)
+          `, [newDoc.id, name, role, '', email]);
+        }
+      } catch (teamErr) {
+        console.error('Error pre-filling call sheet contacts:', teamErr);
+      }
     } else if (type === 'shotlist') {
       // maybe add a single empty row to start
       await pool.query(
