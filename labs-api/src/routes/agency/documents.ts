@@ -284,6 +284,7 @@ router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, r
 // --------------------------------------------------------------------------
 router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) => {
   const { location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, directions_notes, shoot_date, additional_locations } = req.body;
+  const addLocsParam = additional_locations ? JSON.stringify(additional_locations) : null;
   try {
     const result = await pool.query(
       `UPDATE agency_call_sheet_data 
@@ -296,18 +297,18 @@ router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) =>
            shoot_date = COALESCE($7, shoot_date),
            location_lat = COALESCE($8, location_lat),
            location_lng = COALESCE($9, location_lng),
-           additional_locations = COALESCE($11, additional_locations),
+           additional_locations = COALESCE($11::jsonb, additional_locations),
            updated_at = NOW()
        WHERE document_id = $6 RETURNING *`,
-      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date, location_lat, location_lng, directions_notes, additional_locations]
+      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date, location_lat, location_lng, directions_notes, addLocsParam]
     );
     // If updating 0 rows (missing initial row), create it
     if (result.rows.length === 0) {
       const newResult = await pool.query(
         `INSERT INTO agency_call_sheet_data 
          (document_id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, additional_locations)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, additional_locations]
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb) RETURNING *`,
+        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, addLocsParam]
       );
       return res.json(newResult.rows[0]);
     }
