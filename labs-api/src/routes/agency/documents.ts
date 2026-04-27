@@ -4,6 +4,25 @@ import { AuthRequest, requireAuth } from '../../middleware/requireAuth';
 
 const router = Router();
 
+// --------------------------------------------------------------------------
+// TEMPORARY MIGRATION ENDPOINT
+// --------------------------------------------------------------------------
+router.get('/migrate-shotlist-vfx', async (req, res) => {
+  try {
+    const sql = `
+      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS is_vfx BOOLEAN DEFAULT false;
+      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS focal_length VARCHAR(255);
+      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS framerate VARCHAR(50);
+      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS camera_type VARCHAR(255);
+    `;
+    await pool.query(sql);
+    res.json({ success: true, message: 'Migration applied successfully' });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // POST /api/agency/documents/init
 // Run this once manually to create the tables.
 router.post('/init', async (req, res) => {
@@ -283,20 +302,7 @@ router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, r
   }
 });
 
-// --------------------------------------------------------------------------
-// TEMPORARY MIGRATION ENDPOINT
-// --------------------------------------------------------------------------
-router.get('/migrate-shotlist-vfx', async (req, res) => {
-  try {
-    const sql = `
-      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS is_vfx BOOLEAN DEFAULT false;
-      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS focal_length VARCHAR(255);
-      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS framerate VARCHAR(50);
-      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS camera_type VARCHAR(255);
-    `;
-    await pool.query(sql);
-    res.json({ success: true, message: 'Migration applied successfully' });
-  } catch (err: any) {
+} catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
