@@ -56,6 +56,11 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_schedule (
   time_end VARCHAR(50),
   description TEXT,
   persons TEXT,
+  scene_name VARCHAR(255),
+  scene_number VARCHAR(50),
+  duration_minutes INTEGER,
+  is_done BOOLEAN DEFAULT FALSE,
+  image_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -80,6 +85,15 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_contacts (
     try {
       await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_lat VARCHAR(50);');
       await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_lng VARCHAR(50);');
+    } catch(e) { /* ignore */ }
+    
+    // safe migration for schedule table (Drehplan features)
+    try {
+      await pool.query('ALTER TABLE agency_call_sheet_schedule ADD COLUMN scene_name VARCHAR(255);');
+      await pool.query('ALTER TABLE agency_call_sheet_schedule ADD COLUMN scene_number VARCHAR(50);');
+      await pool.query('ALTER TABLE agency_call_sheet_schedule ADD COLUMN duration_minutes INTEGER;');
+      await pool.query('ALTER TABLE agency_call_sheet_schedule ADD COLUMN is_done BOOLEAN DEFAULT FALSE;');
+      await pool.query('ALTER TABLE agency_call_sheet_schedule ADD COLUMN image_url TEXT;');
     } catch(e) { /* ignore */ }
     res.json({ message: 'Tables created successfully' });
   } catch (err: any) {
@@ -300,12 +314,12 @@ router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) =>
 
 // Schedule CRUD
 router.post('/:id/schedule', requireAuth, async (req: AuthRequest, res) => {
-  const { time_start, time_end, description, persons } = req.body;
+  const { time_start, time_end, description, persons, scene_name, scene_number, duration_minutes, is_done, image_url } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO agency_call_sheet_schedule (document_id, time_start, time_end, description, persons)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [req.params.id, time_start, time_end, description, persons]
+      `INSERT INTO agency_call_sheet_schedule (document_id, time_start, time_end, description, persons, scene_name, scene_number, duration_minutes, is_done, image_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [req.params.id, time_start, time_end, description, persons, scene_name, scene_number, duration_minutes, is_done, image_url]
     );
     res.json(result.rows[0]);
   } catch (err: any) {
@@ -314,7 +328,7 @@ router.post('/:id/schedule', requireAuth, async (req: AuthRequest, res) => {
 });
 
 router.put('/schedule/:itemId', requireAuth, async (req: AuthRequest, res) => {
-  const { time_start, time_end, description, persons } = req.body;
+  const { time_start, time_end, description, persons, scene_name, scene_number, duration_minutes, is_done, image_url } = req.body;
   try {
     const result = await pool.query(
       `UPDATE agency_call_sheet_schedule 
@@ -322,9 +336,14 @@ router.put('/schedule/:itemId', requireAuth, async (req: AuthRequest, res) => {
            time_end = COALESCE($2, time_end),
            description = COALESCE($3, description),
            persons = COALESCE($4, persons),
+           scene_name = COALESCE($5, scene_name),
+           scene_number = COALESCE($6, scene_number),
+           duration_minutes = COALESCE($7, duration_minutes),
+           is_done = COALESCE($8, is_done),
+           image_url = COALESCE($9, image_url),
            updated_at = NOW()
-       WHERE id = $5 RETURNING *`,
-      [time_start, time_end, description, persons, req.params.itemId]
+       WHERE id = $10 RETURNING *`,
+      [time_start, time_end, description, persons, scene_name, scene_number, duration_minutes, is_done, image_url, req.params.itemId]
     );
     res.json(result.rows[0]);
   } catch (err: any) {
