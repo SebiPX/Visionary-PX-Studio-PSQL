@@ -187,7 +187,7 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
     if (doc.type === 'shotlist') {
       const itemsRes = await pool.query('SELECT * FROM agency_shotlist_items WHERE document_id = $1 ORDER BY order_index ASC', [doc.id]);
       doc.items = itemsRes.rows;
-    } else if (doc.type === 'call_sheet') {
+    } else if (doc.type === 'call_sheet' || doc.type === 'event_sheet') {
       const dataRes = await pool.query('SELECT * FROM agency_call_sheet_data WHERE document_id = $1', [doc.id]);
       doc.data = dataRes.rows[0] || {};
       
