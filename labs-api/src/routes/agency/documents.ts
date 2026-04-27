@@ -28,6 +28,10 @@ CREATE TABLE IF NOT EXISTS agency_shotlist_items (
   take VARCHAR(50),
   duration VARCHAR(50),
   framing VARCHAR(255),
+  is_vfx BOOLEAN DEFAULT false,
+  focal_length VARCHAR(255),
+  framerate VARCHAR(50),
+  camera_type VARCHAR(255),
   cast_list TEXT,
   props TEXT,
   notes TEXT,
@@ -227,13 +231,13 @@ router.patch('/:id', requireAuth, async (req: AuthRequest, res) => {
 // SHOTLIST SPECIFIC ENDPOINTS
 // --------------------------------------------------------------------------
 router.post('/:id/shotlist-items', requireAuth, async (req: AuthRequest, res) => {
-  const { scene_name, scene_number, take, duration, framing, cast_list, props, notes, image_url, order_index } = req.body;
+  const { scene_name, scene_number, take, duration, framing, is_vfx, focal_length, framerate, camera_type, cast_list, props, notes, image_url, order_index } = req.body;
   try {
     const result = await pool.query(
       `INSERT INTO agency_shotlist_items 
-        (document_id, order_index, scene_name, scene_number, take, duration, framing, cast_list, props, notes, image_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-      [req.params.id, order_index || 0, scene_name, scene_number, take, duration, framing, cast_list, props, notes, image_url]
+        (document_id, order_index, scene_name, scene_number, take, duration, framing, is_vfx, focal_length, framerate, camera_type, cast_list, props, notes, image_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
+      [req.params.id, order_index || 0, scene_name, scene_number, take, duration, framing, is_vfx || false, focal_length, framerate, camera_type, cast_list, props, notes, image_url]
     );
     res.json(result.rows[0]);
   } catch (err: any) {
@@ -242,7 +246,7 @@ router.post('/:id/shotlist-items', requireAuth, async (req: AuthRequest, res) =>
 });
 
 router.put('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, res) => {
-  const { scene_name, scene_number, order_index, take, duration, framing, cast_list, props, notes, image_url } = req.body;
+  const { scene_name, scene_number, order_index, take, duration, framing, is_vfx, focal_length, framerate, camera_type, cast_list, props, notes, image_url } = req.body;
   try {
     const result = await pool.query(
       `UPDATE agency_shotlist_items 
@@ -252,13 +256,17 @@ router.put('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, res)
            take = COALESCE($4, take),
            duration = COALESCE($5, duration),
            framing = COALESCE($6, framing),
-           cast_list = COALESCE($7, cast_list),
-           props = COALESCE($8, props),
-           notes = COALESCE($9, notes),
-           image_url = COALESCE($10, image_url),
+           is_vfx = COALESCE($7, is_vfx),
+           focal_length = COALESCE($8, focal_length),
+           framerate = COALESCE($9, framerate),
+           camera_type = COALESCE($10, camera_type),
+           cast_list = COALESCE($11, cast_list),
+           props = COALESCE($12, props),
+           notes = COALESCE($13, notes),
+           image_url = COALESCE($14, image_url),
            updated_at = NOW()
-       WHERE id = $11 RETURNING *`,
-      [scene_name, scene_number, order_index, take, duration, framing, cast_list, props, notes, image_url, req.params.itemId]
+       WHERE id = $15 RETURNING *`,
+      [scene_name, scene_number, order_index, take, duration, framing, is_vfx, focal_length, framerate, camera_type, cast_list, props, notes, image_url, req.params.itemId]
     );
     res.json(result.rows[0]);
   } catch (err: any) {
@@ -270,6 +278,24 @@ router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, r
   try {
     await pool.query('DELETE FROM agency_shotlist_items WHERE id = $1', [req.params.itemId]);
     res.status(204).send();
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --------------------------------------------------------------------------
+// TEMPORARY MIGRATION ENDPOINT
+// --------------------------------------------------------------------------
+router.get('/migrate-shotlist-vfx', async (req, res) => {
+  try {
+    const sql = `
+      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS is_vfx BOOLEAN DEFAULT false;
+      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS focal_length VARCHAR(255);
+      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS framerate VARCHAR(50);
+      ALTER TABLE agency_shotlist_items ADD COLUMN IF NOT EXISTS camera_type VARCHAR(255);
+    `;
+    await pool.query(sql);
+    res.json({ success: true, message: 'Migration applied successfully' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
