@@ -22,6 +22,16 @@ router.get('/migrate-shotlist-vfx', async (req, res) => {
   }
 });
 
+router.get('/migrate-callsheet-catering', async (req, res) => {
+  try {
+    const sql = `ALTER TABLE agency_call_sheet_data ADD COLUMN IF NOT EXISTS catering_info VARCHAR(255);`;
+    await pool.query(sql);
+    res.json({ success: true, message: 'Catering migration applied successfully' });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // POST /api/agency/documents/init
 // Run this once manually to create the tables.
@@ -306,7 +316,7 @@ router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, r
 // CALL SHEET SPECIFIC ENDPOINTS
 // --------------------------------------------------------------------------
 router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) => {
-  const { location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, directions_notes, shoot_date, additional_locations } = req.body;
+  const { location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, directions_notes, shoot_date, additional_locations, catering_info } = req.body;
   const addLocsParam = additional_locations ? JSON.stringify(additional_locations) : null;
   try {
     const result = await pool.query(
@@ -321,17 +331,18 @@ router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) =>
            location_lat = COALESCE($8, location_lat),
            location_lng = COALESCE($9, location_lng),
            additional_locations = COALESCE($11::jsonb, additional_locations),
+           catering_info = COALESCE($12, catering_info),
            updated_at = NOW()
        WHERE document_id = $6 RETURNING *`,
-      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date, location_lat, location_lng, directions_notes, addLocsParam]
+      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date, location_lat, location_lng, directions_notes, addLocsParam, catering_info]
     );
     // If updating 0 rows (missing initial row), create it
     if (result.rows.length === 0) {
       const newResult = await pool.query(
         `INSERT INTO agency_call_sheet_data 
-         (document_id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, additional_locations)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb) RETURNING *`,
-        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, addLocsParam]
+         (document_id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, additional_locations, catering_info)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12) RETURNING *`,
+        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, addLocsParam, catering_info]
       );
       return res.json(newResult.rows[0]);
     }
