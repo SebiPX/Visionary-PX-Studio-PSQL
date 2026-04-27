@@ -302,11 +302,6 @@ router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, r
   }
 });
 
-} catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // --------------------------------------------------------------------------
 // CALL SHEET SPECIFIC ENDPOINTS
 // --------------------------------------------------------------------------
