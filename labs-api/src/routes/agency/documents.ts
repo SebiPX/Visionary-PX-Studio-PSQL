@@ -79,15 +79,11 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_contacts (
     await pool.query(sql);
 
     // Provide safe schema migration for existing tables that already exist
-    try {
-      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN shoot_date VARCHAR(50);');
-    } catch(e) { /* ignore if column already exists */ }
-    try {
-      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_lat VARCHAR(50);');
-      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_lng VARCHAR(50);');
-      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN directions_notes TEXT;');
-      await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN additional_locations JSONB DEFAULT \'[]\'::jsonb;');
-    } catch(e) { /* ignore */ }
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN shoot_date VARCHAR(50);'); } catch(e) {}
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_lat VARCHAR(50);'); } catch(e) {}
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_lng VARCHAR(50);'); } catch(e) {}
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN directions_notes TEXT;'); } catch(e) {}
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN additional_locations JSONB DEFAULT \'[]\'::jsonb;'); } catch(e) {}
     
     // safe migration for schedule table (Drehplan features)
     try {
