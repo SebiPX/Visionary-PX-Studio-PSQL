@@ -123,6 +123,7 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_contacts (
     try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN pjm_name VARCHAR(255);'); } catch(e) {}
     try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN pjm_phone VARCHAR(255);'); } catch(e) {}
     try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN job_title VARCHAR(255);'); } catch(e) {}
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_notes TEXT;'); } catch(e) {}
     
     // safe migration for schedule table (Drehplan features)
     try {
@@ -326,7 +327,7 @@ router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, r
 // CALL SHEET SPECIFIC ENDPOINTS
 // --------------------------------------------------------------------------
 router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) => {
-  const { location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, directions_notes, shoot_date, additional_locations, catering_info, client_name, project_name, pjm_name, job_title, pjm_phone } = req.body;
+  const { location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, directions_notes, shoot_date, additional_locations, catering_info, client_name, project_name, pjm_name, job_title, pjm_phone, location_notes } = req.body;
   const addLocsParam = additional_locations ? JSON.stringify(additional_locations) : null;
   try {
     const result = await pool.query(
@@ -347,17 +348,18 @@ router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) =>
            pjm_name = COALESCE($15, pjm_name),
            job_title = COALESCE($16, job_title),
            pjm_phone = COALESCE($17, pjm_phone),
+           location_notes = COALESCE($18, location_notes),
            updated_at = NOW()
        WHERE document_id = $6 RETURNING *`,
-      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date, location_lat, location_lng, directions_notes, addLocsParam, catering_info, client_name, project_name, pjm_name, job_title, pjm_phone]
+      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date, location_lat, location_lng, directions_notes, addLocsParam, catering_info, client_name, project_name, pjm_name, job_title, pjm_phone, location_notes]
     );
     // If updating 0 rows (missing initial row), create it
     if (result.rows.length === 0) {
       const newResult = await pool.query(
         `INSERT INTO agency_call_sheet_data 
-         (document_id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, additional_locations, catering_info, client_name, project_name, pjm_name, job_title, pjm_phone)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12, $13, $14, $15, $16, $17) RETURNING *`,
-        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, addLocsParam, catering_info, client_name, project_name, pjm_name, job_title, pjm_phone]
+         (document_id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, additional_locations, catering_info, client_name, project_name, pjm_name, job_title, pjm_phone, location_notes)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
+        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, addLocsParam, catering_info, client_name, project_name, pjm_name, job_title, pjm_phone, location_notes]
       );
       return res.json(newResult.rows[0]);
     }
