@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_contacts (
     
     // safe migration for contacts table
     try { await pool.query("ALTER TABLE agency_call_sheet_contacts ADD COLUMN category VARCHAR(50) DEFAULT 'crew';"); } catch(e) {}
+    try { await pool.query("ALTER TABLE agency_call_sheet_contacts ADD COLUMN order_index INTEGER DEFAULT 0;"); } catch(e) {}
 
     res.json({ message: 'Tables created successfully' });
   } catch (err: any) {
@@ -234,7 +235,7 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
       const scheduleRes = await pool.query('SELECT * FROM agency_call_sheet_schedule WHERE document_id = $1 ORDER BY time_start ASC', [doc.id]);
       doc.schedule = scheduleRes.rows;
 
-      const contactsRes = await pool.query('SELECT * FROM agency_call_sheet_contacts WHERE document_id = $1', [doc.id]);
+      const contactsRes = await pool.query('SELECT * FROM agency_call_sheet_contacts WHERE document_id = $1 ORDER BY order_index ASC, created_at ASC', [doc.id]);
       doc.contacts = contactsRes.rows;
     }
 
@@ -287,8 +288,8 @@ router.post('/:id/duplicate', requireAuth, async (req: AuthRequest, res) => {
       `, [newId, req.params.id]);
 
       await pool.query(`
-        INSERT INTO agency_call_sheet_contacts (document_id, name, role, category, phone, email)
-        SELECT $1, name, role, category, phone, email
+        INSERT INTO agency_call_sheet_contacts (document_id, name, role, category, phone, email, order_index)
+        SELECT $1, name, role, category, phone, email, order_index
         FROM agency_call_sheet_contacts WHERE document_id = $2
       `, [newId, req.params.id]);
     }
@@ -464,15 +465,33 @@ router.delete('/schedule/:itemId', requireAuth, async (req: AuthRequest, res) =>
 
 // Contacts CRUD
 router.post('/:id/contacts', requireAuth, async (req: AuthRequest, res) => {
-  const { name, role, category, phone, email } = req.body;
+  const { name, role, category, phone, email, order_index } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO agency_call_sheet_contacts (document_id, name, role, category, phone, email)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [req.params.id, name, role, category || 'crew', phone, email]
+      `INSERT INTO agency_call_sheet_contacts (document_id, name, role, category, phone, email, order_index)
+       VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 0)) RETURNING *`,
+      [req.params.id, name, role, category || 'crew', phone, email, order_index]
     );
     res.json(result.rows[0]);
   } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.patch('/:id/contacts-reorder', requireAuth, async (req: AuthRequest, res) => {
+  const { contacts } = req.body;
+  try {
+    await pool.query('BEGIN');
+    for (const c of contacts) {
+      await pool.query(
+        'UPDATE agency_call_sheet_contacts SET order_index = $1, updated_at = NOW() WHERE id = $2 AND document_id = $3',
+        [c.order_index, c.id, req.params.id]
+      );
+    }
+    await pool.query('COMMIT');
+    res.json({ success: true });
+  } catch (err: any) {
+    await pool.query('ROLLBACK');
     res.status(500).json({ error: err.message });
   }
 });
