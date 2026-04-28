@@ -254,6 +254,51 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+router.post('/:id/duplicate', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const docRes = await pool.query('SELECT * FROM agency_documents WHERE id = $1', [req.params.id]);
+    if (docRes.rows.length === 0) return res.status(404).json({ error: 'Document not found' });
+    const origDoc = docRes.rows[0];
+
+    const newDocRes = await pool.query(
+      'INSERT INTO agency_documents (project_id, title, type, author_id) VALUES ($1, $2, $3, $4) RETURNING *',
+      [origDoc.project_id, `${origDoc.title} - kopie`, origDoc.type, req.user?.id || origDoc.author_id]
+    );
+    const newDoc = newDocRes.rows[0];
+    const newId = newDoc.id;
+
+    if (origDoc.type === 'shotlist') {
+      await pool.query(`
+        INSERT INTO agency_shotlist_items (document_id, scene_number, shot_number, setup, framing, description, duration_seconds, props, notes, image_url)
+        SELECT $1, scene_number, shot_number, setup, framing, description, duration_seconds, props, notes, image_url
+        FROM agency_shotlist_items WHERE document_id = $2
+      `, [newId, req.params.id]);
+    } else if (origDoc.type === 'call_sheet' || origDoc.type === 'event_sheet') {
+      await pool.query(`
+        INSERT INTO agency_call_sheet_data (document_id, location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, shoot_date, directions_notes, additional_locations, catering_info, client_name, project_name, pjm_name, pjm_phone, job_title, location_notes)
+        SELECT $1, location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, shoot_date, directions_notes, additional_locations, catering_info, client_name, project_name, pjm_name, pjm_phone, job_title, location_notes
+        FROM agency_call_sheet_data WHERE document_id = $2
+      `, [newId, req.params.id]);
+
+      await pool.query(`
+        INSERT INTO agency_call_sheet_schedule (document_id, time_start, time_end, description, persons, scene_name, scene_number, duration_minutes, is_done, image_url)
+        SELECT $1, time_start, time_end, description, persons, scene_name, scene_number, duration_minutes, is_done, image_url
+        FROM agency_call_sheet_schedule WHERE document_id = $2
+      `, [newId, req.params.id]);
+
+      await pool.query(`
+        INSERT INTO agency_call_sheet_contacts (document_id, name, role, category, phone, email)
+        SELECT $1, name, role, category, phone, email
+        FROM agency_call_sheet_contacts WHERE document_id = $2
+      `, [newId, req.params.id]);
+    }
+
+    res.json(newDoc);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // PATCH /api/agency/documents/:id => edit title
 router.patch('/:id', requireAuth, async (req: AuthRequest, res) => {
   try {
