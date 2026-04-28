@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_contacts (
   document_id UUID NOT NULL REFERENCES agency_documents(id) ON DELETE CASCADE,
   name VARCHAR(255),
   role VARCHAR(255),
+  category VARCHAR(50) DEFAULT 'crew',
   phone VARCHAR(100),
   email VARCHAR(255),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -126,6 +127,10 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_contacts (
       await pool.query('ALTER TABLE agency_call_sheet_schedule ADD COLUMN is_done BOOLEAN DEFAULT FALSE;');
       await pool.query('ALTER TABLE agency_call_sheet_schedule ADD COLUMN image_url TEXT;');
     } catch(e) { /* ignore */ }
+    
+    // safe migration for contacts table
+    try { await pool.query("ALTER TABLE agency_call_sheet_contacts ADD COLUMN category VARCHAR(50) DEFAULT 'crew';"); } catch(e) {}
+
     res.json({ message: 'Tables created successfully' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -402,12 +407,12 @@ router.delete('/schedule/:itemId', requireAuth, async (req: AuthRequest, res) =>
 
 // Contacts CRUD
 router.post('/:id/contacts', requireAuth, async (req: AuthRequest, res) => {
-  const { name, role, phone, email } = req.body;
+  const { name, role, category, phone, email } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO agency_call_sheet_contacts (document_id, name, role, phone, email)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [req.params.id, name, role, phone, email]
+      `INSERT INTO agency_call_sheet_contacts (document_id, name, role, category, phone, email)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [req.params.id, name, role, category || 'crew', phone, email]
     );
     res.json(result.rows[0]);
   } catch (err: any) {
@@ -416,17 +421,18 @@ router.post('/:id/contacts', requireAuth, async (req: AuthRequest, res) => {
 });
 
 router.put('/contacts/:itemId', requireAuth, async (req: AuthRequest, res) => {
-  const { name, role, phone, email } = req.body;
+  const { name, role, category, phone, email } = req.body;
   try {
     const result = await pool.query(
       `UPDATE agency_call_sheet_contacts 
        SET name = COALESCE($1, name),
            role = COALESCE($2, role),
-           phone = COALESCE($3, phone),
-           email = COALESCE($4, email),
+           category = COALESCE($3, category),
+           phone = COALESCE($4, phone),
+           email = COALESCE($5, email),
            updated_at = NOW()
-       WHERE id = $5 RETURNING *`,
-      [name, role, phone, email, req.params.itemId]
+       WHERE id = $6 RETURNING *`,
+      [name, role, category, phone, email, req.params.itemId]
     );
     res.json(result.rows[0]);
   } catch (err: any) {
