@@ -63,7 +63,9 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
           business_relevance: row.business_relevance,
           region: row.region,
           audience: row.audience,
-          action_hint: row.action_hint
+          action_hint: row.action_hint,
+          source_name: row.source_name,
+          source_url: row.source_url
         };
       });
       
