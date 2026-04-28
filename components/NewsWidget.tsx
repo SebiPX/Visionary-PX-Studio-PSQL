@@ -17,6 +17,8 @@ interface NewsItem {
   region?: string;
   audience?: string[];
   action_hint?: string;
+  source_name?: string;
+  source_url?: string;
 }
 
 export const NewsWidget: React.FC = () => {
@@ -91,9 +93,22 @@ export const NewsWidget: React.FC = () => {
                         return <div className="text-center text-muted-foreground text-sm py-4">Keine aktuellen Nachrichten vorhanden.</div>;
                     }
 
-                    return news.map(item => (
-                        <div key={item.id} className="bg-card/40 p-4 rounded-xl border border-border/50 hover:border-border/80 transition-colors flex flex-col-reverse sm:flex-row gap-4 justify-between">
-                            <div className="flex-1 min-w-0">
+                    return news.map(item => {
+                        const CardWrapper = item.source_url ? 'a' : 'div';
+                        const wrapperProps = item.source_url ? { 
+                            href: item.source_url, 
+                            target: "_blank", 
+                            rel: "noopener noreferrer", 
+                            'aria-label': `Artikel öffnen: ${item.title}` 
+                        } : {};
+
+                        return (
+                        <CardWrapper 
+                            key={item.id} 
+                            className={`block bg-card/40 p-4 rounded-xl border border-border/50 transition-all flex flex-col-reverse sm:flex-row gap-4 justify-between group ${item.source_url ? 'cursor-pointer hover:border-[#135bec]/50 hover:bg-card/60 hover:shadow-[0_0_15px_rgba(19,91,236,0.15)] hover:-translate-y-0.5' : 'hover:border-border/80'}`}
+                            {...(wrapperProps as any)}
+                        >
+                            <div className="flex-1 min-w-0 flex flex-col">
                                 <div className="flex flex-wrap items-center gap-2 mb-2">
                                     {item.type === 'internal' ? (
                                         <MessageCircle size={16} className="text-green-400 shrink-0" />
@@ -123,26 +138,42 @@ export const NewsWidget: React.FC = () => {
                                     )}
                                 </div>
                                 <div className="text-xs text-muted-foreground mb-3 flex justify-between">
-                                    <span>{item.type === 'internal' ? 'Team Info' : 'AI Daily Update'}</span>
+                                    <span>
+                                        {item.type === 'internal' ? 'Team Info' : 'AI Daily Update'}
+                                        {item.source_name && ` • ${item.source_name}`}
+                                    </span>
                                     <span>{new Date(item.publish_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                                 <div className="text-sm text-foreground/90 prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-a:text-blue-400 hover:prose-a:text-blue-300 prose-ul:pl-4">
                                     <ReactMarkdown>{item.content}</ReactMarkdown>
                                 </div>
-                                {item.action_hint && (
-                                    <div className="mt-3 text-xs bg-primary/10 text-primary px-3 py-2 rounded-lg flex items-start gap-2">
-                                        <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                                        <span><strong>Action:</strong> {item.action_hint}</span>
+                                
+                                <div className="mt-auto pt-4 flex items-center justify-between">
+                                    <div className="flex-1">
+                                        {item.action_hint && (
+                                            <div className="text-xs bg-primary/10 text-primary px-3 py-2 rounded-lg inline-flex items-start gap-2">
+                                                <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                                                <span><strong>Action:</strong> {item.action_hint}</span>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                    <div className="text-xs font-medium shrink-0 ml-4">
+                                        {item.source_url ? (
+                                            <span className="text-[#135bec] flex items-center gap-1 group-hover:text-blue-400 transition-colors">Original lesen ↗</span>
+                                        ) : (
+                                            <span className="text-muted-foreground">Kein Link verfügbar</span>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                             {item.thumbnail && (
                                 <div className="shrink-0 w-full aspect-video sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted/20 relative mb-2 sm:mb-0">
-                                    <img src={item.thumbnail} alt={item.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                                    <img src={item.thumbnail} alt={item.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                                 </div>
                             )}
-                        </div>
-                    ));
+                        </CardWrapper>
+                        );
+                    });
                 })()}
             </div>
         </div>
