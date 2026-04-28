@@ -82,7 +82,7 @@ router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) =>
 
 // PATCH /api/creative/projects/:id - Update existing project (Auto-save)
 router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, status, reviewer_id, client_name, tags } = req.body;
+  const { title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, status, reviewer_id, client_name, tags, current_step } = req.body;
   
   let parsedGuestCount: number | null = null;
   if (guest_count !== undefined && guest_count !== null && guest_count !== '') {
@@ -113,8 +113,9 @@ router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Respons
            reviewer_id = COALESCE($11, reviewer_id),
            client_name = COALESCE($12, client_name),
            tags = COALESCE($13, tags),
+           current_step = COALESCE($14, current_step),
            updated_at = NOW()
-       WHERE id = $14 AND (user_id = $15 OR owner_id = $15 OR reviewer_id = $15)
+       WHERE id = $15 AND (user_id = $16 OR owner_id = $17 OR reviewer_id = $18)
        RETURNING *`,
       [
         title ?? null,
@@ -130,7 +131,10 @@ router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Respons
         reviewer_id ?? null,
         client_name ?? null,
         parsedTags ?? null,
+        current_step ?? null,
         req.params.id,
+        req.userId,
+        req.userId,
         req.userId
       ]
     );
