@@ -90,6 +90,13 @@ router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Respons
     if (isNaN(parsedGuestCount)) parsedGuestCount = null;
   }
 
+  let parsedBudget: any = budget;
+  if (budget === '') parsedBudget = null;
+
+  let parsedTags: any = tags;
+  if (tags === '') parsedTags = null;
+  else if (tags && !Array.isArray(tags)) parsedTags = [tags];
+
   try {
     const result = await pool.query(
       `UPDATE px_creative_projects
@@ -113,7 +120,7 @@ router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Respons
         title ?? null,
         occasion ?? null,
         guest_count === '' ? 0 : (parsedGuestCount ?? null),
-        budget ?? null,
+        parsedBudget ?? null,
         season ?? null,
         industry ?? null,
         emotional_goals ?? null,
@@ -122,7 +129,7 @@ router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Respons
         status ?? null,
         reviewer_id ?? null,
         client_name ?? null,
-        tags ?? null,
+        parsedTags ?? null,
         req.params.id,
         req.userId
       ]
