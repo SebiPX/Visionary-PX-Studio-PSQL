@@ -83,6 +83,13 @@ router.post('/projects', requireAuth, async (req: AuthRequest, res: Response) =>
 // PATCH /api/creative/projects/:id - Update existing project (Auto-save)
 router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Response) => {
   const { title, occasion, guest_count, budget, season, industry, emotional_goals, target_audience, location_preference, status, reviewer_id, client_name, tags } = req.body;
+  
+  let parsedGuestCount: number | null = null;
+  if (guest_count !== undefined && guest_count !== null && guest_count !== '') {
+    parsedGuestCount = parseInt(guest_count, 10);
+    if (isNaN(parsedGuestCount)) parsedGuestCount = null;
+  }
+
   try {
     const result = await pool.query(
       `UPDATE px_creative_projects
@@ -105,7 +112,7 @@ router.patch('/projects/:id', requireAuth, async (req: AuthRequest, res: Respons
       [
         title ?? null,
         occasion ?? null,
-        guest_count ?? null,
+        guest_count === '' ? 0 : (parsedGuestCount ?? null),
         budget ?? null,
         season ?? null,
         industry ?? null,

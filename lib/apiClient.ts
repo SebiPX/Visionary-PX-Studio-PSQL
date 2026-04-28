@@ -569,7 +569,7 @@ export interface ApiNotification {
 }
 
 export const notifications = {
-    list: () => request<ApiNotification[]>('/api/agency/notifications/my'),
-    markRead: (id: string) => request<ApiNotification>(`/api/agency/notifications/${id}/read`, { method: 'PUT' }),
-    markAllRead: () => request<{ success: boolean }>('/api/agency/notifications/my/read-all', { method: 'PUT' }),
+    list: () => request<ApiNotification[]>('/api/notifications/my'),
+    markRead: (id: string) => request<ApiNotification>(`/api/notifications/${id}/read`, { method: 'PUT' }),
+    markAllRead: () => request<{ success: boolean }>('/api/notifications/my/read-all', { method: 'PUT' }),
 };
