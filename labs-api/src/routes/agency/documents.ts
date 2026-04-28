@@ -261,8 +261,8 @@ router.post('/:id/duplicate', requireAuth, async (req: AuthRequest, res) => {
     const origDoc = docRes.rows[0];
 
     const newDocRes = await pool.query(
-      'INSERT INTO agency_documents (project_id, title, type, author_id) VALUES ($1, $2, $3, $4) RETURNING *',
-      [origDoc.project_id, `${origDoc.title} - kopie`, origDoc.type, req.user?.id || origDoc.author_id]
+      'INSERT INTO agency_documents (project_id, title, type, created_by) VALUES ($1, $2, $3, $4) RETURNING *',
+      [origDoc.project_id, `${origDoc.title} - kopie`, origDoc.type, req.userId || origDoc.created_by]
     );
     const newDoc = newDocRes.rows[0];
     const newId = newDoc.id;
