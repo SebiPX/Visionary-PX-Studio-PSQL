@@ -118,6 +118,10 @@ CREATE TABLE IF NOT EXISTS agency_call_sheet_contacts (
     try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN location_lng VARCHAR(50);'); } catch(e) {}
     try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN directions_notes TEXT;'); } catch(e) {}
     try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN additional_locations JSONB DEFAULT \'[]\'::jsonb;'); } catch(e) {}
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN client_name VARCHAR(255);'); } catch(e) {}
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN project_name VARCHAR(255);'); } catch(e) {}
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN pjm_name VARCHAR(255);'); } catch(e) {}
+    try { await pool.query('ALTER TABLE agency_call_sheet_data ADD COLUMN job_title VARCHAR(255);'); } catch(e) {}
     
     // safe migration for schedule table (Drehplan features)
     try {
@@ -321,7 +325,7 @@ router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, r
 // CALL SHEET SPECIFIC ENDPOINTS
 // --------------------------------------------------------------------------
 router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) => {
-  const { location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, directions_notes, shoot_date, additional_locations, catering_info } = req.body;
+  const { location_name, location_address, location_lat, location_lng, weather_info, hospital_info, general_notes, directions_notes, shoot_date, additional_locations, catering_info, client_name, project_name, pjm_name, job_title } = req.body;
   const addLocsParam = additional_locations ? JSON.stringify(additional_locations) : null;
   try {
     const result = await pool.query(
@@ -337,17 +341,21 @@ router.put('/:id/call-sheet-data', requireAuth, async (req: AuthRequest, res) =>
            location_lng = COALESCE($9, location_lng),
            additional_locations = COALESCE($11::jsonb, additional_locations),
            catering_info = COALESCE($12, catering_info),
+           client_name = COALESCE($13, client_name),
+           project_name = COALESCE($14, project_name),
+           pjm_name = COALESCE($15, pjm_name),
+           job_title = COALESCE($16, job_title),
            updated_at = NOW()
        WHERE document_id = $6 RETURNING *`,
-      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date, location_lat, location_lng, directions_notes, addLocsParam, catering_info]
+      [location_name, location_address, weather_info, hospital_info, general_notes, req.params.id, shoot_date, location_lat, location_lng, directions_notes, addLocsParam, catering_info, client_name, project_name, pjm_name, job_title]
     );
     // If updating 0 rows (missing initial row), create it
     if (result.rows.length === 0) {
       const newResult = await pool.query(
         `INSERT INTO agency_call_sheet_data 
-         (document_id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, additional_locations, catering_info)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12) RETURNING *`,
-        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, addLocsParam, catering_info]
+         (document_id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, additional_locations, catering_info, client_name, project_name, pjm_name, job_title)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12, $13, $14, $15, $16) RETURNING *`,
+        [req.params.id, location_name, location_address, weather_info, hospital_info, general_notes, directions_notes, shoot_date, location_lat, location_lng, addLocsParam, catering_info, client_name, project_name, pjm_name, job_title]
       );
       return res.json(newResult.rows[0]);
     }
