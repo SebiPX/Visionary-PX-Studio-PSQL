@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { AppView } from '../types';
 import toast from 'react-hot-toast';
+import { downloadAsset } from '../lib/apiClient';
 
 export type ContentItem = {
     id: string;
@@ -147,37 +148,13 @@ export const MyAssets: React.FC<MyAssetsProps> = ({ setView, navigateToItem, isA
     const handleDownload = async (url: string, filename: string) => {
         const toastId = toast.loading('Wird heruntergeladen...');
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Network response was not ok');
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(blobUrl);
+            await downloadAsset(url, filename);
             toast.dismiss(toastId);
             toast.success('Download abgeschlossen');
         } catch (error) {
-            console.error('Fetch download failed, using fallback:', error);
-            try {
-                // Fallback: simple anchor click if fetch fails (e.g. CORS issues)
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                toast.dismiss(toastId);
-                toast.success('Download gestartet');
-            } catch (fallbackError) {
-                toast.dismiss(toastId);
-                toast.error('Fehler beim Herunterladen');
-                console.error(fallbackError);
-            }
+            toast.dismiss(toastId);
+            toast.error('Fehler beim Herunterladen');
+            console.error(error);
         }
     };
 
