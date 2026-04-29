@@ -261,9 +261,11 @@ router.post('/:id/duplicate', requireAuth, async (req: AuthRequest, res) => {
     if (docRes.rows.length === 0) return res.status(404).json({ error: 'Document not found' });
     const origDoc = docRes.rows[0];
 
+    const targetProjectId = req.body.targetProjectId || origDoc.project_id;
+
     const newDocRes = await pool.query(
       'INSERT INTO agency_documents (project_id, title, type, created_by) VALUES ($1, $2, $3, $4) RETURNING *',
-      [origDoc.project_id, `${origDoc.title} - kopie`, origDoc.type, req.userId || origDoc.created_by]
+      [targetProjectId, `${origDoc.title} - kopie`, origDoc.type, req.userId || origDoc.created_by]
     );
     const newDoc = newDocRes.rows[0];
     const newId = newDoc.id;
