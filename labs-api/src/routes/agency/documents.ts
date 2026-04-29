@@ -200,6 +200,27 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
             VALUES ($1, $2, $3, $4, $5)
           `, [newDoc.id, name, role, '', email]);
         }
+
+        // Pre-fill clients
+        const clientContactsRes = await pool.query(`
+          SELECT cc.full_name, cc.position, cc.email, cc.phone
+          FROM agency_client_contacts cc
+          JOIN agency_projects p ON cc.client_id = p.client_id
+          WHERE p.id = $1
+        `, [project_id]);
+
+        let orderIndex = 0;
+        for (const cc of clientContactsRes.rows) {
+          const name = cc.full_name || 'Unknown';
+          const role = cc.position || 'Kunde';
+          const email = cc.email || '';
+          const phone = cc.phone || '';
+          
+          await pool.query(`
+            INSERT INTO agency_call_sheet_contacts (document_id, name, role, phone, email, category, order_index)
+            VALUES ($1, $2, $3, $4, $5, 'client', $6)
+          `, [newDoc.id, name, role, phone, email, orderIndex++]);
+        }
       } catch (teamErr) {
         console.error('Error pre-filling call sheet contacts:', teamErr);
       }
