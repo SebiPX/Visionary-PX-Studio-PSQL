@@ -202,24 +202,31 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
         }
 
         // Pre-fill clients
-        const clientContactsRes = await pool.query(`
-          SELECT cc.full_name, cc.position, cc.email, cc.phone
-          FROM agency_client_contacts cc
-          JOIN agency_projects p ON cc.client_id = p.client_id
-          WHERE p.id = $1
-        `, [project_id]);
+        try {
+          const clientContactsRes = await pool.query(`
+            SELECT full_name, position, email, phone
+            FROM agency_client_contacts
+            WHERE client_id = (SELECT client_id FROM agency_projects WHERE id = $1 LIMIT 1)
+          `, [project_id]);
 
-        let orderIndex = 0;
-        for (const cc of clientContactsRes.rows) {
-          const name = cc.full_name || 'Unknown';
-          const role = cc.position || 'Kunde';
-          const email = cc.email || '';
-          const phone = cc.phone || '';
-          
+          let orderIndex = 0;
+          for (const cc of clientContactsRes.rows) {
+            const name = cc.full_name || 'Unknown';
+            const role = cc.position || 'Kunde';
+            const email = cc.email || '';
+            const phone = cc.phone || '';
+            
+            await pool.query(`
+              INSERT INTO agency_call_sheet_contacts (document_id, name, role, phone, email, category, order_index)
+              VALUES ($1, $2, $3, $4, $5, 'kunde', $6)
+            `, [newDoc.id, name, role, phone, email, orderIndex++]);
+          }
+        } catch (clientErr: any) {
+          console.error('Error pre-filling client contacts:', clientErr);
           await pool.query(`
             INSERT INTO agency_call_sheet_contacts (document_id, name, role, phone, email, category, order_index)
-            VALUES ($1, $2, $3, $4, $5, 'client', $6)
-          `, [newDoc.id, name, role, phone, email, orderIndex++]);
+            VALUES ($1, $2, $3, $4, $5, 'kunde', 0)
+          `, [newDoc.id, 'ERROR: ' + clientErr.message, 'Database Error', '', '']);
         }
       } catch (teamErr) {
         console.error('Error pre-filling call sheet contacts:', teamErr);
