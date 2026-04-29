@@ -16,27 +16,6 @@ router.get('/', requireAuth, async (_req: AuthRequest, res: Response) => {
   }
 });
 
-router.get('/test-fetch', async (_req, res) => {
-  try {
-    const result = await pool.query(`SELECT id, geraet, modell FROM inventar_items`);
-    res.json(result.rows);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.post('/test-update', async (req, res) => {
-  try {
-    const { updates } = req.body;
-    for (const update of updates) {
-      await pool.query('UPDATE inventar_items SET gewicht = $1 WHERE id = $2', [update.gewicht, update.id]);
-    }
-    res.json({ success: true });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // POST /api/inventar/items
 router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
   const {
