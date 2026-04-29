@@ -65,7 +65,7 @@ export async function performProjectSync() {
         projectId = projRes.rows[0].id;
         await pool.query(`
           UPDATE agency_projects 
-          SET title = $1, budget_total = $2, deadline = $3, start_date = $4, updated_at = NOW()
+          SET title = $1, budget_total = $2, deadline = COALESCE(deadline, $3), start_date = COALESCE(start_date, $4), updated_at = NOW()
           WHERE id = $5
         `, [p.name || 'Unnamed Project', budget, deadline, startDate, projectId]);
       }
