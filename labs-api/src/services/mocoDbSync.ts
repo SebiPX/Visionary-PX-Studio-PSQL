@@ -53,12 +53,15 @@ export async function performProjectSync() {
       let projectId;
 
       const projRes = await pool.query('SELECT id FROM agency_projects WHERE moco_project_id = $1', [p.id]);
+      
+      const fullTitle = p.identifier ? `${p.identifier} ${p.name || 'Unnamed Project'}`.trim() : (p.name || 'Unnamed Project');
+
       if (projRes.rows.length === 0) {
         const newProjRes = await pool.query(`
           INSERT INTO agency_projects (title, moco_project_id, client_id, status, budget_total, deadline, start_date)
           VALUES ($1, $2, $3, $4, $5, $6, $7)
           RETURNING id
-        `, [p.name || 'Unnamed Project', p.id, clientId, 'active', budget, deadline, startDate]);
+        `, [fullTitle, p.id, clientId, 'active', budget, deadline, startDate]);
         projectId = newProjRes.rows[0].id;
         importedCount++;
       } else {
@@ -67,7 +70,7 @@ export async function performProjectSync() {
           UPDATE agency_projects 
           SET title = $1, budget_total = $2, deadline = COALESCE(deadline, $3), start_date = COALESCE(start_date, $4), updated_at = NOW()
           WHERE id = $5
-        `, [p.name || 'Unnamed Project', budget, deadline, startDate, projectId]);
+        `, [fullTitle, budget, deadline, startDate, projectId]);
       }
 
       if (p.leader && p.leader.id) {
