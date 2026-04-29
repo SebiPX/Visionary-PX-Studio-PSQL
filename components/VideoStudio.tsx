@@ -174,8 +174,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                 config: {
                     resolution: (activeMode === 'IMAGE' && uploadedImage) ? '720p' : '1080p',
                     aspectRatio: aspectRatio,
-                    durationSeconds: parseInt(duration.replace('s', ''), 10),
-                    personGeneration: 'allow_adult'
+                    durationSeconds: parseInt(duration.replace('s', ''), 10)
                 }
             }) as any;
 
