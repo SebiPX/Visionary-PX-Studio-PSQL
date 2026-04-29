@@ -22,7 +22,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
     geraet, px_nummer, aufkleber, modell, seriennummer, ort, os, status,
     ip_office, ip_tiger, px_eigentum, handy_nr, notes, department,
     is_verleihartikel, anschaffungsdatum, anschaffungspreis, bild_url,
-    assigned_to_name, assigned_to_id,
+    assigned_to_name, assigned_to_id, gewicht
   } = req.body;
   try {
     const result = await pool.query(
@@ -30,13 +30,13 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
         (geraet, px_nummer, aufkleber, modell, seriennummer, ort, os, status,
          ip_office, ip_tiger, px_eigentum, handy_nr, notes, department,
          is_verleihartikel, anschaffungsdatum, anschaffungspreis, bild_url,
-         assigned_to_name, assigned_to_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+         assigned_to_name, assigned_to_id, gewicht)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
        RETURNING *`,
       [geraet, px_nummer, aufkleber, modell, seriennummer, ort, os, status,
        ip_office, ip_tiger, px_eigentum, handy_nr, notes, department,
        is_verleihartikel, anschaffungsdatum, anschaffungspreis, bild_url,
-       assigned_to_name, assigned_to_id]
+       assigned_to_name, assigned_to_id, gewicht || 0]
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {

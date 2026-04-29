@@ -32,6 +32,32 @@ router.get('/migrate-callsheet-catering', async (req, res) => {
   }
 });
 
+router.get('/migrate-packing-lists', async (req, res) => {
+  try {
+    const sql = `
+      ALTER TABLE inventar_items ADD COLUMN IF NOT EXISTS gewicht NUMERIC(10, 2) DEFAULT 0;
+      
+      CREATE TABLE IF NOT EXISTS agency_packing_list_items (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        document_id UUID NOT NULL REFERENCES agency_documents(id) ON DELETE CASCADE,
+        inventar_item_id UUID,
+        name VARCHAR(255) NOT NULL,
+        category VARCHAR(255),
+        quantity INTEGER DEFAULT 1,
+        weight_kg NUMERIC(10, 2) DEFAULT 0,
+        is_packed BOOLEAN DEFAULT false,
+        order_index INTEGER DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+    await pool.query(sql);
+    res.json({ success: true, message: 'Packing lists migration applied successfully' });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // POST /api/agency/documents/init
 // Run this once manually to create the tables.
@@ -265,6 +291,9 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
 
       const contactsRes = await pool.query('SELECT * FROM agency_call_sheet_contacts WHERE document_id = $1 ORDER BY order_index ASC, created_at ASC', [doc.id]);
       doc.contacts = contactsRes.rows;
+    } else if (doc.type === 'packing_list') {
+      const itemsRes = await pool.query('SELECT * FROM agency_packing_list_items WHERE document_id = $1 ORDER BY order_index ASC', [doc.id]);
+      doc.items = itemsRes.rows;
     }
 
     res.json(doc);
@@ -321,6 +350,12 @@ router.post('/:id/duplicate', requireAuth, async (req: AuthRequest, res) => {
         INSERT INTO agency_call_sheet_contacts (document_id, name, role, category, phone, email, order_index)
         SELECT $1, name, role, category, phone, email, order_index
         FROM agency_call_sheet_contacts WHERE document_id = $2
+      `, [newId, req.params.id]);
+    } else if (origDoc.type === 'packing_list') {
+      await pool.query(`
+        INSERT INTO agency_packing_list_items (document_id, inventar_item_id, name, category, quantity, weight_kg, is_packed, order_index)
+        SELECT $1, inventar_item_id, name, category, quantity, weight_kg, is_packed, order_index
+        FROM agency_packing_list_items WHERE document_id = $2
       `, [newId, req.params.id]);
     }
 
@@ -393,6 +428,54 @@ router.put('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, res)
 router.delete('/shotlist-items/:itemId', requireAuth, async (req: AuthRequest, res) => {
   try {
     await pool.query('DELETE FROM agency_shotlist_items WHERE id = $1', [req.params.itemId]);
+    res.status(204).send();
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --------------------------------------------------------------------------
+// PACKING LIST SPECIFIC ENDPOINTS
+// --------------------------------------------------------------------------
+router.post('/:id/packing-list-items', requireAuth, async (req: AuthRequest, res) => {
+  const { inventar_item_id, name, category, quantity, weight_kg, is_packed, order_index } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO agency_packing_list_items 
+        (document_id, inventar_item_id, name, category, quantity, weight_kg, is_packed, order_index)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [req.params.id, inventar_item_id || null, name, category, quantity || 1, weight_kg || 0, is_packed || false, order_index || 0]
+    );
+    res.json(result.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/packing-list-items/:itemId', requireAuth, async (req: AuthRequest, res) => {
+  const { name, category, quantity, weight_kg, is_packed, order_index } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE agency_packing_list_items 
+       SET name = COALESCE($1, name),
+           category = COALESCE($2, category),
+           quantity = COALESCE($3, quantity),
+           weight_kg = COALESCE($4, weight_kg),
+           is_packed = COALESCE($5, is_packed),
+           order_index = COALESCE($6, order_index),
+           updated_at = NOW()
+       WHERE id = $7 RETURNING *`,
+      [name, category, quantity, weight_kg, is_packed, order_index, req.params.itemId]
+    );
+    res.json(result.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.delete('/packing-list-items/:itemId', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    await pool.query('DELETE FROM agency_packing_list_items WHERE id = $1', [req.params.itemId]);
     res.status(204).send();
   } catch (err: any) {
     res.status(500).json({ error: err.message });
