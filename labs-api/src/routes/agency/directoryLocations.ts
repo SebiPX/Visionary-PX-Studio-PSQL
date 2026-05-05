@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
 // Create new location
 router.post('/', async (req, res) => {
     const fields = req.body;
-    const keys = Object.keys(fields).filter(k => k !== 'id' && k !== 'created_at');
+    const keys = Object.keys(fields).filter(k => k !== 'id' && k !== 'created_at' && k !== 'average_rating' && k !== 'rating_count');
     
     if (keys.length === 0) return res.status(400).json({ error: 'No fields provided' });
     
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
 router.patch('/:id', async (req, res) => {
     const { id } = req.params;
     const fields = req.body;
-    const keys = Object.keys(fields).filter(k => k !== 'id' && k !== 'created_at');
+    const keys = Object.keys(fields).filter(k => k !== 'id' && k !== 'created_at' && k !== 'average_rating' && k !== 'rating_count');
     
     if (keys.length === 0) return res.status(400).json({ error: 'No fields provided' });
     
