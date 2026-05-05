@@ -1,13 +1,26 @@
 import { Router } from 'express';
 import pool from '../../db';
+import { requireAuth, AuthRequest } from '../../middleware/requireAuth';
 
 const router = Router();
 
 // Get all locations
 router.get('/', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM directory_locations ORDER BY name ASC');
-        res.json(result.rows);
+        const result = await pool.query(`
+            SELECT l.*, 
+                   COALESCE((SELECT AVG(rating)::numeric(2,1) FROM directory_location_ratings WHERE location_id = l.id), 0) as average_rating,
+                   (SELECT COUNT(*) FROM directory_location_ratings WHERE location_id = l.id) as rating_count
+            FROM directory_locations l 
+            ORDER BY l.name ASC
+        `);
+        // Map string values from numeric back to number for convenience
+        const rows = result.rows.map(row => ({
+            ...row,
+            average_rating: parseFloat(row.average_rating),
+            rating_count: parseInt(row.rating_count, 10)
+        }));
+        res.json(rows);
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
@@ -112,6 +125,46 @@ router.delete('/assets/:assetId', async (req, res) => {
     try {
         await pool.query('DELETE FROM directory_location_assets WHERE id = $1', [assetId]);
         res.status(204).send();
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- Ratings ---
+
+// Get current user's rating for a location
+router.get('/:id/rate', requireAuth, async (req: AuthRequest, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query(
+            'SELECT rating FROM directory_location_ratings WHERE location_id = $1 AND user_id = $2',
+            [id, req.userId]
+        );
+        res.json({ rating: result.rows.length > 0 ? result.rows[0].rating : null });
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Set current user's rating for a location
+router.post('/:id/rate', requireAuth, async (req: AuthRequest, res) => {
+    const { id } = req.params;
+    const { rating } = req.body;
+    
+    if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: 'Rating must be a number between 1 and 5' });
+    }
+    
+    try {
+        const result = await pool.query(
+            `INSERT INTO directory_location_ratings (location_id, user_id, rating) 
+             VALUES ($1, $2, $3) 
+             ON CONFLICT (location_id, user_id) 
+             DO UPDATE SET rating = EXCLUDED.rating, updated_at = NOW()
+             RETURNING rating`,
+            [id, req.userId, rating]
+        );
+        res.json({ rating: result.rows[0].rating });
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }

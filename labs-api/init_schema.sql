@@ -501,3 +501,19 @@ CREATE TABLE IF NOT EXISTS public.directory_location_assets (
 );
 
 CREATE INDEX IF NOT EXISTS idx_directory_location_assets_location_id ON public.directory_location_assets(location_id);
+
+-- =========================================================
+-- Directory Location Ratings
+-- =========================================================
+CREATE TABLE IF NOT EXISTS public.directory_location_ratings (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    location_id UUID REFERENCES public.directory_locations(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(location_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_directory_location_ratings_location_id ON public.directory_location_ratings(location_id);
+
