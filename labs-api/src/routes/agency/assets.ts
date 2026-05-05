@@ -139,11 +139,25 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
   } = req.body;
 
   try {
-    const existingResult = await pool.query('SELECT project_id, name FROM agency_assets WHERE id = $1', [req.params.id]);
+    const existingResult = await pool.query('SELECT project_id, name, feedback_note FROM agency_assets WHERE id = $1', [req.params.id]);
     if (existingResult.rows.length === 0) {
       return res.status(404).json({ error: 'Asset not found' });
     }
     const existingAsset = existingResult.rows[0];
+
+    // Handle feedback appending if new feedback is provided
+    let finalNote = existingAsset.feedback_note || '';
+    if (feedback_note !== undefined && feedback_note !== null && feedback_note.trim() !== '') {
+        const dateStr = new Date().toLocaleString('de-DE');
+        let statusText = status ? status.replace(/_/g, ' ') : 'Status Update';
+        // Capitalize status text
+        statusText = statusText.charAt(0).toUpperCase() + statusText.slice(1);
+        
+        let newEntry = `[${dateStr}] Internal (${statusText}):\n${feedback_note.trim()}`;
+        finalNote = existingAsset.feedback_note ? `${newEntry}\n\n------------------------\n\n${existingAsset.feedback_note}` : newEntry;
+    } else if (feedback_note === null) {
+        // If client explicitly sent null, we could clear it, but let's just keep finalNote.
+    }
 
     const result = await pool.query(
       `UPDATE agency_assets 
@@ -151,14 +165,14 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
            description = COALESCE($2, description),
            category = COALESCE($3, category),
            status = COALESCE($4, status),
-           feedback_note = COALESCE($5, feedback_note),
+           feedback_note = $5,
            is_physical = COALESCE($6, is_physical),
            location = COALESCE($7, location),
            is_visible_to_client = COALESCE($8, is_visible_to_client)
        WHERE id = $9
        RETURNING *`,
       [
-        name, description, category, status, feedback_note, 
+        name, description, category, status, finalNote, 
         is_physical, location, is_visible_to_client, req.params.id
       ]
     );

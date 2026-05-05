@@ -74,14 +74,26 @@ router.patch('/:id/review', async (req, res) => {
             return res.status(400).json({ error: 'Invalid status provided.' });
         }
 
-        // Verify the asset is currently in a state that allows review
+        // We need to fetch the existing feedback note first
         const checkResult = await pool.query(
-            `SELECT id FROM agency_assets WHERE id = $1 AND status IN ('client_review', 'changes_requested')`,
+            `SELECT id, feedback_note FROM agency_assets WHERE id = $1 AND status IN ('client_review', 'changes_requested')`,
             [id]
         );
 
         if (checkResult.rows.length === 0) {
             return res.status(400).json({ error: 'Asset is not currently under review.' });
+        }
+
+        const existingNote = checkResult.rows[0].feedback_note || '';
+        let finalNote = existingNote;
+
+        // Only append if new feedback was provided
+        if (feedback_note && feedback_note.trim().length > 0) {
+            const dateStr = new Date().toLocaleString('de-DE');
+            let statusText = status === 'approved' ? 'Freigegeben (Approved)' : 'Änderungen gewünscht (Changes Requested)';
+            let newEntry = `[${dateStr}] Client Review - ${statusText}:\n${feedback_note.trim()}`;
+            
+            finalNote = existingNote ? `${newEntry}\n\n------------------------\n\n${existingNote}` : newEntry;
         }
 
         // Update the asset
@@ -90,7 +102,7 @@ router.patch('/:id/review', async (req, res) => {
              SET status = $1, feedback_note = $2
              WHERE id = $3
              RETURNING *`,
-            [status, feedback_note, id]
+            [status, finalNote, id]
         );
 
         res.json(updateResult.rows[0]);
