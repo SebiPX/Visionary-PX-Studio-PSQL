@@ -485,3 +485,19 @@ CREATE TABLE IF NOT EXISTS public.agency_news (
 
 CREATE INDEX IF NOT EXISTS idx_agency_news_publish_date ON agency_news(publish_date DESC);
 CREATE INDEX IF NOT EXISTS idx_agency_news_type ON agency_news(type);
+
+-- =========================================================
+-- Directory Location Assets
+-- =========================================================
+CREATE TABLE IF NOT EXISTS public.directory_location_assets (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    location_id UUID REFERENCES public.directory_locations(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    storage_path TEXT NOT NULL,
+    file_type TEXT,
+    file_size BIGINT,
+    uploaded_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_directory_location_assets_location_id ON public.directory_location_assets(location_id);

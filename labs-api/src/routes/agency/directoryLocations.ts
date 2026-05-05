@@ -68,4 +68,53 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// --- Location Assets ---
+
+// Get assets for a location
+router.get('/:id/assets', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query(
+            'SELECT * FROM directory_location_assets WHERE location_id = $1 ORDER BY created_at DESC',
+            [id]
+        );
+        res.json(result.rows);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Add asset to a location
+router.post('/:id/assets', async (req, res) => {
+    const { id } = req.params;
+    const { name, storage_path, file_type, file_size, uploaded_by } = req.body;
+    
+    if (!name || !storage_path) {
+        return res.status(400).json({ error: 'Name and storage_path are required' });
+    }
+    
+    try {
+        const result = await pool.query(
+            `INSERT INTO directory_location_assets 
+            (location_id, name, storage_path, file_type, file_size, uploaded_by) 
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [id, name, storage_path, file_type, file_size, uploaded_by || null]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete an asset
+router.delete('/assets/:assetId', async (req, res) => {
+    const { assetId } = req.params;
+    try {
+        await pool.query('DELETE FROM directory_location_assets WHERE id = $1', [assetId]);
+        res.status(204).send();
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;
