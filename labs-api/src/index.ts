@@ -37,6 +37,7 @@ import agencyRoutes from './routes/agency';
 import casesRoutes from './routes/cases';
 import newsRoutes from './routes/news';
 import notesRoutes from './routes/notes';
+import publicAssetRoutes from './routes/public/assets';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -162,6 +163,7 @@ app.use('/api', agencyRoutes); // Mounts /api/clients, /api/projects, etc. to ma
 app.use('/api/agency/cases', casesRoutes);
 app.use('/api/news', newsRoutes); // News of the Day
 app.use('/api/notes', notesRoutes);
+app.use('/api/public/assets', publicAssetRoutes);
 
 // Inventar
 app.use('/api/inventar/items',            inventarItemRoutes);
