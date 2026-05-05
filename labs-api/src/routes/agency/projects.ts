@@ -1,8 +1,19 @@
 import { Router } from 'express';
 import pool from '../../db';
 import { AuthRequest, requireAuth } from '../../middleware/requireAuth';
+import { Response } from 'express';
 
 const router = Router();
+
+const checkNotFreelancer = async (userId: string | undefined, res: Response) => {
+  if (!userId) return false;
+  const result = await pool.query('SELECT role FROM profiles WHERE id = $1', [userId]);
+  if (result.rows[0]?.role === 'freelancer') {
+    res.status(403).json({ error: 'Access denied for freelancers' });
+    return false;
+  }
+  return true;
+};
 
 // GET /api/agency/projects
 router.get('/', requireAuth, async (req: AuthRequest, res) => {
@@ -42,6 +53,9 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
       }
       query += ` WHERE p.client_id = $1`;
       queryParams.push(user.client_id);
+    } else if (user.role === 'freelancer') {
+      query += ` WHERE p.id IN (SELECT project_id FROM agency_project_members WHERE user_id = $1)`;
+      queryParams.push(req.userId);
     }
     
     query += ` ORDER BY p.updated_at DESC`;
@@ -55,6 +69,7 @@ router.get('/', requireAuth, async (req: AuthRequest, res) => {
 
 // GET /api/agency/projects/financial-overview
 router.get('/financial-overview', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   try {
     const result = await pool.query(`
       SELECT 
@@ -91,6 +106,7 @@ router.get('/financial-overview', requireAuth, async (req: AuthRequest, res) => 
 
 // GET /api/agency/projects/stats
 router.get('/stats', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   try {
     const result = await pool.query(`
       SELECT 
@@ -107,6 +123,7 @@ router.get('/stats', requireAuth, async (req: AuthRequest, res) => {
 
 // POST /api/agency/projects/margins-batch
 router.post('/margins-batch', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   const { projectIds } = req.body;
   
   if (!projectIds || !Array.isArray(projectIds) || projectIds.length === 0) {
@@ -178,6 +195,9 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
       if (!user.client_id) return res.status(403).json({ error: 'Access denied' });
       query += ` AND p.client_id = $2`;
       queryParams.push(user.client_id);
+    } else if (user && user.role === 'freelancer') {
+      query += ` AND p.id IN (SELECT project_id FROM agency_project_members WHERE user_id = $2)`;
+      queryParams.push(req.userId);
     }
 
     const result = await pool.query(query, queryParams);
@@ -321,6 +341,7 @@ router.get('/:id/tasks', requireAuth, async (req: AuthRequest, res) => {
 
 // GET /api/agency/projects/:id/costs
 router.get('/:id/costs', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   try {
     const result = await pool.query(`SELECT * FROM agency_costs WHERE project_id = $1 ORDER BY date DESC`, [req.params.id]);
     res.json(result.rows);
@@ -331,6 +352,7 @@ router.get('/:id/costs', requireAuth, async (req: AuthRequest, res) => {
 
 // GET /api/agency/projects/:id/financial-documents
 router.get('/:id/financial-documents', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   try {
     const result = await pool.query(`SELECT * FROM agency_financial_documents WHERE project_id = $1 ORDER BY created_at DESC`, [req.params.id]);
     res.json(result.rows);
@@ -359,6 +381,7 @@ router.get('/:id/time-entries', requireAuth, async (req: AuthRequest, res) => {
 
 // GET /api/agency/projects/:id/billable-value
 router.get('/:id/billable-value', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   try {
     const result = await pool.query(`
       SELECT 
@@ -397,6 +420,7 @@ router.get('/:id/services', requireAuth, async (req: AuthRequest, res) => {
 });
 // GET /api/agency/projects/:id/service-breakdown
 router.get('/:id/service-breakdown', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   try {
     const result = await pool.query(`
       WITH task_estimates AS (
@@ -559,6 +583,7 @@ router.patch('/:id/archive', requireAuth, async (req: AuthRequest, res) => {
 
 // GET /api/agency/projects/:projectId/revenue
 router.get('/:projectId/revenue', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   try {
     // For now, return sum of billable hours as revenue, or total quotes.
     const result = await pool.query(
@@ -573,6 +598,7 @@ router.get('/:projectId/revenue', requireAuth, async (req: AuthRequest, res) => 
 
 // GET /api/agency/projects/:projectId/costs/calculate
 router.get('/:projectId/costs/calculate', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   try {
     const projectId = req.params.projectId;
     // Get direct costs
@@ -603,6 +629,7 @@ router.get('/:projectId/costs/calculate', requireAuth, async (req: AuthRequest, 
 
 // GET /api/agency/projects/:projectId/margin
 router.get('/:projectId/margin', requireAuth, async (req: AuthRequest, res) => {
+  if (!(await checkNotFreelancer(req.userId, res))) return;
   try {
     // Dummy / simplified for now
     res.json({
