@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
-interface LoginProps {
-    onSwitchToSignup: () => void;
-}
-
-export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
+export const Login: React.FC = () => {
     const { signIn, resetPassword } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -134,17 +130,6 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                             ) : (
                                 'Sign In'
                             )}
-                        </button>
-                    </div>
-
-                    {/* Switch to Signup */}
-                    <div className="text-center mt-4">
-                        <button
-                            type="button"
-                            onClick={onSwitchToSignup}
-                            className="text-sm text-primary hover:text-blue-300 transition-colors"
-                        >
-                            Don't have an account? Create one
                         </button>
                     </div>
                 </form>

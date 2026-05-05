@@ -143,4 +143,43 @@ router.patch('/admin/reset-password', requireAuth, async (req: AuthRequest, res:
   }
 });
 
+// POST /auth/admin/users — admin creates a new user
+router.post('/admin/users', requireAuth, async (req: AuthRequest, res: Response) => {
+  // Only admins
+  const adminCheck = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
+  if (!adminCheck.rows[0] || adminCheck.rows[0].role !== 'admin') {
+    res.status(403).json({ error: 'Admin access required' });
+    return;
+  }
+  
+  const { email, password, full_name, role } = req.body;
+  if (!email || !password || !full_name) {
+    res.status(400).json({ error: 'email, password, and full_name required' });
+    return;
+  }
+  if (password.length < 6) {
+    res.status(400).json({ error: 'password must be at least 6 characters' });
+    return;
+  }
+  
+  const targetRole = role || 'creative';
+  
+  try {
+    const new_hash = await bcrypt.hash(password, 12);
+    const result = await pool.query(
+      `INSERT INTO profiles (email, password_hash, full_name, role) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING id, email, full_name, role`,
+      [email.toLowerCase().trim(), new_hash, full_name, targetRole]
+    );
+    res.status(201).json({ success: true, user: result.rows[0] });
+  } catch (err: any) {
+    if (err.code === '23505') { // unique_violation
+      res.status(409).json({ error: 'Email already exists' });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
+  }
+});
+
 export default router;

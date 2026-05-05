@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Login } from './Login';
-import { Signup } from './Signup';
 import { ResetPassword } from './ResetPassword';
 
 export const AuthPage: React.FC = () => {
@@ -47,9 +46,5 @@ export const AuthPage: React.FC = () => {
         return <ResetPassword onComplete={handleResetComplete} />;
     }
 
-    return isLogin ? (
-        <Login onSwitchToSignup={() => setIsLogin(false)} />
-    ) : (
-        <Signup onSwitchToLogin={() => setIsLogin(true)} />
-    );
+    return <Login />;
 };
