@@ -307,6 +307,27 @@ export const ChatBot: React.FC = () => {
       }
     }
 
+    // Process xls and xlsx text content silently
+    if (ext === 'xls' || ext === 'xlsx') {
+      try {
+        const XLSX = await import('xlsx');
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        let textResult = '';
+        for (const sheetName of workbook.SheetNames) {
+          const worksheet = workbook.Sheets[sheetName];
+          const csv = XLSX.utils.sheet_to_csv(worksheet);
+          if (csv.trim()) {
+            textResult += `\n--- Tabellenblatt: ${sheetName} ---\n${csv}\n`;
+          }
+        }
+        setAttachedFile({ name: file.name, type: file.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', text: textResult, previewUrl: undefined });
+        return;
+      } catch (err) {
+        console.error(`Failed to parse ${ext}:`, err);
+      }
+    }
+
     // Default: read as base64 (images, pdfs, remaining formats)
     const reader = new FileReader();
     reader.onloadend = () => {
