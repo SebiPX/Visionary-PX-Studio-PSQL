@@ -38,6 +38,7 @@ import casesRoutes from './routes/cases';
 import newsRoutes from './routes/news';
 import notesRoutes from './routes/notes';
 import publicAssetRoutes from './routes/public/assets';
+import bannercraftRoutes from './routes/bannercraft';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -129,6 +130,19 @@ pool.query(`
 `).then(() => console.log('DB: checked notes table'))
   .catch(e => console.error('DB notes patch err:', e.message));
 
+pool.query(`
+  CREATE TABLE IF NOT EXISTS public.bannercraft_projects (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+      project_name TEXT,
+      state_json JSONB,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+  );
+  CREATE INDEX IF NOT EXISTS idx_bannercraft_user_id ON public.bannercraft_projects(user_id);
+`).then(() => console.log('DB: checked bannercraft_projects table'))
+  .catch(e => console.error('DB bannercraft patch err:', e.message));
+
 // Add robust endpoint tracking
 app.use(express.urlencoded({ extended: true }));
 
@@ -164,6 +178,7 @@ app.use('/api/agency/cases', casesRoutes);
 app.use('/api/news', newsRoutes); // News of the Day
 app.use('/api/notes', notesRoutes);
 app.use('/api/public/assets', publicAssetRoutes);
+app.use('/api/bannercraft', bannercraftRoutes);
 
 // Inventar
 app.use('/api/inventar/items',            inventarItemRoutes);
