@@ -7,7 +7,7 @@ const router = express.Router();
 // GET /api/bannercraft - List all projects for the authenticated user
 router.get('/', requireAuth, async (req: any, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
         const result = await pool.query(
             'SELECT id, project_name, state_json, created_at, updated_at FROM public.bannercraft_projects WHERE user_id = $1 ORDER BY updated_at DESC',
             [userId]
@@ -22,7 +22,7 @@ router.get('/', requireAuth, async (req: any, res) => {
 // POST /api/bannercraft - Create a new project
 router.post('/', requireAuth, async (req: any, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
         const { project_name, state_json } = req.body;
 
         const result = await pool.query(
@@ -40,7 +40,7 @@ router.post('/', requireAuth, async (req: any, res) => {
 // PUT /api/bannercraft/:id - Update an existing project
 router.put('/:id', requireAuth, async (req: any, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
         const projectId = req.params.id;
         const { project_name, state_json } = req.body;
 
@@ -69,7 +69,7 @@ router.put('/:id', requireAuth, async (req: any, res) => {
 // DELETE /api/bannercraft/:id - Delete a project
 router.delete('/:id', requireAuth, async (req: any, res) => {
     try {
-        const userId = req.user.id;
+        const userId = req.userId;
         const projectId = req.params.id;
 
         const result = await pool.query(
