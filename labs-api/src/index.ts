@@ -49,6 +49,7 @@ startMocoSyncCron();
 
 // ── Middleware ───────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
+allowedOrigins.push('https://px-bannercraft.labs-schickeria.com');
 
 app.use(cors({
   origin: (origin, callback) => {
