@@ -63,7 +63,7 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
 
   // Load user list for admins
   useEffect(() => {
-    if (profile?.role === 'admin') {
+    if (profile?.role === 'superadmin') {
       inventar.profiles.list().then(list => {
         setAdminUsers(list.filter(u => u.id !== profile.id));
       }).catch(() => {});
@@ -352,7 +352,7 @@ export const Settings: React.FC<SettingsProps> = ({ userProfile }) => {
           </div>
 
           {/* Admin: Reset User Password */}
-          {profile?.role === 'admin' && (
+          {profile?.role === 'superadmin' && (
             <>
               <div className="w-full h-px bg-white/5" />
               <div className="space-y-4">
