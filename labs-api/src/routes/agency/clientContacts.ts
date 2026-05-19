@@ -132,11 +132,11 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
 import bcrypt from 'bcryptjs';
 
 router.post('/:id/manage-login', requireAuth, async (req: AuthRequest, res) => {
-  // Only admins can create/manage logins
+  // Only superadmin can create/manage logins
   try {
     const adminCheck = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
-    if (!adminCheck.rows[0] || adminCheck.rows[0].role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required to manage client logins' });
+    if (!adminCheck.rows[0] || adminCheck.rows[0].role !== 'superadmin') {
+      return res.status(403).json({ error: 'Superadmin access required to manage client logins' });
     }
 
     const { password } = req.body;
@@ -195,8 +195,8 @@ router.post('/:id/manage-login', requireAuth, async (req: AuthRequest, res) => {
 router.delete('/:id/revoke-login', requireAuth, async (req: AuthRequest, res) => {
   try {
     const adminCheck = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
-    if (!adminCheck.rows[0] || adminCheck.rows[0].role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required to revoke client logins' });
+    if (!adminCheck.rows[0] || adminCheck.rows[0].role !== 'superadmin') {
+      return res.status(403).json({ error: 'Superadmin access required to revoke client logins' });
     }
 
     const contactRes = await pool.query('SELECT email FROM agency_client_contacts WHERE id = $1', [req.params.id]);
