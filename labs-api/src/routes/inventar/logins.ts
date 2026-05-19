@@ -4,20 +4,28 @@ import { AuthRequest, requireAuth } from '../../middleware/requireAuth';
 
 const router = Router();
 
-router.get('/', requireAuth, async (_req: AuthRequest, res: Response) => {
+router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const result = await pool.query(`SELECT * FROM logins ORDER BY name ASC`);
+    const userResult = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
+    const isGF = userResult.rows[0]?.role === 'GF';
+
+    let result;
+    if (isGF) {
+      result = await pool.query(`SELECT * FROM logins ORDER BY name ASC`);
+    } else {
+      result = await pool.query(`SELECT * FROM logins WHERE is_gf_only = false OR is_gf_only IS NULL ORDER BY name ASC`);
+    }
     res.json(result.rows);
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
 router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { name, website, login_name, passwort, anmerkung, kategorie, department } = req.body;
+  const { name, website, login_name, passwort, anmerkung, kategorie, department, is_gf_only } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO logins (name, website, login_name, passwort, anmerkung, kategorie, department)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [name, website, login_name, passwort, anmerkung, kategorie, department]
+      `INSERT INTO logins (name, website, login_name, passwort, anmerkung, kategorie, department, is_gf_only)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [name, website, login_name, passwort, anmerkung, kategorie, department, is_gf_only || false]
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) { res.status(500).json({ error: err.message }); }

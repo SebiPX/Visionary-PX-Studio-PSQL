@@ -59,7 +59,8 @@ function InventarShell({ onBack, setView, navigateToItem, dashboardPath }: Inven
       }
     : null
 
-  const isAdmin = profile?.role === 'admin'
+  const isGF = profile?.role === 'GF'
+  const isAdmin = profile?.role === 'admin' || isGF
 
   const { items, createItem, updateItem, deleteItem, uploadImage, fetchItems } = useInventar()
   const { loans } = useLoans()
@@ -179,7 +180,7 @@ function InventarShell({ onBack, setView, navigateToItem, dashboardPath }: Inven
             <Route path="/kalender" element={<KalendarPage items={items} scheine={scheine} />} />
 
             <Route path="/logins" element={
-              <LoginsPage logins={logins} isAdmin={isAdmin} onCreate={createLogin} onUpdate={updateLogin} onDelete={deleteLogin} />
+              <LoginsPage logins={logins} isAdmin={isAdmin} isGF={isGF} onCreate={createLogin} onUpdate={updateLogin} onDelete={deleteLogin} />
             } />
 
             <Route path="/handyvertraege" element={

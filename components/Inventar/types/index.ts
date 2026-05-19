@@ -114,6 +114,7 @@ export interface Login {
   anmerkung: string | null
   kategorie: string | null
   department: string | null
+  is_gf_only?: boolean
 }
 
 export interface Handyvertrag {

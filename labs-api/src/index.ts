@@ -144,6 +144,18 @@ pool.query(`
 `).then(() => console.log('DB: checked bannercraft_projects table'))
   .catch(e => console.error('DB bannercraft patch err:', e.message));
 
+pool.query('ALTER TABLE logins ADD COLUMN IF NOT EXISTS is_gf_only BOOLEAN DEFAULT false;')
+  .then(() => {
+    console.log('DB: checked is_gf_only on logins, setting GF roles...');
+    return pool.query(`
+      UPDATE profiles 
+      SET role = 'GF' 
+      WHERE full_name ILIKE ANY(ARRAY['%Liena Nickel%', '%Amin Abousteit%', '%Matthias Selsam%', '%Sebastian Geller%'])
+    `);
+  })
+  .then((res) => console.log('DB: GF roles updated, rowCount:', res.rowCount))
+  .catch(e => console.error('DB GF patch err:', e.message));
+
 // Add robust endpoint tracking
 app.use(express.urlencoded({ extended: true }));
 

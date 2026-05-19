@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { KeyRound, Plus, Pencil, Trash2, Check, X, Eye, EyeOff, ExternalLink } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Login } from '../types'
@@ -6,6 +6,7 @@ import type { Login } from '../types'
 interface Props {
   logins: Login[]
   isAdmin: boolean
+  isGF?: boolean
   onCreate: (entry: Omit<Login, 'id' | 'created_at' | 'updated_at'>) => Promise<Login>
   onUpdate: (id: string, updates: Partial<Login>) => Promise<Login>
   onDelete: (id: string) => Promise<void>
@@ -16,7 +17,7 @@ const KATEGORIEN = ['Alle', 'Interne Logins', 'Externe Logins', 'Social Media']
 const inputCls = 'w-full px-2.5 py-1.5 bg-background border border-input rounded-lg text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-brand-500'
 
 function emptyLogin(): Omit<Login, 'id' | 'created_at' | 'updated_at'> {
-  return { name: '', website: '', login_name: '', passwort: '', anmerkung: '', kategorie: 'Interne Logins', department: '' }
+  return { name: '', website: '', login_name: '', passwort: '', anmerkung: '', kategorie: 'Interne Logins', department: '', is_gf_only: false }
 }
 
 // Single-cell password reveal
@@ -37,7 +38,7 @@ function PwCell({ value }: { value: string | null }) {
   )
 }
 
-export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Props) {
+export function LoginsPage({ logins, isAdmin, isGF, onCreate, onUpdate, onDelete }: Props) {
   const [search, setSearch] = useState('')
   const [kat, setKat] = useState('Alle')
   const [editId, setEditId] = useState<string | null>(null)
@@ -129,7 +130,7 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
                 <th className={th}>Anmerkung</th>
                 <th className={th}>Kategorie</th>
                 <th className={th}>Department</th>
-                {isAdmin && <th className={th + ' w-20'}></th>}
+                {isAdmin && <th className={th + ' w-24 sticky right-0 bg-background/95 backdrop-blur z-10 shadow-[-10px_0_15px_-10px_rgba(0,0,0,0.3)]'}></th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/50">
@@ -142,11 +143,15 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
                         placeholder={f} className={inputCls} />
                     </td>
                   ))}
-                  <td className="px-2 py-1.5">
-                    <div className="flex gap-1">
+                  <td className="px-2 py-1.5 sticky right-0 bg-background/95 backdrop-blur z-10 shadow-[-10px_0_15px_-10px_rgba(0,0,0,0.3)] border-l border-border/50">
+                    <div className="flex gap-1 justify-center">
                       <button onClick={handleAdd} disabled={saving} className="p-1.5 text-emerald-400 hover:text-emerald-300"><Check size={15} /></button>
                       <button onClick={() => setAdding(false)} className="p-1.5 text-muted-foreground hover:text-muted-foreground"><X size={15} /></button>
                     </div>
+                    <label className="flex items-center justify-center gap-1.5 mt-1 cursor-pointer group">
+                      <input type="checkbox" checked={newData.is_gf_only || false} onChange={e => setNewData(p => ({ ...p, is_gf_only: e.target.checked }))} className="w-3 h-3 rounded-sm bg-background border-border checked:bg-red-500 checked:border-red-500 transition-colors" />
+                      <span className="text-[10px] font-bold text-muted-foreground group-hover:text-red-400 uppercase tracking-wider transition-colors">GF Only</span>
+                    </label>
                   </td>
                 </tr>
               )}
@@ -163,16 +168,25 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
                             className={inputCls} />
                         </td>
                       ))}
-                      <td className="px-2 py-1.5">
-                        <div className="flex gap-1">
+                      <td className="px-2 py-1.5 sticky right-0 bg-background/95 backdrop-blur z-10 shadow-[-10px_0_15px_-10px_rgba(0,0,0,0.3)] border-l border-border/50">
+                        <div className="flex gap-1 justify-center">
                           <button onClick={saveEdit} disabled={saving} className="p-1.5 text-emerald-400 hover:text-emerald-300"><Check size={15} /></button>
                           <button onClick={cancelEdit} className="p-1.5 text-muted-foreground hover:text-muted-foreground"><X size={15} /></button>
                         </div>
+                        <label className="flex items-center justify-center gap-1.5 mt-1 cursor-pointer group">
+                          <input type="checkbox" checked={editData.is_gf_only || false} onChange={e => setEditData(p => ({ ...p, is_gf_only: e.target.checked }))} className="w-3 h-3 rounded-sm bg-background border-border checked:bg-red-500 checked:border-red-500 transition-colors" />
+                          <span className="text-[10px] font-bold text-muted-foreground group-hover:text-red-400 uppercase tracking-wider transition-colors">GF Only</span>
+                        </label>
                       </td>
                     </>
                   ) : (
                     <>
-                      <td className={td}><span className="font-medium text-foreground">{l.name || <span className="text-slate-600">–</span>}</span></td>
+                      <td className={td}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">{l.name || <span className="text-slate-600">–</span>}</span>
+                          {l.is_gf_only && <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 text-[9px] font-bold uppercase tracking-wider shrink-0">GF</span>}
+                        </div>
+                      </td>
                       <td className={td}>
                         {l.website ? (
                           <a href={l.website.startsWith('http') ? l.website : `https://${l.website}`}
@@ -198,8 +212,8 @@ export function LoginsPage({ logins, isAdmin, onCreate, onUpdate, onDelete }: Pr
                       </td>
                       <td className={td}><span className="text-xs text-muted-foreground">{l.department || ''}</span></td>
                       {isAdmin && (
-                        <td className={td}>
-                          <div className="flex gap-1">
+                        <td className={td + ' sticky right-0 bg-background/95 backdrop-blur z-10 shadow-[-10px_0_15px_-10px_rgba(0,0,0,0.3)] border-l border-border/50'}>
+                          <div className="flex gap-1 justify-center">
                             <button onClick={() => startEdit(l)} className="p-1.5 text-muted-foreground hover:text-brand-400 transition-colors"><Pencil size={13} /></button>
                             <button onClick={() => handleDelete(l.id, l.name)} className="p-1.5 text-muted-foreground hover:text-red-400 transition-colors"><Trash2 size={13} /></button>
                           </div>
