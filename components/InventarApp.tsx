@@ -59,7 +59,7 @@ function InventarShell({ onBack, setView, navigateToItem, dashboardPath }: Inven
       }
     : null
 
-  const isGF = profile?.role === 'GF'
+  const isGF = profile?.role === 'GF' || profile?.role === 'superadmin'
   const isAdmin = profile?.role === 'admin' || isGF
 
   const { items, createItem, updateItem, deleteItem, uploadImage, fetchItems } = useInventar()

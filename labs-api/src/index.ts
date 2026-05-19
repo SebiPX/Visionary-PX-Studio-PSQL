@@ -146,14 +146,21 @@ pool.query(`
 
 pool.query('ALTER TABLE logins ADD COLUMN IF NOT EXISTS is_gf_only BOOLEAN DEFAULT false;')
   .then(() => {
-    console.log('DB: checked is_gf_only on logins, setting GF roles...');
-    return pool.query(`
-      UPDATE profiles 
-      SET role = 'GF' 
-      WHERE full_name ILIKE ANY(ARRAY['%Liena Nickel%', '%Amin Abousteit%', '%Matthias Selsam%', '%Sebastian Geller%'])
-    `);
+    console.log('DB: checked is_gf_only on logins, setting GF and superadmin roles...');
+    return Promise.all([
+      pool.query(`
+        UPDATE profiles 
+        SET role = 'GF' 
+        WHERE full_name ILIKE ANY(ARRAY['%Liena Nickel%', '%Amin Abousteit%', '%Matthias Selsam%'])
+      `),
+      pool.query(`
+        UPDATE profiles 
+        SET role = 'superadmin' 
+        WHERE full_name ILIKE '%Sebastian Geller%'
+      `)
+    ]);
   })
-  .then((res) => console.log('DB: GF roles updated, rowCount:', res.rowCount))
+  .then((res) => console.log('DB: GF roles updated:', res[0].rowCount, 'Superadmin updated:', res[1].rowCount))
   .catch(e => console.error('DB GF patch err:', e.message));
 
 // Add robust endpoint tracking

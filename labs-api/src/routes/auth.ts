@@ -112,11 +112,11 @@ router.patch('/password', requireAuth, async (req: AuthRequest, res: Response) =
 
 // PATCH /auth/admin/reset-password — admin sets a new password for any user
 router.patch('/admin/reset-password', requireAuth, async (req: AuthRequest, res: Response) => {
-  // Only admins or GF
+  // Only superadmin
   const adminCheck = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
   const userRole = adminCheck.rows[0]?.role;
-  if (userRole !== 'admin' && userRole !== 'GF') {
-    res.status(403).json({ error: 'Admin access required' });
+  if (userRole !== 'superadmin') {
+    res.status(403).json({ error: 'Superadmin access required' });
     return;
   }
   const { user_id, new_password } = req.body;
@@ -146,10 +146,10 @@ router.patch('/admin/reset-password', requireAuth, async (req: AuthRequest, res:
 
 // POST /auth/admin/users — admin creates a new user
 router.post('/admin/users', requireAuth, async (req: AuthRequest, res: Response) => {
-  // Only admins or GF
+  // Only admins or GF or superadmin
   const adminCheck = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
   const userRole = adminCheck.rows[0]?.role;
-  if (userRole !== 'admin' && userRole !== 'GF') {
+  if (userRole !== 'admin' && userRole !== 'GF' && userRole !== 'superadmin') {
     res.status(403).json({ error: 'Admin access required' });
     return;
   }

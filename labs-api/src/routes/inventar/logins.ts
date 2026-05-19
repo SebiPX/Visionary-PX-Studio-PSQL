@@ -7,7 +7,8 @@ const router = Router();
 router.get('/', requireAuth, async (req: AuthRequest, res: Response) => {
   try {
     const userResult = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
-    const isGF = userResult.rows[0]?.role === 'GF';
+    const role = userResult.rows[0]?.role;
+    const isGF = role === 'GF' || role === 'superadmin';
 
     let result;
     if (isGF) {
