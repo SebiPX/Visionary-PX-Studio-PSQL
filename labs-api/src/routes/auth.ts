@@ -21,8 +21,8 @@ router.post('/login', async (req, res: Response) => {
   }
   try {
     const result = await pool.query(
-      'SELECT id, email, full_name, avatar_url, role, password_hash FROM profiles WHERE LOWER(email) = LOWER($1)',
-      [email.trim()]
+      'SELECT id, email, full_name, avatar_url, role, password_hash FROM profiles WHERE LOWER(email) = $1',
+      [email.trim().toLowerCase()]
     );
     if (result.rows.length === 0) {
       res.status(401).json({ error: 'Invalid credentials' });
