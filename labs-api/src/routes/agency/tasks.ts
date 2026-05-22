@@ -168,7 +168,7 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
     const userResult = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
     const userRole = userResult.rows[0]?.role || 'user';
     const isCreator = existingTask.created_by === req.userId;
-    const canEdit = userRole === 'admin' || userRole === 'pjm' || isCreator;
+    const canEdit = userRole === 'admin' || userRole === 'superadmin' || userRole === 'pjm' || isCreator;
 
     const updates = req.body;
     const allowedFields = [
@@ -272,7 +272,7 @@ router.delete('/:id', requireAuth, async (req: AuthRequest, res) => {
     const userResult = await pool.query('SELECT role FROM profiles WHERE id = $1', [req.userId]);
     const userRole = userResult.rows[0]?.role || 'user';
     const isCreator = existingTask.created_by === req.userId;
-    const canDelete = userRole === 'admin' || userRole === 'pjm' || isCreator;
+    const canDelete = userRole === 'admin' || userRole === 'superadmin' || userRole === 'pjm' || isCreator;
 
     if (!canDelete) {
       return res.status(403).json({ error: 'You do not have permission to delete this task.' });
