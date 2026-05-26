@@ -177,7 +177,8 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
       'planned_minutes', 'estimated_hours', 'estimated_rate', 
       'materials', 'custom_dates', 'depends_on_task_ids',
       'service_module_id', 'project_service_id', 'seniority_level_id', 'is_visible_to_client',
-      'brand', 'show', 'formats', 'legal_line', 'freigabelink', 'rights_expiration_date', 'status_influencerclips'
+      'brand', 'show', 'formats', 'legal_line', 'freigabelink', 'rights_expiration_date', 'status_influencerclips',
+      'project_id'
     ];
 
     if (!canEdit) {
