@@ -31,7 +31,7 @@ router.get('/download', async (req: Request, res: Response) => {
     '42e817feef1a0fe73189800cbbe001d7.r2.cloudflarestorage.com',
   ];
   const parsed = new URL(url);
-  if (!allowed.some(host => parsed.hostname === host)) {
+  if (!allowed.some(host => parsed.hostname === host || parsed.hostname.endsWith('.' + host))) {
     res.status(403).json({ error: 'Domain not allowed' });
     return;
   }
