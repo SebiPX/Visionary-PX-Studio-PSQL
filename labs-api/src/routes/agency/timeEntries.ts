@@ -130,12 +130,10 @@ router.post('/', requireAuth, async (req: AuthRequest, res) => {
     );
     const newEntry = result.rows[0];
 
-    // Attempt to sync to MOCO if it's submitted
-    if (newEntry.status === 'submitted' || newEntry.status === 'approved') {
-      import('../../services/mocoService').then(({ syncTimeEntryToMoco }) => {
-        syncTimeEntryToMoco(newEntry.id).catch(console.error);
-      });
-    }
+    // Attempt to sync to MOCO (always sync, regardless of status)
+    import('../../services/mocoService').then(({ syncTimeEntryToMoco }) => {
+      syncTimeEntryToMoco(newEntry.id).catch(console.error);
+    });
 
     res.status(201).json(newEntry);
   } catch (err: any) {
@@ -165,12 +163,10 @@ router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
     }
     const updatedEntry = result.rows[0];
 
-    // Attempt to sync to MOCO if it's submitted
-    if (updatedEntry.status === 'submitted' || updatedEntry.status === 'approved') {
-      import('../../services/mocoService').then(({ syncTimeEntryToMoco }) => {
-        syncTimeEntryToMoco(updatedEntry.id).catch(console.error);
-      });
-    }
+    // Attempt to sync to MOCO (always sync, regardless of status)
+    import('../../services/mocoService').then(({ syncTimeEntryToMoco }) => {
+      syncTimeEntryToMoco(updatedEntry.id).catch(console.error);
+    });
 
     res.json(updatedEntry);
   } catch (err: any) {

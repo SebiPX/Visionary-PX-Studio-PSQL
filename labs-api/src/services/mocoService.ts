@@ -72,8 +72,8 @@ export async function syncTimeEntryToMoco(timeEntryId: number) {
   if (result.rows.length === 0) return null;
   const entry = result.rows[0];
 
-  // We only sync submitted/approved entries that have duration
-  if (entry.status === 'draft' || !entry.duration_minutes) return null;
+  // We only sync entries that have duration
+  if (!entry.duration_minutes) return null;
   if (!entry.moco_project_id || !entry.moco_user_id) return null;
 
   let finalMocoTaskId = entry.service_moco_task_id || entry.legacy_moco_task_id;
