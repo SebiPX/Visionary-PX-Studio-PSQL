@@ -160,10 +160,10 @@ export async function performProjectSync() {
       const activeMocoIds = mocoProjects.map(p => p.id);
       const archiveRes = await pool.query(`
         UPDATE agency_projects 
-        SET status = 'archived', updated_at = NOW()
+        SET status = 'completed', updated_at = NOW()
         WHERE moco_project_id IS NOT NULL 
         AND moco_project_id != ALL($1::int[])
-        AND status != 'archived'
+        AND status != 'completed'
       `, [activeMocoIds]);
       
       if (archiveRes.rowCount && archiveRes.rowCount > 0) {
