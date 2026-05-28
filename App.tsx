@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AppView, UserProfile } from './types';
+import { useHashRouter } from './hooks/useHashRouter';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthPage } from './components/auth/AuthPage';
@@ -25,7 +26,7 @@ import { SocialAuditApp } from './components/SocialAudit/SocialAuditApp';
 
 const AppContent: React.FC = () => {
   const { user, profile, loading } = useAuth();
-  const [currentView, setCurrentView] = useState<AppView>(AppView.DASHBOARD);
+  const [currentView, setCurrentView] = useHashRouter(AppView.DASHBOARD);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [dashboardPath, setDashboardPath] = useState<string>('/dashboard');
 
