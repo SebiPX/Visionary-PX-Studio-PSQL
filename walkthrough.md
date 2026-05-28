@@ -1,3 +1,19 @@
+# Shared Notes Module & Moco Archive Sync
+
+## 1. ToDo / Notizen (Shared Module)
+- **PX-Studio**: Der Menüpunkt heißt nun klar und deutlich **"ToDo / Notizen"** (vorher "Notizen").
+- **PX-Flow**: Das Modul `Notes.tsx` aus PX-Studio wurde erfolgreich nach PX-Flow kopiert und unter "PX Desk" integriert. Beide Apps nutzen denselben API-Endpunkt (`/api/notes`) und synchronisieren sich in Echtzeit.
+
+## 2. Sichtbarkeit für den Superadmin (PX-Flow)
+- Die Rechte-Prüfung in der Navigation (`Navigation.tsx`) und den Detail-Ansichten wurde überarbeitet.
+- Der **SUPERADMIN** (`profile.role === 'superadmin'`) wird nun überall korrekt als Admin erkannt, sodass die Reiter "Karten" und "Verträge" wieder dauerhaft sichtbar und editierbar sind.
+
+## 3. Moco Auto-Archiving Sync (Backend)
+- **Problem**: In Moco archivierte Projekte wurden beim Sync ignoriert und blieben in PX-Flow fälschlicherweise "Aktiv".
+- **Lösung**: Das Sync-Skript (`mocoDbSync.ts`) prüft nun, welche Projekte nicht mehr im aktiven Moco-Feed auftauchen. Diese verwaisten Projekte werden nun automatisch auf `status = 'completed'` gesetzt. Dadurch verschwinden sie sauber aus der aktiven Ansicht in PX-Flow und respektieren den `agency_projects_status_check` Constraint der Datenbank.
+
+---
+
 # Apify Integration for Social Audit Agent
 
 I have successfully replaced the Mock-Sync functionality with real Apify data retrieval!
