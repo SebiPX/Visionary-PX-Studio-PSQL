@@ -154,6 +154,23 @@ export async function performProjectSync() {
       }
 
     }
+
+    // Mark projects as archived if they exist in our DB with a moco_project_id but are no longer returned by the active MOCO /projects endpoint
+    if (mocoProjects.length > 0) {
+      const activeMocoIds = mocoProjects.map(p => p.id);
+      const archiveRes = await pool.query(`
+        UPDATE agency_projects 
+        SET status = 'archived', updated_at = NOW()
+        WHERE moco_project_id IS NOT NULL 
+        AND moco_project_id != ALL($1::int[])
+        AND status != 'archived'
+      `, [activeMocoIds]);
+      
+      if (archiveRes.rowCount && archiveRes.rowCount > 0) {
+        console.log(`[MOCO Cron] Auto-archived ${archiveRes.rowCount} projects no longer active in MOCO.`);
+      }
+    }
+
     console.log(`[MOCO Cron] Project Sync complete. Imported/Updated: ${importedCount}`);
     return importedCount;
   } catch (err) {
