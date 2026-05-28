@@ -81,6 +81,10 @@ pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS created_by UUID RE
   .then(() => console.log('DB: checked created_by on agency_tasks'))
   .catch(e => console.error('DB patch err:', e.message));
 
+pool.query('ALTER TABLE agency_time_entries ADD COLUMN IF NOT EXISTS moco_activity_id INTEGER;')
+  .then(() => console.log('DB: checked moco_activity_id on agency_time_entries'))
+  .catch(e => console.error('DB patch err:', e.message));
+
 pool.query(`
   ALTER TABLE agency_tasks 
   ADD COLUMN IF NOT EXISTS brand TEXT,
