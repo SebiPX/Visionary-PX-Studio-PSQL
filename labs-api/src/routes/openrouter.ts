@@ -160,8 +160,8 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
         let completedData: any = null;
         let success = false;
 
-        // Poll every 5s up to 30 times (150 seconds total timeout)
-        for (let i = 0; i < 30; i++) {
+        // Poll every 5s up to 84 times (420 seconds / 7 minutes total timeout)
+        for (let i = 0; i < 84; i++) {
           await new Promise(resolve => setTimeout(resolve, 5000));
           const pollRes = await fetch(pollUrl, {
             headers: { 'Authorization': `Bearer ${apiKey}` }
