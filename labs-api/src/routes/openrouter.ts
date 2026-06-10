@@ -226,6 +226,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
               }
             }
           }
+        }
         const videos = assistantMessage.videos || assistantMessage.video_url;
         if (Array.isArray(videos)) {
           for (const vid of videos) {
