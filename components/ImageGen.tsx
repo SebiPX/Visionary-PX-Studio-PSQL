@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
+import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy, openRouterProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { GeneratedImage } from '../types';
 import { ImageSourcePicker } from './ImageSourcePicker';
@@ -8,6 +8,23 @@ import { fal } from '@fal-ai/client';
 fal.config({ 
     proxyUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/proxy/fal`
 });
+
+const OPENROUTER_IMAGE_MODELS = [
+    { id: 'openai/gpt-5.4-image-2', name: 'GPT-5.4 Image 2' },
+    { id: 'sourceful/riverflow-v2.5-pro', name: 'Riverflow v2.5 Pro' },
+    { id: 'sourceful/riverflow-v2-pro', name: 'Riverflow v2 Pro' },
+    { id: 'sourceful/riverflow-v2-fast', name: 'Riverflow v2 Fast' },
+    { id: 'black-forest-labs/flux.2-klein-4b', name: 'FLUX.2 Klein 4B' },
+    { id: 'bytedance-seed/seedream-4.5', name: 'SeeDream 4.5' },
+    { id: 'black-forest-labs/flux.2-max', name: 'FLUX.2 Max' },
+    { id: 'sourceful/riverflow-v2-max-preview', name: 'Riverflow v2 Max Preview' },
+    { id: 'sourceful/riverflow-v2-standard-preview', name: 'Riverflow v2 Standard Preview' },
+    { id: 'sourceful/riverflow-v2-fast-preview', name: 'Riverflow v2 Fast Preview' },
+    { id: 'black-forest-labs/flux.2-flex', name: 'FLUX.2 Flex' },
+    { id: 'black-forest-labs/flux.2-pro', name: 'FLUX.2 Pro' },
+    { id: 'openai/gpt-5-image-mini', name: 'GPT-5 Image Mini' }
+];
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -38,7 +55,8 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     // Mode and settings
     const [activeMode, setActiveMode] = useState<'TEXT' | 'IMG2IMG' | 'EDIT' | 'UPSCALE'>('TEXT');
     const [aspectRatio, setAspectRatio] = useState<'1:1' | '16:9' | '9:16' | '4:5' | 'none'>('16:9');
-    const [aiModel, setAiModel] = useState<'GEMINI' | 'FAL_QWEN'>('GEMINI');
+    const [aiModel, setAiModel] = useState<'GEMINI' | 'FAL_QWEN' | 'OPENROUTER'>('GEMINI');
+    const [openRouterModel, setOpenRouterModel] = useState<string>('openai/gpt-5.4-image-2');
 
     // History
     const [history, setHistory] = useState<GeneratedImage[]>([]);
@@ -314,7 +332,77 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                 const imageBlob = await (await fetch(falImageUrl)).blob();
                 const fileName = `${Date.now()}_fal_${Math.random().toString(36).substr(2, 6)}.png`;
                 const imageFile = new File([imageBlob], fileName, { type: 'image/png' });
-                finalImageUrl = await uploadFile(imageFile, 'images');
+                finalImageUrl = await uploadFile(imageFile, 'images');            } else if (aiModel === 'OPENROUTER') {
+                // OPENROUTER
+                const parts: any[] = [];
+                if (activeMode !== 'TEXT') {
+                    if (activeMode === 'EDIT' && canvasRef.current) {
+                        const canvasDataUrl = canvasRef.current.toDataURL('image/png');
+                        const base64Data = canvasDataUrl.split(',')[1];
+                        parts.push({
+                            inlineData: {
+                                mimeType: 'image/png',
+                                data: base64Data
+                            }
+                        });
+                    } else if (uploadedImage) {
+                        const base64Data = uploadedImage.split(',')[1];
+                        parts.push({
+                            inlineData: {
+                                mimeType: 'image/png',
+                                data: base64Data
+                            }
+                        });
+                    }
+                }
+                parts.push({ text: prompt });
+
+                const generateSingleImage = async () => {
+                    const response = await openRouterProxy({
+                        action: 'generateContent',
+                        model: openRouterModel,
+                        contents: [{ role: 'user', parts: parts }]
+                    }) as any;
+
+                    if (response?.error) {
+                        console.error("OpenRouter API Error:", response.error);
+                        throw new Error(JSON.stringify(response.error));
+                    }
+
+                    if (!response.candidates || response.candidates.length === 0) {
+                        throw new Error("Die Bild-KI hat keine Antwort geliefert. Bitte versuche es noch einmal.");
+                    }
+
+                    const candidate = response.candidates[0];
+                    const respParts = candidate.content?.parts;
+                    if (respParts) {
+                        for (const part of respParts) {
+                            if (part.inlineData) {
+                                const mimeType = part.inlineData.mimeType || 'image/png';
+                                const ext = mimeType.split('/')[1] || 'png';
+                                const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
+                                const imageBlob = await (await fetch(dataUri)).blob();
+                                const fileName = `${Date.now()}_or_${Math.random().toString(36).substr(2, 6)}.${ext}`;
+                                const imageFile = new File([imageBlob], fileName, { type: mimeType });
+                                return await uploadFile(imageFile, 'images');
+                            }
+                        }
+                        const textPart = respParts.find((p: any) => p.text);
+                        if (textPart) {
+                            throw new Error(`Die KI hat mit Text statt einem Bild geantwortet: "${textPart.text}"`);
+                        }
+                    }
+                    throw new Error("Fehler: Die Antwort der OpenRouter Bild-KI war ungültig (fehlende Daten).");
+                };
+
+                const url = await generateSingleImage();
+                await saveImage({
+                    prompt: prompt,
+                    style: activeMode,
+                    image_url: url,
+                    config: { aspectRatio, effectiveAspectRatio: getEffectiveAspectRatio(), mode: activeMode, model: aiModel, openRouterModel }
+                });
+                finalImageUrl = url;
 
             } else {
                 // GEMINI
@@ -497,21 +585,44 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
 
                         <div className="space-y-2">
                             <label className="text-xs text-foreground/90">AI Engine</label>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-3 gap-1">
                                 <button
                                     onClick={() => setAiModel('GEMINI')}
-                                    className={`py-2 px-3 rounded-lg border transition-all text-[10px] sm:text-xs flex items-center justify-center gap-1 font-bold ${aiModel === 'GEMINI' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                    className={`py-2 px-1 rounded-lg border transition-all text-[9px] sm:text-[10px] flex items-center justify-center gap-1 font-bold ${aiModel === 'GEMINI' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
-                                    Google Gemini
+                                    Gemini
                                 </button>
                                 <button
                                     onClick={() => setAiModel('FAL_QWEN')}
-                                    className={`py-2 px-3 rounded-lg border transition-all text-[10px] sm:text-xs flex items-center justify-center gap-1 font-bold ${aiModel === 'FAL_QWEN' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                    className={`py-2 px-1 rounded-lg border transition-all text-[9px] sm:text-[10px] flex items-center justify-center gap-1 font-bold ${aiModel === 'FAL_QWEN' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
                                 >
-                                    Fal.ai (Qwen)
+                                    Fal.ai
+                                </button>
+                                <button
+                                    onClick={() => setAiModel('OPENROUTER')}
+                                    className={`py-2 px-1 rounded-lg border transition-all text-[9px] sm:text-[10px] flex items-center justify-center gap-1 font-bold ${aiModel === 'OPENROUTER' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                >
+                                    OpenRouter
                                 </button>
                             </div>
                         </div>
+
+                        {aiModel === 'OPENROUTER' && (
+                            <div className="space-y-2 animate-in fade-in duration-300">
+                                <label className="text-xs text-foreground/90">OpenRouter Model</label>
+                                <select
+                                    value={openRouterModel}
+                                    onChange={(e) => setOpenRouterModel(e.target.value)}
+                                    className="w-full bg-white/5 border border-border rounded-lg py-2 px-3 text-xs text-foreground focus:ring-1 focus:ring-primary focus:border-primary"
+                                >
+                                    {OPENROUTER_IMAGE_MODELS.map(model => (
+                                        <option key={model.id} value={model.id} className="bg-[#0b0f19] text-foreground">
+                                            {model.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
 
                         <div className="space-y-2">
                             <label className="text-xs text-foreground/90">Aspect Ratio</label>

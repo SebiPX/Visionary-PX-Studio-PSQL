@@ -60,10 +60,25 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
         }
       }
 
-      const openRouterBody = {
+      const openRouterBody: any = {
         model: model,
         messages: messages,
       };
+
+      // If user specified modalities or if it's an image model, add it
+      if (req.body.modalities) {
+        openRouterBody.modalities = req.body.modalities;
+      } else if (
+        model.includes('image') ||
+        model.includes('flux') ||
+        model.includes('riverflow') ||
+        model.includes('sdxl') ||
+        model.includes('stable-diffusion') ||
+        model.includes('midjourney') ||
+        model.includes('seedream')
+      ) {
+        openRouterBody.modalities = ['image'];
+      }
 
       const orRes = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
         method: 'POST',
@@ -83,13 +98,89 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
       }
 
       // Map response back to mimic the gemini structure output expected by the frontend
+      const parts: any[] = [];
+      const assistantMessage = result.choices?.[0]?.message;
+
+      if (assistantMessage) {
+        if (assistantMessage.content) {
+          parts.push({ text: assistantMessage.content });
+        }
+
+        const images = assistantMessage.images || assistantMessage.image_url;
+        if (Array.isArray(images)) {
+          for (const img of images) {
+            const url = img.image_url?.url || img.url;
+            if (url) {
+              if (url.startsWith('data:')) {
+                const match = url.match(/^data:([^;]+);base64,(.+)$/);
+                if (match) {
+                  parts.push({
+                    inlineData: {
+                      mimeType: match[1],
+                      data: match[2]
+                    }
+                  });
+                }
+              } else {
+                try {
+                  const imageFetch = await fetch(url);
+                  const arrayBuffer = await imageFetch.arrayBuffer();
+                  const base64 = Buffer.from(arrayBuffer).toString('base64');
+                  const mimeType = imageFetch.headers.get('content-type') || 'image/png';
+                  parts.push({
+                    inlineData: {
+                      mimeType,
+                      data: base64
+                    }
+                  });
+                } catch (e) {
+                  console.error('Failed to fetch remote image url from OpenRouter response:', e);
+                }
+              }
+            }
+          }
+        } else if (images && typeof images === 'object') {
+          const url = images.image_url?.url || images.url;
+          if (url) {
+            if (url.startsWith('data:')) {
+              const match = url.match(/^data:([^;]+);base64,(.+)$/);
+              if (match) {
+                parts.push({
+                  inlineData: {
+                    mimeType: match[1],
+                    data: match[2]
+                  }
+                });
+              }
+            } else {
+              try {
+                const imageFetch = await fetch(url);
+                const arrayBuffer = await imageFetch.arrayBuffer();
+                const base64 = Buffer.from(arrayBuffer).toString('base64');
+                const mimeType = imageFetch.headers.get('content-type') || 'image/png';
+                parts.push({
+                  inlineData: {
+                    mimeType,
+                    data: base64
+                  }
+                });
+              } catch (e) {
+                console.error('Failed to fetch remote image url from OpenRouter response:', e);
+              }
+            }
+          }
+        }
+      }
+
+      if (parts.length === 0) {
+        parts.push({ text: assistantMessage?.content || '' });
+      }
+
       const mappedResponse = {
         candidates: [
           {
             content: {
-              parts: [
-                { text: result.choices?.[0]?.message?.content || '' }
-              ]
+              parts: parts
             }
           }
         ]
