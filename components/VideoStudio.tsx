@@ -6,11 +6,11 @@ import { ImageSourcePicker } from './ImageSourcePicker';
 
 const ALL_VIDEO_MODELS = [
     // Fast & Cheap Group
-    { id: 'google/veo-3.1-fast', name: 'Gemini Veo 3.1 Fast (Kostenlos)', engine: 'GEMINI', category: 'fast' },
-    { id: 'alibaba/wan-2.6', name: 'Wan 2.6 (Kostenlos / Test)', engine: 'OPENROUTER', category: 'fast' },
-    { id: 'alibaba/wan-2.7', name: 'Wan 2.7 (Kostenlos / Test)', engine: 'OPENROUTER', category: 'fast' },
-    { id: 'bytedance/seedance-1-5-pro', name: 'Seedance 1.5 Pro (Kostenlos / Test)', engine: 'OPENROUTER', category: 'fast' },
-    { id: 'google/veo-3.1-lite', name: 'Veo 3.1 Lite (Kostenlos / Test)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'google/veo-3.1-fast', name: 'Gemini Veo 3.1 Fast (Kostenlos über eigenen Key)', engine: 'GEMINI', category: 'fast' },
+    { id: 'alibaba/wan-2.6', name: 'Wan 2.6 (~3.7 €-ct / Sek.)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'alibaba/wan-2.7', name: 'Wan 2.7 (~9.2 €-ct / Sek.)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'bytedance/seedance-1-5-pro', name: 'Seedance 1.5 Pro (~2.5 €-ct / Sek.)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'google/veo-3.1-lite', name: 'Veo 3.1 Lite (~3.5 €-ct / Sek.)', engine: 'OPENROUTER', category: 'fast' },
 
     // Premium Group (Expensive / Slow)
     { id: 'openai/sora-2-pro', name: 'Sora 2 Pro (~28 €-ct / Sek.)', engine: 'OPENROUTER', category: 'premium' },
