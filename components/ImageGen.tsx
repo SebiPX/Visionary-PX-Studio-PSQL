@@ -10,18 +10,9 @@ fal.config({
 });
 
 const OPENROUTER_IMAGE_MODELS = [
-    { id: 'openai/gpt-5.4-image-2', name: 'GPT-5.4 Image 2' },
-    { id: 'sourceful/riverflow-v2.5-pro', name: 'Riverflow v2.5 Pro' },
-    { id: 'sourceful/riverflow-v2-pro', name: 'Riverflow v2 Pro' },
     { id: 'sourceful/riverflow-v2-fast', name: 'Riverflow v2 Fast' },
-    { id: 'black-forest-labs/flux.2-klein-4b', name: 'FLUX.2 Klein 4B' },
-    { id: 'bytedance-seed/seedream-4.5', name: 'SeeDream 4.5' },
-    { id: 'black-forest-labs/flux.2-max', name: 'FLUX.2 Max' },
-    { id: 'sourceful/riverflow-v2-max-preview', name: 'Riverflow v2 Max Preview' },
-    { id: 'sourceful/riverflow-v2-standard-preview', name: 'Riverflow v2 Standard Preview' },
     { id: 'sourceful/riverflow-v2-fast-preview', name: 'Riverflow v2 Fast Preview' },
-    { id: 'black-forest-labs/flux.2-flex', name: 'FLUX.2 Flex' },
-    { id: 'black-forest-labs/flux.2-pro', name: 'FLUX.2 Pro' },
+    { id: 'black-forest-labs/flux.2-klein-4b', name: 'FLUX.2 Klein 4B' },
     { id: 'openai/gpt-5-image-mini', name: 'GPT-5 Image Mini' }
 ];
 
@@ -56,7 +47,7 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     const [activeMode, setActiveMode] = useState<'TEXT' | 'IMG2IMG' | 'EDIT' | 'UPSCALE'>('TEXT');
     const [aspectRatio, setAspectRatio] = useState<'1:1' | '16:9' | '9:16' | '4:5' | 'none'>('16:9');
     const [aiModel, setAiModel] = useState<'GEMINI' | 'FAL_QWEN' | 'OPENROUTER'>('GEMINI');
-    const [openRouterModel, setOpenRouterModel] = useState<string>('openai/gpt-5.4-image-2');
+    const [openRouterModel, setOpenRouterModel] = useState<string>('sourceful/riverflow-v2-fast');
 
     // History
     const [history, setHistory] = useState<GeneratedImage[]>([]);
