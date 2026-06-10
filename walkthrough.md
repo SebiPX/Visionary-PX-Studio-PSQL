@@ -53,3 +53,15 @@ To begin extracting real posts:
 
 ## Navigation Restructuring
 - Moved the `Sketch Studio` and `Story Studio` modules from the "Agents" tab to the "Studio" tab in [components/Navigation.tsx](file:///d:/PX%20AgenturApp/PROJECT/CODE/2026/260226/Visionary-PX-Studio-PSQL/components/Navigation.tsx). This creates a more logical grouping, keeping all creative asset-generation tools together in the Studio section.
+
+## OpenRouter Image Generation Integration
+
+We integrated OpenRouter's image generation capabilities into PX-Studio:
+- **Backend Route**: Setup safe proxying in `labs-api/src/routes/openrouter.ts` with error handling, defensive model validation, and mapping OpenRouter's choice structure back to Gemini formats.
+- **Fast Models Restriction**: Restricted OpenRouter models to only fast/lightweight models to prevent gateway timeouts on Nginx and keep generation times under 15-20s.
+  - `sourceful/riverflow-v2-fast` (Default Model)
+  - `sourceful/riverflow-v2-fast-preview`
+  - `black-forest-labs/flux.2-klein-4b`
+  - `openai/gpt-5-image-mini`
+- **Nginx Config**: Configured `proxy_read_timeout 600s;` and `proxy_send_timeout 600s;` on the VPS Nginx Proxy Manager setup to guarantee the long HTTP connection isn't severed by the reverse proxy.
+
