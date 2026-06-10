@@ -65,3 +65,36 @@ We integrated OpenRouter's image generation capabilities into PX-Studio:
   - `openai/gpt-5-image-mini`
 - **Nginx Config**: Configured `proxy_read_timeout 600s;` and `proxy_send_timeout 600s;` on the VPS Nginx Proxy Manager setup to guarantee the long HTTP connection isn't severed by the reverse proxy.
 
+---
+
+# Videogenerierung Refactoring
+
+Die Videogenerierungs-Oberfläche in PX-Studio wurde erfolgreich modernisiert und vereinfacht. Beide Komponenten (Frontend & Backend-Proxy) wurden aktualisiert und auf dem VPS-Server live deployt.
+
+## Änderungen im Detail
+
+### 1. Unified Dropdown für Video-Modelle
+- Alle alten Engines und Buttons wurden durch ein einziges, übersichtliches Dropdown-Menü ersetzt.
+- Die Modelle sind gruppiert in **Schnelle & Günstige Modelle** und **Premium Modelle**.
+- Jedes Modell zeigt den geschätzten Preis pro Sekunde in Euro-Cent (`€-ct`) direkt im Namen an (berechnet aus dem OpenRouter USD Preis unter Berücksichtigung des EUR-Kurses von 0,92).
+- Route für `google/veo-3.1-fast` geht direkt über den lokalen Gemini-Proxy, alle anderen über OpenRouter.
+
+### 2. Vereinfachtes Seitenverhältnis (Aspect Ratio)
+- Die vorherigen Buttons wurden durch einen modernen, simplen Pill-Switcher ersetzt:
+  - **Quer (16:9)**
+  - **Hoch (9:16)**
+
+### 3. Entfernung von Motion Strength
+- Der Regler für "Motion Strength" wurde komplett entfernt.
+
+### 4. Dynamische Kamerafahrten (Camera Movement)
+- Die Kamera-Buttons steuern keine Engine-Parameter mehr direkt, sondern erweitern den User-Prompt im Textfeld.
+- Zuvor hinzugefügte Kamera-Beschreibungen werden automatisch erkannt und überschrieben.
+
+### 5. Backend & Video Proxy (OpenRouter / Asynchrones Job-Routing)
+- **Asynchrone Video API**: Der Backend-Proxy in [openrouter.ts](file:///d:/PX%20TOOLS/APPs/PX-Studio/labs-api/src/routes/openrouter.ts) leitet Video-Modelle nun an die neue, asynchrone OpenRouter Job-API (`/api/v1/videos`) weiter.
+- **Polling & Base64-Download**: Die API startet die Generierung, pollt im Hintergrund (alle 5 Sekunden) bis das Video fertiggestellt ist, lädt die fertige MP4-Datei herunter und konvertiert sie direkt in Base64 zur Wiedergabe im Frontend.
+- **R2 Image-to-Video Integration**: Bei Image-to-Video wird das Base64-Bild automatisch zuerst auf Cloudflare R2 hochgeladen, um eine öffentliche HTTPS-URL für OpenRouter zu generieren, da OpenRouter keine Base64-Bilddaten für Video-Referenzen akzeptiert.
+- **Dauer & Auflösung (Gemini Veo Fix)**: Bei Gemini Veo 3.1 Fast wird die Auflösung dynamisch auf `720p` gesetzt, wenn eine Videodauer unter 8 Sekunden (z. B. 4s oder 6s) gewählt ist, um Fehler der API zu verhindern (da 1080p dort nur für 8s freigegeben ist).
+- **Erhöhtes Timeout**: Das Polling-Timeout im Backend wurde auf 7 Minuten (420 Sekunden) erhöht, um auch bei Auslastung oder langsameren Modellen einen Gateway-Timeout zu verhindern.
+
