@@ -223,7 +223,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                         mimeType: uploadedImage.split(';')[0].split(':')[1] || 'image/png'
                     } : undefined,
                     config: {
-                        resolution: (activeMode === 'IMAGE' && uploadedImage) ? '720p' : '1080p',
+                        resolution: (parseInt(duration.replace('s', ''), 10) === 8 && !(activeMode === 'IMAGE' && uploadedImage)) ? '1080p' : '720p',
                         aspectRatio: aspectRatio,
                         durationSeconds: parseInt(duration.replace('s', ''), 10)
                     }
