@@ -69,13 +69,15 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
       if (req.body.modalities) {
         openRouterBody.modalities = req.body.modalities;
       } else if (
-        model.includes('image') ||
-        model.includes('flux') ||
-        model.includes('riverflow') ||
-        model.includes('sdxl') ||
-        model.includes('stable-diffusion') ||
-        model.includes('midjourney') ||
-        model.includes('seedream')
+        model && (
+          model.includes('image') ||
+          model.includes('flux') ||
+          model.includes('riverflow') ||
+          model.includes('sdxl') ||
+          model.includes('stable-diffusion') ||
+          model.includes('midjourney') ||
+          model.includes('seedream')
+        )
       ) {
         openRouterBody.modalities = ['image'];
       }
@@ -91,7 +93,16 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
         body: JSON.stringify(openRouterBody),
       });
       
-      const result = await orRes.json() as any;
+      const responseText = await orRes.text();
+      let result: any = {};
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Failed to parse OpenRouter response as JSON:', responseText);
+        res.status(orRes.status).json({ error: `OpenRouter returned invalid response (status ${orRes.status})`, details: responseText });
+        return;
+      }
+
       if (!orRes.ok) {
         res.status(orRes.status).json({ error: result?.error?.message || 'OpenRouter API error', details: result });
         return;
@@ -99,7 +110,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
 
       // Map response back to mimic the gemini structure output expected by the frontend
       const parts: any[] = [];
-      const assistantMessage = result.choices?.[0]?.message;
+      const assistantMessage = result?.choices?.[0]?.message;
 
       if (assistantMessage) {
         if (assistantMessage.content) {
