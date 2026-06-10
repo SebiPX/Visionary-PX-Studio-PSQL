@@ -10,10 +10,10 @@ fal.config({
 });
 
 const OPENROUTER_IMAGE_MODELS = [
-    { id: 'sourceful/riverflow-v2-fast', name: 'Riverflow v2 Fast (t2i: <0.01¢ | i2i: <0.01¢)' },
-    { id: 'sourceful/riverflow-v2-fast-preview', name: 'Riverflow v2 Fast Preview (t2i: <0.01¢ | i2i: <0.01¢)' },
-    { id: 'black-forest-labs/flux.2-klein-4b', name: 'FLUX.2 Klein 4B (t2i: ~1.4¢ | i2i: ~1.5¢)' },
-    { id: 'openai/gpt-5-image-mini', name: 'GPT-5 Image Mini (t2i: ~2.0¢ | i2i: ~3.0¢)' }
+    { id: 'sourceful/riverflow-v2-fast', name: 'Riverflow v2 Fast (t2i: <0.01 €-ct | i2i: <0.01 €-ct)' },
+    { id: 'sourceful/riverflow-v2-fast-preview', name: 'Riverflow v2 Fast Preview (t2i: <0.01 €-ct | i2i: <0.01 €-ct)' },
+    { id: 'black-forest-labs/flux.2-klein-4b', name: 'FLUX.2 Klein 4B (t2i: ~1.3 €-ct | i2i: ~1.4 €-ct)' },
+    { id: 'openai/gpt-5-image-mini', name: 'GPT-5 Image Mini (t2i: ~1.8 €-ct | i2i: ~2.8 €-ct)' }
 ];
 
 // ============================================================================
