@@ -1,8 +1,33 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy } from '../lib/apiClient';
+import { uploadFile, normalizeStorageUrl, downloadAsset, geminiProxy, openRouterProxy } from '../lib/apiClient';
 import { useGeneratedContent } from '../hooks/useGeneratedContent';
 import { GeneratedVideo } from '../types';
 import { ImageSourcePicker } from './ImageSourcePicker';
+
+const ALL_VIDEO_MODELS = [
+    // Fast & Cheap Group
+    { id: 'google/veo-3.1-fast', name: 'Gemini Veo 3.1 Fast (Kostenlos)', engine: 'GEMINI', category: 'fast' },
+    { id: 'alibaba/wan-2.6', name: 'Wan 2.6 (Kostenlos / Test)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'alibaba/wan-2.7', name: 'Wan 2.7 (Kostenlos / Test)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'bytedance/seedance-1-5-pro', name: 'Seedance 1.5 Pro (Kostenlos / Test)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'google/veo-3.1-lite', name: 'Veo 3.1 Lite (Kostenlos / Test)', engine: 'OPENROUTER', category: 'fast' },
+
+    // Premium Group (Expensive / Slow)
+    { id: 'openai/sora-2-pro', name: 'Sora 2 Pro (~28 €-ct / Sek.)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'google/veo-3.1', name: 'Veo 3.1 Pro (~7.5 €-ct / Sek.)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'minimax/hailuo-2.3', name: 'Hailuo 2.3 (~7.5 €-ct / Sek.)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'kwaivgi/kling-video-o1', name: 'Kling Video O1 (~10 €-ct / Sek.)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'kwaivgi/kling-v3.0-pro', name: 'Kling Video v3.0 Pro (~11 €-ct / Sek.)', engine: 'OPENROUTER', category: 'premium' }
+];
+
+const CAMERA_DESCRIPTIONS: Record<string, string> = {
+    'Pan': 'slow camera pan from left to right',
+    'Zoom': 'slow camera zoom in',
+    'Tilt': 'slow camera tilt up',
+    'Roll': 'cinematic camera roll rotation',
+    'Static': 'static camera shot, no movement',
+    'Orbit': 'slow camera orbit around the subject'
+};
 
 interface HistoryItem {
     id: string;
@@ -30,6 +55,29 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
     const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9');
     const [duration, setDuration] = useState<'4s' | '6s' | '8s'>('4s');
     const [cameraMotion, setCameraMotion] = useState('Pan');
+    const [videoModel, setVideoModel] = useState<string>('google/veo-3.1-fast');
+
+    const applyCameraMotion = (motion: string) => {
+        setCameraMotion(motion);
+        const desc = CAMERA_DESCRIPTIONS[motion];
+        if (desc) {
+            setPrompt(prev => {
+                let cleanPrompt = prev;
+                Object.values(CAMERA_DESCRIPTIONS).forEach(val => {
+                    cleanPrompt = cleanPrompt.replace(new RegExp(`,\\s*${val}`, 'gi'), '');
+                    cleanPrompt = cleanPrompt.replace(new RegExp(`\\s*${val}`, 'gi'), '');
+                });
+                cleanPrompt = cleanPrompt.trim();
+                if (cleanPrompt.endsWith(',')) {
+                    cleanPrompt = cleanPrompt.slice(0, -1).trim();
+                }
+                if (cleanPrompt.endsWith('.')) {
+                    cleanPrompt = cleanPrompt.slice(0, -1).trim();
+                }
+                return cleanPrompt ? `${cleanPrompt}, ${desc}` : desc;
+            });
+        }
+    };
     const [videoUri, setVideoUri] = useState('');
     const [history, setHistory] = useState<GeneratedVideo[]>([]);
 
@@ -162,78 +210,126 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
         setIsPlaying(false);
 
         try {
-            const cameraPrompt = cameraMotion !== 'Static' ? ` Camera movement: ${cameraMotion}.` : ' Static camera.';
-            const response = await geminiProxy({
-                action: 'generateVideos',
-                model: 'veo-3.1-fast-generate-preview',
-                prompt: `${prompt}.${cameraPrompt}`,
-                image: (activeMode === 'IMAGE' && uploadedImage) ? {
-                    bytesBase64Encoded: uploadedImage.split(',')[1],
-                    mimeType: uploadedImage.split(';')[0].split(':')[1] || 'image/png'
-                } : undefined,
-                config: {
-                    resolution: (activeMode === 'IMAGE' && uploadedImage) ? '720p' : '1080p',
-                    aspectRatio: aspectRatio,
-                    durationSeconds: parseInt(duration.replace('s', ''), 10)
-                }
-            }) as any;
+            let publicUrl = "";
 
-            if (response?.error) {
-                throw new Error(JSON.stringify(response.error));
-            }
-
-            let operation = response;
-
-            while (!operation.done) {
-                await new Promise(resolve => setTimeout(resolve, 5000));
-
-                const opResponse = await geminiProxy({
-                    action: 'getVideosOperation',
-                    operation: operation
+            if (videoModel === 'google/veo-3.1-fast') {
+                // GEMINI VEO
+                const response = await geminiProxy({
+                    action: 'generateVideos',
+                    model: 'veo-3.1-fast-generate-preview',
+                    prompt: prompt,
+                    image: (activeMode === 'IMAGE' && uploadedImage) ? {
+                        bytesBase64Encoded: uploadedImage.split(',')[1],
+                        mimeType: uploadedImage.split(';')[0].split(':')[1] || 'image/png'
+                    } : undefined,
+                    config: {
+                        resolution: (activeMode === 'IMAGE' && uploadedImage) ? '720p' : '1080p',
+                        aspectRatio: aspectRatio,
+                        durationSeconds: parseInt(duration.replace('s', ''), 10)
+                    }
                 }) as any;
 
-                if (opResponse?.error) {
-                    throw new Error(JSON.stringify(opResponse.error));
+                if (response?.error) {
+                    throw new Error(JSON.stringify(response.error));
                 }
 
-                operation = opResponse;
+                let operation = response;
+
+                while (!operation.done) {
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+
+                    const opResponse = await geminiProxy({
+                        action: 'getVideosOperation',
+                        operation: operation
+                    }) as any;
+
+                    if (opResponse?.error) {
+                        throw new Error(JSON.stringify(opResponse.error));
+                    }
+
+                    operation = opResponse;
+                }
+
+                const googleUri =
+                    operation.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+
+                if (!googleUri) {
+                    throw new Error('Video generated but no download URL found in response.');
+                }
+
+                const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || '');
+                const googleDownloadUrl = googleUri.includes('?')
+                    ? `${googleUri}&key=${apiKey}`
+                    : `${googleUri}?key=${apiKey}`;
+
+                const videoBlob = await (await fetch(googleDownloadUrl)).blob();
+                const fileName = `${Date.now()}_veo_${Math.random().toString(36).substr(2, 6)}.mp4`;
+                const videoFile = new File([videoBlob], fileName, { type: 'video/mp4' });
+                publicUrl = await uploadFile(videoFile, 'videos');
+            } else {
+                // OPENROUTER VIDEO
+                const parts: any[] = [];
+                if (activeMode === 'IMAGE' && uploadedImage) {
+                    const base64Data = uploadedImage.split(',')[1];
+                    parts.push({
+                        inlineData: {
+                            mimeType: 'image/png',
+                            data: base64Data
+                        }
+                    });
+                }
+                parts.push({ text: prompt });
+
+                const response = await openRouterProxy({
+                    action: 'generateContent',
+                    model: videoModel,
+                    contents: [{ role: 'user', parts: parts }],
+                    modalities: ['video']
+                }) as any;
+
+                if (response?.error) {
+                    throw new Error(JSON.stringify(response.error));
+                }
+
+                if (!response.candidates || response.candidates.length === 0) {
+                    throw new Error("Die Video-KI hat keine Antwort geliefert.");
+                }
+
+                const candidate = response.candidates[0];
+                const respParts = candidate.content?.parts;
+                if (respParts) {
+                    for (const part of respParts) {
+                        if (part.inlineData) {
+                            const mimeType = part.inlineData.mimeType || 'video/mp4';
+                            const ext = mimeType.split('/')[1] || 'mp4';
+                            const dataUri = `data:${mimeType};base64,${part.inlineData.data}`;
+                            const videoBlob = await (await fetch(dataUri)).blob();
+                            const fileName = `${Date.now()}_or_${Math.random().toString(36).substr(2, 6)}.${ext}`;
+                            const videoFile = new File([videoBlob], fileName, { type: mimeType });
+                            publicUrl = await uploadFile(videoFile, 'videos');
+                            break;
+                        }
+                    }
+                }
+
+                if (!publicUrl) {
+                    throw new Error("Fehler: Die Antwort der OpenRouter Video-KI war ungültig (fehlende Daten).");
+                }
             }
 
-            const googleUri =
-                operation.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
-
-            if (!googleUri) {
-                console.warn('[VideoStudio] Unexpected response structure:', JSON.stringify(operation));
-                throw new Error('Video generated but no download URL found in response.');
-            }
-
-            // 1. Download the video from Google Files API (needs the API key)
-            const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || '');
-            const googleDownloadUrl = googleUri.includes('?')
-                ? `${googleUri}&key=${apiKey}`
-                : `${googleUri}?key=${apiKey}`;
-
-            const videoBlob = await (await fetch(googleDownloadUrl)).blob();
-
-            // 2. Upload to Cloudflare R2 for a permanent URL
-            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 6)}.mp4`;
-            const videoFile = new File([videoBlob], fileName, { type: 'video/mp4' });
-            const publicUrl = await uploadFile(videoFile, 'videos');
-            // 3. Save to DB & update UI
             setVideoUri(publicUrl);
             setIsPlaying(true);
             await saveVideo({
                 prompt,
-                model: 'veo-3.1-fast-generate-preview',
+                model: videoModel,
                 video_url: publicUrl,
                 config: { mode: activeMode, duration, aspectRatio, cameraMotion },
             });
             loadVideoHistory();
 
-
-        } catch (e) {
+        } catch (e: any) {
             console.error("Video generation failed", e);
-            alert("Video generation failed. Please try again.");
+            alert(e.message || "Video generation failed. Please try again.");
         } finally {
             setIsGenerating(false);
         }
@@ -266,6 +362,30 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                         <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Settings</h3>
 
                         <div className="space-y-2">
+                            <label className="text-xs text-foreground/90">AI Video-Modell</label>
+                            <select
+                                value={videoModel}
+                                onChange={(e) => setVideoModel(e.target.value)}
+                                className="w-full bg-white/5 border border-border rounded-lg py-2 px-3 text-xs text-foreground focus:ring-1 focus:ring-primary focus:border-primary"
+                            >
+                                <optgroup label="Schnelle & Günstige Modelle" className="bg-[#0b0f19] text-foreground font-semibold">
+                                    {ALL_VIDEO_MODELS.filter(m => m.category === 'fast').map(model => (
+                                        <option key={model.id} value={model.id} className="bg-[#0b0f19] text-foreground font-normal">
+                                            {model.name}
+                                        </option>
+                                    ))}
+                                </optgroup>
+                                <optgroup label="Premium Modelle (Langsamer)" className="bg-[#0b0f19] text-foreground font-semibold">
+                                    {ALL_VIDEO_MODELS.filter(m => m.category === 'premium').map(model => (
+                                        <option key={model.id} value={model.id} className="bg-[#0b0f19] text-foreground font-normal">
+                                            {model.name}
+                                        </option>
+                                    ))}
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
                             <label className="text-xs text-foreground/90">Duration</label>
                             <div className="grid grid-cols-3 gap-2">
                                 {['4s', '6s', '8s'].map(d => (
@@ -282,28 +402,20 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
 
                         <div className="space-y-2">
                             <label className="text-xs text-foreground/90">Aspect Ratio</label>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-white/5 p-1 rounded-xl flex">
                                 <button
                                     onClick={() => setAspectRatio('16:9')}
-                                    className={`py-2 px-3 rounded-lg border transition-all text-xs flex items-center justify-center gap-2 ${aspectRatio === '16:9' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                    className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${aspectRatio === '16:9' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
-                                    <span className="material-icons text-sm">crop_16_9</span> 16:9
+                                    Quer (16:9)
                                 </button>
                                 <button
                                     onClick={() => setAspectRatio('9:16')}
-                                    className={`py-2 px-3 rounded-lg border transition-all text-xs flex items-center justify-center gap-2 ${aspectRatio === '9:16' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
+                                    className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${aspectRatio === '9:16' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
-                                    <span className="material-icons text-sm">crop_portrait</span> 9:16
+                                    Hoch (9:16)
                                 </button>
                             </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <label className="text-xs text-foreground/90">Motion Strength</label>
-                                <span className="text-xs text-primary">High</span>
-                            </div>
-                            <input type="range" className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full" />
                         </div>
                     </div>
 
@@ -314,7 +426,7 @@ export const VideoStudio: React.FC<VideoStudioProps> = ({ selectedItemId, onItem
                             {['Pan', 'Zoom', 'Tilt', 'Roll', 'Static', 'Orbit'].map((cam) => (
                                 <button
                                     key={cam}
-                                    onClick={() => setCameraMotion(cam)}
+                                    onClick={() => applyCameraMotion(cam)}
                                     className={`aspect-square rounded-lg border flex flex-col items-center justify-center gap-1 transition-all ${cameraMotion === cam ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border hover:border-primary/50 hover:bg-white/10 text-muted-foreground'}`}
                                 >
                                     <span className={`material-icons-round text-lg ${cameraMotion === cam ? 'text-primary' : 'text-muted-foreground'}`}>videocam</span>

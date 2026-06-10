@@ -103,9 +103,21 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
         messages: messages,
       };
 
-      // If user specified modalities or if it's an image model, add it
+      // If user specified modalities or if it's an image/video model, add it
       if (req.body.modalities) {
         openRouterBody.modalities = req.body.modalities;
+      } else if (
+        model && (
+          model.includes('video') ||
+          model.includes('wan') ||
+          model.includes('sora') ||
+          model.includes('veo') ||
+          model.includes('seedance') ||
+          model.includes('hailuo') ||
+          model.includes('kling')
+        )
+      ) {
+        openRouterBody.modalities = ['video'];
       } else if (
         model && (
           model.includes('image') ||
@@ -211,6 +223,69 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
                 });
               } catch (e) {
                 console.error('Failed to fetch remote image url from OpenRouter response:', e);
+              }
+            }
+          }
+        const videos = assistantMessage.videos || assistantMessage.video_url;
+        if (Array.isArray(videos)) {
+          for (const vid of videos) {
+            const url = vid.video_url?.url || vid.url || vid;
+            if (url && typeof url === 'string') {
+              if (url.startsWith('data:')) {
+                const match = url.match(/^data:([^;]+);base64,(.+)$/);
+                if (match) {
+                  parts.push({
+                    inlineData: {
+                      mimeType: match[1],
+                      data: match[2]
+                    }
+                  });
+                }
+              } else {
+                try {
+                  const videoFetch = await fetch(url);
+                  const arrayBuffer = await videoFetch.arrayBuffer();
+                  const base64 = Buffer.from(arrayBuffer).toString('base64');
+                  const mimeType = videoFetch.headers.get('content-type') || 'video/mp4';
+                  parts.push({
+                    inlineData: {
+                      mimeType,
+                      data: base64
+                    }
+                  });
+                } catch (e) {
+                  console.error('Failed to fetch remote video url from OpenRouter response:', e);
+                }
+              }
+            }
+          }
+        } else if (videos) {
+          const url = typeof videos === 'string' ? videos : (videos.video_url?.url || videos.url);
+          if (url && typeof url === 'string') {
+            if (url.startsWith('data:')) {
+              const match = url.match(/^data:([^;]+);base64,(.+)$/);
+              if (match) {
+                parts.push({
+                  inlineData: {
+                    mimeType: match[1],
+                    data: match[2]
+                  }
+                });
+              }
+            } else {
+              try {
+                const videoFetch = await fetch(url);
+                const arrayBuffer = await videoFetch.arrayBuffer();
+                const base64 = Buffer.from(arrayBuffer).toString('base64');
+                const mimeType = videoFetch.headers.get('content-type') || 'video/mp4';
+                parts.push({
+                  inlineData: {
+                    mimeType,
+                    data: base64
+                  }
+                });
+              } catch (e) {
+                console.error('Failed to fetch remote video url from OpenRouter response:', e);
               }
             }
           }
