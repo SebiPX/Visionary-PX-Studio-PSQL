@@ -1,7 +1,45 @@
 import { Router, Response } from 'express';
 import { AuthRequest, requireAuth } from '../middleware/requireAuth';
+import { request } from 'https';
+import { URL } from 'url';
 
 const OPENROUTER_BASE = 'https://openrouter.ai/api/v1';
+
+function postRequest(urlStr: string, headers: any, bodyObj: any): Promise<{ status: number, text: string }> {
+  return new Promise((resolve, reject) => {
+    const url = new URL(urlStr);
+    const body = JSON.stringify(bodyObj);
+    const options = {
+      hostname: url.hostname,
+      path: url.pathname + url.search,
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Length': Buffer.byteLength(body)
+      }
+    };
+
+    const req = request(options, (res) => {
+      let responseData = '';
+      res.on('data', (chunk) => {
+        responseData += chunk.toString();
+      });
+      res.on('end', () => {
+        resolve({
+          status: res.statusCode || 200,
+          text: responseData
+        });
+      });
+    });
+
+    req.on('error', (err) => {
+      reject(err);
+    });
+
+    req.write(body);
+    req.end();
+  });
+}
 
 const router = Router();
 
@@ -82,28 +120,24 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
         openRouterBody.modalities = ['image'];
       }
 
-      const orRes = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'HTTP-Referer': process.env.VITE_API_URL || 'http://localhost:4000',
-          'X-Title': 'PX-Studio'
-        },
-        body: JSON.stringify(openRouterBody),
-      });
+      const orRes = await postRequest(`${OPENROUTER_BASE}/chat/completions`, {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': process.env.VITE_API_URL || 'http://localhost:4000',
+        'X-Title': 'PX-Studio'
+      }, openRouterBody);
       
-      const responseText = await orRes.text();
+      const responseText = orRes.text;
       let result: any = {};
       try {
-        result = JSON.parse(responseText);
+        result = JSON.parse(responseText.trim());
       } catch (e) {
         console.error('Failed to parse OpenRouter response as JSON:', responseText);
         res.status(orRes.status).json({ error: `OpenRouter returned invalid response (status ${orRes.status})`, details: responseText });
         return;
       }
 
-      if (!orRes.ok) {
+      if (orRes.status < 200 || orRes.status >= 300) {
         res.status(orRes.status).json({ error: result?.error?.message || 'OpenRouter API error', details: result });
         return;
       }
