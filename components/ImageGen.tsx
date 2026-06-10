@@ -9,11 +9,25 @@ fal.config({
     proxyUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/proxy/fal`
 });
 
-const OPENROUTER_IMAGE_MODELS = [
-    { id: 'sourceful/riverflow-v2-fast', name: 'Riverflow v2 Fast (t2i: <0.01 €-ct | i2i: <0.01 €-ct)' },
-    { id: 'sourceful/riverflow-v2-fast-preview', name: 'Riverflow v2 Fast Preview (t2i: <0.01 €-ct | i2i: <0.01 €-ct)' },
-    { id: 'black-forest-labs/flux.2-klein-4b', name: 'FLUX.2 Klein 4B (t2i: ~1.3 €-ct | i2i: ~1.4 €-ct)' },
-    { id: 'openai/gpt-5-image-mini', name: 'GPT-5 Image Mini (t2i: ~1.8 €-ct | i2i: ~2.8 €-ct)' }
+const ALL_IMAGE_MODELS = [
+    // Fast & Cheap Group
+    { id: 'gemini-3.1-flash-image-preview', name: 'Gemini 3.1 Flash Image (Kostenlos)', engine: 'GEMINI', category: 'fast' },
+    { id: 'fal-ai/qwen-image-2', name: 'Fal.ai Qwen Image 2 (t2i: ~0.9 €-ct | i2i: ~0.9 €-ct)', engine: 'FAL_QWEN', category: 'fast' },
+    { id: 'sourceful/riverflow-v2-fast', name: 'Riverflow v2 Fast (t2i: <0.01 €-ct | i2i: <0.01 €-ct)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'sourceful/riverflow-v2-fast-preview', name: 'Riverflow v2 Fast Preview (t2i: <0.01 €-ct | i2i: <0.01 €-ct)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'black-forest-labs/flux.2-klein-4b', name: 'FLUX.2 Klein 4B (t2i: ~1.3 €-ct | i2i: ~1.4 €-ct)', engine: 'OPENROUTER', category: 'fast' },
+    { id: 'openai/gpt-5-image-mini', name: 'GPT-5 Image Mini (t2i: ~1.8 €-ct | i2i: ~2.8 €-ct)', engine: 'OPENROUTER', category: 'fast' },
+
+    // Premium & Detailed Group (Expensive / Slow)
+    { id: 'openai/gpt-5.4-image-2', name: 'GPT-5.4 Image 2 (t2i: ~3.7 €-ct | i2i: ~5.5 €-ct)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'sourceful/riverflow-v2.5-pro', name: 'Riverflow v2.5 Pro (t2i: ~3.5 €-ct | i2i: ~4.5 €-ct)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'sourceful/riverflow-v2-pro', name: 'Riverflow v2 Pro (t2i: ~3.0 €-ct | i2i: ~4.0 €-ct)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'black-forest-labs/flux.2-pro', name: 'FLUX.2 Pro (t2i: ~4.0 €-ct | i2i: ~5.0 €-ct)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'black-forest-labs/flux.2-max', name: 'FLUX.2 Max (t2i: ~2.5 €-ct | i2i: ~3.5 €-ct)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'black-forest-labs/flux.2-flex', name: 'FLUX.2 Flex (t2i: ~2.5 €-ct | i2i: ~3.5 €-ct)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'sourceful/riverflow-v2-max-preview', name: 'Riverflow v2 Max Preview (t2i: ~2.5 €-ct | i2i: ~3.5 €-ct)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'sourceful/riverflow-v2-standard-preview', name: 'Riverflow v2 Standard Preview (t2i: ~2.5 €-ct | i2i: ~3.5 €-ct)', engine: 'OPENROUTER', category: 'premium' },
+    { id: 'bytedance-seed/seedream-4.5', name: 'SeeDream 4.5 (t2i: ~2.0 €-ct | i2i: ~3.0 €-ct)', engine: 'OPENROUTER', category: 'premium' }
 ];
 
 // ============================================================================
@@ -65,6 +79,22 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
     const [isDrawing, setIsDrawing] = useState(false);
     const [brushSize, setBrushSize] = useState(10);
     const [brushColor, setBrushColor] = useState('#FFFFFF');
+
+    const getSelectedModelId = () => {
+        if (aiModel === 'GEMINI') return 'gemini-3.1-flash-image-preview';
+        if (aiModel === 'FAL_QWEN') return 'fal-ai/qwen-image-2';
+        return openRouterModel;
+    };
+
+    const handleModelChange = (modelId: string) => {
+        const found = ALL_IMAGE_MODELS.find(m => m.id === modelId);
+        if (found) {
+            setAiModel(found.engine as 'GEMINI' | 'FAL_QWEN' | 'OPENROUTER');
+            if (found.engine === 'OPENROUTER') {
+                setOpenRouterModel(found.id);
+            }
+        }
+    };
 
     // ========================================================================
     // HANDLERS
@@ -575,45 +605,28 @@ export const ImageGen: React.FC<ImageGenProps> = ({ selectedItemId, onItemLoaded
                         <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Settings</h3>
 
                         <div className="space-y-2">
-                            <label className="text-xs text-foreground/90">AI Engine</label>
-                            <div className="grid grid-cols-3 gap-1">
-                                <button
-                                    onClick={() => setAiModel('GEMINI')}
-                                    className={`py-2 px-1 rounded-lg border transition-all text-[9px] sm:text-[10px] flex items-center justify-center gap-1 font-bold ${aiModel === 'GEMINI' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
-                                >
-                                    Gemini
-                                </button>
-                                <button
-                                    onClick={() => setAiModel('FAL_QWEN')}
-                                    className={`py-2 px-1 rounded-lg border transition-all text-[9px] sm:text-[10px] flex items-center justify-center gap-1 font-bold ${aiModel === 'FAL_QWEN' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
-                                >
-                                    Fal.ai
-                                </button>
-                                <button
-                                    onClick={() => setAiModel('OPENROUTER')}
-                                    className={`py-2 px-1 rounded-lg border transition-all text-[9px] sm:text-[10px] flex items-center justify-center gap-1 font-bold ${aiModel === 'OPENROUTER' ? 'bg-primary/20 border-primary text-primary' : 'bg-white/5 border-border text-muted-foreground hover:bg-white/10'}`}
-                                >
-                                    OpenRouter
-                                </button>
-                            </div>
-                        </div>
-
-                        {aiModel === 'OPENROUTER' && (
-                            <div className="space-y-2 animate-in fade-in duration-300">
-                                <label className="text-xs text-foreground/90">OpenRouter Model</label>
-                                <select
-                                    value={openRouterModel}
-                                    onChange={(e) => setOpenRouterModel(e.target.value)}
-                                    className="w-full bg-white/5 border border-border rounded-lg py-2 px-3 text-xs text-foreground focus:ring-1 focus:ring-primary focus:border-primary"
-                                >
-                                    {OPENROUTER_IMAGE_MODELS.map(model => (
-                                        <option key={model.id} value={model.id} className="bg-[#0b0f19] text-foreground">
+                            <label className="text-xs text-foreground/90">AI Modell</label>
+                            <select
+                                value={getSelectedModelId()}
+                                onChange={(e) => handleModelChange(e.target.value)}
+                                className="w-full bg-white/5 border border-border rounded-lg py-2 px-3 text-xs text-foreground focus:ring-1 focus:ring-primary focus:border-primary"
+                            >
+                                <optgroup label="Schnelle & Günstige Modelle" className="bg-[#0b0f19] text-foreground font-semibold">
+                                    {ALL_IMAGE_MODELS.filter(m => m.category === 'fast').map(model => (
+                                        <option key={model.id} value={model.id} className="bg-[#0b0f19] text-foreground font-normal">
                                             {model.name}
                                         </option>
                                     ))}
-                                </select>
-                            </div>
-                        )}
+                                </optgroup>
+                                <optgroup label="Premium & Detailreiche Modelle (Teurer / Langsamer)" className="bg-[#0b0f19] text-foreground font-semibold">
+                                    {ALL_IMAGE_MODELS.filter(m => m.category === 'premium').map(model => (
+                                        <option key={model.id} value={model.id} className="bg-[#0b0f19] text-foreground font-normal">
+                                            {model.name}
+                                        </option>
+                                    ))}
+                                </optgroup>
+                            </select>
+                        </div>
 
                         <div className="space-y-2">
                             <label className="text-xs text-foreground/90">Aspect Ratio</label>
