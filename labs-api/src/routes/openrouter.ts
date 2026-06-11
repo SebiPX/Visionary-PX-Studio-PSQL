@@ -226,10 +226,10 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
           
           if (!item.parts || !Array.isArray(item.parts)) continue;
 
-          // Check if there are complex parts (like images)
-          const hasImage = item.parts.some((p: any) => p.inlineData);
+          // Check if there are complex parts (like images or documents)
+          const hasComplexContent = item.parts.some((p: any) => p.inlineData);
           
-          if (hasImage) {
+          if (hasComplexContent) {
             const contentParts: any[] = [];
             for (const p of item.parts) {
               if (p.text) {
@@ -237,12 +237,24 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
               } else if (p.inlineData) {
                 const mimeType = p.inlineData.mimeType || 'image/png';
                 const base64Data = p.inlineData.data;
-                contentParts.push({
-                  type: 'image_url',
-                  image_url: {
-                    url: `data:${mimeType};base64,${base64Data}`
-                  }
-                });
+                const filename = p.inlineData.filename || 'document.pdf';
+                
+                if (mimeType.startsWith('image/')) {
+                  contentParts.push({
+                    type: 'image_url',
+                    image_url: {
+                      url: `data:${mimeType};base64,${base64Data}`
+                    }
+                  });
+                } else {
+                  contentParts.push({
+                    type: 'file',
+                    file: {
+                      filename: filename,
+                      file_data: `data:${mimeType};base64,${base64Data}`
+                    }
+                  });
+                }
               }
             }
             messages.push({ role, content: contentParts });

@@ -420,7 +420,8 @@ export const ChatBot: React.FC = () => {
                // 3. Attach base64 as inline data to the Gemini prompt
                const inlineData = {
                    mimeType,
-                   data: base64Data
+                   data: base64Data,
+                   filename: fileToProcess.name
                };
                
                // The contents array structure for the final user prompt
