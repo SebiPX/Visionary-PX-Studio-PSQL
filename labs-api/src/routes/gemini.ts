@@ -19,6 +19,22 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
 
     // ---- generateContent (text, image generation, sketch) ----
     if (action === 'generateContent') {
+      // Clean up any extra fields (like filename) from inlineData for Gemini API compliance
+      if (Array.isArray(contents)) {
+        for (const item of contents) {
+          if (item.parts && Array.isArray(item.parts)) {
+            for (const part of item.parts) {
+              if (part.inlineData) {
+                part.inlineData = {
+                  mimeType: part.inlineData.mimeType,
+                  data: part.inlineData.data
+                };
+              }
+            }
+          }
+        }
+      }
+
       const url = `${GEMINI_BASE}/models/${model}:generateContent?key=${apiKey}`;
       const geminiBody: Record<string, unknown> = { contents };
       if (systemInstruction) geminiBody.systemInstruction = { parts: [{ text: systemInstruction }] };
