@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import fs from 'fs';
+import csv from 'csv-parser';
+
 import express from 'express';
 import cors from 'cors';
 
@@ -166,6 +169,75 @@ pool.query('ALTER TABLE logins ADD COLUMN IF NOT EXISTS is_gf_only BOOLEAN DEFAU
   })
   .then((res) => console.log('DB: GF roles updated:', res[0].rowCount, 'Superadmin updated:', res[1].rowCount))
   .catch(e => console.error('DB GF patch err:', e.message));
+
+pool.query(`
+  CREATE TABLE IF NOT EXISTS public.agency_accounts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      firma TEXT NOT NULL,
+      kategorie TEXT,
+      bemerkung TEXT,
+      website TEXT,
+      benutzername TEXT,
+      passwort TEXT,
+      kundennummer TEXT,
+      strasse TEXT,
+      telefonnummer TEXT,
+      email TEXT,
+      sonstiges TEXT,
+      dokumente TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+  );
+  CREATE INDEX IF NOT EXISTS idx_agency_accounts_firma ON public.agency_accounts(firma);
+`).then(async () => {
+  console.log('DB: checked agency_accounts table');
+  try {
+    const checkRes = await pool.query('SELECT COUNT(*)::integer as count FROM public.agency_accounts');
+    if (checkRes.rows[0].count === 0) {
+      const csvPath = 'D:\\PX TOOLS\\INPUT\\AIRTABLE\\Accountliste-Grid view.csv';
+      if (fs.existsSync(csvPath)) {
+        console.log('DB: seeding agency_accounts from CSV...');
+        const rows: any[] = [];
+        fs.createReadStream(csvPath)
+          .pipe(csv({ mapHeaders: ({ header }) => header.trim().replace(/^\uFEFF/g, '') }))
+          .on('data', (data) => rows.push(data))
+          .on('end', async () => {
+            try {
+              for (const r of rows) {
+                if (!r['FIRMA']) continue;
+                await pool.query(
+                  `INSERT INTO public.agency_accounts 
+                   (firma, kategorie, bemerkung, website, benutzername, passwort, kundennummer, strasse, telefonnummer, email, sonstiges, dokumente)
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+                  [
+                    r['FIRMA'],
+                    r['Kategorie'] || null,
+                    r['Bemerkung'] || null,
+                    r['Website / Login'] || null,
+                    r['BENUTZERNAME'] || null,
+                    r['PASSWORT'] || null,
+                    r['Kundennummer'] || null,
+                    r['STRASSE'] || null,
+                    r['TELEFONNUMMER'] || null,
+                    r['EMAIL'] || null,
+                    r['SONSTIGES'] || null,
+                    r['Dokumente'] || null
+                  ]
+                );
+              }
+              console.log(`DB: successfully seeded ${rows.length} accounts from CSV`);
+            } catch (seedErr: any) {
+              console.error('DB: agency_accounts seeding failed:', seedErr.message);
+            }
+          });
+      } else {
+        console.log('DB: CSV file not found for seeding agency_accounts:', csvPath);
+      }
+    }
+  } catch (err: any) {
+    console.error('DB: failed to check/seed agency_accounts:', err.message);
+  }
+}).catch(e => console.error('DB agency_accounts table creation err:', e.message));
 
 // Add robust endpoint tracking
 app.use(express.urlencoded({ extended: true }));

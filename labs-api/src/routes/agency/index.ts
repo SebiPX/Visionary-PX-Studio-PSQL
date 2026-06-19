@@ -20,6 +20,7 @@ import mocoWebhookRoutes from './mocoWebhooks';
 import chatRoutes from './chat';
 import directoryFreelancersRoutes from './directoryFreelancers';
 import directoryLocationsRoutes from './directoryLocations';
+import accountsRoutes from './accounts';
 
 const router = Router();
 
@@ -43,5 +44,6 @@ router.use('/webhooks/moco', mocoWebhookRoutes);
 router.use('/chat', chatRoutes);
 router.use('/directory-freelancers', directoryFreelancersRoutes);
 router.use('/directory-locations', directoryLocationsRoutes);
+router.use('/accounts', accountsRoutes);
 
 export default router;
