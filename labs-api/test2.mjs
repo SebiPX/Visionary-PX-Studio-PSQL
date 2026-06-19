@@ -1,0 +1,1 @@
+import dotenv from 'dotenv'; dotenv.config({ path: '.env.local' }); dotenv.config({ path: '.env' }); const f = fetch(process.env.MOCO_API_URL + '/projects', { headers: { Authorization: 'Token token=' + process.env.MOCO_API_KEY } }).then(r => r.json()).then(d => { console.log('Active:', d.length); console.log(Object.keys(d[0])); });

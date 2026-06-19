@@ -195,7 +195,7 @@ pool.query(`
   try {
     const checkRes = await pool.query('SELECT COUNT(*)::integer as count FROM public.agency_accounts');
     if (checkRes.rows[0].count === 0) {
-      const csvPath = path.join(process.cwd(), 'Accountliste.csv');
+      const csvPath = path.join(process.cwd(), 'src', 'Accountliste.csv');
       if (fs.existsSync(csvPath)) {
         console.log('DB: seeding agency_accounts from CSV...');
         const rows: any[] = [];
