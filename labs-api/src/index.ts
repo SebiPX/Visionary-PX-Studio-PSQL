@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import fs from 'fs';
+import path from 'path';
 import csv from 'csv-parser';
 
 import express from 'express';
@@ -194,7 +195,7 @@ pool.query(`
   try {
     const checkRes = await pool.query('SELECT COUNT(*)::integer as count FROM public.agency_accounts');
     if (checkRes.rows[0].count === 0) {
-      const csvPath = 'D:\\PX TOOLS\\INPUT\\AIRTABLE\\Accountliste-Grid view.csv';
+      const csvPath = path.join(process.cwd(), 'Accountliste.csv');
       if (fs.existsSync(csvPath)) {
         console.log('DB: seeding agency_accounts from CSV...');
         const rows: any[] = [];
