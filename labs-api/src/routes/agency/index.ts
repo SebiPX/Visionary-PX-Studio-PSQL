@@ -15,6 +15,7 @@ import reportsRoutes from './reports';
 import resourcesRoutes from './resources';
 import servicePricingRoutes from './servicePricing';
 import documentRoutes from './documents';
+import offerRoutes from './offers';
 
 import mocoWebhookRoutes from './mocoWebhooks';
 import chatRoutes from './chat';
@@ -40,6 +41,7 @@ router.use('/seniority-levels', seniorityLevelRoutes);
 router.use('/reports', reportsRoutes);
 router.use('/resources', resourcesRoutes);
 router.use('/documents', documentRoutes);
+router.use('/offers', offerRoutes);
 router.use('/webhooks/moco', mocoWebhookRoutes);
 router.use('/chat', chatRoutes);
 router.use('/directory-freelancers', directoryFreelancersRoutes);
