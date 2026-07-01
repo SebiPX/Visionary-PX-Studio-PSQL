@@ -85,9 +85,26 @@ pool.query('ALTER TABLE agency_tasks ADD COLUMN IF NOT EXISTS created_by UUID RE
   .then(() => console.log('DB: checked created_by on agency_tasks'))
   .catch(e => console.error('DB patch err:', e.message));
 
+// R2 Storage bucket
 pool.query('ALTER TABLE agency_time_entries ADD COLUMN IF NOT EXISTS moco_activity_id INTEGER;')
   .then(() => console.log('DB: checked moco_activity_id on agency_time_entries'))
   .catch(e => console.error('DB patch err:', e.message));
+
+// Persistent local KVA Offer Drafts
+pool.query(`
+  CREATE TABLE IF NOT EXISTS public.agency_moco_offer_drafts (
+      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+      moco_offer_id INTEGER NOT NULL UNIQUE,
+      project_id INTEGER,
+      title TEXT NOT NULL,
+      items_json JSONB NOT NULL,
+      last_edited_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_moco_offer_drafts_offer_id ON public.agency_moco_offer_drafts(moco_offer_id);
+`).then(() => console.log('DB: checked agency_moco_offer_drafts table'))
+  .catch(e => console.error('DB offer_drafts migration err:', e.message));
 
 pool.query(`
   ALTER TABLE agency_tasks 
