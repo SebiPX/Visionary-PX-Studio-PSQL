@@ -17,6 +17,25 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// PUT /api/agency/offers/:id
+// Updates an offer in MOCO with modified items/properties
+router.put('/:id', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const offerId = req.params.id;
+    const body = req.body;
+    
+    // We proxy the PUT payload straight to MOCO
+    const updatedOffer = await mocoFetch(`/offers/${offerId}`, {
+      method: 'PUT',
+      body: JSON.stringify(body)
+    });
+    res.json(updatedOffer);
+  } catch (err: any) {
+    console.error(`Error updating offer ${req.params.id} in MOCO:`, err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/agency/offers
 // Lists offers from MOCO
 router.get('/', requireAuth, async (req: AuthRequest, res) => {
