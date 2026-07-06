@@ -169,6 +169,23 @@ pool.query(`
 `).then(() => console.log('DB: checked bannercraft_projects table'))
   .catch(e => console.error('DB bannercraft patch err:', e.message));
 
+pool.query(`
+  CREATE TABLE IF NOT EXISTS public.agency_kitchen_duties (
+      year INTEGER NOT NULL,
+      week_number INTEGER NOT NULL,
+      assigned_ids UUID[] NOT NULL DEFAULT '{}',
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+      PRIMARY KEY (year, week_number)
+  );
+
+  CREATE TABLE IF NOT EXISTS public.agency_kitchen_duty_participants (
+      profile_id UUID PRIMARY KEY REFERENCES public.profiles(id) ON DELETE CASCADE,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+  );
+`).then(() => console.log('DB: checked kitchen duty tables'))
+  .catch(e => console.error('DB kitchen duty patch err:', e.message));
+
 pool.query('ALTER TABLE logins ADD COLUMN IF NOT EXISTS is_gf_only BOOLEAN DEFAULT false;')
   .then(() => {
     console.log('DB: checked is_gf_only on logins, setting GF and superadmin roles...');
