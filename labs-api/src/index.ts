@@ -152,6 +152,8 @@ pool.query(`
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
   );
+  ALTER TABLE public.notes ADD COLUMN IF NOT EXISTS due_date TIMESTAMPTZ;
+  ALTER TABLE public.notes ADD COLUMN IF NOT EXISTS due_date_notified BOOLEAN DEFAULT false;
   CREATE INDEX IF NOT EXISTS idx_notes_user_id ON public.notes(user_id);
 `).then(() => console.log('DB: checked notes table'))
   .catch(e => console.error('DB notes patch err:', e.message));
@@ -327,6 +329,43 @@ app.use('/api/inventar/profiles',         inventarProfileRoutes);
 app.use((_req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
+
+// ── Background Note Reminder Checker ─────────────────────────
+setInterval(async () => {
+  try {
+    const query = `
+      SELECT n.*, p.id as profile_user_id 
+      FROM public.notes n
+      JOIN public.profiles p ON n.user_id = p.id
+      WHERE n.due_date <= NOW() 
+        AND (n.due_date_notified IS NULL OR n.due_date_notified = false)
+    `;
+    const res = await pool.query(query);
+    
+    for (const note of res.rows) {
+      const notifTitle = `Erinnerung: ${note.title || 'Notiz'}`;
+      const notifMessage = note.content 
+        ? (note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content)
+        : 'Deine Notiz/Erinnerung ist fällig.';
+      
+      await pool.query(
+        `INSERT INTO public.agency_notifications 
+          (user_id, type, title, message, link, related_entity_id, related_entity_type)
+         VALUES ($1, 'info', $2, $3, '/notes', $4, 'note')`,
+        [note.user_id, notifTitle, notifMessage, note.id]
+      );
+      
+      await pool.query(
+        `UPDATE public.notes 
+         SET due_date_notified = true 
+         WHERE id = $1`,
+        [note.id]
+      );
+    }
+  } catch (err: any) {
+    console.error('[labs-api] Error checking due notes:', err.message);
+  }
+}, 60 * 1000);
 
 // ── Start ─────────────────────────────────────────────────────
 app.listen(PORT, () => {
